@@ -1,0 +1,60 @@
+"""Fixed-seed evaluation, Wilson confidence interval, exportable real results."""
+import argparse
+from collections import Counter
+import csv
+import math
+import numpy as np
+from .envs import RocketEnv
+from .controllers import ClassicalController
+from .simulation import LearnedPolicy
+from .storage import atomic_json
+from .config import DATA, load_config
+
+def wilson(k,n):
+    if n==0: return [0.,1.]
+    z=1.95996398454; p=k/n; denom=1+z*z/n
+    center=(p+z*z/(2*n))/denom
+    margin=z*math.sqrt(p*(1-p)/n+z*z/(4*n*n))/denom
+    return [max(0.,center-margin),min(1.,center+margin)]
+
+def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_seed=10000,scenario="nominal",config=None):
+    cfg=config or load_config()
+    if scenario=="gusts": cfg["world"]["gust_std"]*=4; cfg["world"]["wind_mean"]=[12,-8,0]
+    elif scenario=="noise": cfg["world"]["sensor_noise"]*=4
+    elif scenario=="thrust_loss": cfg["vehicle"]["max_thrust"]*=.8
+    elif scenario=="extreme_starts": cfg["mission"]["horizontal_position"]*=4; cfg["mission"]["initial_tilt_deg"]*=4
+    env=RocketEnv(mission,config=cfg)
+    policy=LearnedPolicy(checkpoint_id) if checkpoint_id else None
+    rows=[]
+    for seed in range(start_seed,start_seed+episodes):
+        obs,_=env.reset(seed=seed)
+        controller=ClassicalController(level)
+        while True:
+            action=policy.action(obs) if policy else controller.action(env)
+            obs,_,term,trunc,info=env.step(action)
+            if term or trunc: break
+        rows.append({**info,"seed":seed,"reward":env.total_reward})
+    k=sum(x["outcome"]=="success" for x in rows)
+    result=dict(mission=mission,method="rl" if checkpoint_id else "classical",level=level,checkpoint_id=checkpoint_id,
+                episodes=episodes,seeds=[start_seed,start_seed+episodes-1],scenario=scenario,successes=k,success_rate=k/episodes,
+                confidence_interval=wilson(k,episodes),mean_reward=float(np.mean([x["reward"] for x in rows])),
+                failures=dict(Counter(x["outcome"] for x in rows if x["outcome"]!="success")),
+                qualification="full fixed-seed batch" if episodes>=10000 else "pilot sample; 10,000-seed gate pending")
+    for metric in ["touchdown_speed","tilt","pad_distance","fuel_used"]:
+        result[f"mean_{metric}"]=float(np.mean([x[metric] for x in rows]))
+        result[f"median_{metric}"]=float(np.median([x[metric] for x in rows]))
+    env.close()
+    return result,rows
+
+def save_result(result,rows):
+    identifier=f"{result['mission']}-{result['method']}-l{result['level']}-{result['checkpoint_id'] or 'controller'}-{result['scenario']}"
+    folder=DATA/"results"; folder.mkdir(parents=True,exist_ok=True)
+    atomic_json(folder/f"{identifier}.json",result)
+    with (folder/f"{identifier}.csv").open("w",newline="") as f:
+        writer=csv.DictWriter(f,fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(rows)
+    ci=result["confidence_interval"]
+    (folder/f"{identifier}.md").write_text(f"# {identifier}\n\nObserved successes: {result['successes']}/{result['episodes']}. 95% Wilson interval: {ci[0]:.4%} to {ci[1]:.4%}.\n\n{result['qualification']}\n\nFailure modes: {result['failures']}\n",encoding="utf-8")
+
+if __name__=="__main__":
+    parser=argparse.ArgumentParser(); parser.add_argument("--mission",default="landing",choices=["landing","takeoff","combined"]); parser.add_argument("--level",type=int,default=4); parser.add_argument("--episodes",type=int,default=10000); parser.add_argument("--checkpoint"); parser.add_argument("--scenario",default="nominal",choices=["nominal","gusts","noise","thrust_loss","extreme_starts"])
+    args=parser.parse_args(); result,rows=evaluate(args.mission,args.level,args.episodes,args.checkpoint,scenario=args.scenario); save_result(result,rows); print(result)

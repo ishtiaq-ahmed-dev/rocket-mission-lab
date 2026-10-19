@@ -1,0 +1,19 @@
+{
+  "id": "combined-classical-l4-s42-123450d5cc044a22",
+  "mission": "combined",
+  "method": "classical",
+  "level": 4,
+  "checkpoint_steps": null,
+  "algorithm": null,
+  "seed": 42,
+  "outcome": "crash_speed",
+  "failure_reason": "crash_speed",
+  "touchdown_speed": 3.2074632722955263,
+  "tilt": 7.01396420775769,
+  "pad_distance": 123.29430735267596,
+  "fuel_used": 6998.3218400944515,
+  "duration": 54.84000000000297,
+  "total_reward": 344.30192137637323,
+  "source": "MuJoCo simulation",
+  "controller_status": "not_requested"
+}

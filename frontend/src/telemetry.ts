@@ -1,0 +1,29 @@
+import {Quaternion} from 'three';
+import type {Frame,Telemetry,V3} from './types';
+export function parseTelemetry(input:unknown):Telemetry {
+  if(!input || typeof input!=='object') throw new Error('Invalid telemetry document');
+  const t=input as Telemetry;
+  if(t.schema_version!=='1.0'||!t.run||!Array.isArray(t.frames)||t.frames.length<2||!Number.isFinite(t.rocket_length)||t.rocket_length<=0||!Number.isFinite(t.initial_fuel)||t.initial_fuel<=0) throw new Error('Unsupported or incomplete telemetry');
+  let previous=-1;
+  for(const f of t.frames){
+    const vectors=[f.position,f.quaternion,f.velocity,f.angular_velocity,f.gimbal,f.wind];
+    const sizes=[3,4,3,3,2,3];
+    if(vectors.some((v,i)=>!Array.isArray(v)||v.length!==sizes[i]||!v.every(Number.isFinite))||!Number.isFinite(f.t)||f.t<=previous||f.throttle<0||f.throttle>1||!Number.isFinite(f.throttle)||!Number.isFinite(f.fuel_mass)||f.fuel_mass<0||!Number.isFinite(f.mass)||f.mass<=0||!['landing','takeoff'].includes(f.phase))throw new Error('Invalid telemetry frame');
+    const norm=Math.hypot(...f.quaternion);if(Math.abs(norm-1)>.01)throw new Error('Quaternion must be normalized');
+    previous=f.t;
+  }
+  return t;
+}
+const lerp=(a:number,b:number,t:number)=>a+(b-a)*t;
+export function sample(frames:Frame[],time:number):Frame {
+  if(time<=frames[0].t)return frames[0]; if(time>=frames.at(-1)!.t)return frames.at(-1)!;
+  let lo=0,hi=frames.length-1;
+  while(hi-lo>1){const mid=(hi+lo)>>1;if(frames[mid].t<=time)lo=mid;else hi=mid;}
+  const a=frames[lo],b=frames[hi],u=(time-a.t)/(b.t-a.t);
+  const vec=(x:V3,y:V3):V3=>x.map((v,i)=>lerp(v,y[i],u)) as V3;
+  const qa=new Quaternion(a.quaternion[1],a.quaternion[2],a.quaternion[3],a.quaternion[0]);
+  const qb=new Quaternion(b.quaternion[1],b.quaternion[2],b.quaternion[3],b.quaternion[0]);qa.slerp(qb,u);
+  return {...a,t:time,position:vec(a.position,b.position),velocity:vec(a.velocity,b.velocity),angular_velocity:vec(a.angular_velocity,b.angular_velocity),wind:vec(a.wind,b.wind),quaternion:[qa.w,qa.x,qa.y,qa.z],throttle:lerp(a.throttle,b.throttle,u),fuel_mass:lerp(a.fuel_mass,b.fuel_mass,u),mass:lerp(a.mass,b.mass,u),gimbal:[lerp(a.gimbal[0],b.gimbal[0],u),lerp(a.gimbal[1],b.gimbal[1],u)]};
+}
+export function tilt(f:Frame){const [w,x,y,z]=f.quaternion;return Math.acos(Math.max(-1,Math.min(1,1-2*(x*x+y*y))))*180/Math.PI + 0*(w+z);}
+export const compact=(v:number)=>v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1000?`${(v/1000).toFixed(v%1000?1:0)}k`:String(v);

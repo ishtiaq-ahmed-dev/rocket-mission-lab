@@ -1,0 +1,357 @@
+{
+  "$defs": {
+    "Frame": {
+      "additionalProperties": false,
+      "properties": {
+        "t": {
+          "title": "T",
+          "type": "number"
+        },
+        "position": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Position",
+          "type": "array"
+        },
+        "quaternion": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Quaternion",
+          "type": "array"
+        },
+        "velocity": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Velocity",
+          "type": "array"
+        },
+        "angular_velocity": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Angular Velocity",
+          "type": "array"
+        },
+        "throttle": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Throttle",
+          "type": "number"
+        },
+        "gimbal": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Gimbal",
+          "type": "array"
+        },
+        "fuel_mass": {
+          "minimum": 0,
+          "title": "Fuel Mass",
+          "type": "number"
+        },
+        "mass": {
+          "exclusiveMinimum": 0,
+          "title": "Mass",
+          "type": "number"
+        },
+        "wind": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Wind",
+          "type": "array"
+        },
+        "phase": {
+          "enum": [
+            "landing",
+            "takeoff"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "reward": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reward"
+        }
+      },
+      "required": [
+        "t",
+        "position",
+        "quaternion",
+        "velocity",
+        "angular_velocity",
+        "throttle",
+        "gimbal",
+        "fuel_mass",
+        "mass",
+        "wind",
+        "phase"
+      ],
+      "title": "Frame",
+      "type": "object"
+    },
+    "RunMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "mission": {
+          "enum": [
+            "landing",
+            "takeoff",
+            "combined"
+          ],
+          "title": "Mission",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "classical",
+            "rl"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "level": {
+          "maximum": 4,
+          "minimum": 1,
+          "title": "Level",
+          "type": "integer"
+        },
+        "checkpoint_steps": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checkpoint Steps"
+        },
+        "algorithm": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Algorithm"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        },
+        "outcome": {
+          "enum": [
+            "success",
+            "crash_speed",
+            "crash_tilt",
+            "missed_pad",
+            "out_of_fuel",
+            "timeout",
+            "out_of_bounds"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "failure_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "success",
+                "crash_speed",
+                "crash_tilt",
+                "missed_pad",
+                "out_of_fuel",
+                "timeout",
+                "out_of_bounds"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failure Reason"
+        },
+        "touchdown_speed": {
+          "title": "Touchdown Speed",
+          "type": "number"
+        },
+        "tilt": {
+          "title": "Tilt",
+          "type": "number"
+        },
+        "pad_distance": {
+          "title": "Pad Distance",
+          "type": "number"
+        },
+        "fuel_used": {
+          "title": "Fuel Used",
+          "type": "number"
+        },
+        "duration": {
+          "title": "Duration",
+          "type": "number"
+        },
+        "total_reward": {
+          "title": "Total Reward",
+          "type": "number"
+        },
+        "source": {
+          "default": "MuJoCo simulation",
+          "title": "Source",
+          "type": "string"
+        },
+        "controller_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Controller Status"
+        }
+      },
+      "required": [
+        "id",
+        "mission",
+        "method",
+        "level",
+        "seed",
+        "outcome",
+        "failure_reason",
+        "touchdown_speed",
+        "tilt",
+        "pad_distance",
+        "fuel_used",
+        "duration",
+        "total_reward"
+      ],
+      "title": "RunMeta",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "config_hash": {
+      "title": "Config Hash",
+      "type": "string"
+    },
+    "rocket_length": {
+      "title": "Rocket Length",
+      "type": "number"
+    },
+    "initial_fuel": {
+      "title": "Initial Fuel",
+      "type": "number"
+    },
+    "run": {
+      "$ref": "#/$defs/RunMeta"
+    },
+    "frames": {
+      "items": {
+        "$ref": "#/$defs/Frame"
+      },
+      "title": "Frames",
+      "type": "array"
+    }
+  },
+  "required": [
+    "config_hash",
+    "rocket_length",
+    "initial_fuel",
+    "run",
+    "frames"
+  ],
+  "title": "Telemetry",
+  "type": "object"
+}

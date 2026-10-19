@@ -1,0 +1,26 @@
+{
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26300-SP0",
+  "packages": {
+    "torch": "2.12.0.dev20260408+cu128",
+    "mujoco": "3.16.0",
+    "stable-baselines3": "2.8.0",
+    "gymnasium": "1.2.3",
+    "cvxpy": "1.9.3",
+    "fastapi": "0.140.6",
+    "numpy": "2.4.3",
+    "scipy": "1.17.1",
+    "tensorboard": "2.21.0"
+  },
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "cuda_architectures": [
+    "sm_75",
+    "sm_80",
+    "sm_86",
+    "sm_90",
+    "sm_100",
+    "sm_120"
+  ],
+  "cuda_matrix_test": 32.0
+}

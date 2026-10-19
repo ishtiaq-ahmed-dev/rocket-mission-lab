@@ -1,0 +1,57 @@
+# Every vehicle/environment number below is APPROXIMATE, educational and generic.
+# These are NOT official Falcon 9 specifications. SI units; z is up; quaternion wxyz.
+vehicle:
+  dry_mass: 22000.0 # approximate kg
+  fuel_mass: 16000.0 # approximate landing/ascent reserve kg, not full orbital propellant
+  isp: 300.0 # approximate seconds
+  max_thrust: 760000.0 # approximate N, one generic engine
+  min_throttle: 0.35 # approximate engine-on floor; engine can switch fully off
+  gimbal_limit_deg: 8.0 # approximate degrees
+  gimbal_rate_deg_s: 30.0 # approximate degrees/s
+  length: 40.0 # approximate m
+  radius: 1.8 # approximate m
+  inertia: [5100000.0, 5100000.0, 61000.0] # approximate kg m2 at dry mass, scaled with mass
+  drag_coefficient: 0.5 # approximate
+  area: 10.18 # approximate m2, isotropic lumped drag (no lift/grid-fin aerodynamics)
+world:
+  gravity: 9.80665 # approximate constant; also g0 in Isp conversion
+  density_sea_level: 1.225 # approximate kg/m3
+  scale_height: 8500.0 # approximate m
+  wind_mean: [2.0, -1.0, 0.0] # approximate m/s
+  gust_std: 0.8 # approximate m/s, mean-reverting process
+  sensor_noise: 0.005 # approximate relative to observation scale
+  timestep: 0.02 # approximate integration seconds
+  control_substeps: 5 # approximate 10 Hz control; 50 Hz integration
+mission:
+  landing_altitude: [180.0, 240.0] # approximate feet altitude m
+  landing_vertical_velocity: [-24.0, -16.0] # approximate m/s
+  horizontal_position: 12.0 # approximate +/- m
+  horizontal_velocity: 1.5 # approximate +/- m/s
+  initial_tilt_deg: 2.0 # approximate
+  pad: [0.0, 0.0, 0.0] # approximate static pad, ship appearance is visual only
+  touchdown_speed: 2.0 # approximate strict total speed threshold m/s
+  touchdown_tilt_deg: 5.0 # approximate strict tilt threshold
+  pad_radius: 5.0 # approximate m
+  takeoff_altitude: 400.0 # approximate separation, NOT orbit
+  takeoff_velocity: 25.0 # approximate m/s
+  takeoff_velocity_tolerance: 8.0 # approximate m/s
+  timeout: 90.0 # approximate seconds
+  bounds: 2500.0 # approximate m
+reward:
+  progress: 0.8 # Potential difference toward target, encourages useful movement
+  velocity: 0.02 # Penalize speed near landing / ascent target speed error
+  tilt: 0.25 # Penalize radians squared; encourage upright flight
+  angular_velocity: 0.02 # Penalize body rates
+  position: 0.003 # Lateral error cost, meters
+  fuel: 0.001 # kg burned; modest efficiency incentive
+  alive: 0.05 # Cost per second to prevent indefinite hovering
+  success: 200.0 # Terminal mission completion
+  failure: -100.0 # Terminal mission failure
+training:
+  seed: 42
+  n_envs: 4
+  checkpoints: [10000, 100000, 500000, 1000000, 5000000, 10000000]
+  evaluation_episodes: 10000
+  curriculum_threshold: 0.75
+  curriculum_window: 40
+  learning_rate: 0.0003
