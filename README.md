@@ -2,8 +2,9 @@
 
 A local 3D rocket landing and takeoff research lab. MuJoCo runs the rigid-body physics; React/Three.js displays recorded telemetry. Classical controllers and pure PPO/SAC policies use the same physics.
 
-**Open the running interface:** http://127.0.0.1:5180/  
-**API documentation:** http://127.0.0.1:8010/docs
+**Open the running interface:** [Rocket Mission Lab](http://127.0.0.1:5180/)
+
+**API documentation:** [Local API docs](http://127.0.0.1:8010/docs)
 
 ## Current qualification
 
