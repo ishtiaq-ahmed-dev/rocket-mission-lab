@@ -25,5 +25,5 @@ export function sample(frames:Frame[],time:number):Frame {
   const qb=new Quaternion(b.quaternion[1],b.quaternion[2],b.quaternion[3],b.quaternion[0]);qa.slerp(qb,u);
   return {...a,t:time,position:vec(a.position,b.position),velocity:vec(a.velocity,b.velocity),angular_velocity:vec(a.angular_velocity,b.angular_velocity),wind:vec(a.wind,b.wind),quaternion:[qa.w,qa.x,qa.y,qa.z],throttle:lerp(a.throttle,b.throttle,u),fuel_mass:lerp(a.fuel_mass,b.fuel_mass,u),mass:lerp(a.mass,b.mass,u),gimbal:[lerp(a.gimbal[0],b.gimbal[0],u),lerp(a.gimbal[1],b.gimbal[1],u)]};
 }
-export function tilt(f:Frame){const [w,x,y,z]=f.quaternion;return Math.acos(Math.max(-1,Math.min(1,1-2*(x*x+y*y))))*180/Math.PI + 0*(w+z);}
+export function tilt(f:Frame){const x=f.quaternion[1],y=f.quaternion[2];return Math.acos(Math.max(-1,Math.min(1,1-2*(x*x+y*y))))*180/Math.PI;}
 export const compact=(v:number)=>v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1000?`${(v/1000).toFixed(v%1000?1:0)}k`:String(v);

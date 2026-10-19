@@ -7,6 +7,9 @@ class ClassicalController:
         self.plan = None
         self.plan_phase = None
         self.plan_status = "not_requested"
+        self.lqr_gain = None
+        self.velocity_integral=0.
+        self.attitude_integral=np.zeros(3)
 
     def _solve_descent(self, env):
         import cvxpy as cp
@@ -35,20 +38,26 @@ class ClassicalController:
 
     def action(self, env):
         ph=env.physics
-        s, cfg=ph.state(), env.cfg
-        h, velocity, position=s["altitude"], s["velocity"], s["position"]
+        s, cfg=getattr(env,"sensed_state",ph.state()), env.cfg
+        velocity, position=s["velocity"], s["position"]
+        h=float(position[2]-ph.half)
         g=cfg["world"]["gravity"]
         if self.level==1:
             # Deliberately untuned altitude/attitude gains, a real failing baseline.
-            az = 0.12*((-0.25*h if env.phase=="landing" else 20)-velocity[2])
+            target_speed=-0.25*h if env.phase=="landing" else 20
+            az = 0.12*(target_speed-velocity[2])
         elif env.phase=="takeoff":
             target_speed=min(cfg["mission"]["takeoff_velocity"], 5+0.12*h)
             az=np.clip(1.1*(target_speed-velocity[2]), -5, 6)
         else:
             target_speed=-min(28., np.sqrt(max(0., 3.0*h)), 0.5*max(h,0)+0.65)
             az=np.clip((0.75 if self.level==2 else 1.5)*(target_speed-velocity[2]), -8., 12.)
+        if self.level<=2:
+            dt=cfg["world"]["timestep"]*cfg["world"]["control_substeps"]
+            self.velocity_integral=np.clip(self.velocity_integral+(target_speed-velocity[2])*dt,-2.,2.)
+            az+=(.005 if self.level==1 else .03)*self.velocity_integral
         lateral=-0.025*(position[:2]-np.array(cfg["mission"]["pad"][:2]))-0.45*velocity[:2]
-        if self.level>=3 and env.phase=="landing":
+        if self.level==3 and env.phase=="landing":
             if self.plan_phase!=env.phase:
                 self.plan_phase=env.phase
                 self._solve_descent(env)
@@ -65,6 +74,15 @@ class ClassicalController:
             drag=-0.5*rho*cfg["vehicle"]["drag_coefficient"]*cfg["vehicle"]["area"]*np.linalg.norm(rel)*rel
             lateral-=drag[:2]/s["mass"]
             az-=drag[2]/s["mass"]
+            if env.phase=="landing":
+                # Feed forward the derivative of the altitude-dependent speed
+                # reference. Without this term, feedback alone lags touchdown.
+                href=max(0.,h)
+                candidates=[28.,np.sqrt(3*href+.25),.5*href+.5]
+                which=int(np.argmin(candidates))
+                reference=-candidates[which]
+                derivative=0. if which==0 else (-1.5/max(np.sqrt(3*href+.25),.1) if which==1 else -.5)
+                az=np.clip(derivative*velocity[2]+2*(reference-velocity[2])-drag[2]/s["mass"],-8,12)
         lateral=np.clip(lateral,-1.0,1.0)
         desired=np.array([*lateral, max(1., g+az)])
         desired/=np.linalg.norm(desired)
@@ -73,6 +91,9 @@ class ClassicalController:
         omega_world=rot@s["angular_velocity"]
         kp,kd=(0.3,0.5) if self.level==1 else (3.0,3.3)
         torque_world=(kp*np.cross(n,desired)-kd*omega_world)*ph.model.body_inertia[1,0]
+        if self.level<=2:
+            self.attitude_integral=np.clip(self.attitude_integral+np.cross(n,desired)*cfg["world"]["timestep"]*cfg["world"]["control_substeps"],-.1,.1)
+            torque_world+=.05*self.attitude_integral*ph.model.body_inertia[1,0]
         torque_body=rot.T@torque_world
         # Vertical acceleration divided by actual body-axis vertical projection.
         thrust=np.clip(s["mass"]*(g+az)/max(n[2],0.3),0,ph.v["max_thrust"])
@@ -82,5 +103,21 @@ class ClassicalController:
         if self.level==1: throttle*=0.72
         denom=max(thrust*ph.half,1)
         gx,gy=-torque_body[1]/denom,torque_body[0]/denom
+        if self.level==4:
+            # LQR stabilizes the complete lateral/attitude chain, including the
+            # initially adverse translation produced by engine gimbal torque.
+            if self.lqr_gain is None:
+                from scipy.linalg import solve_continuous_are
+                a=np.array([[0,1,0,0],[0,0,g,0],[0,0,0,1],[0,0,0,0.]])
+                b=np.array([[0],[g],[0],[-g*s["mass"]*ph.half/ph.model.body_inertia[1,0]]])
+                q=np.diag([.01,.4,10,3]); rr=np.array([[20.]])
+                self.lqr_gain=np.linalg.solve(rr,b.T@solve_continuous_are(a,b,q,rr))[0]
+            n_dot=rot@np.cross(s["angular_velocity"],[0.,0.,1.])
+            desired_gimbal=[]
+            for axis in range(2):
+                state=[position[axis]-cfg["mission"]["pad"][axis],velocity[axis],n[axis],n_dot[axis]]
+                desired_gimbal.append(-float(self.lqr_gain@state))
+            body_gimbal=rot.T@np.array([*desired_gimbal,0.])
+            gx,gy=body_gimbal[:2]
         limit=np.deg2rad(ph.v["gimbal_limit_deg"])
         return np.clip([2*throttle-1,gx/limit,gy/limit],-1,1).astype(np.float32)

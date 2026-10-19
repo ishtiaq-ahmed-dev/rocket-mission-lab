@@ -12,7 +12,7 @@ from .storage import runs, read_json, training_jobs, checkpoints, atomic_json
 from .simulation import simulate
 
 app=FastAPI(title="Rocket Mission Lab",version="1.0.0")
-app.add_middleware(CORSMiddleware,allow_origins=["http://localhost:5173","http://127.0.0.1:5173"],allow_methods=["GET","POST"],allow_headers=["Content-Type"])
+app.add_middleware(CORSMiddleware,allow_origins=["http://localhost:5180","http://127.0.0.1:5180"],allow_methods=["GET","POST"],allow_headers=["Content-Type"])
 job_lock=threading.Lock()
 
 @app.get("/health")

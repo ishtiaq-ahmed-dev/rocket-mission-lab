@@ -12,3 +12,4 @@ data/jobs/
 logs/
 test-results/
 playwright-report/
+*.tsbuildinfo

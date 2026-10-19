@@ -7,7 +7,7 @@ import numpy as np
 from .envs import RocketEnv
 from .controllers import ClassicalController
 from .simulation import LearnedPolicy
-from .storage import atomic_json
+from .storage import atomic_json, config_hash
 from .config import DATA, load_config
 
 def wilson(k,n):
@@ -39,6 +39,7 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
                 episodes=episodes,seeds=[start_seed,start_seed+episodes-1],scenario=scenario,successes=k,success_rate=k/episodes,
                 confidence_interval=wilson(k,episodes),mean_reward=float(np.mean([x["reward"] for x in rows])),
                 failures=dict(Counter(x["outcome"] for x in rows if x["outcome"]!="success")),
+                config_hash=config_hash(),
                 qualification="full fixed-seed batch" if episodes>=10000 else "pilot sample; 10,000-seed gate pending")
     for metric in ["touchdown_speed","tilt","pad_distance","fuel_used"]:
         result[f"mean_{metric}"]=float(np.mean([x[metric] for x in rows]))
@@ -49,6 +50,14 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
 def save_result(result,rows):
     identifier=f"{result['mission']}-{result['method']}-l{result['level']}-{result['checkpoint_id'] or 'controller'}-{result['scenario']}"
     folder=DATA/"results"; folder.mkdir(parents=True,exist_ok=True)
+    # Preserve a completed full batch when a smaller pilot for that controller
+    # finishes later. Keep the pilot separately rather than overwriting evidence.
+    existing_path=folder/f"{identifier}.json"
+    if existing_path.exists():
+        from .storage import read_json
+        existing=read_json(existing_path,{})
+        if existing.get("episodes",0)>result["episodes"]:
+            identifier+=f"-pilot-{result['episodes']}"
     atomic_json(folder/f"{identifier}.json",result)
     with (folder/f"{identifier}.csv").open("w",newline="") as f:
         writer=csv.DictWriter(f,fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(rows)

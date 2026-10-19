@@ -19,20 +19,26 @@ class RocketEnv(gym.Env):
         self.observation_space = spaces.Box(-np.inf, np.inf, (21,), dtype=np.float32)
         self.phase = mission
 
+    def set_difficulty(self, value):
+        if not 0<=value<=1:raise ValueError("difficulty must be within [0,1]")
+        self.difficulty=float(value)
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         rng, m, d = self.np_random, self.cfg["mission"], self.difficulty
         self.phase = "takeoff" if self.mission in ("takeoff", "combined") else "landing"
         self.separated = False
         if self.phase == "landing":
-            h = rng.uniform(*m["landing_altitude"]) * (0.25 + 0.75*d)
+            # The first curriculum stage is genuinely easy: 3 m, -0.8 m/s,
+            # centered and upright. d=1 preserves the complete mission ranges.
+            h = 3. + d*(rng.uniform(*m["landing_altitude"])-3.)
             pos = [*rng.uniform(-m["horizontal_position"]*d, m["horizontal_position"]*d, 2), h+self.physics.half]
-            vel = [*rng.uniform(-m["horizontal_velocity"]*d, m["horizontal_velocity"]*d, 2), rng.uniform(*m["landing_vertical_velocity"])*(0.3+0.7*d)]
+            vel = [*rng.uniform(-m["horizontal_velocity"]*d, m["horizontal_velocity"]*d, 2), -.8+d*(rng.uniform(*m["landing_vertical_velocity"])+.8)]
         else:
             pos, vel = [0, 0, self.physics.half+0.05], [0, 0, 0]
         q = Rotation.from_euler("xy", rng.uniform(-m["initial_tilt_deg"]*d, m["initial_tilt_deg"]*d, 2), degrees=True).as_quat()
-        mass_scale = rng.uniform(0.95, 1.05) if self.randomize else 1.0
-        thrust_scale = rng.uniform(0.97, 1.03) if self.randomize else 1.0
+        mass_scale = rng.uniform(1-.05*d, 1+.05*d) if self.randomize else 1.0
+        thrust_scale = rng.uniform(1-.03*d, 1+.03*d) if self.randomize else 1.0
         self.physics.reset(int(rng.integers(0, 2**31)), pos, vel, [q[3], *q[:3]], mass_scale, d if self.randomize else 0., thrust_scale)
         if options:
             if "state" in options:
@@ -58,6 +64,7 @@ class RocketEnv(gym.Env):
             noise = self.np_random.normal(0, self.cfg["world"]["sensor_noise"]*self.difficulty, obs.shape)
             noise[6:10] = 0 # do not corrupt quaternion representation
             obs += noise
+        self.sensed_state={**s,"position":obs[:3]*400,"velocity":obs[3:6]*50,"angular_velocity":obs[10:13]*2}
         return obs.astype(np.float32)
 
     def _potential(self, s):
@@ -97,7 +104,8 @@ class RocketEnv(gym.Env):
             reason = "out_of_fuel"
         if reason is None and (np.linalg.norm(s["position"][:2]) > m["bounds"] or s["altitude"] > m["bounds"]):
             reason = "out_of_bounds"
-        if reason is None and s["t"] >= m["timeout"]:
+        timeout=m["timeout"]*(.2+.8*self.difficulty) if self.mission=="landing" else m["timeout"]
+        if reason is None and s["t"] >= timeout:
             reason = "timeout"
         potential = self._potential(s)
         progress = 0. if phase_changed else potential-self.previous_potential
@@ -106,6 +114,8 @@ class RocketEnv(gym.Env):
         reward = r["progress"]*progress - dt*(r["velocity"]*vertical_error**2 + r["tilt"]*np.deg2rad(s["tilt"])**2 + r["angular_velocity"]*np.linalg.norm(s["angular_velocity"])**2 + r["position"]*distance + r["alive"]) - r["fuel"]*(old["fuel_mass"]-s["fuel_mass"])
         if reason:
             reward += r["success"] if reason=="success" else r["failure"]
+            terminal_speed=abs(s["velocity"][2]-m["takeoff_velocity"]) if self.phase=="takeoff" else speed
+            reward-=r["terminal_speed"]*terminal_speed**2+r["terminal_tilt"]*np.deg2rad(s["tilt"])**2+r["terminal_position"]*distance
         self.total_reward += reward
         self.previous_potential, self.last_state = potential, s
         info = dict(outcome=reason, failure_reason=None if reason in (None,"success") else reason,

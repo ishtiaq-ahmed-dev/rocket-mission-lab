@@ -1,6 +1,6 @@
 import {useMemo,useRef} from 'react';
 import {Canvas,useFrame,useThree} from '@react-three/fiber';
-import {OrbitControls,Line,Sky,Text,ContactShadows} from '@react-three/drei';
+import {OrbitControls,Line,Sky,ContactShadows} from '@react-three/drei';
 import * as THREE from 'three';
 import {useLab} from './store';
 import {sample} from './telemetry';
@@ -9,6 +9,10 @@ import type {Telemetry} from './types';
 const C=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2);
 const Ci=C.clone().invert();
 const world=(p:number[]):[number,number,number]=>[p[0],p[2],-p[1]];
+function RocketLabel(){
+  const texture=useMemo(()=>{const canvas=document.createElement('canvas');canvas.width=128;canvas.height=1024;const ctx=canvas.getContext('2d')!;ctx.fillStyle='#e4e5dd';ctx.fillRect(0,0,128,1024);ctx.fillStyle='#263b43';ctx.translate(64,512);ctx.rotate(-Math.PI/2);ctx.font='bold 44px Arial';ctx.textAlign='center';ctx.fillText('MISSION LAB',0,15);const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;return tex;},[]);
+  return <mesh position={[0,4,1.81]}><planeGeometry args={[1.1,9]}/><meshStandardMaterial map={texture} roughness={.5}/></mesh>;
+}
 function Terrain(){
   const geometry=useMemo(()=>{
     const geo=new THREE.PlaneGeometry(4800,4800,150,150);geo.rotateX(-Math.PI/2);
@@ -70,7 +74,7 @@ function Rocket({telemetry,ghost=false}:{telemetry:Telemetry;ghost?:boolean}){
     <mesh position={[0,-18,0]} castShadow><cylinderGeometry args={[1.8,1.5,2,32]}/><meshStandardMaterial color={ghost?'#71dae6':'#272d30'} metalness={.7} roughness={.4} transparent={ghost} opacity={ghost?.25:1}/></mesh>
     <mesh position={[0,-19.8,0]}><cylinderGeometry args={[.65,1.1,1.7,24,1,true]}/><meshStandardMaterial color="#171b1c" side={THREE.DoubleSide} metalness={.8} roughness={.4}/></mesh>
     {[-13,8,15].map(y=><mesh key={y} position={[0,y,0]}><cylinderGeometry args={[1.815,1.815,.25,40]}/><meshStandardMaterial color="#626c6e" metalness={.7} transparent={ghost} opacity={ghost?.2:1}/></mesh>)}
-    {!ghost&&<><Text position={[0,5,1.82]} fontSize={.85} letterSpacing={.15} color="#263b43" anchorX="center" rotation={[0,0,Math.PI/2]}>MISSION LAB</Text><mesh position={[0,10,1.8]}><planeGeometry args={[1.1,1.6]}/><meshStandardMaterial color="#dd713e"/></mesh></>}
+    {!ghost&&<><RocketLabel/><mesh position={[0,10,1.8]}><planeGeometry args={[1.1,1.6]}/><meshStandardMaterial color="#dd713e"/></mesh></>}
     {[0,1,2,3].map(i=><group key={i} rotation={[0,i*Math.PI/2+Math.PI/4,0]}>
       <mesh position={[3.3,-16.7,0]} rotation={[0,0,-.48]} castShadow><boxGeometry args={[.25,7,.4]}/><meshStandardMaterial color="#495359" metalness={.6} transparent={ghost} opacity={ghost?.3:1}/></mesh>
       <mesh position={[2.8,-18.1,0]} rotation={[0,0,-.75]}><boxGeometry args={[.16,5,.2]}/><meshStandardMaterial color="#7d8685" metalness={.8}/></mesh>
@@ -113,7 +117,7 @@ function FlightScene(){
     {telemetry&&<Rocket telemetry={telemetry}/>} {ghost&&<Rocket telemetry={ghost} ghost/>}
     {trajectory.length>1&&<Line points={trajectory} color="#f6b879" lineWidth={1.2} transparent opacity={.6} dashed dashSize={3} gapSize={4}/>}
     {ghostLine.length>1&&<Line points={ghostLine} color="#78dbe4" lineWidth={1} transparent opacity={.4}/>}
-    <OrbitControls ref={controls} makeDefault enableDamping minDistance={12} maxDistance={1800} maxPolarAngle={Math.PI*.495} target={[0,180,0]} enabled={mode==='Free orbit'}/>
+    <OrbitControls ref={controls} makeDefault enableDamping minDistance={12} maxDistance={1800} maxPolarAngle={mode==='Free orbit'?Math.PI*.495:Math.PI} target={[0,180,0]} enabled={mode==='Free orbit'}/>
   </>;
 }
 export default function Scene(){return <Canvas shadows camera={{position:[155,260,180],fov:46,near:.5,far:16000}} dpr={[1,1.75]} gl={{antialias:true,powerPreference:'high-performance'}}><FlightScene/></Canvas>}

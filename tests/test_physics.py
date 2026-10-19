@@ -50,3 +50,19 @@ def test_classical_improvement():
             successes+=info["outcome"]=="success"
         results.append(successes)
     assert results[1]>results[0], results
+
+def test_curriculum_reaches_environment_through_wrappers():
+    from stable_baselines3.common.monitor import Monitor
+    from stable_baselines3.common.vec_env import DummyVecEnv,VecNormalize
+    vec=VecNormalize(DummyVecEnv([lambda:Monitor(LandingEnv(difficulty=0))]))
+    vec.env_method("set_difficulty",.6)
+    assert vec.envs[0].unwrapped.difficulty==pytest.approx(.6)
+    vec.close()
+
+def test_zero_difficulty_is_easy_not_full_altitude():
+    env=LandingEnv(difficulty=0);env.reset(seed=42)
+    s=env.physics.state()
+    assert s["altitude"]==3
+    np.testing.assert_array_equal(s["position"][:2],[0,0])
+    np.testing.assert_array_equal(s["velocity"],[0,0,-.8])
+    assert env.physics.wind_scale==0

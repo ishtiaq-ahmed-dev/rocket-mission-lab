@@ -15,7 +15,9 @@ class LearnedPolicy:
         cls=PPO if self.meta["algorithm"]=="PPO" else SAC
         self.norm=VecNormalize.load(path/"normalize.pkl",DummyVecEnv([lambda:RocketEnv(self.meta["mission"])]))
         self.norm.training=False; self.norm.norm_reward=False
-        self.model=cls.load(path/"model.zip",device="cpu")
+        # Inference never needs SAC's training replay buffer. Avoid allocating a
+        # full 250k-transition buffer for every evaluation/replay policy load.
+        self.model=cls.load(path/"model.zip",device="cpu",buffer_size=1) if cls is SAC else cls.load(path/"model.zip",device="cpu")
 
     def action(self, observation):
         normalized=self.norm.normalize_obs(np.array([observation]))
