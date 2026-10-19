@@ -1,0 +1,30 @@
+{
+  "mission": "landing",
+  "method": "classical",
+  "level": 4,
+  "checkpoint_id": null,
+  "episodes": 10000,
+  "seeds": [
+    10000,
+    19999
+  ],
+  "scenario": "nominal",
+  "successes": 10000,
+  "success_rate": 1.0,
+  "confidence_interval": [
+    0.9996160016293234,
+    1.0
+  ],
+  "mean_reward": 202.00380004017438,
+  "failures": {},
+  "config_hash": "15b9d2a4ad7e8f68",
+  "qualification": "full fixed-seed batch",
+  "mean_touchdown_speed": 0.7273786867121586,
+  "median_touchdown_speed": 0.7094852432000811,
+  "mean_tilt": 0.7046688318499584,
+  "median_tilt": 0.6545550018153143,
+  "mean_pad_distance": 1.0624454257455898,
+  "median_pad_distance": 1.0153712514296998,
+  "mean_fuel_used": 2526.1499497073796,
+  "median_fuel_used": 2521.8581410437446
+}

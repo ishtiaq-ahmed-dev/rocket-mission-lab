@@ -17,7 +17,7 @@ from .storage import atomic_json, config_hash
 from .evaluate import evaluate, save_result
 
 class TrainingCallback(BaseCallback):
-    def __init__(self, job_id, mission, algorithm, total, eval_episodes=12, config=None):
+    def __init__(self, job_id, mission, algorithm, total, eval_episodes=12, config=None, initial_steps=0, initial_difficulty=None):
         super().__init__()
         self.job_id,self.mission,self.algorithm,self.total=job_id,mission,algorithm,total
         self.folder=DATA/"jobs"/job_id
@@ -30,12 +30,15 @@ class TrainingCallback(BaseCallback):
         self.milestones=sorted(set([0,total,*[x for x in cfg["training"]["checkpoints"] if x<=total],total//4,total//2,3*total//4]))
         self.difficulty=cfg["training"].get("initial_difficulty",0.)
         self.status="running"
+        self.initial_steps=initial_steps
+        if initial_difficulty is not None:self.difficulty=initial_difficulty
+        self.completed={x for x in self.milestones if x<initial_steps}
 
     def write_status(self, error=None):
         atomic_json(self.folder/"status.json",dict(id=self.job_id,mission=self.mission,algorithm=self.algorithm,
                     status=self.status,steps=self.num_timesteps,total_steps=self.total,started_at=self.started,
                     updated_at=time.time(),elapsed_seconds=time.time()-self.started,
-                    steps_per_second=self.num_timesteps/max(1,time.time()-self.started),
+                    steps_per_second=(self.num_timesteps-self.initial_steps)/max(1,time.time()-self.started),
                     device=str(self.model.device),seed=self.model.seed,difficulty=self.difficulty,
                     episode_count=len(self.history),recent_successes=sum(self.recent),recent_episodes=len(self.recent),
                     curve=self.curve,episodes=self.history[-400:],error=error,pid=os.getpid(),config_hash=self.training_hash))
@@ -64,7 +67,8 @@ class TrainingCallback(BaseCallback):
         self.write_status()
 
     def _on_training_start(self):
-        self.checkpoint(); self.completed.add(0)
+        self.training_env.env_method("set_difficulty",self.difficulty)
+        self.checkpoint(); self.completed.add(self.num_timesteps)
 
     def _on_step(self):
         for done,info in zip(self.locals.get("dones",[]),self.locals.get("infos",[])):
@@ -76,7 +80,7 @@ class TrainingCallback(BaseCallback):
         # Advance only after the measured rolling threshold is met.
         threshold=self.config["training"]["curriculum_threshold"]
         if len(self.recent)==40 and np.mean(self.recent)>=threshold and self.difficulty<1:
-            self.difficulty=min(1.,self.difficulty+.15)
+            self.difficulty=min(1.,self.difficulty+self.config["training"].get("curriculum_increment",.15))
             # env_method traverses Monitor wrappers; set_attr would only shadow
             # an attribute on the wrapper and leave the real environment easy.
             self.training_env.env_method("set_difficulty",self.difficulty)
@@ -89,26 +93,39 @@ class TrainingCallback(BaseCallback):
             self.last_write=time.time(); self.write_status()
         return not (self.folder/"stop").exists()
 
-def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",job_id=None,eval_episodes=12):
+def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",job_id=None,eval_episodes=12,resume=None):
     torch.set_num_threads(2)
     np.random.seed(seed); torch.manual_seed(seed)
     cfg=load_config()
     job_id=job_id or f"{mission}-{algorithm.lower()}-{int(time.time())}"
     folder=DATA/"jobs"/job_id; folder.mkdir(parents=True,exist_ok=True)
     atomic_json(folder/"config.json",cfg)
-    vec=VecNormalize(DummyVecEnv([lambda:Monitor(RocketEnv(mission,config=cfg,difficulty=cfg["training"].get("initial_difficulty",0.))) for _ in range(cfg["training"]["n_envs"])]),norm_obs=True,norm_reward=True,clip_obs=10)
+    vec=VecNormalize(DummyVecEnv([lambda:Monitor(RocketEnv(mission,config=cfg,difficulty=cfg["training"].get("initial_difficulty",0.))) for _ in range(cfg["training"]["n_envs"])]),norm_obs=cfg["training"].get("observation_normalization",True),norm_reward=cfg["training"].get("reward_normalization",True),clip_obs=10)
     vec.seed(seed)
     # MLP PPO is generally CPU-bound; CUDA is useful for larger SAC updates.
     if device=="auto": device="cpu" if algorithm=="PPO" else ("cuda" if torch.cuda.is_available() else "cpu")
     common=dict(policy="MlpPolicy",env=vec,learning_rate=cfg["training"]["learning_rate"],seed=seed,device=device,
                 verbose=0,tensorboard_log=str(DATA/"tensorboard"/job_id))
-    if algorithm=="PPO":
-        model=PPO(**common,n_steps=512,batch_size=256,n_epochs=6,gamma=.995,ent_coef=.002,policy_kwargs=dict(net_arch=[128,128],log_std_init=-1.5))
+    initial_steps=0;initial_difficulty=None
+    if resume:
+        from .storage import checkpoint_path,read_json
+        checkpoint=checkpoint_path(resume);meta=read_json(checkpoint/"checkpoint.json")
+        if meta["mission"]!=mission or meta["algorithm"]!=algorithm:raise ValueError("Resume mission and algorithm must match checkpoint")
+        if meta.get("config_hash")!=config_hash():raise ValueError("Configuration changed; resume requires the exact recorded configuration")
+        if algorithm!="PPO":raise ValueError("SAC training resume requires replay-buffer persistence; start a new SAC run instead")
+        vec=VecNormalize.load(checkpoint/"normalize.pkl",vec.venv)
+        vec.training=True;vec.seed(seed)
+        model=PPO.load(checkpoint/"model.zip",env=vec,device=device)
+        model.tensorboard_log=str(DATA/"tensorboard"/job_id)
+        initial_steps=model.num_timesteps;initial_difficulty=meta.get("difficulty",0.)
+        atomic_json(folder/"resume.json",dict(parent_checkpoint=resume,parent_steps=initial_steps,additional_steps=steps))
+    elif algorithm=="PPO":
+        model=PPO(**common,n_steps=512,batch_size=256,n_epochs=8,gamma=.995,ent_coef=.0005,policy_kwargs=dict(net_arch=[128,128],log_std_init=cfg["training"].get("policy_log_std",-1.5)))
     else:
         model=SAC(**common,batch_size=256,buffer_size=250000,learning_starts=2000,train_freq=4,gradient_steps=1,gamma=.995,policy_kwargs=dict(net_arch=[128,128]))
-    callback=TrainingCallback(job_id,mission,algorithm,steps,eval_episodes,cfg)
+    callback=TrainingCallback(job_id,mission,algorithm,initial_steps+steps,eval_episodes,cfg,initial_steps,initial_difficulty)
     try:
-        model.learn(total_timesteps=steps,callback=callback)
+        model.learn(total_timesteps=steps,callback=callback,reset_num_timesteps=resume is None)
         if callback.num_timesteps not in [x["steps"] for x in callback.curve]: callback.checkpoint()
         callback.status="stopped" if (folder/"stop").exists() else "completed"
         callback.write_status()
@@ -121,10 +138,10 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
     return job_id
 
 if __name__=="__main__":
-    parser=argparse.ArgumentParser(); parser.add_argument("--mission",default="landing",choices=["landing","takeoff"]); parser.add_argument("--algorithm",default="PPO",choices=["PPO","SAC"]); parser.add_argument("--steps",type=int,default=100000); parser.add_argument("--seed",type=int,default=42); parser.add_argument("--device",default="auto",choices=["auto","cpu","cuda"]); parser.add_argument("--job-id"); parser.add_argument("--eval-episodes",type=int,default=12)
+    parser=argparse.ArgumentParser(); parser.add_argument("--mission",default="landing",choices=["landing","takeoff"]); parser.add_argument("--algorithm",default="PPO",choices=["PPO","SAC"]); parser.add_argument("--steps",type=int,default=100000); parser.add_argument("--seed",type=int,default=42); parser.add_argument("--device",default="auto",choices=["auto","cpu","cuda"]); parser.add_argument("--job-id"); parser.add_argument("--eval-episodes",type=int,default=12);parser.add_argument("--resume")
     args=parser.parse_args()
     try:
-        train(args.mission,args.algorithm,args.steps,args.seed,args.device,args.job_id,args.eval_episodes)
+        train(args.mission,args.algorithm,args.steps,args.seed,args.device,args.job_id,args.eval_episodes,args.resume)
     except BaseException:
         if args.job_id:
             from .storage import read_json

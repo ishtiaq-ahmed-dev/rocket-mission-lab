@@ -1,0 +1,33 @@
+{
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "landing-ppo-shaped__step-000100000",
+  "episodes": 20,
+  "seeds": [
+    20000,
+    20019
+  ],
+  "scenario": "nominal",
+  "successes": 0,
+  "success_rate": 0.0,
+  "confidence_interval": [
+    1.3877787807814457e-17,
+    0.1611251580528119
+  ],
+  "mean_reward": -17144.090889148963,
+  "failures": {
+    "timeout": 3,
+    "crash_speed": 14,
+    "out_of_bounds": 3
+  },
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 74.54162449346829,
+  "median_touchdown_speed": 61.427935821547564,
+  "mean_tilt": 25.579846321134216,
+  "median_tilt": 27.116441179030424,
+  "mean_pad_distance": 1135.077023249824,
+  "median_pad_distance": 974.2549159438811,
+  "mean_fuel_used": 6843.826022306936,
+  "median_fuel_used": 7266.960718922768
+}

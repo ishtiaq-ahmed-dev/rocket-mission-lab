@@ -1,0 +1,19 @@
+{
+  "id": "takeoff-rl-l3-s42-15b9d2a4ad7e8f68",
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 3,
+  "checkpoint_steps": 50000,
+  "algorithm": "SAC",
+  "seed": 42,
+  "outcome": "crash_speed",
+  "failure_reason": "crash_speed",
+  "touchdown_speed": 70.23839307222963,
+  "tilt": 36.620248107948875,
+  "pad_distance": 307.6682902840091,
+  "fuel_used": 2881.6679380034057,
+  "duration": 17.599999999999714,
+  "total_reward": -235.66508360435688,
+  "source": "MuJoCo simulation",
+  "controller_status": "measured checkpoint; maturity not certified"
+}

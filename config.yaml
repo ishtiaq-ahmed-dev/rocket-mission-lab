@@ -38,15 +38,25 @@ mission:
   timeout: 90.0 # approximate seconds
   bounds: 2500.0 # approximate m
 reward:
-  progress: 0.8 # Potential difference toward target, encourages useful movement
-  velocity: 0.02 # Penalize speed near landing / ascent target speed error
-  tilt: 0.25 # Penalize radians squared; encourage upright flight
-  angular_velocity: 0.02 # Penalize body rates
-  position: 0.003 # Lateral error cost, meters
+  profile: state-potential-v3 # dense state-only shaping; no expert controls or target actions
+  potential_height: 0.25 # potential uses meters of remaining mission distance
+  potential_speed: 6.0 # potential penalizes kinetic state, never a controller-generated action
+  potential_tilt: 80.0 # 1-cos(tilt) keeps attitude stable and bounded
+  potential_rate: 3.0 # rad/s norm, favors stable rotation
+  potential_lateral: 2.0 # meters from the static pad/launch line
+  action_cost: 0.01 # gimbal effort; throttle fuel already has a separate cost
+  progress: 0.15 # Potential difference toward target, limited to avoid rewarding dives
+  velocity: 0.08 # Penalize speed near landing / ascent target speed error
+  tilt: 2.0 # Penalize radians squared; encourage upright flight
+  angular_velocity: 0.2 # Penalize body rates
+  position: 0.01 # Lateral error cost, meters
   fuel: 0.001 # kg burned; modest efficiency incentive
   alive: 0.05 # Cost per second to prevent indefinite hovering
   success: 200.0 # Terminal mission completion
   failure: -100.0 # Terminal mission failure
+  terminal_speed: 2.0 # Smooth terminal speed-error cost, makes near misses informative
+  terminal_tilt: 0.2 # Terminal tilt cost, radians squared
+  terminal_position: 1.0 # Terminal lateral error cost, meters
 training:
   seed: 42
   n_envs: 4
@@ -54,4 +64,11 @@ training:
   evaluation_episodes: 10000
   curriculum_threshold: 0.75
   curriculum_window: 40
+  initial_difficulty: 0.0
+  curriculum_increment: 0.025 # small distribution changes avoid a 3 m -> 35 m jump
+  observation_normalization: false # fixed physical scaling is stable across curriculum transitions
+  observation_position_scale: [40.0, 40.0, 250.0]
+  observation_velocity_scale: [10.0, 10.0, 30.0]
+  reward_normalization: true
+  policy_log_std: -2.3 # exploration remains a learned stochastic policy
   learning_rate: 0.0003

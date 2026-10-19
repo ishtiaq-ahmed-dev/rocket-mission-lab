@@ -55,19 +55,34 @@ class RocketEnv(gym.Env):
 
     def _obs(self, s):
         # Only physical state, clock and relative goal. No controller/expert action.
-        obs = np.concatenate([np.asarray(s["position"])/400, np.asarray(s["velocity"])/50,
+        train=self.cfg["training"]
+        position_scale=np.asarray(train.get("observation_position_scale",[400,400,400]))
+        velocity_scale=np.asarray(train.get("observation_velocity_scale",[50,50,50]))
+        obs = np.concatenate([np.asarray(s["position"])/position_scale, np.asarray(s["velocity"])/velocity_scale,
                               s["quaternion"], np.asarray(s["angular_velocity"])/2,
                               [s["fuel_mass"] / (self.cfg["vehicle"]["fuel_mass"]*self.physics.mass_scale), s["t"]/90],
-                              (self._target()-s["position"])/400,
+                              (self._target()-s["position"])/position_scale,
                               [self.cfg["mission"]["takeoff_velocity"]/50 if self.phase=="takeoff" else 0, s["mass"]/40000, s["throttle"]]])
         if self.noise:
             noise = self.np_random.normal(0, self.cfg["world"]["sensor_noise"]*self.difficulty, obs.shape)
             noise[6:10] = 0 # do not corrupt quaternion representation
             obs += noise
-        self.sensed_state={**s,"position":obs[:3]*400,"velocity":obs[3:6]*50,"angular_velocity":obs[10:13]*2}
+        # Sensor magnitudes remain identical for both methods across changes to
+        # the neural-network feature scale. Noise is defined in legacy SI scale.
+        if self.noise:
+            obs[:3]-=noise[:3];obs[:3]+=noise[:3]*400/position_scale
+            obs[3:6]-=noise[3:6];obs[3:6]+=noise[3:6]*50/velocity_scale
+        self.sensed_state={**s,"position":obs[:3]*position_scale,"velocity":obs[3:6]*velocity_scale,"angular_velocity":obs[10:13]*2}
         return obs.astype(np.float32)
 
     def _potential(self, s):
+        r=self.cfg["reward"]
+        if r.get("profile")=="state-potential-v3":
+            h=max(0.,s["altitude"])
+            target=self.cfg["mission"]["takeoff_altitude"] if self.phase=="takeoff" else 0.
+            velocity=s["velocity"].copy()
+            if self.phase=="takeoff":velocity[2]-=self.cfg["mission"]["takeoff_velocity"]
+            return -(r["potential_height"]*abs(target-h)+r["potential_speed"]*np.linalg.norm(velocity)+r["potential_tilt"]*(1-np.cos(np.deg2rad(s["tilt"])))+r["potential_rate"]*np.linalg.norm(s["angular_velocity"])+r["potential_lateral"]*np.linalg.norm(s["position"][:2]-self._target()[:2]))
         return -np.linalg.norm(self._target()-s["position"])
 
     def step(self, action):
@@ -112,10 +127,14 @@ class RocketEnv(gym.Env):
         vertical_error = s["velocity"][2]-m["takeoff_velocity"] if self.phase=="takeoff" else speed*max(0.1, 1-min(s["altitude"]/100, 1))
         dt = s["t"]-old["t"]
         reward = r["progress"]*progress - dt*(r["velocity"]*vertical_error**2 + r["tilt"]*np.deg2rad(s["tilt"])**2 + r["angular_velocity"]*np.linalg.norm(s["angular_velocity"])**2 + r["position"]*distance + r["alive"]) - r["fuel"]*(old["fuel_mass"]-s["fuel_mass"])
+        if r.get("profile")=="state-potential-v3":
+            # Difference of physical-state potentials, plus bounded running
+            # costs. No PID action, optimal-control reference or expert data.
+            reward=progress-dt*(.3+r["tilt"]*(1-np.cos(np.deg2rad(s["tilt"])))+r["angular_velocity"]*np.linalg.norm(s["angular_velocity"])**2+r["action_cost"]*float(np.dot(np.asarray(action)[1:],np.asarray(action)[1:]))) - r["fuel"]*(old["fuel_mass"]-s["fuel_mass"])
         if reason:
             reward += r["success"] if reason=="success" else r["failure"]
             terminal_speed=abs(s["velocity"][2]-m["takeoff_velocity"]) if self.phase=="takeoff" else speed
-            reward-=r["terminal_speed"]*terminal_speed**2+r["terminal_tilt"]*np.deg2rad(s["tilt"])**2+r["terminal_position"]*distance
+            reward-=r["terminal_speed"]*min(terminal_speed**2,400)+r["terminal_tilt"]*np.deg2rad(s["tilt"])**2+r["terminal_position"]*min(distance,100)
         self.total_reward += reward
         self.previous_potential, self.last_state = potential, s
         info = dict(outcome=reason, failure_reason=None if reason in (None,"success") else reason,

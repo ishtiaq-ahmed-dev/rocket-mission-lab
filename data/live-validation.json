@@ -1,0 +1,36 @@
+{
+  "frontend_http": 200,
+  "frontend_title": true,
+  "proxy_health": 200,
+  "proxy_missions": 200,
+  "proxy_runs": 200,
+  "proxy_training": 200,
+  "proxy_checkpoints": 200,
+  "proxy_results/summary": 200,
+  "proxy_results/failures": 200,
+  "proxy_system": 200,
+  "proxy_schema/telemetry": 200,
+  "telemetry_http": 200,
+  "frame_count": 202,
+  "initial_hud_altitude": 226.4373629133578,
+  "outcome": "success",
+  "touchdown_speed": 0.7129316082806952,
+  "browser_visual_verification": "Automation unavailable under browser tool policy; user confirmed live camera rotation. Latest terrain and 4K export need visual confirmation.",
+  "terrain_textures": {
+    "ground-color-4k.jpg": {
+      "http": 200,
+      "width": 4096,
+      "height": 4096
+    },
+    "ground-normal-4k.jpg": {
+      "http": 200,
+      "width": 4096,
+      "height": 4096
+    },
+    "ground-roughness-4k.jpg": {
+      "http": 200,
+      "width": 4096,
+      "height": 4096
+    }
+  }
+}

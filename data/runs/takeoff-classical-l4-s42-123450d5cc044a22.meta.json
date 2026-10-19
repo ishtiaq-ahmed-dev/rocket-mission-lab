@@ -8,12 +8,12 @@
   "seed": 42,
   "outcome": "success",
   "failure_reason": null,
-  "touchdown_speed": 25.10605233914931,
-  "tilt": 0.021360292434468048,
-  "pad_distance": 0.175666588028356,
-  "fuel_used": 3427.630021782439,
+  "touchdown_speed": 25.106051325028833,
+  "tilt": 0.03206711301050326,
+  "pad_distance": 0.08843797220850924,
+  "fuel_used": 3427.6470910376247,
   "duration": 24.699999999999562,
-  "total_reward": 445.0616311175532,
+  "total_reward": 445.0968894199578,
   "source": "MuJoCo simulation",
   "controller_status": "not_requested"
 }

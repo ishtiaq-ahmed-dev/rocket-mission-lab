@@ -1,123 +1,77 @@
-import {useMemo,useRef} from 'react';
+import {useLayoutEffect,useMemo,useRef} from 'react';
 import {Canvas,useFrame,useThree} from '@react-three/fiber';
-import {OrbitControls,Line,Sky,ContactShadows} from '@react-three/drei';
 import * as THREE from 'three';
+import World,{useVehicleTexture} from './World';
 import {useLab} from './store';
 import {sample} from './telemetry';
+import {terrainHeight} from './terrain';
+import CameraRig from './CameraRig';
+import Trajectory from './Trajectory';
+import Engine from './Engine';
+import RenderOutput from './RenderOutput';
 import type {Telemetry} from './types';
 
-const C=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2);
-const Ci=C.clone().invert();
+const C=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2),Ci=C.clone().invert();
 const world=(p:number[]):[number,number,number]=>[p[0],p[2],-p[1]];
-function RocketLabel(){
-  const texture=useMemo(()=>{const canvas=document.createElement('canvas');canvas.width=128;canvas.height=1024;const ctx=canvas.getContext('2d')!;ctx.fillStyle='#e4e5dd';ctx.fillRect(0,0,128,1024);ctx.fillStyle='#263b43';ctx.translate(64,512);ctx.rotate(-Math.PI/2);ctx.font='bold 44px Arial';ctx.textAlign='center';ctx.fillText('MISSION LAB',0,15);const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;return tex;},[]);
-  return <mesh position={[0,4,1.81]}><planeGeometry args={[1.1,9]}/><meshStandardMaterial map={texture} roughness={.5}/></mesh>;
-}
-function Terrain(){
-  const geometry=useMemo(()=>{
-    const geo=new THREE.PlaneGeometry(4800,4800,150,150);geo.rotateX(-Math.PI/2);
-    const pos=geo.attributes.position; const colors=[];const color=new THREE.Color();
-    for(let i=0;i<pos.count;i++){
-      const x=pos.getX(i),z=pos.getZ(i),shore=340+110*Math.sin(z/440)+80*Math.cos(z/250);
-      const land=THREE.MathUtils.smoothstep(shore-x,0,170);
-      const distance=Math.hypot(x,z);const hills=(Math.sin(x*.009)*Math.cos(z*.006)*12+18)*THREE.MathUtils.smoothstep(distance,240,900);
-      pos.setY(i,-4+land*(4+hills));
-      const variation=(Math.sin(x*.055+z*.025)+Math.cos(x*.013-z*.052))*.025;
-      color.setRGB(.22+variation,.255+variation,.19+variation); if(land<.9)color.setRGB(.35,.33,.25);
-      colors.push(color.r,color.g,color.b);
-    }
-    geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geo.computeVertexNormals();return geo;
-  },[]);
-  return <><mesh geometry={geometry} receiveShadow><meshStandardMaterial vertexColors roughness={1}/></mesh><mesh rotation={[-Math.PI/2,0,0]} position={[0,-1.2,0]} receiveShadow><planeGeometry args={[18000,18000]}/><meshStandardMaterial color="#426b70" roughness={.36} metalness={.5}/></mesh>
-  {Array.from({length:9},(_,i)=><mesh key={i} position={[650+i*110,-.8,-500+i*130]} rotation={[-Math.PI/2,0,-.2]}><planeGeometry args={[230,1]}/><meshBasicMaterial color="#94b6b4" transparent opacity={.15}/></mesh>)}
-  <mesh position={[-170,.02,0]} rotation={[-Math.PI/2,0,0]} receiveShadow><planeGeometry args={[320,12]}/><meshStandardMaterial color="#484c47"/></mesh>
-  <mesh position={[-310,8,-70]} castShadow><boxGeometry args={[38,16,65]}/><meshStandardMaterial color="#747f7b" roughness={.9}/></mesh>
-  <mesh position={[-310,17,-70]}><boxGeometry args={[41,2,68]}/><meshStandardMaterial color="#394a4b"/></mesh>
-  {[-1,1].map((n)=><group key={n} position={[-140,0,n*75]}><mesh position={[0,7,0]} castShadow><cylinderGeometry args={[8,8,14,24]}/><meshStandardMaterial color="#b4b8a9" metalness={.45} roughness={.5}/></mesh><mesh position={[0,14,0]}><sphereGeometry args={[8,24,12,0,Math.PI*2,0,Math.PI/2]}/><meshStandardMaterial color="#c1c8b8" metalness={.4} roughness={.5}/></mesh></group>)}
-  {Array.from({length:6},(_,i)=><group key={i} position={[-70-i*90,0,-160-i*15]}><mesh position={[0,12,0]} castShadow><cylinderGeometry args={[.3,.6,24,6]}/><meshStandardMaterial color="#87918b"/></mesh><mesh position={[0,24,0]}><sphereGeometry args={[1,8,8]}/><meshBasicMaterial color="#e38d4d"/></mesh></group>)}
-  </>;
-}
-function Pad(){
-  const ship=useLab(s=>s.pad)==='Ship';
-  return <group position={[0,.1,0]}>
-    {ship&&<><mesh position={[0,-2,0]} receiveShadow><boxGeometry args={[65,5,95]}/><meshStandardMaterial color="#182a30" roughness={.7}/></mesh><mesh position={[23,5,32]}><boxGeometry args={[10,10,15]}/><meshStandardMaterial color="#b5c4bd"/></mesh></>}
-    <mesh receiveShadow><cylinderGeometry args={[29,30,1,96]}/><meshStandardMaterial color="#9a9a84" roughness={.95}/></mesh>
-    <mesh position={[0,.55,0]} receiveShadow><cylinderGeometry args={[24,24,.15,96]}/><meshStandardMaterial color="#343d3b" roughness={.9}/></mesh>
-    <mesh rotation={[-Math.PI/2,0,0]} position={[0,.66,0]}><ringGeometry args={[20.9,21.3,96]}/><meshBasicMaterial color="#d5d4af"/></mesh>
-    <mesh rotation={[-Math.PI/2,0,0]} position={[0,.67,0]}><ringGeometry args={[4.7,5,64]}/><meshBasicMaterial color="#d5d4af"/></mesh>
-    {[-1,1].map(n=><mesh key={n} position={[n*6,.69,0]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[1,18]}/><meshBasicMaterial color="#dfdfc8"/></mesh>)}
-    <mesh position={[0,.7,0]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[12,1]}/><meshBasicMaterial color="#dfdfc8"/></mesh>
-    {Array.from({length:16},(_,i)=>{const a=i/16*Math.PI*2;return <group key={i} position={[Math.cos(a)*27,1,Math.sin(a)*27]}><mesh><boxGeometry args={[.7,.4,.7]}/><meshBasicMaterial color="#a4d7d2"/></mesh></group>})}
-  </group>;
+function Strut({from,to,radius=.12,color='#8b9698'}:{from:[number,number,number];to:[number,number,number];radius?:number;color?:string}){
+  const a=new THREE.Vector3(...from),b=new THREE.Vector3(...to),mid=a.clone().add(b).multiplyScalar(.5),q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),b.clone().sub(a).normalize());
+  return <mesh position={mid} quaternion={q} castShadow><cylinderGeometry args={[radius,radius,a.distanceTo(b),16]}/><meshPhysicalMaterial color={color} metalness={.8} roughness={.24}/></mesh>;
 }
 function Rocket({telemetry,ghost=false}:{telemetry:Telemetry;ghost?:boolean}){
-  const root=useRef<THREE.Group>(null);const flame=useRef<THREE.Group>(null);const particles=useRef<THREE.InstancedMesh>(null);
-  const dummy=useMemo(()=>new THREE.Object3D(),[]);
-  const material=useMemo(()=>new THREE.MeshStandardMaterial({color:ghost?'#79d5df':'#e4e5dd',metalness:.38,roughness:.4,transparent:ghost,opacity:ghost?.28:1,depthWrite:!ghost}),[ghost]);
+  const root=useRef<THREE.Group>(null);const map=useVehicleTexture();
+  const legShell=useMemo(()=>{const shape=new THREE.Shape();shape.moveTo(1.73,-11);shape.lineTo(2.28,-11.5);shape.lineTo(6.2,-19.6);shape.lineTo(5.5,-19.5);shape.lineTo(2,-14.1);shape.closePath();const geometry=new THREE.ExtrudeGeometry(shape,{depth:.42,bevelEnabled:true,bevelThickness:.04,bevelSize:.04,bevelSegments:2,steps:1});geometry.translate(0,0,-.21);return geometry;},[]);
+  const material=useMemo(()=>new THREE.MeshPhysicalMaterial({map:ghost?null:map,color:ghost?'#79d5df':'#ffffff',metalness:ghost?.1:.2,roughness:.33,clearcoat:.22,clearcoatRoughness:.35,transparent:ghost,opacity:ghost?.22:1,depthWrite:!ghost}),[ghost,map]);
   useFrame(()=>{
-    const {time}=useLab.getState();const f=sample(telemetry.frames,time);if(!root.current)return;
-    root.current.position.set(...world(f.position));
-    root.current.quaternion.copy(C).multiply(new THREE.Quaternion(f.quaternion[1],f.quaternion[2],f.quaternion[3],f.quaternion[0])).multiply(Ci);
-    if(flame.current){flame.current.visible=f.throttle>.02&&time<telemetry.run.duration;flame.current.scale.set(1+f.throttle*.5,Math.max(.01,f.throttle)*(1+.08*Math.sin(time*47)),1+f.throttle*.5);}
-    if(particles.current){
-      for(let i=0;i<65;i++){
-        const age=((time*1.7+i*.153)%1);const spread=age*8;
-        dummy.position.set(Math.sin(i*13)*spread,-23-age*55,Math.cos(i*9)*spread);
-        dummy.scale.setScalar((.6+age*3.4)*f.throttle);dummy.updateMatrix();particles.current.setMatrixAt(i,dummy.matrix);
-      }particles.current.instanceMatrix.needsUpdate=true;particles.current.visible=f.throttle>.1&&time<telemetry.run.duration;
-    }
+    const {time}=useLab.getState(),f=sample(telemetry.frames,time);if(!root.current)return;
+    root.current.position.set(...world(f.position));root.current.quaternion.copy(C).multiply(new THREE.Quaternion(f.quaternion[1],f.quaternion[2],f.quaternion[3],f.quaternion[0])).multiply(Ci);
   });
   return <group ref={root}>
-    <mesh material={material} castShadow={!ghost}><cylinderGeometry args={[1.8,1.8,34,40]}/></mesh>
-    <mesh position={[0,18,0]} material={material}><cylinderGeometry args={[1.1,1.8,2,32]}/></mesh>
-    <mesh position={[0,19.5,0]} material={material}><sphereGeometry args={[1.1,24,16,0,Math.PI*2,0,Math.PI/2]}/></mesh>
-    <mesh position={[0,-18,0]} castShadow><cylinderGeometry args={[1.8,1.5,2,32]}/><meshStandardMaterial color={ghost?'#71dae6':'#272d30'} metalness={.7} roughness={.4} transparent={ghost} opacity={ghost?.25:1}/></mesh>
-    <mesh position={[0,-19.8,0]}><cylinderGeometry args={[.65,1.1,1.7,24,1,true]}/><meshStandardMaterial color="#171b1c" side={THREE.DoubleSide} metalness={.8} roughness={.4}/></mesh>
-    {[-13,8,15].map(y=><mesh key={y} position={[0,y,0]}><cylinderGeometry args={[1.815,1.815,.25,40]}/><meshStandardMaterial color="#626c6e" metalness={.7} transparent={ghost} opacity={ghost?.2:1}/></mesh>)}
-    {!ghost&&<><RocketLabel/><mesh position={[0,10,1.8]}><planeGeometry args={[1.1,1.6]}/><meshStandardMaterial color="#dd713e"/></mesh></>}
+    <mesh material={material} castShadow={!ghost} receiveShadow><cylinderGeometry args={[1.8,1.8,34,96,16]}/></mesh>
+    <mesh position={[0,18,0]} material={material} castShadow><cylinderGeometry args={[1.15,1.8,2,64]}/></mesh>
+    <mesh position={[0,19.3,0]} material={material} castShadow><sphereGeometry args={[1.15,48,24,0,Math.PI*2,0,Math.PI/2]}/></mesh>
+    <mesh position={[0,-17.6,0]} castShadow><cylinderGeometry args={[1.8,1.5,1.4,64]}/><meshPhysicalMaterial color={ghost?'#71dae6':'#333637'} metalness={.65} roughness={.42} transparent={ghost} opacity={ghost?.22:1}/></mesh>
+    {[-16.7,-12.5,8,15.3].map(y=><mesh key={y} position={[0,y,0]}><cylinderGeometry args={[1.812,1.812,.07,96]}/><meshPhysicalMaterial color="#7f8781" metalness={.7} roughness={.3} transparent={ghost} opacity={ghost?.2:1}/></mesh>)}
     {[0,1,2,3].map(i=><group key={i} rotation={[0,i*Math.PI/2+Math.PI/4,0]}>
-      <mesh position={[3.3,-16.7,0]} rotation={[0,0,-.48]} castShadow><boxGeometry args={[.25,7,.4]}/><meshStandardMaterial color="#495359" metalness={.6} transparent={ghost} opacity={ghost?.3:1}/></mesh>
-      <mesh position={[2.8,-18.1,0]} rotation={[0,0,-.75]}><boxGeometry args={[.16,5,.2]}/><meshStandardMaterial color="#7d8685" metalness={.8}/></mesh>
-      <mesh position={[5,-19.8,0]}><boxGeometry args={[1.5,.3,1.2]}/><meshStandardMaterial color="#2a3135"/></mesh>
-      <group position={[2.7,12,0]}>
-        {Array.from({length:5},(_,k)=><mesh key={k} position={[0,0,(k-2)*.4]}><boxGeometry args={[2,.12,.07]}/><meshStandardMaterial color="#485256"/></mesh>)}
-        {Array.from({length:5},(_,k)=><mesh key={k} position={[(k-2)*.5,0,0]}><boxGeometry args={[.07,.12,1.8]}/><meshStandardMaterial color="#485256"/></mesh>)}
+      <mesh geometry={legShell} castShadow receiveShadow><meshPhysicalMaterial color="#c3c4b9" metalness={.3} roughness={.55}/></mesh>
+      <Strut from={[1.78,-16.6,0]} to={[6.2,-19.65,0]} radius={.1} color="#9ca8aa"/>
+      <Strut from={[2.8,-13.4,0]} to={[5.2,-17.6,0]} radius={.085} color="#c1c8c6"/>
+      <mesh position={[1.85,-11.3,0]} castShadow><sphereGeometry args={[.25,20,16]}/><meshPhysicalMaterial color="#68777a" metalness={.8} roughness={.25}/></mesh>
+      <mesh position={[6.2,-19.85,0]} castShadow><cylinderGeometry args={[.72,.82,.3,32]}/><meshPhysicalMaterial color="#2f3637" metalness={.5} roughness={.65}/></mesh>
+      <group position={[2.65,12,0]}>
+        {Array.from({length:7},(_,k)=><mesh key={k} position={[0,0,(k-3)*.3]} castShadow><boxGeometry args={[2.15,.13,.045]}/><meshPhysicalMaterial color="#59676c" metalness={.8} roughness={.24}/></mesh>)}
+        {Array.from({length:7},(_,k)=><mesh key={k} position={[(k-3)*.32,0,0]} castShadow><boxGeometry args={[.045,.15,1.95]}/><meshPhysicalMaterial color="#59676c" metalness={.8} roughness={.24}/></mesh>)}
+        {[-1,1].map(n=><mesh key={n} position={[n*1.08,0,0]}><boxGeometry args={[.08,.24,2.08]}/><meshPhysicalMaterial color="#576a70" metalness={.8} roughness={.3}/></mesh>)}
       </group>
+      <mesh position={[1.81,-1,0]}><cylinderGeometry args={[.065,.065,20,12]}/><meshPhysicalMaterial color="#b6beb8" metalness={.6} roughness={.4}/></mesh>
     </group>)}
-    {!ghost&&<><group ref={flame} position={[0,-20.4,0]}>
-      <mesh position={[0,-6,0]} rotation={[0,0,Math.PI]}><coneGeometry args={[1.5,12,24,1,true]}/><meshBasicMaterial color="#ffad55" transparent opacity={.7} blending={THREE.AdditiveBlending} depthWrite={false}/></mesh>
-      <mesh position={[0,-3,0]} rotation={[0,0,Math.PI]}><coneGeometry args={[.8,6,24]}/><meshBasicMaterial color="#eaf5ff" transparent opacity={.9} blending={THREE.AdditiveBlending} depthWrite={false}/></mesh>
-      <pointLight color="#ff9549" intensity={180} distance={65}/>
-    </group><instancedMesh ref={particles} args={[undefined,undefined,65]} frustumCulled={false}><sphereGeometry args={[1,6,6]}/><meshStandardMaterial color="#c3bca9" transparent opacity={.13} depthWrite={false}/></instancedMesh></>}
+    {!ghost&&<Engine telemetry={telemetry}/>}
   </group>;
 }
-function FlightScene(){
-  const telemetry=useLab(s=>s.telemetry),ghost=useLab(s=>s.ghost),mode=useLab(s=>s.camera);
-  const controls=useRef<React.ComponentRef<typeof OrbitControls>>(null);const {camera}=useThree();
-  const position=useMemo(()=>new THREE.Vector3(),[]),target=useMemo(()=>new THREE.Vector3(),[]);
-  useFrame((_,dt)=>{
-    useLab.getState().advance(Math.min(dt,.1));
-    if(!telemetry||mode==='Free orbit')return;
-    const f=sample(telemetry.frames,useLab.getState().time),[x,y,z]=world(f.position);const h=Math.max(y-20,0);
-    if(mode==='Chase'){position.set(x+45,y+20,z+65);target.set(x,y,z);}
-    else if(mode==='Ground'){position.set(105,8,120);target.set(x,Math.max(20,y-8),z);}
-    else if(mode==='Top-down'){position.set(x+1,y+180,z+.1);target.set(x,0,z);}
-    else {const t=useLab.getState().time*.035;position.set(x+Math.cos(.75+t)*(95+h*.22),y+30+Math.min(h*.15,35),z+Math.sin(.75+t)*(115+h*.22));target.set(x,Math.max(14,y-15),z);}
-    camera.position.lerp(position,1-Math.exp(-dt*2));
-    if(controls.current){controls.current.target.lerp(target,1-Math.exp(-dt*3));controls.current.update();}
+function Exhaust({telemetry}:{telemetry:Telemetry}){
+  const count=150;const {size,camera,gl}=useThree();
+  const geometry=useMemo(()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(count*3),3));g.setAttribute('alpha',new THREE.Float32BufferAttribute(new Float32Array(count),1));g.setAttribute('scale',new THREE.Float32BufferAttribute(new Float32Array(count),1));return g;},[]);
+  const material=useMemo(()=>new THREE.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{pixelScale:{value:500}},vertexShader:'attribute float alpha; attribute float scale; varying float opacity; uniform float pixelScale; void main(){vec4 mv=modelViewMatrix*vec4(position,1.0); gl_Position=projectionMatrix*mv; gl_PointSize=clamp(scale*pixelScale/max(1.0,-mv.z),1.0,170.0);opacity=alpha;}',fragmentShader:'varying float opacity; void main(){float r=length(gl_PointCoord-vec2(0.5))*2.0; float a=exp(-r*r*4.0)*(1.0-smoothstep(0.7,1.0,r))*opacity;gl_FragColor=vec4(vec3(0.69,0.69,0.64),a);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'}),[]);
+  const emission=useMemo(()=>new THREE.Vector3(),[]),direction=useMemo(()=>new THREE.Vector3(),[]),quaternion=useMemo(()=>new THREE.Quaternion(),[]);
+  useLayoutEffect(()=>{material.uniforms.pixelScale.value=size.height*gl.getPixelRatio()/(2*Math.tan((camera as THREE.PerspectiveCamera).fov*Math.PI/360));},[size,camera,gl,material]);
+  useFrame(()=>{
+    const t=useLab.getState().time,now=sample(telemetry.frames,t),position=geometry.attributes.position,alpha=geometry.attributes.alpha,scale=geometry.attributes.scale;
+    for(let i=0;i<count;i++){
+      const age=(i/count*4.2+t*.07)%4.2,emitted=sample(telemetry.frames,Math.max(0,t-age)),a=i*2.39996,width=.4+age*2.6;
+      const throttle=emitted.throttle*(t>=age?1:0)*(t<telemetry.run.duration+age?1:0);
+      quaternion.set(emitted.quaternion[1],emitted.quaternion[2],emitted.quaternion[3],emitted.quaternion[0]);
+      emission.set(0,0,-telemetry.rocket_length/2+.5).applyQuaternion(quaternion).add(new THREE.Vector3(...emitted.position));
+      direction.set(-Math.tan(emitted.gimbal[0]),-Math.tan(emitted.gimbal[1]),-1).normalize().applyQuaternion(quaternion);
+      const x=emission.x+direction.x*age*12+Math.cos(a)*width+emitted.wind[0]*age*.5,z=-emission.y-direction.y*age*12+Math.sin(a)*width-emitted.wind[1]*age*.5,y=emission.z+direction.z*age*12;
+      const ground=useLab.getState().pad==='Ship'?-1.2:terrainHeight(x,z);
+      position.setXYZ(i,x,Math.max(ground+.35,y),z);scale.setX(i,1.5+age*4);alpha.setX(i,throttle*.22*(1-age/4.2));
+      if(i>100&&now.phase==='landing'&&now.position[2]<35&&now.throttle>.1){const dustAge=(i-100)/50;position.setXYZ(i,now.position[0]+Math.cos(a)*dustAge*30,.3+dustAge*2,-now.position[1]+Math.sin(a)*dustAge*30);scale.setX(i,3+dustAge*12);alpha.setX(i,now.throttle*.1*(1-dustAge));}
+    }position.needsUpdate=alpha.needsUpdate=scale.needsUpdate=true;
   });
-  const trajectory=useMemo(()=>telemetry?.frames.filter((_,i)=>i%4===0).map(f=>world(f.position))||[],[telemetry]);
-  const ghostLine=useMemo(()=>ghost?.frames.filter((_,i)=>i%5===0).map(f=>world(f.position))||[],[ghost]);
-  return <>
-    <color attach="background" args={['#829b9e']}/><fog attach="fog" args={['#879d9c',800,3800]}/>
-    <Sky distance={12000} sunPosition={[-1200,500,-500]} turbidity={5} rayleigh={.5} mieCoefficient={.008} mieDirectionalG={.85}/>
-    <ambientLight intensity={.6} color="#bdcfd2"/><hemisphereLight args={['#c6e2e8','#5c5b40',1.6]}/>
-    <directionalLight position={[-160,250,-100]} intensity={3.4} color="#ffe2bd" castShadow shadow-mapSize={[2048,2048]} shadow-camera-left={-170} shadow-camera-right={170} shadow-camera-top={270} shadow-camera-bottom={-170} shadow-camera-far={650} shadow-bias={-.0001}/>
-    <Terrain/><Pad/><ContactShadows position={[0,.7,0]} opacity={.4} scale={90} blur={2} far={50} resolution={256}/>
-    {telemetry&&<Rocket telemetry={telemetry}/>} {ghost&&<Rocket telemetry={ghost} ghost/>}
-    {trajectory.length>1&&<Line points={trajectory} color="#f6b879" lineWidth={1.2} transparent opacity={.6} dashed dashSize={3} gapSize={4}/>}
-    {ghostLine.length>1&&<Line points={ghostLine} color="#78dbe4" lineWidth={1} transparent opacity={.4}/>}
-    <OrbitControls ref={controls} makeDefault enableDamping minDistance={12} maxDistance={1800} maxPolarAngle={mode==='Free orbit'?Math.PI*.495:Math.PI} target={[0,180,0]} enabled={mode==='Free orbit'}/>
-  </>;
+  return <points geometry={geometry} material={material} frustumCulled={false}/>;
 }
-export default function Scene(){return <Canvas shadows camera={{position:[155,260,180],fov:46,near:.5,far:16000}} dpr={[1,1.75]} gl={{antialias:true,powerPreference:'high-performance'}}><FlightScene/></Canvas>}
+function FlightScene(){
+  const telemetry=useLab(s=>s.telemetry),ghost=useLab(s=>s.ghost);
+  useFrame((_,dt)=>useLab.getState().advance(Math.min(dt,.1)));
+  return <><World/>{telemetry&&<><Rocket telemetry={telemetry}/><Exhaust telemetry={telemetry}/><Trajectory telemetry={telemetry}/></>}{ghost&&<><Rocket telemetry={ghost} ghost/><Trajectory telemetry={ghost} ghost/></>}<CameraRig/><RenderOutput/></>;
+}
+export default function Scene(){return <Canvas shadows camera={{position:[75,245,80],fov:40,near:1,far:12000}} dpr={1} gl={{antialias:true,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:1.05,outputColorSpace:THREE.SRGBColorSpace}}><FlightScene/></Canvas>;}

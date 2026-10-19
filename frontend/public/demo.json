@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "config_hash": "15b9d2a4ad7e8f68",
+  "config_hash": "4f2cb7c24e9839d5",
   "rocket_length": 40.0,
   "initial_fuel": 15404.981812280874,
   "run": {
-    "id": "landing-classical-l4-s42-15b9d2a4ad7e8f68",
+    "id": "landing-classical-l4-s42-4f2cb7c24e9839d5",
     "mission": "landing",
     "method": "classical",
     "level": 4,
@@ -18,7 +18,7 @@
     "pad_distance": 0.7823770412243413,
     "fuel_used": 2557.831236141599,
     "duration": 20.05999999999966,
-    "total_reward": 205.26435194239053,
+    "total_reward": 355.0875248758275,
     "source": "MuJoCo simulation",
     "controller_status": "not_requested"
   },

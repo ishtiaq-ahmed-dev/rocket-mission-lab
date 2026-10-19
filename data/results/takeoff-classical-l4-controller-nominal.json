@@ -1,0 +1,30 @@
+{
+  "mission": "takeoff",
+  "method": "classical",
+  "level": 4,
+  "checkpoint_id": null,
+  "episodes": 32,
+  "seeds": [
+    20000,
+    20031
+  ],
+  "scenario": "nominal",
+  "successes": 32,
+  "success_rate": 1.0,
+  "confidence_interval": [
+    0.8928208017449346,
+    1.0
+  ],
+  "mean_reward": -32.70280677535855,
+  "failures": {},
+  "config_hash": "15b9d2a4ad7e8f68",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 24.990632739025052,
+  "median_touchdown_speed": 25.03759546995034,
+  "mean_tilt": 0.5664052057772434,
+  "median_tilt": 0.5152081233606645,
+  "mean_pad_distance": 0.5440247059655376,
+  "median_pad_distance": 0.47964540785242205,
+  "mean_fuel_used": 3342.592442452563,
+  "median_fuel_used": 3371.204691080211
+}

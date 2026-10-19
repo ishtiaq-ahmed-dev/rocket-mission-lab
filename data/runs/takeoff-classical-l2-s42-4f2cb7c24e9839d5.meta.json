@@ -1,0 +1,19 @@
+{
+  "id": "takeoff-classical-l2-s42-4f2cb7c24e9839d5",
+  "mission": "takeoff",
+  "method": "classical",
+  "level": 2,
+  "checkpoint_steps": null,
+  "algorithm": null,
+  "seed": 42,
+  "outcome": "success",
+  "failure_reason": null,
+  "touchdown_speed": 25.181462198183674,
+  "tilt": 0.4179121560808557,
+  "pad_distance": 0.3898114204530457,
+  "fuel_used": 3423.8345841739683,
+  "duration": 24.599999999999564,
+  "total_reward": 436.0173963258823,
+  "source": "MuJoCo simulation",
+  "controller_status": "not_requested"
+}

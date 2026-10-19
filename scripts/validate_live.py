@@ -7,6 +7,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from rocket_lab.schemas import Telemetry
 from rocket_lab.storage import atomic_json
 from rocket_lab.config import DATA
+from PIL import Image
 
 def get(url):
     with urllib.request.urlopen(url,timeout=30) as response:
@@ -25,7 +26,15 @@ def main():
     checks["initial_hud_altitude"]=telemetry.frames[0].position[2]-telemetry.rocket_length/2
     checks["outcome"]=telemetry.run.outcome
     checks["touchdown_speed"]=telemetry.run.touchdown_speed
-    checks["browser_visual_verification"]="UNVERIFIED - browser tool policy blocked observation"
+    checks["browser_visual_verification"]="Automation unavailable under browser tool policy; user confirmed live camera rotation. Latest terrain and 4K export need visual confirmation."
+    checks["terrain_textures"]={}
+    for kind in ["color","normal","roughness"]:
+        filename=f"ground-{kind}-4k.jpg"
+        image=Image.open(Path(__file__).resolve().parents[1]/"frontend"/"public"/"assets"/"terrain"/filename)
+        request=urllib.request.Request(f"http://127.0.0.1:5180/assets/terrain/{filename}",method="HEAD")
+        with urllib.request.urlopen(request,timeout=30) as response:
+            assert response.status==200 and image.size==(4096,4096)
+            checks["terrain_textures"][filename]=dict(http=response.status,width=image.width,height=image.height)
     atomic_json(DATA/"live-validation.json",checks)
     print(json.dumps(checks,indent=2))
 if __name__=="__main__":main()

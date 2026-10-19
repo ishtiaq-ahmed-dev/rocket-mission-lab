@@ -1,0 +1,19 @@
+{
+  "id": "landing-rl-l1-s42-123450d5cc044a22",
+  "mission": "landing",
+  "method": "rl",
+  "level": 1,
+  "checkpoint_steps": 0,
+  "algorithm": "PPO",
+  "seed": 42,
+  "outcome": "out_of_bounds",
+  "failure_reason": "out_of_bounds",
+  "touchdown_speed": 164.98633155846602,
+  "tilt": 53.22296403475273,
+  "pad_distance": 2500.505085979685,
+  "fuel_used": 6669.399850593309,
+  "duration": 52.100000000002545,
+  "total_reward": -2117.899869429124,
+  "source": "MuJoCo simulation",
+  "controller_status": "measured checkpoint; maturity not certified"
+}

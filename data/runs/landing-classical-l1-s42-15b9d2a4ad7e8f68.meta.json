@@ -1,0 +1,19 @@
+{
+  "id": "landing-classical-l1-s42-15b9d2a4ad7e8f68",
+  "mission": "landing",
+  "method": "classical",
+  "level": 1,
+  "checkpoint_steps": null,
+  "algorithm": null,
+  "seed": 42,
+  "outcome": "crash_speed",
+  "failure_reason": "crash_speed",
+  "touchdown_speed": 33.20889974410687,
+  "tilt": 3.4573648261149725,
+  "pad_distance": 9.340902826488517,
+  "fuel_used": 825.9684937260317,
+  "duration": 8.599999999999905,
+  "total_reward": -2381.0171777911382,
+  "source": "MuJoCo simulation",
+  "controller_status": "not_requested"
+}

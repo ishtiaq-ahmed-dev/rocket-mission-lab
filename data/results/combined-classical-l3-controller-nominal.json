@@ -1,0 +1,33 @@
+{
+  "mission": "combined",
+  "method": "classical",
+  "level": 3,
+  "checkpoint_id": null,
+  "episodes": 32,
+  "seeds": [
+    20000,
+    20031
+  ],
+  "scenario": "nominal",
+  "successes": 17,
+  "success_rate": 0.53125,
+  "confidence_interval": [
+    0.3644951711897506,
+    0.6913061289193079
+  ],
+  "mean_reward": -166.9644858075917,
+  "failures": {
+    "crash_speed": 14,
+    "missed_pad": 1
+  },
+  "config_hash": "15b9d2a4ad7e8f68",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 1.7944367253176723,
+  "median_touchdown_speed": 1.7785397518736423,
+  "mean_tilt": 1.4602929823136082,
+  "median_tilt": 1.3173180470557484,
+  "mean_pad_distance": 3.346928645969914,
+  "median_pad_distance": 2.750484060958339,
+  "mean_fuel_used": 6739.838799318471,
+  "median_fuel_used": 6741.90320849168
+}

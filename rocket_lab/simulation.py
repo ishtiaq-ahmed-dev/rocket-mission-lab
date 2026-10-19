@@ -3,23 +3,30 @@ from .envs import RocketEnv
 from .controllers import ClassicalController
 from .schemas import Frame, RunMeta, Telemetry
 from .storage import atomic_json, config_hash, checkpoint_path, select_checkpoint
-from .config import DATA
+from .config import DATA, load_config
 
 class LearnedPolicy:
-    def __init__(self, identifier):
+    def __init__(self, identifier, observation_config=None):
         from stable_baselines3 import PPO, SAC
         from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
         from .storage import read_json
         path=checkpoint_path(identifier)
         self.meta=read_json(path/"checkpoint.json")
+        self.input_config=observation_config or load_config()
+        self.trained_config=self.meta.get("config") or read_json(DATA/"jobs"/self.meta["job_id"]/"config.json",{})
         cls=PPO if self.meta["algorithm"]=="PPO" else SAC
-        self.norm=VecNormalize.load(path/"normalize.pkl",DummyVecEnv([lambda:RocketEnv(self.meta["mission"])]))
+        self.norm=VecNormalize.load(path/"normalize.pkl",DummyVecEnv([lambda:RocketEnv(self.meta["mission"],config=self.trained_config or None)]))
         self.norm.training=False; self.norm.norm_reward=False
         # Inference never needs SAC's training replay buffer. Avoid allocating a
         # full 250k-transition buffer for every evaluation/replay policy load.
         self.model=cls.load(path/"model.zip",device="cpu",buffer_size=1) if cls is SAC else cls.load(path/"model.zip",device="cpu")
 
     def action(self, observation):
+        observation=np.asarray(observation).copy()
+        source=self.input_config.get("training",{});target=self.trained_config.get("training",{})
+        position_ratio=np.asarray(source.get("observation_position_scale",[400]*3))/np.asarray(target.get("observation_position_scale",[400]*3))
+        velocity_ratio=np.asarray(source.get("observation_velocity_scale",[50]*3))/np.asarray(target.get("observation_velocity_scale",[50]*3))
+        observation[:3]*=position_ratio;observation[3:6]*=velocity_ratio;observation[15:18]*=position_ratio
         normalized=self.norm.normalize_obs(np.array([observation]))
         return self.model.predict(normalized,deterministic=True)[0][0]
 
@@ -31,7 +38,7 @@ def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=
     if method=="rl":
         for phase in (["takeoff","landing"] if mission=="combined" else [mission]):
             selected=checkpoint_id if checkpoint_id and mission!="combined" else select_checkpoint(phase,level)["id"]
-            policies[phase]=LearnedPolicy(selected)
+            policies[phase]=LearnedPolicy(selected,observation_config=env.cfg)
         meta=policies[env.phase].meta
         steps,algorithm=meta["steps"],meta["algorithm"]
     else: steps,algorithm=None,None

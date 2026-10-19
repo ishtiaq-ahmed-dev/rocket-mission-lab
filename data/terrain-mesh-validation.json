@@ -1,0 +1,23 @@
+{
+  "scope": "CPU mesh assembly only. GPU frame rate and visual appearance are not measured.",
+  "qualities": {
+    "Balanced": {
+      "triangles": 513752,
+      "vertices": 262513,
+      "buffer_bytes": 17715596,
+      "assembly_ms": 194
+    },
+    "High": {
+      "triangles": 1000520,
+      "vertices": 508249,
+      "buffer_bytes": 34369196,
+      "assembly_ms": 357
+    },
+    "Ultra": {
+      "triangles": 2943464,
+      "vertices": 1484425,
+      "buffer_bytes": 100636268,
+      "assembly_ms": 942
+    }
+  }
+}

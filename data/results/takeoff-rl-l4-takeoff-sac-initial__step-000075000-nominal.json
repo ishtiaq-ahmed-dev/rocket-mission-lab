@@ -1,0 +1,31 @@
+{
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "takeoff-sac-initial__step-000075000",
+  "episodes": 12,
+  "seeds": [
+    10000,
+    10011
+  ],
+  "scenario": "nominal",
+  "successes": 0,
+  "success_rate": 0.0,
+  "confidence_interval": [
+    0.0,
+    0.24249400665523077
+  ],
+  "mean_reward": -1591.1286488791636,
+  "failures": {
+    "crash_speed": 12
+  },
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 152.8423399651052,
+  "median_touchdown_speed": 167.42735675323866,
+  "mean_tilt": 124.20963584424737,
+  "median_tilt": 126.95539707956556,
+  "mean_pad_distance": 1189.977482945425,
+  "median_pad_distance": 1355.7297464235257,
+  "mean_fuel_used": 3614.392289362831,
+  "median_fuel_used": 3828.1863447033684
+}

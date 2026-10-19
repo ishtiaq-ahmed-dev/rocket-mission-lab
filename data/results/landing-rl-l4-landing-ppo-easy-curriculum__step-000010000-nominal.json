@@ -1,0 +1,32 @@
+{
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "landing-ppo-easy-curriculum__step-000010000",
+  "episodes": 20,
+  "seeds": [
+    20000,
+    20019
+  ],
+  "scenario": "nominal",
+  "successes": 0,
+  "success_rate": 0.0,
+  "confidence_interval": [
+    1.3877787807814457e-17,
+    0.1611251580528119
+  ],
+  "mean_reward": -5406.9745814156395,
+  "failures": {
+    "crash_speed": 20
+  },
+  "config_hash": "15b9d2a4ad7e8f68",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 28.61060907691409,
+  "median_touchdown_speed": 17.106729059699884,
+  "mean_tilt": 12.69376898882674,
+  "median_tilt": 6.070124406929852,
+  "mean_pad_distance": 159.9911447033823,
+  "median_pad_distance": 24.11143477528711,
+  "mean_fuel_used": 1975.2145603546567,
+  "median_fuel_used": 1687.067846569178
+}
