@@ -163,3 +163,25 @@ V16 completed 9,312,368 lineage steps. Its larger sample scored 41/256 (16.02%; 
 A five-million-additional-step exact-config v10 continuation (`landing-ppo-pad-v10-long`) starts from 8,908,272 with 256 full-task checkpoint episodes on seeds 20000–20255. Its initial 56/256 is a different pool from the 65/256 development comparison on 22000–22255. A separate frozen v10 nominal 10,000-seed batch and matched current-source classical landing batch are being run on 10000–19999. Their frozen source and candidate manifests are separate from later live producer changes.
 
 Elevated test execution became available on 20 October. The complete backend suite passed 52 tests, closing the previously restricted API transport/dispatch check for that source. The old services had exited; the verified inactive localhost ports were restarted under the existing hidden supervisor. Current production frontend/proxy/routes/textures passed real HTTP checks. Default RL checkpoint selection now considers compatible experiment variants, and a producer fix records the actual automatically selected checkpoint ID. Cross-mission IDs and one-checkpoint combined requests are rejected. Browser visual appearance, acceleration state, sound playback and FPS remain separate unverified gates.
+
+
+## Joint failure diagnosis and isolated terminal-speed experiment
+
+The v10 retained actor's 256 development landings met the speed threshold in 89 episodes, tilt in 200 and pad offset in 183. Only 65 met all three. Ninety-one failed speed alone, 39 speed plus offset, 18 speed plus tilt, and 19 all three. Nine failed tilt alone, ten tilt plus offset and five offset alone. These simultaneous criteria explain more than the priority-ordered failure label. `scripts/analyze_landing_failures.py` verifies every original success against the three physical thresholds and exports the measured scatter/count plot; it never changes recorded outcomes.
+
+The v17 sibling changes only terminal-speed cost from 2 to 8 while preserving v10 lateral/terminal-position weights, full-height starts, observations and physical task. The earlier v12 trial also reduced the terminal-position weight, so its failure did not isolate speed cost. V17 actor-warm-starts the retained v10 checkpoint with a fresh critic/optimizer/reward transform, and runs 800,000 additional steps with 64 checkpoint episodes. It is a bounded empirical trial, not the default until measured results justify selection. The five-million-step exact v10 continuation remains a separate control.
+
+
+## Frozen landing result
+
+The unchanged v10 8,908,272 actor completed the restarted nominal batch on seeds 10000–19999 with 1,781/10,000 successes (17.81%; Wilson interval 17.0725–18.5722%). Failures were 7,453 speed events, 516 tilt events and 250 pad misses. Mean terminal speed was 3.0368 m/s, tilt 3.8274 degrees and offset 4.6284 m. This is materially below the previously selected 65/256 development sample; repeated model selection on that smaller pool can produce optimistic estimates. The failed disk-interrupted partial batch was not counted or combined with this completed batch.
+
+The automatic development selector may prefer newer snapshots after larger evidence changes a candidate's lower bound. Its chosen model is therefore not necessarily the exact frozen candidate above. The qualification panel always names the precise checkpoint/configuration/seeds, while the development table and replay report their own provenance. New development selection is not a post-selection qualification guarantee.
+
+
+The matched classical landing batch completed with 10,000/10,000 observed successes on the same current configuration and seeds, Wilson lower bound 99.9616%. Mean speed was 0.7274 m/s, tilt 0.7047 degrees and offset 1.0624 m. This remains a scoped nominal simulation comparison with disclosed information asymmetries.
+
+The recovered long v10 job's 10,158,272 checkpoint reached 71/256 on its larger 20000–20255 callback pool and 72/256 (28.13%; interval 22.97–33.92%) on development seeds 22000–22255. Mean speed was 2.6658 m/s, tilt 3.4307 degrees and offset 3.7870 m. Its stage probes were 0/32, 7/32, 10/32 and 10/32; full-height improvement coexists with severe forgetting of the easy stage. Only the named older checkpoint has the frozen 10,000 result. The current selector may use this newer unqualified development candidate while explicitly preserving that distinction.
+
+
+V17 completed 802,816 additional steps, reaching 9,711,088 lineage steps. The final checkpoint scored 8/64 on its callback pool and 22/256 (8.59%; interval 5.74–12.67%) on the matched development pool. Mean speed was 2.6358 m/s, tilt 5.1805 degrees and pad offset 5.7198 m. Stage probes were 0/32, 0/32, 4/32 and 3/32. Increasing the isolated terminal-speed coefficient did not improve reliability. The failed trial, source snapshot, initial physical-transfer comparison and first-seed failures remain retained; the default remains chosen by measured evidence.

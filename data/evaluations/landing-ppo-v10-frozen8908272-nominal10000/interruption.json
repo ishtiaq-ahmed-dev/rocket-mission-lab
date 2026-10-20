@@ -1,0 +1,7 @@
+{
+  "reason": "D: exhausted; original journal retained without truncation or reuse",
+  "valid_complete_lines": 5164,
+  "has_partial_line": false,
+  "restarted_as": "landing-ppo-v10-frozen8908272-nominal10000-r2",
+  "recorded_at": 1792463730.0981839
+}

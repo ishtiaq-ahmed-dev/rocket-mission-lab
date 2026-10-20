@@ -1,16 +1,48 @@
 {
-  "created_at": 1792464071.4945328,
+  "created_at": 1792464663.1215458,
   "status": "passed",
   "scope": "saved evidence/schema/build-link validation; no browser or HTTP check",
-  "checkpoints": 35,
-  "replays": 147,
-  "stage_replays": 128,
-  "selected_successful_examples": 19,
-  "full_task_samples": 19,
-  "full_task_episodes": 4864,
-  "qualification_samples": 2,
-  "qualification_episodes": 20000,
+  "checkpoints": 37,
+  "replays": 157,
+  "stage_replays": 136,
+  "selected_successful_examples": 21,
+  "full_task_samples": 21,
+  "full_task_episodes": 5376,
+  "qualification_samples": 4,
+  "qualification_episodes": 40000,
   "checked": [
+    {
+      "checkpoint": "landing-ppo-pad-v10-long-recovered__step-010158272",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 81,
+      "url": "/model-replays/landing-ppo-pad-v10-long-recovered__step-010158272-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-long-recovered__step-010158272",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 102,
+      "url": "/model-replays/landing-ppo-pad-v10-long-recovered__step-010158272-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-long-recovered__step-010158272",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 118,
+      "url": "/model-replays/landing-ppo-pad-v10-long-recovered__step-010158272-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-long-recovered__step-010158272",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 128,
+      "url": "/model-replays/landing-ppo-pad-v10-long-recovered__step-010158272-d1.000-s21000.json"
+    },
     {
       "checkpoint": "landing-ppo-precision-v15-refinement__step-009911792",
       "difficulty": 0.2,
@@ -42,6 +74,38 @@
       "outcome": "crash_speed",
       "frames": 140,
       "url": "/model-replays/landing-ppo-precision-v15-refinement__step-009911792-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-terminalspeed-v17-pilot__step-009711088",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 81,
+      "url": "/model-replays/landing-ppo-terminalspeed-v17-pilot__step-009711088-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-terminalspeed-v17-pilot__step-009711088",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 97,
+      "url": "/model-replays/landing-ppo-terminalspeed-v17-pilot__step-009711088-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-terminalspeed-v17-pilot__step-009711088",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 107,
+      "url": "/model-replays/landing-ppo-terminalspeed-v17-pilot__step-009711088-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-terminalspeed-v17-pilot__step-009711088",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 118,
+      "url": "/model-replays/landing-ppo-terminalspeed-v17-pilot__step-009711088-d1.000-s21000.json"
     },
     {
       "checkpoint": "landing-ppo-groundspeed-v16-pilot__step-009312368",

@@ -1,0 +1,17 @@
+{
+  "id": "landing-ppo-v10-frozen8908272-nominal10000",
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "scenario": "nominal",
+  "checkpoint_id": "landing-ppo-pad-v10-continued__step-008908272",
+  "status": "failed",
+  "completed": 5150,
+  "total": 10000,
+  "successes": 920,
+  "started_at": 1792463158.9691734,
+  "updated_at": 1792463604.5040274,
+  "pid": 29920,
+  "source_hash": "3c7a0d26b4f566952f4f9007c5da07e5f9e1443a137c5ad01c65f9d21ec918e0",
+  "error": "D: drive exhausted while appending per-seed journal; partial batch retained, not qualification."
+}

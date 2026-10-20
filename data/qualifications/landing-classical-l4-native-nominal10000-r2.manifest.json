@@ -1,0 +1,13 @@
+{
+  "mission": "landing",
+  "checkpoint_id": null,
+  "config_hash": "4f2cb7c24e9839d5",
+  "candidate_sha256": {},
+  "seeds": [
+    10000,
+    19999
+  ],
+  "episodes": 10000,
+  "selection_scope": "candidate fixed before observing this qualification batch; selected using separate development seeds",
+  "physics_sha256": "03d9c5f843f181fe143ebdccc49365a82a23c7020f3f12a2abb4701509999d20"
+}

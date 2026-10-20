@@ -1,0 +1,33 @@
+{
+  "scope": "One batch; simultaneous terminal kinematic failures, not pooled seeds or qualification",
+  "result_file": "landing-rl-l4-landing-ppo-pad-v10-continued__step-008908272-development-s22000-n256.json",
+  "checkpoint_id": "landing-ppo-pad-v10-continued__step-008908272",
+  "seeds": [
+    22000,
+    22255
+  ],
+  "episodes": 256,
+  "impact_episodes": 256,
+  "other_outcomes": {},
+  "thresholds": {
+    "speed_less_than": 2.0,
+    "tilt_less_than": 5.0,
+    "offset_at_most": 5.0
+  },
+  "individual_constraint_pass_counts": {
+    "speed": 89,
+    "tilt": 200,
+    "offset": 183
+  },
+  "simultaneous_violations": {
+    "none": 65,
+    "speed": 91,
+    "speed+offset": 39,
+    "tilt": 9,
+    "speed+tilt+offset": 19,
+    "tilt+offset": 10,
+    "speed+tilt": 18,
+    "offset": 5
+  },
+  "recorded_successes": 65
+}

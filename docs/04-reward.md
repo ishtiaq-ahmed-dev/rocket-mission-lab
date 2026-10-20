@@ -43,3 +43,6 @@ It gives near-surface high-speed states a continuous debit before the terminal e
 ## Evidence and further reading
 
 See [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the actual validation record in [VALIDATION.md](VALIDATION.md).
+
+
+The v17 sibling isolates one terminal-cost change: speed coefficient 8 instead of 2, with terminal-position coefficient still 12. V12 had changed both coefficients, so its results did not isolate the speed term. V17 keeps the same success thresholds and state observations, and uses a separately recorded fresh critic after actor transfer. Its reward magnitude is not comparable to v10; compare physical outcomes instead.

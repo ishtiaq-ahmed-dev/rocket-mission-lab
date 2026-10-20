@@ -8,10 +8,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from rocket_lab.config import DATA
-from rocket_lab.storage import training_jobs,read_json,checkpoint_path,atomic_json
+from rocket_lab.storage import training_jobs,read_json,checkpoint_path,atomic_json,config_hash
 
 def save_figure(fig,path):
-    fig.savefig(path,dpi=180)
+    fig.savefig(path,dpi=180,metadata={'Date':None} if path.suffix=='.svg' else None)
     if path.suffix=='.svg':
         # Matplotlib adds line-end spaces inside path data; preserve the same
         # SVG tokens while keeping generated files clean in source control.
@@ -61,7 +61,7 @@ def qualification_plot(target):
                 [100*(row['success_rate']-row['confidence_interval'][0]) for row in values]]
         fig,ax=plt.subplots(figsize=(9,5))
         ax.bar(labels,rates,color=['#dba976' if row['method']=='classical' else '#75b8c9' for row in values],yerr=errors,capsize=7,width=.55,ecolor='#e7d4bd')
-        ax.set(title=f'{mission.capitalize()} / frozen nominal candidates',ylabel='Observed failures (%)',ylim=(0,max(3,max(rates)*1.6)))
+        ax.set(title=f'{mission.capitalize()} / frozen nominal candidates',ylabel='Observed failures (%)',ylim=(0,min(100,max(3,max(rates)*1.6))))
         ax.grid(axis='y',alpha=.2);ax.set_axisbelow(True)
         for index,row in enumerate(values):
             ax.text(index,100*(1-row['confidence_interval'][0])+.12,f"{row['episodes']-row['successes']:,} / {row['episodes']:,} failures",ha='center')
@@ -74,6 +74,7 @@ def qualification_plot(target):
 def main():
     target=DATA/"plots";target.mkdir(parents=True,exist_ok=True)
     plt.style.use("dark_background")
+    plt.rcParams['svg.hashsalt']='rocket-mission-lab'
     development_plot(target)
     qualification_plot(target)
     fig,axes=plt.subplots(1,2,figsize=(13,4.5),constrained_layout=True)
@@ -87,18 +88,24 @@ def main():
     axes[1].set(title="Actual held-out successes",xlabel="environment steps",ylabel="observed success fraction",ylim=(-.02,1.02))
     for ax in axes:ax.grid(alpha=.15);ax.legend(fontsize=6)
     fig.savefig(target/"learning-curves.png",dpi=170);plt.close(fig)
-    rows=[x for p in (DATA/"results").glob("*.json") if (x:=read_json(p)) and x["method"]=="classical" and x["scenario"]=="nominal"]
+    current_hash=config_hash()
+    rows=[x for p in (DATA/"results").glob("*.json") if (x:=read_json(p)) and x["method"]=="classical" and x["scenario"]=="nominal" and x.get('config_hash')==current_hash]
     if rows:
         fig,axes=plt.subplots(1,3,figsize=(13,4),constrained_layout=True)
         for ax,mission in zip(axes,["landing","takeoff","combined"]):
-            values=sorted([r for r in rows if r["mission"]==mission],key=lambda r:r["level"])
+            selected={}
+            for row in rows:
+                if row['mission']!=mission:continue
+                previous=selected.get(row['level'])
+                if not previous or (row['episodes'],row.get('completed_at',0))>(previous['episodes'],previous.get('completed_at',0)):selected[row['level']]=row
+            values=sorted(selected.values(),key=lambda row:row['level'])
             if not values:continue
             p=[r["success_rate"] for r in values]
             errors=[[r["success_rate"]-r["confidence_interval"][0] for r in values],[r["confidence_interval"][1]-r["success_rate"] for r in values]]
             ax.bar([str(r["level"]) for r in values],p,color="#b7a184",yerr=errors,capsize=4,ecolor='#e7d4bd')
             ax.set(title=mission,xlabel="controller level",ylabel="success fraction",ylim=(0,1.1));ax.grid(axis="y",alpha=.15)
             for i,r in enumerate(values):ax.text(i,.03,f"{r['successes']}/{r['episodes']}",ha="center",fontsize=9,color="#d9e5e6")
-        fig.suptitle("Measured controller evaluation with 95% Wilson intervals")
+        fig.suptitle(f"Largest nominal controller samples / 95% Wilson intervals / configuration {current_hash}")
         fig.savefig(target/"classical-comparison.png",dpi=170);plt.close(fig)
     print(target)
 if __name__=="__main__":main()

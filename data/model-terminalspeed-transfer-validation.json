@@ -1,0 +1,15 @@
+{
+  "scope": "V17 actor-only transfer before updates; first 20 of 64 checkpoint evaluation seeds compared to parent",
+  "parent": "landing-ppo-pad-v10-continued__step-008908272",
+  "child": "landing-ppo-terminalspeed-v17-pilot__step-008908272",
+  "episodes_compared": 20,
+  "outcomes_match_exactly": true,
+  "maximum_absolute_differences": {
+    "touchdown_speed": 5.906386491005833e-14,
+    "tilt": 1.7967849430533533e-12,
+    "pad_distance": 2.7533531010703882e-14,
+    "fuel_used": 0.0
+  },
+  "tolerance": 1e-08,
+  "reward_comparison": "Excluded because terminal-speed cost changed"
+}

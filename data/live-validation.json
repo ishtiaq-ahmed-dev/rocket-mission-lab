@@ -1,5 +1,5 @@
 {
-  "verified_at_unix": 1792464068.7421515,
+  "verified_at_unix": 1792464660.8137875,
   "scope": "live localhost HTTP/schema/static-assets; no browser visual or GPU measurement",
   "source_hash": "7474f177c4e8ebd6a78ea3406ed9d8dc1dc1a108e1af3e3f3a0a4fc7e0de99e5",
   "frontend_http": 200,
@@ -22,13 +22,13 @@
   "touchdown_speed": 0.7129316082806952,
   "rl_default_selection": {
     "landing": {
-      "checkpoint": "landing-ppo-pad-v10-continued__step-008908272",
-      "steps": 8908272,
+      "checkpoint": "landing-ppo-pad-v10-long-recovered__step-010158272",
+      "steps": 10158272,
       "outcome": "crash_speed",
-      "frames": 121,
-      "speed": 3.0498478437263694,
-      "tilt": 4.147243297287619,
-      "pad_distance": 1.3588737633477277
+      "frames": 128,
+      "speed": 3.617845125039732,
+      "tilt": 5.030160955730678,
+      "pad_distance": 1.0250536018699004
     },
     "takeoff": {
       "checkpoint": "takeoff-ppo-full-v13-refinement__step-002761136",
@@ -43,15 +43,15 @@
   "published_model_evidence": {
     "model-probes.json": {
       "http": 200,
-      "entries": 35
+      "entries": 37
     },
     "model-evaluations.json": {
       "http": 200,
-      "entries": 19
+      "entries": 21
     },
     "model-qualifications.json": {
       "http": 200,
-      "entries": 2
+      "entries": 4
     }
   },
   "selected_example_http": 200,

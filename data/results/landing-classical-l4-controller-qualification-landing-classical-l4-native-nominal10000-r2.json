@@ -1,0 +1,35 @@
+{
+  "mission": "landing",
+  "method": "classical",
+  "level": 4,
+  "checkpoint_id": null,
+  "episodes": 10000,
+  "seeds": [
+    10000,
+    19999
+  ],
+  "scenario": "nominal",
+  "successes": 10000,
+  "success_rate": 1.0,
+  "confidence_interval": [
+    0.9996160016293234,
+    1.0
+  ],
+  "mean_reward": 373.75653367496597,
+  "failures": {},
+  "config_hash": "4f2cb7c24e9839d5",
+  "qualification": "full fixed-seed batch",
+  "mean_touchdown_speed": 0.7273786867129663,
+  "median_touchdown_speed": 0.7094852432000942,
+  "mean_tilt": 0.7046688318318469,
+  "median_tilt": 0.654555001820049,
+  "mean_pad_distance": 1.062445425725664,
+  "median_pad_distance": 1.0153712514298459,
+  "mean_fuel_used": 2526.1499497073246,
+  "median_fuel_used": 2521.8581410437446,
+  "evaluation_role": "frozen-candidate nominal qualification",
+  "progress_id": "landing-classical-l4-native-nominal10000-r2",
+  "manifest_file": "landing-classical-l4-native-nominal10000-r2.manifest.json",
+  "source_hash": "7474f177c4e8ebd6a78ea3406ed9d8dc1dc1a108e1af3e3f3a0a4fc7e0de99e5",
+  "completed_at": 1792464404.1612542
+}

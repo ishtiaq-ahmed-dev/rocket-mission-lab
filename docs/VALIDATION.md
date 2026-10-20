@@ -121,3 +121,15 @@ Atomic JSON writes clean up their own failed temporary files and preserve the pr
 After low-space recovery and the Results batch-isolation change, the complete suite passed 55 backend tests (including API transport and storage fault drills), plus 32 frontend tests, TypeScript, lint and production build. The Results page now selects one failure sample and one configuration explicitly, and uses the largest nominal classical sample per level. It no longer sums overlapping seed pools or displays duplicate same-configuration controller bars. The API publishes its current configuration hash for this filter. Browser visual inspection remains unavailable under the existing policy.
 
 A later capacity check found about 4.85 GiB available on D:. No additional unrelated files were removed by this task; the cause of that capacity change was not investigated. The low-space protections remain active.
+
+
+## Completed current-source landing nominal batches
+
+The frozen v10 8,908,272 checkpoint completed 1,781/10,000 nominal successes (17.81%; Wilson interval 17.0725–18.5722%). There were 7,453 speed failures, 516 tilt failures and 250 pad misses. Mean terminal speed was 3.0368 m/s, tilt 3.8274 degrees and pad offset 4.6284 m. This is weaker than its 65/256 selected development sample, reinforcing the documented selection/seed uncertainty. The completed `-r2` journal is the authoritative batch; the original disk-interrupted journal remains failed and was not combined with it.
+
+Matched current-source classical L4 landing completed with 10,000/10,000 observed successes (Wilson lower bound 99.9616%), mean speed 0.7274 m/s, tilt 0.7047 degrees and offset 1.0624 m. Both batches use baseline configuration `4f2cb7c24e9839d5` and seeds 10000–19999. They retain the disclosed differences in state features, known wind/model information, and no real-vehicle qualification is implied.
+
+The recovered v10 continuation's 10,158,272 checkpoint scored 71/256 on the 20000 checkpoint pool and 72/256 on the separate 22000 development pool (28.13%; interval 22.97–33.92%). The latter mean speed was 2.6658 m/s, tilt 3.4307 degrees and offset 3.7870 m. Its stage probes were 0/32, 7/32, 10/32 and 10/32, showing easier-start forgetting. It has not received a full nominal batch; it must not inherit the older checkpoint's qualification.
+
+
+The single-weight v17 landing trial finished with 22/256 full-task development successes, 2.6358 m/s mean speed, 5.1805 degree tilt and 5.7198 m offset. Its stage probes were 0/32, 0/32, 4/32 and 3/32. This failed trial is preserved and does not replace the stronger development candidate. Its first 20 initial physical outcomes matched the retained parent within 1e-8; reward intentionally changed.

@@ -1,0 +1,17 @@
+{
+  "mission": "landing",
+  "checkpoint_id": "landing-ppo-pad-v10-continued__step-008908272",
+  "config_hash": "4f2cb7c24e9839d5",
+  "candidate_sha256": {
+    "model.zip": "39391bf9c3eeec7e3af1951b675c53a1fc4b9ae0fe2b4025e7b8e3684deb4756",
+    "normalize.pkl": "f9132c7de803c72044ec51c6c6cd3408807167dae3a963f536f13decc401ae54",
+    "checkpoint.json": "194ce80a09f08a3ace7e47ff46bd4272b39db431e4934c7e4d94fc40f4397cef"
+  },
+  "seeds": [
+    10000,
+    19999
+  ],
+  "episodes": 10000,
+  "selection_scope": "candidate fixed before observing this qualification batch; selected using separate development seeds",
+  "physics_sha256": "03d9c5f843f181fe143ebdccc49365a82a23c7020f3f12a2abb4701509999d20"
+}

@@ -4,6 +4,7 @@ interface Probe {
  stages:{difficulty:number;episodes:number;successes:number;mean_speed:number;mean_tilt:number;mean_offset:number;replay_url?:string;replay_seed?:number;replay_outcome?:string;target_altitude?:number;target_velocity?:number}[];
 }
 function policyName(probe:Probe){
+ if(probe.training_profile==='terminal-speed-v17')return 'Terminal speed cost';
  if(probe.training_profile==='near-ground-speed-v16')return 'Ground speed cost';
  if(probe.training_profile==='precision-updates-v15')return 'Precision updates';
  if(probe.training_profile==='sac-full-v14')return 'SAC full task';

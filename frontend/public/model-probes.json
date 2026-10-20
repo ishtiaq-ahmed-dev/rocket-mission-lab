@@ -1,5 +1,93 @@
 [
   {
+    "checkpoint_id": "landing-ppo-pad-v10-long-recovered__step-010158272",
+    "mission": "landing",
+    "steps": 10158272,
+    "config_hash": "4f2cb7c24e9839d5",
+    "training_config_hash": "364e1822c49464a7",
+    "created_at": 1792464425.494711,
+    "scope": "development curriculum probes; not qualification",
+    "profile": "state-potential-v4",
+    "training_profile": "pad-accuracy-v10",
+    "algorithm": "PPO",
+    "stages": [
+      {
+        "difficulty": 0.2,
+        "episodes": 32,
+        "seeds": [
+          21000,
+          21031
+        ],
+        "successes": 0,
+        "failures": {
+          "crash_speed": 32
+        },
+        "mean_speed": 2.460372614499143,
+        "mean_tilt": 3.189361230305691,
+        "mean_offset": 4.278324714513053,
+        "replay_url": "/model-replays/landing-ppo-pad-v10-long-recovered__step-010158272-d0.200-s21000.json",
+        "replay_seed": 21000,
+        "replay_outcome": "crash_speed"
+      },
+      {
+        "difficulty": 0.4,
+        "episodes": 32,
+        "seeds": [
+          21000,
+          21031
+        ],
+        "successes": 7,
+        "failures": {
+          "crash_speed": 22,
+          "missed_pad": 3
+        },
+        "mean_speed": 2.1458086301556065,
+        "mean_tilt": 3.0043648520073907,
+        "mean_offset": 4.215555772609804,
+        "replay_url": "/model-replays/landing-ppo-pad-v10-long-recovered__step-010158272-d0.400-s21000.json",
+        "replay_seed": 21000,
+        "replay_outcome": "crash_speed"
+      },
+      {
+        "difficulty": 0.6,
+        "episodes": 32,
+        "seeds": [
+          21000,
+          21031
+        ],
+        "successes": 10,
+        "failures": {
+          "crash_speed": 18,
+          "missed_pad": 4
+        },
+        "mean_speed": 2.3077705176489527,
+        "mean_tilt": 3.301390293436108,
+        "mean_offset": 3.5988633688820517,
+        "replay_url": "/model-replays/landing-ppo-pad-v10-long-recovered__step-010158272-d0.600-s21000.json",
+        "replay_seed": 21000,
+        "replay_outcome": "crash_speed"
+      },
+      {
+        "difficulty": 1.0,
+        "episodes": 32,
+        "seeds": [
+          21000,
+          21031
+        ],
+        "successes": 10,
+        "failures": {
+          "crash_speed": 22
+        },
+        "mean_speed": 2.8814426495727536,
+        "mean_tilt": 3.879358115529741,
+        "mean_offset": 3.4742158929543114,
+        "replay_url": "/model-replays/landing-ppo-pad-v10-long-recovered__step-010158272-d1.000-s21000.json",
+        "replay_seed": 21000,
+        "replay_outcome": "crash_speed"
+      }
+    ]
+  },
+  {
     "checkpoint_id": "landing-ppo-precision-v15-refinement__step-009911792",
     "mission": "landing",
     "steps": 9911792,
@@ -85,6 +173,96 @@
         "mean_tilt": 5.360603954988922,
         "mean_offset": 4.767454456417235,
         "replay_url": "/model-replays/landing-ppo-precision-v15-refinement__step-009911792-d1.000-s21000.json",
+        "replay_seed": 21000,
+        "replay_outcome": "crash_speed"
+      }
+    ]
+  },
+  {
+    "checkpoint_id": "landing-ppo-terminalspeed-v17-pilot__step-009711088",
+    "mission": "landing",
+    "steps": 9711088,
+    "config_hash": "4f2cb7c24e9839d5",
+    "training_config_hash": "5733c48293865572",
+    "created_at": 1792464580.863775,
+    "scope": "development curriculum probes; not qualification",
+    "profile": "state-potential-v4",
+    "training_profile": "terminal-speed-v17",
+    "algorithm": "PPO",
+    "stages": [
+      {
+        "difficulty": 0.2,
+        "episodes": 32,
+        "seeds": [
+          21000,
+          21031
+        ],
+        "successes": 0,
+        "failures": {
+          "crash_speed": 32
+        },
+        "mean_speed": 2.53725691087556,
+        "mean_tilt": 3.2885167653763236,
+        "mean_offset": 4.710590988320895,
+        "replay_url": "/model-replays/landing-ppo-terminalspeed-v17-pilot__step-009711088-d0.200-s21000.json",
+        "replay_seed": 21000,
+        "replay_outcome": "crash_speed"
+      },
+      {
+        "difficulty": 0.4,
+        "episodes": 32,
+        "seeds": [
+          21000,
+          21031
+        ],
+        "successes": 0,
+        "failures": {
+          "crash_speed": 29,
+          "missed_pad": 3
+        },
+        "mean_speed": 2.461851696912706,
+        "mean_tilt": 3.0164479354243383,
+        "mean_offset": 5.779384624949712,
+        "replay_url": "/model-replays/landing-ppo-terminalspeed-v17-pilot__step-009711088-d0.400-s21000.json",
+        "replay_seed": 21000,
+        "replay_outcome": "crash_speed"
+      },
+      {
+        "difficulty": 0.6,
+        "episodes": 32,
+        "seeds": [
+          21000,
+          21031
+        ],
+        "successes": 4,
+        "failures": {
+          "crash_speed": 24,
+          "missed_pad": 4
+        },
+        "mean_speed": 2.4522122455371322,
+        "mean_tilt": 3.4125681420481713,
+        "mean_offset": 5.501076562201356,
+        "replay_url": "/model-replays/landing-ppo-terminalspeed-v17-pilot__step-009711088-d0.600-s21000.json",
+        "replay_seed": 21000,
+        "replay_outcome": "crash_speed"
+      },
+      {
+        "difficulty": 1.0,
+        "episodes": 32,
+        "seeds": [
+          21000,
+          21031
+        ],
+        "successes": 3,
+        "failures": {
+          "crash_speed": 21,
+          "crash_tilt": 5,
+          "missed_pad": 3
+        },
+        "mean_speed": 2.945679155070685,
+        "mean_tilt": 4.927078418834733,
+        "mean_offset": 5.57332301269828,
+        "replay_url": "/model-replays/landing-ppo-terminalspeed-v17-pilot__step-009711088-d1.000-s21000.json",
         "replay_seed": 21000,
         "replay_outcome": "crash_speed"
       }

@@ -1,0 +1,17 @@
+{
+  "id": "landing-classical-l4-native-nominal10000",
+  "mission": "landing",
+  "method": "classical",
+  "level": 4,
+  "scenario": "nominal",
+  "checkpoint_id": null,
+  "status": "failed",
+  "completed": 4525,
+  "total": 10000,
+  "successes": 4525,
+  "started_at": 1792463151.6313102,
+  "updated_at": 1792463604.5040274,
+  "pid": 30036,
+  "source_hash": "3c7a0d26b4f566952f4f9007c5da07e5f9e1443a137c5ad01c65f9d21ec918e0",
+  "error": "D: drive exhausted while appending per-seed journal; partial batch retained, not qualification."
+}
