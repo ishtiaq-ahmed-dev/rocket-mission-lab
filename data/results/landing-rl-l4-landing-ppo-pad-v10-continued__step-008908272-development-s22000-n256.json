@@ -1,0 +1,40 @@
+{
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "landing-ppo-pad-v10-continued__step-008908272",
+  "episodes": 256,
+  "seeds": [
+    22000,
+    22255
+  ],
+  "scenario": "nominal",
+  "successes": 65,
+  "success_rate": 0.25390625,
+  "confidence_interval": [
+    0.20449864653193006,
+    0.3105902828026781
+  ],
+  "mean_reward": 113.72195714166402,
+  "failures": {
+    "crash_speed": 167,
+    "crash_tilt": 19,
+    "missed_pad": 5
+  },
+  "config_hash": "4f2cb7c24e9839d5",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 2.783741491562754,
+  "median_touchdown_speed": 2.569311112989621,
+  "mean_tilt": 3.8393009133878557,
+  "median_tilt": 3.8139283274596836,
+  "mean_pad_distance": 4.367639171226861,
+  "median_pad_distance": 3.7863446512998102,
+  "mean_fuel_used": 1801.0681274247604,
+  "median_fuel_used": 1789.7585907702269,
+  "evaluation_role": "additional development sample; not 10000-seed qualification",
+  "progress_id": "landing-v10-final8908272-native-dev256",
+  "replay_url": "/model-replays/landing-ppo-pad-v10-continued__step-008908272-dev256-s22000-successful-example.json",
+  "replay_seed": 22000,
+  "replay_outcome": "success",
+  "selection_note": "First successful seed in this sample, selected by outcome; 65 successes in all 256 episodes."
+}

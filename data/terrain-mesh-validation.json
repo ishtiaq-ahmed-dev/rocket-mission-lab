@@ -1,23 +1,29 @@
 {
-  "scope": "CPU mesh assembly only. GPU frame rate and visual appearance are not measured.",
+  "scope": "CPU geometry assembly and source draw budgets only. Browser GPU/FPS not measured.",
   "qualities": {
     "Balanced": {
-      "triangles": 513752,
-      "vertices": 262513,
-      "buffer_bytes": 17715596,
-      "assembly_ms": 194
+      "triangles": 160504,
+      "vertices": 83433,
+      "buffer_bytes": 5597100,
+      "assembly_ms": 73
     },
     "High": {
-      "triangles": 1000520,
-      "vertices": 508249,
-      "buffer_bytes": 34369196,
-      "assembly_ms": 357
+      "triangles": 282712,
+      "vertices": 145713,
+      "buffer_bytes": 9803916,
+      "assembly_ms": 110
     },
     "Ultra": {
-      "triangles": 2943464,
-      "vertices": 1484425,
-      "buffer_bytes": 100636268,
-      "assembly_ms": 942
+      "triangles": 769480,
+      "vertices": 391449,
+      "buffer_bytes": 26457516,
+      "assembly_ms": 272
+    },
+    "4K": {
+      "triangles": 2712424,
+      "vertices": 1367625,
+      "buffer_bytes": 92724588,
+      "assembly_ms": 914
     }
   }
 }

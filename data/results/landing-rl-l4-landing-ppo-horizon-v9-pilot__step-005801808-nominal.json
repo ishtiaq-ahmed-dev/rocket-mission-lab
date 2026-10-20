@@ -1,0 +1,34 @@
+{
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "landing-ppo-horizon-v9-pilot__step-005801808",
+  "episodes": 20,
+  "seeds": [
+    20000,
+    20019
+  ],
+  "scenario": "nominal",
+  "successes": 2,
+  "success_rate": 0.1,
+  "confidence_interval": [
+    0.027866481213769084,
+    0.3010336452284804
+  ],
+  "mean_reward": 63.52068529464378,
+  "failures": {
+    "crash_tilt": 4,
+    "missed_pad": 11,
+    "crash_speed": 3
+  },
+  "config_hash": "f10344bcd3bb0cd4",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 1.75378438351608,
+  "median_touchdown_speed": 1.460525751049786,
+  "mean_tilt": 3.925305190491585,
+  "median_tilt": 3.460283392415964,
+  "mean_pad_distance": 9.513328343670612,
+  "median_pad_distance": 10.255029353959555,
+  "mean_fuel_used": 1573.394968163741,
+  "median_fuel_used": 1556.8956328780787
+}

@@ -5,6 +5,10 @@ const frame:Frame={t:0,position:[0,0,220],velocity:[0,0,-10],quaternion:[1,0,0,0
 const telemetry={schema_version:'1.0',rocket_length:40,initial_fuel:1000,run:{id:'test'},frames:[frame,{...frame,t:1,position:[10,0,210],quaternion:[Math.cos(.1),Math.sin(.1),0,0],fuel_mass:900}]} as Telemetry;
 describe('versioned telemetry',()=>{
  it('accepts finite time-ordered frames',()=>expect(parseTelemetry(telemetry)).toBe(telemetry));
+ it('accepts the additive goal/provenance revision while retaining archived flights',()=>{
+  const current={...telemetry,schema_version:'1.1',run:{...telemetry.run,training_mode:true,target_altitude:64.25,target_velocity:6.3}};
+  expect(parseTelemetry(current).run.target_altitude).toBe(64.25);
+ });
  it('rejects unsupported versions',()=>expect(()=>parseTelemetry({...telemetry,schema_version:'2.0'})).toThrow());
  it('rejects invalid quaternions',()=>expect(()=>parseTelemetry({...telemetry,frames:[{...frame,quaternion:[0,0,0,0]},telemetry.frames[1]]})).toThrow());
  it('rejects nonmonotonic timestamps',()=>expect(()=>parseTelemetry({...telemetry,frames:[frame,frame]})).toThrow());

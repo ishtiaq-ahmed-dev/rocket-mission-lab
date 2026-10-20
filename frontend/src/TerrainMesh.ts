@@ -7,8 +7,9 @@ import {terrainHeight,shoreline} from './terrain';
  */
 export function createTerrainMesh(quality:string){
  const positions:number[]=[],uvs:number[]=[],indices:number[]=[],normals:number[]=[],colors:number[]=[];
- const nearStep=quality==='Balanced'?2:quality==='High'?1:.5;
- const rangeStep=quality==='Balanced'?4:quality==='High'?2:1;
+ const nearStep=quality==='Balanced'?4:quality==='High'?2:quality==='Ultra'?1:.5;
+ const rangeStep=quality==='Balanced'?8:quality==='High'?4:quality==='Ultra'?2:1;
+ const farStep=24,farBoundary=504;
  function vertex(x:number,z:number){
   const id=positions.length/3,y=terrainHeight(x,z);positions.push(x,y,z);uvs.push(x/90,z/90);
   // Identical normals at patch boundaries prevent lighting seams when the
@@ -25,7 +26,7 @@ export function createTerrainMesh(quality:string){
   for(let z=0;z<=nz;z++)for(let x=0;x<=nx;x++)vertex(minX+x*step,minZ+z*step);
   for(let z=0;z<nz;z++)for(let x=0;x<nx;x++){const a=base+z*(nx+1)+x,b=a+1,c=a+nx+1,d=c+1;indices.push(a,c,b,b,c,d);}
  }
- // Engineered near region: 360x360 m. Ultra/4K = 1,036,800 small triangles.
+ // Fine geometry is reserved for the visible range; 4K remains an opt-in mode.
  patch(-180,180,-180,180,nearStep);
  // The collar uses the fine boundary spacing and a coarse outer edge. Fan
  // stitching avoids overlapping coplanar meshes and unmatched T-junctions.
@@ -39,15 +40,15 @@ export function createTerrainMesh(quality:string){
  }
  for(const axis of ['x','z'] as const)for(const sign of [-1,1])side(axis,sign,180,192,nearStep,rangeStep);
  // Continue fine geometry across the coastline, access road and facilities,
- // not just the pad. At Ultra/4K this entire 960 m range uses one-meter cells.
+ // not just the pad, without making distant land use the same density.
  patch(-480,-192,-480,480,rangeStep);patch(192,480,-480,480,rangeStep);
  patch(-192,192,-480,-192,rangeStep);patch(-192,192,192,480,rangeStep);
- for(const axis of ['x','z'] as const)for(const sign of [-1,1])side(axis,sign,480,492,rangeStep,12);
- patch(-2400,-492,-2400,2400,12);patch(492,2400,-2400,2400,12);
- patch(-492,492,-2400,-492,12);patch(-492,492,492,2400,12);
+ for(const axis of ['x','z'] as const)for(const sign of [-1,1])side(axis,sign,480,farBoundary,rangeStep,farStep);
+ patch(-2400,-farBoundary,-2400,2400,farStep);patch(farBoundary,2400,-2400,2400,farStep);
+ patch(-farBoundary,farBoundary,-2400,-farBoundary,farStep);patch(-farBoundary,farBoundary,farBoundary,2400,farStep);
  // Low-detail land continues to the fog horizon instead of ending at an
  // obvious square island edge. Four patches never overlap the inner surface.
- for(const axis of ['x','z'] as const)for(const sign of [-1,1])side(axis,sign,2400,2520,12,120);
+ for(const axis of ['x','z'] as const)for(const sign of [-1,1])side(axis,sign,2400,2520,farStep,120);
  patch(-9000,-2520,-9000,9000,120);patch(2520,9000,-9000,9000,120);
  patch(-2520,2520,-9000,-2520,120);patch(-2520,2520,2520,9000,120);
  const geometry=new BufferGeometry();geometry.setAttribute('position',new Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new Float32BufferAttribute(uvs,2));geometry.setAttribute('normal',new Float32BufferAttribute(normals,3));geometry.setAttribute('color',new Float32BufferAttribute(colors,3));geometry.setIndex(indices);geometry.computeBoundingSphere();

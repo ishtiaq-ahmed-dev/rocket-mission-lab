@@ -1,0 +1,32 @@
+{
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "takeoff-ppo-horizon-v13-pilot__step-001000000",
+  "episodes": 20,
+  "seeds": [
+    20000,
+    20019
+  ],
+  "scenario": "nominal",
+  "successes": 0,
+  "success_rate": 0.0,
+  "confidence_interval": [
+    1.3877787807814457e-17,
+    0.1611251580528119
+  ],
+  "mean_reward": -3053.8587425814653,
+  "failures": {
+    "crash_speed": 20
+  },
+  "config_hash": "0b566b8242b02a08",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 48.838213588091094,
+  "median_touchdown_speed": 47.65839663707901,
+  "mean_tilt": 34.526128389818446,
+  "median_tilt": 36.60265158934609,
+  "mean_pad_distance": 335.2250886859893,
+  "median_pad_distance": 326.15113030637997,
+  "mean_fuel_used": 3189.6379038165674,
+  "median_fuel_used": 3191.1002913876446
+}

@@ -1,0 +1,17 @@
+{
+  "mission": "takeoff",
+  "checkpoint_id": "takeoff-ppo-full-v13-refinement__step-002761136",
+  "config_hash": "4f2cb7c24e9839d5",
+  "candidate_sha256": {
+    "model.zip": "6202f929b1bc90007abf31cd5db20a01ac5a46e2ae94202b8469f53c8ffc7f37",
+    "normalize.pkl": "5640e55351b1975993f38234e3299761c28719bc0a42a9238963c93e8e920d6e",
+    "checkpoint.json": "a3d441b4585425d0d9d43b90ed205cb678bb04097b1655cc75091cdd9bf22deb"
+  },
+  "seeds": [
+    10000,
+    19999
+  ],
+  "episodes": 10000,
+  "selection_scope": "candidate fixed before observing this qualification batch; selected using separate development seeds",
+  "physics_sha256": "03d9c5f843f181fe143ebdccc49365a82a23c7020f3f12a2abb4701509999d20"
+}

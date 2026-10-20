@@ -26,6 +26,11 @@ class RunMeta(BaseModel):
     method: Literal["classical","rl"]
     level: int = Field(ge=1,le=4)
     checkpoint_steps: int | None = None
+    checkpoint_id: str | None = None
+    difficulty: float = Field(default=1.0,ge=0,le=1)
+    training_mode: bool = False
+    target_altitude: float | None = None
+    target_velocity: float | None = None
     algorithm: str | None = None
     seed: int
     outcome: Outcome
@@ -41,7 +46,8 @@ class RunMeta(BaseModel):
 
 class Telemetry(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    schema_version: Literal["1.0"] = "1.0"
+    # Accept archived 1.0 flights; new producers identify goal/provenance fields.
+    schema_version: Literal["1.0","1.1"] = "1.1"
     config_hash: str
     rocket_length: float
     initial_fuel: float

@@ -1,0 +1,7 @@
+{
+  "scope": "frozen nominal candidates",
+  "results": [
+    "takeoff-classical-l4-controller-qualification-takeoff-classical-l4-native-nominal10000.json",
+    "takeoff-rl-l4-takeoff-ppo-full-v13-refinement__step-002761136-qualification-takeoff-ppo-v13-frozen2761136-nominal10000.json"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "landing-ppo-horizon-v9-pilot__step-006305328",
+  "episodes": 256,
+  "seeds": [
+    22000,
+    22255
+  ],
+  "scenario": "nominal",
+  "successes": 23,
+  "success_rate": 0.08984375,
+  "confidence_interval": [
+    0.060613367266213226,
+    0.13120151495813379
+  ],
+  "mean_reward": 48.038233856032235,
+  "failures": {
+    "missed_pad": 88,
+    "crash_speed": 111,
+    "crash_tilt": 34
+  },
+  "config_hash": "f10344bcd3bb0cd4",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 1.9629297075432524,
+  "median_touchdown_speed": 1.9085397598846296,
+  "mean_tilt": 3.9127607176949164,
+  "median_tilt": 3.6973844084517484,
+  "mean_pad_distance": 10.694917661236634,
+  "median_pad_distance": 9.782262768186314,
+  "mean_fuel_used": 1502.2755941435116,
+  "median_fuel_used": 1477.8477205363033,
+  "evaluation_role": "additional development sample; not 10000-seed qualification",
+  "progress_id": "landing-v9-dev256-s22000",
+  "replay_url": "/model-replays/landing-ppo-horizon-v9-pilot__step-006305328-dev256-s22011-successful-example.json",
+  "replay_seed": 22011,
+  "replay_outcome": "success",
+  "selection_note": "First successful seed in this sample, selected by outcome; 23 successes in all 256 episodes."
+}

@@ -11,15 +11,20 @@ if __name__=="__main__":
     parser.add_argument('job_id')
     parser.add_argument('--steps',type=int,default=1000000)
     parser.add_argument('--resume')
+    parser.add_argument('--warm-start')
+    parser.add_argument('--config')
+    parser.add_argument('--adapt-optimizer-from')
+    parser.add_argument('--eval-episodes',type=int,default=20)
     args=parser.parse_args()
     job_id=args.job_id
     if not job_id.replace('-','').isalnum():raise ValueError("Invalid job ID")
     if args.steps<1:raise ValueError("Steps must be positive")
+    if not 1<=args.eval_episodes<=10000:raise ValueError('Evaluation episodes must be within [1,10000]')
     folder=DATA/"jobs"/job_id;folder.mkdir(parents=True,exist_ok=True)
     log=(folder/"output.log").open("a",buffering=1);sys.stdout=sys.stderr=log
     try:
         from rocket_lab.train import train
-        train("landing","PPO",args.steps,42,"cpu",job_id,20,resume=args.resume)
+        train("landing","PPO",args.steps,42,"cpu",job_id,args.eval_episodes,resume=args.resume,warm_start=args.warm_start,config_path=args.config,adapt_optimizer_from=args.adapt_optimizer_from)
     except BaseException:
         import traceback
         from rocket_lab.storage import atomic_json,read_json

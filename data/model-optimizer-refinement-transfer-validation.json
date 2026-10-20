@@ -1,0 +1,15 @@
+{
+  "scope": "optimizer-only adaptation of improved v10 before updates; original dynamics versus native numerical optimization",
+  "parent": "landing-ppo-pad-v10-continued__step-008908272",
+  "child": "landing-ppo-precision-v15-refinement__step-008908272",
+  "episodes": 20,
+  "outcomes_match_exactly": true,
+  "maximum_absolute_differences": {
+    "touchdown_speed": 5.906386491005833e-14,
+    "tilt": 1.7967849430533533e-12,
+    "pad_distance": 2.7533531010703882e-14,
+    "fuel_used": 0.0,
+    "reward": 9.094947017729282e-13
+  },
+  "tolerance": 1e-08
+}

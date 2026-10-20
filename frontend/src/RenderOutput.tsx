@@ -4,10 +4,17 @@ import {PerspectiveCamera,Vector2} from 'three';
 import {registerCapture,pixelRatioForQuality} from './capture';
 import {useLab} from './store';
 export default function RenderOutput(){
- const {gl,scene,camera,size,setDpr}=useThree(),quality=useLab(s=>s.quality);
- const measurement=useRef({time:0,frames:0}),buffer=useRef(new Vector2());
+ const {gl,scene,camera,size,setDpr}=useThree(),quality=useLab(s=>s.quality),playing=useLab(s=>s.playing);
+ const measurement=useRef({time:-1,frames:0}),buffer=useRef(new Vector2());
  useFrame(state=>{
-  const sample=measurement.current;sample.frames++;
+  const sample=measurement.current;
+  if(!playing){
+   gl.getDrawingBufferSize(buffer.current);const info=`${buffer.current.x} × ${buffer.current.y} · IDLE`;
+   if(useLab.getState().renderInfo!==info)useLab.getState().set({renderInfo:info});
+   sample.time=-1;sample.frames=0;return;
+  }
+  if(sample.time<0){sample.time=state.clock.elapsedTime;sample.frames=0;return;}
+  sample.frames++;
   const elapsed=state.clock.elapsedTime-sample.time;
   if(elapsed>=1){
    gl.getDrawingBufferSize(buffer.current);

@@ -1,0 +1,41 @@
+{
+  "scope": "CPU headless dynamics microbenchmark during concurrent training; not GPU, browser FPS or end-to-end training throughput",
+  "hash_kind": "UTF-8 source text with normalized newlines",
+  "source_hash": "7ea783e6f685aeae626eae4c01b6824e814c6a61b8b192bbf4abeccd54298794",
+  "variant_hash": "03d9c5f843f181fe143ebdccc49365a82a23c7020f3f12a2abb4701509999d20",
+  "trajectories": 32,
+  "steps_per_trajectory": 120,
+  "maximum_absolute_differences": {
+    "position": 9.094947017729282e-13,
+    "velocity": 5.440092820663267e-14,
+    "quaternion": 2.0456184489370255e-16,
+    "angular_velocity": 1.732555071631836e-16,
+    "fuel_mass": 0.0,
+    "wind": 0.0,
+    "tilt": 1.2527485565832358e-09
+  },
+  "control_steps_per_timing": 600,
+  "timings_seconds": {
+    "reference": [
+      0.17761449998943135,
+      0.17524719997891225,
+      0.1741971999872476,
+      0.1749353999912273,
+      0.17389860001276247,
+      0.18712669998058118
+    ],
+    "native": [
+      0.08487350001814775,
+      0.08511290000751615,
+      0.08598419997724704,
+      0.08594109999830835,
+      0.08614140001009218,
+      0.08760309999343008
+    ]
+  },
+  "median_speedup": 2.036829948936713,
+  "reference_steps_per_second": 3426.7836268915853,
+  "native_steps_per_second": 6979.775519778752,
+  "source_url": "https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mju-quat2mat",
+  "applied": true
+}

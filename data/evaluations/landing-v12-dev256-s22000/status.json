@@ -1,0 +1,16 @@
+{
+  "id": "landing-v12-dev256-s22000",
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "scenario": "nominal",
+  "checkpoint_id": "landing-ppo-touchdown-v12-pilot__step-007306736",
+  "status": "completed",
+  "completed": 256,
+  "total": 256,
+  "successes": 29,
+  "started_at": 1792435931.5813656,
+  "updated_at": 1792435950.6304026,
+  "pid": 41472,
+  "source_hash": "2108ff98d56dfbf75d93c316a8b8a15a54ef83226e021f50f24c87bb1cbd20d8"
+}

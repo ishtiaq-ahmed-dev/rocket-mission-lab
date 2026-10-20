@@ -1,0 +1,21 @@
+{
+  "id": "landing-rl-l2-s42-landing-ppo-pad-v10-pilot__step-006705328-364e1822c49464a7",
+  "mission": "landing",
+  "method": "rl",
+  "level": 2,
+  "checkpoint_steps": 6705328,
+  "checkpoint_id": "landing-ppo-pad-v10-pilot__step-006705328",
+  "difficulty": 1.0,
+  "algorithm": "PPO",
+  "seed": 42,
+  "outcome": "crash_speed",
+  "failure_reason": "crash_speed",
+  "touchdown_speed": 3.5531811351462066,
+  "tilt": 4.779184765895925,
+  "pad_distance": 1.6485048393510833,
+  "fuel_used": 1626.7694954700182,
+  "duration": 12.13999999999983,
+  "total_reward": 42.90591495306924,
+  "source": "MuJoCo simulation",
+  "controller_status": "measured checkpoint; maturity not certified"
+}

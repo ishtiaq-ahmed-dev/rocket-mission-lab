@@ -29,4 +29,6 @@ POST /simulate, /training, /training/{id}/stop
 
 ## Validation
 
+New saved recordings use schema 1.1 with explicit `checkpoint_id`, actual episode `difficulty`, `training_mode`, and optional takeoff altitude/velocity goals. The Python and TypeScript parsers also accept archived 1.0 recordings. These optional fields keep old files readable; a 1.1 practice flight states its shortened goal instead of being presented as full 400 m success. The shared schema is generated from Pydantic. A running server must be restarted to import changed producer/schema code; replacing the frontend build alone does not update that process.
+
 Tests exercise all read endpoints, every terminal outcome, malformed requests, unknown run/checkpoint handling, schema export consistency and a stubbed bounded training dispatch. In-process API tests require normal Windows socket permissions because asyncio creates a local socketpair.

@@ -1,0 +1,16 @@
+{
+  "id": "takeoff-v13-refine-2261136-native-dev256",
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "scenario": "nominal",
+  "checkpoint_id": "takeoff-ppo-full-v13-refinement__step-002261136",
+  "status": "completed",
+  "completed": 256,
+  "total": 256,
+  "successes": 236,
+  "started_at": 1792437330.7374163,
+  "updated_at": 1792437346.2120264,
+  "pid": 16892,
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc"
+}

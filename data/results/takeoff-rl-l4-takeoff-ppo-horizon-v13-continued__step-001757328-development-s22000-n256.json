@@ -1,0 +1,40 @@
+{
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "takeoff-ppo-horizon-v13-continued__step-001757328",
+  "episodes": 256,
+  "seeds": [
+    22000,
+    22255
+  ],
+  "scenario": "nominal",
+  "successes": 57,
+  "success_rate": 0.22265625,
+  "confidence_interval": [
+    0.1760060103036549,
+    0.2775069100575702
+  ],
+  "mean_reward": -71.08182081475195,
+  "failures": {
+    "missed_pad": 93,
+    "crash_speed": 74,
+    "crash_tilt": 32
+  },
+  "config_hash": "0b566b8242b02a08",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 20.15923219791583,
+  "median_touchdown_speed": 20.038938522710694,
+  "mean_tilt": 4.949430483554987,
+  "median_tilt": 3.049956047515669,
+  "mean_pad_distance": 8.540006132470756,
+  "median_pad_distance": 5.647446285650277,
+  "mean_fuel_used": 1985.3703844767658,
+  "median_fuel_used": 1932.3288523944075,
+  "evaluation_role": "additional development sample; not 10000-seed qualification",
+  "progress_id": "takeoff-v13-1757-dev256-s22000",
+  "replay_url": "/model-replays/takeoff-ppo-horizon-v13-continued__step-001757328-dev256-s22016-successful-example.json",
+  "replay_seed": 22016,
+  "replay_outcome": "success",
+  "selection_note": "First successful seed in this sample, selected by outcome; 57 successes in all 256 episodes."
+}

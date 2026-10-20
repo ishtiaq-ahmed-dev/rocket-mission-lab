@@ -8,6 +8,9 @@ interface State {
   speed:number;
   camera:string;
   cameraRevision:number;
+  cameraTool:'Rotate'|'Pan';
+  followRocket:boolean;
+  frameLimit:number;
   quality:string;
   renderInfo:string;
   trail:'Off'|'Flown'|'Full';
@@ -22,7 +25,7 @@ interface State {
 
 export const useLab=create<State>((set,get)=>({
   telemetry:null,ghost:null,time:0,playing:false,speed:1,
-  camera:'Rocket',cameraRevision:0,quality:'Ultra',renderInfo:'',
+  camera:'Rocket',cameraRevision:0,cameraTool:'Rotate',followRocket:true,frameLimit:60,quality:'High',renderInfo:'',
   trail:'Off',sound:false,volume:.35,pad:'Coastal',recording:false,
   load:telemetry=>set({telemetry,time:0,playing:true}),
   set:state=>set(state),

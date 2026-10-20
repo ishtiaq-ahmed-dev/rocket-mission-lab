@@ -1,7 +1,6 @@
 import {useEffect,useMemo} from 'react';
 import {useFrame,useThree} from '@react-three/fiber';
 import {Environment,useTexture} from '@react-three/drei';
-import {Water} from 'three/addons/objects/Water.js';
 import * as THREE from 'three';
 import {useLab} from './store';
 import Nature from './Nature';
@@ -27,19 +26,19 @@ export function useVehicleTexture(){
   }),[]);
 }
 function Ocean(){
-  const quality=useLab(s=>s.quality);
   const water=useMemo(()=>{
     const normals=canvasTexture(512,ctx=>{const data=ctx.createImageData(512,512);for(let y=0;y<512;y++)for(let x=0;x<512;x++){const i=(y*512+x)*4;data.data[i]=128+Math.round(35*Math.cos(x*.21+y*.17)+18*Math.sin(x*.067-y*.12));data.data[i+1]=128+Math.round(33*Math.sin(x*.12-y*.19)+15*Math.cos(x*.05+y*.27));data.data[i+2]=240;data.data[i+3]=255;}ctx.putImageData(data,0,0);});normals.colorSpace=THREE.NoColorSpace;normals.wrapS=normals.wrapT=THREE.RepeatWrapping;
-    const object=new Water(new THREE.PlaneGeometry(18000,18000),{textureWidth:quality==='Balanced'?512:1024,textureHeight:quality==='Balanced'?512:1024,waterNormals:normals,sunDirection:new THREE.Vector3(-.5,.65,-.4).normalize(),sunColor:0xffe6c5,waterColor:0x20535b,distortionScale:2.6,fog:true});
-    object.rotation.x=-Math.PI/2;object.position.y=-1.3;object.material.uniforms.size.value=3.5;
-    return object;
-  },[quality]);
-  useFrame(()=>{water.material.uniforms.time.value=useLab.getState().time*.35;water.material.uniforms.distortionScale.value=2.2;});
-  return <primitive object={water}/>;
+    normals.repeat.set(650,650);return normals;
+  },[]);
+  useEffect(()=>()=>water.dispose(),[water]);
+  useFrame(()=>{const t=useLab.getState().time;water.offset.set(t*.0015,t*.0007);});
+  // HDR/environment reflection in one scene pass. Planar Water redrew every
+  // object for a reflection on every frame, including the dense terrain.
+  return <mesh rotation={[-Math.PI/2,0,0]} position={[0,-1.3,0]}><planeGeometry args={[18000,18000]}/><meshPhysicalMaterial color="#315c63" roughness={.2} metalness={0} ior={1.33} normalMap={water} normalScale={[.35,.35]} envMapIntensity={1.4}/></mesh>;
 }
 function Landscape(){
   const quality=useLab(s=>s.quality);
-  const suffix=quality==='Ultra'||quality==='4K'?'-4k':'';
+  const suffix=quality==='Balanced'?'':'-4k';
   const maps=useTexture(['color','normal','roughness'].map(kind=>`/assets/terrain/ground-${kind}${suffix}.jpg`));
   const {gl}=useThree();
   const textures=useMemo(()=>maps.map((source,i)=>{const map=source.clone();map.wrapS=map.wrapT=THREE.RepeatWrapping;map.repeat.set(1,1);map.anisotropy=Math.min(16,gl.capabilities.getMaxAnisotropy());map.colorSpace=i===0?THREE.SRGBColorSpace:THREE.NoColorSpace;map.needsUpdate=true;return map;}),[maps,gl]);
@@ -88,6 +87,6 @@ export default function World(){const quality=useLab(s=>s.quality),ship=useLab(s
   <Environment files="/assets/environment/coastal-sky.hdr" background backgroundBlurriness={0} backgroundIntensity={.85} environmentIntensity={.65} environmentRotation={[0,1.2,0]}/>
   <fog attach="fog" args={['#aab7b3',1100,5000]}/>
   <ambientLight intensity={.12}/><hemisphereLight args={['#c7d8e5','#6c735b',.65]}/>
-  <directionalLight position={[-180,260,170]} intensity={3} color="#fff0d9" castShadow shadow-mapSize={quality==='Balanced'?[2048,2048]:[4096,4096]} shadow-camera-left={-110} shadow-camera-right={110} shadow-camera-top={310} shadow-camera-bottom={-90} shadow-camera-far={700} shadow-normalBias={.025} shadow-bias={-.00008} shadow-radius={3}/>
+  <directionalLight position={[-180,260,170]} intensity={3} color="#fff0d9" castShadow shadow-mapSize={quality==='Balanced'?[1024,1024]:[2048,2048]} shadow-camera-left={-110} shadow-camera-right={110} shadow-camera-top={310} shadow-camera-bottom={-90} shadow-camera-far={700} shadow-normalBias={.025} shadow-bias={-.00008} shadow-radius={3}/>
   <group position={[ship?-850:0,0,0]}><Landscape/><Nature/><Facilities/></group><Ocean/><LandingPad/>
 </>}

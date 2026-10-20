@@ -1,0 +1,1039 @@
+{
+  "created_at": 1792463351.6652927,
+  "status": "passed",
+  "scope": "saved evidence/schema/build-link validation; no browser or HTTP check",
+  "checkpoints": 35,
+  "replays": 147,
+  "stage_replays": 128,
+  "selected_successful_examples": 19,
+  "full_task_samples": 19,
+  "full_task_episodes": 4864,
+  "qualification_samples": 2,
+  "qualification_episodes": 20000,
+  "checked": [
+    {
+      "checkpoint": "landing-ppo-precision-v15-refinement__step-009911792",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 88,
+      "url": "/model-replays/landing-ppo-precision-v15-refinement__step-009911792-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-refinement__step-009911792",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 111,
+      "url": "/model-replays/landing-ppo-precision-v15-refinement__step-009911792-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-refinement__step-009911792",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 125,
+      "url": "/model-replays/landing-ppo-precision-v15-refinement__step-009911792-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-refinement__step-009911792",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 140,
+      "url": "/model-replays/landing-ppo-precision-v15-refinement__step-009911792-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-groundspeed-v16-pilot__step-009312368",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 98,
+      "url": "/model-replays/landing-ppo-groundspeed-v16-pilot__step-009312368-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-groundspeed-v16-pilot__step-009312368",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 115,
+      "url": "/model-replays/landing-ppo-groundspeed-v16-pilot__step-009312368-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-groundspeed-v16-pilot__step-009312368",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 123,
+      "url": "/model-replays/landing-ppo-groundspeed-v16-pilot__step-009312368-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-groundspeed-v16-pilot__step-009312368",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 129,
+      "url": "/model-replays/landing-ppo-groundspeed-v16-pilot__step-009312368-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-continued__step-008908272",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 85,
+      "url": "/model-replays/landing-ppo-pad-v10-continued__step-008908272-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-continued__step-008908272",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 106,
+      "url": "/model-replays/landing-ppo-pad-v10-continued__step-008908272-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-continued__step-008908272",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 120,
+      "url": "/model-replays/landing-ppo-pad-v10-continued__step-008908272-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-continued__step-008908272",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 136,
+      "url": "/model-replays/landing-ppo-pad-v10-continued__step-008908272-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-continued__step-008308848",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 77,
+      "url": "/model-replays/landing-ppo-precision-v15-continued__step-008308848-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-continued__step-008308848",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 95,
+      "url": "/model-replays/landing-ppo-precision-v15-continued__step-008308848-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-continued__step-008308848",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 106,
+      "url": "/model-replays/landing-ppo-precision-v15-continued__step-008308848-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-continued__step-008308848",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 119,
+      "url": "/model-replays/landing-ppo-precision-v15-continued__step-008308848-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-continued__step-008308272",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 74,
+      "url": "/model-replays/landing-ppo-horizon-v9-continued__step-008308272-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-continued__step-008308272",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 91,
+      "url": "/model-replays/landing-ppo-horizon-v9-continued__step-008308272-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-continued__step-008308272",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 102,
+      "url": "/model-replays/landing-ppo-horizon-v9-continued__step-008308272-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-continued__step-008308272",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 114,
+      "url": "/model-replays/landing-ppo-horizon-v9-continued__step-008308272-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-touchdown-v12-pilot__step-007306736",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 73,
+      "url": "/model-replays/landing-ppo-touchdown-v12-pilot__step-007306736-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-touchdown-v12-pilot__step-007306736",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 91,
+      "url": "/model-replays/landing-ppo-touchdown-v12-pilot__step-007306736-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-touchdown-v12-pilot__step-007306736",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 101,
+      "url": "/model-replays/landing-ppo-touchdown-v12-pilot__step-007306736-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-touchdown-v12-pilot__step-007306736",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 106,
+      "url": "/model-replays/landing-ppo-touchdown-v12-pilot__step-007306736-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-pilot__step-007305328",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 73,
+      "url": "/model-replays/landing-ppo-precision-v15-pilot__step-007305328-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-pilot__step-007305328",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 90,
+      "url": "/model-replays/landing-ppo-precision-v15-pilot__step-007305328-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-pilot__step-007305328",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 101,
+      "url": "/model-replays/landing-ppo-precision-v15-pilot__step-007305328-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-precision-v15-pilot__step-007305328",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 108,
+      "url": "/model-replays/landing-ppo-precision-v15-pilot__step-007305328-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-pilot__step-007108144",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 81,
+      "url": "/model-replays/landing-ppo-pad-v10-pilot__step-007108144-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-pilot__step-007108144",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 101,
+      "url": "/model-replays/landing-ppo-pad-v10-pilot__step-007108144-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-pilot__step-007108144",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 112,
+      "url": "/model-replays/landing-ppo-pad-v10-pilot__step-007108144-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-pilot__step-007108144",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 125,
+      "url": "/model-replays/landing-ppo-pad-v10-pilot__step-007108144-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-pilot__step-006905328",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 75,
+      "url": "/model-replays/landing-ppo-pad-v10-pilot__step-006905328-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-pilot__step-006905328",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 95,
+      "url": "/model-replays/landing-ppo-pad-v10-pilot__step-006905328-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-pilot__step-006905328",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 107,
+      "url": "/model-replays/landing-ppo-pad-v10-pilot__step-006905328-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-pad-v10-pilot__step-006905328",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 120,
+      "url": "/model-replays/landing-ppo-pad-v10-pilot__step-006905328-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-continued__step-006805328",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 70,
+      "url": "/model-replays/landing-ppo-horizon-v9-continued__step-006805328-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-continued__step-006805328",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 87,
+      "url": "/model-replays/landing-ppo-horizon-v9-continued__step-006805328-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-continued__step-006805328",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 97,
+      "url": "/model-replays/landing-ppo-horizon-v9-continued__step-006805328-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-continued__step-006805328",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 103,
+      "url": "/model-replays/landing-ppo-horizon-v9-continued__step-006805328-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-pilot__step-006305328",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 72,
+      "url": "/model-replays/landing-ppo-horizon-v9-pilot__step-006305328-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-pilot__step-006305328",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 86,
+      "url": "/model-replays/landing-ppo-horizon-v9-pilot__step-006305328-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-pilot__step-006305328",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 95,
+      "url": "/model-replays/landing-ppo-horizon-v9-pilot__step-006305328-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-horizon-v9-pilot__step-006305328",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 101,
+      "url": "/model-replays/landing-ppo-horizon-v9-pilot__step-006305328-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-exploration-v7-pilot__step-005454624",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 73,
+      "url": "/model-replays/landing-ppo-exploration-v7-pilot__step-005454624-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-exploration-v7-pilot__step-005454624",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 88,
+      "url": "/model-replays/landing-ppo-exploration-v7-pilot__step-005454624-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-exploration-v7-pilot__step-005454624",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 95,
+      "url": "/model-replays/landing-ppo-exploration-v7-pilot__step-005454624-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-exploration-v7-pilot__step-005454624",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 99,
+      "url": "/model-replays/landing-ppo-exploration-v7-pilot__step-005454624-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-full-v8-pilot__step-005453920",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 68,
+      "url": "/model-replays/landing-ppo-full-v8-pilot__step-005453920-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-full-v8-pilot__step-005453920",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 82,
+      "url": "/model-replays/landing-ppo-full-v8-pilot__step-005453920-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-full-v8-pilot__step-005453920",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 91,
+      "url": "/model-replays/landing-ppo-full-v8-pilot__step-005453920-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-full-v8-pilot__step-005453920",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 97,
+      "url": "/model-replays/landing-ppo-full-v8-pilot__step-005453920-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-full-v8-pilot__step-005301808",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 71,
+      "url": "/model-replays/landing-ppo-full-v8-pilot__step-005301808-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-full-v8-pilot__step-005301808",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 89,
+      "url": "/model-replays/landing-ppo-full-v8-pilot__step-005301808-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-full-v8-pilot__step-005301808",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 101,
+      "url": "/model-replays/landing-ppo-full-v8-pilot__step-005301808-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-full-v8-pilot__step-005301808",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 115,
+      "url": "/model-replays/landing-ppo-full-v8-pilot__step-005301808-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-bounded-v6-pilot__step-005053216",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 72,
+      "url": "/model-replays/landing-ppo-bounded-v6-pilot__step-005053216-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-bounded-v6-pilot__step-005053216",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 93,
+      "url": "/model-replays/landing-ppo-bounded-v6-pilot__step-005053216-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-bounded-v6-pilot__step-005053216",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 101,
+      "url": "/model-replays/landing-ppo-bounded-v6-pilot__step-005053216-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-bounded-v6-pilot__step-005053216",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 92,
+      "url": "/model-replays/landing-ppo-bounded-v6-pilot__step-005053216-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-exploration-v7-pilot__step-004851808",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 68,
+      "url": "/model-replays/landing-ppo-exploration-v7-pilot__step-004851808-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-exploration-v7-pilot__step-004851808",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 83,
+      "url": "/model-replays/landing-ppo-exploration-v7-pilot__step-004851808-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-exploration-v7-pilot__step-004851808",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 94,
+      "url": "/model-replays/landing-ppo-exploration-v7-pilot__step-004851808-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-exploration-v7-pilot__step-004851808",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 92,
+      "url": "/model-replays/landing-ppo-exploration-v7-pilot__step-004851808-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004754624",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 74,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004754624-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004754624",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 81,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004754624-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004754624",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 80,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004754624-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004754624",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 71,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004754624-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-mixed-v5-pilot__step-004753216",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 74,
+      "url": "/model-replays/landing-ppo-mixed-v5-pilot__step-004753216-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-mixed-v5-pilot__step-004753216",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 82,
+      "url": "/model-replays/landing-ppo-mixed-v5-pilot__step-004753216-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-mixed-v5-pilot__step-004753216",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 85,
+      "url": "/model-replays/landing-ppo-mixed-v5-pilot__step-004753216-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-mixed-v5-pilot__step-004753216",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 74,
+      "url": "/model-replays/landing-ppo-mixed-v5-pilot__step-004753216-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-bounded-v6-pilot__step-004651808",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 73,
+      "url": "/model-replays/landing-ppo-bounded-v6-pilot__step-004651808-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-bounded-v6-pilot__step-004651808",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 90,
+      "url": "/model-replays/landing-ppo-bounded-v6-pilot__step-004651808-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-bounded-v6-pilot__step-004651808",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 93,
+      "url": "/model-replays/landing-ppo-bounded-v6-pilot__step-004651808-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-bounded-v6-pilot__step-004651808",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 90,
+      "url": "/model-replays/landing-ppo-bounded-v6-pilot__step-004651808-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-mixed-v5-pilot__step-004651808",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 71,
+      "url": "/model-replays/landing-ppo-mixed-v5-pilot__step-004651808-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-mixed-v5-pilot__step-004651808",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 82,
+      "url": "/model-replays/landing-ppo-mixed-v5-pilot__step-004651808-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-mixed-v5-pilot__step-004651808",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 84,
+      "url": "/model-replays/landing-ppo-mixed-v5-pilot__step-004651808-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-mixed-v5-pilot__step-004651808",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 74,
+      "url": "/model-replays/landing-ppo-mixed-v5-pilot__step-004651808-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004351808",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 76,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004351808-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004351808",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 85,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004351808-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004351808",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 84,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004351808-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004351808",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 73,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004351808-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004151808",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 75,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004151808-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004151808",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 81,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004151808-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004151808",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 81,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004151808-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-continued__step-004151808",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 73,
+      "url": "/model-replays/landing-ppo-lateral-v4-continued__step-004151808-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-pilot__step-003951808",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 71,
+      "url": "/model-replays/landing-ppo-lateral-v4-pilot__step-003951808-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-pilot__step-003951808",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 77,
+      "url": "/model-replays/landing-ppo-lateral-v4-pilot__step-003951808-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-pilot__step-003951808",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 78,
+      "url": "/model-replays/landing-ppo-lateral-v4-pilot__step-003951808-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-lateral-v4-pilot__step-003951808",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 73,
+      "url": "/model-replays/landing-ppo-lateral-v4-pilot__step-003951808-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-state-potential-v3-continued__step-003751104",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 73,
+      "url": "/model-replays/landing-ppo-state-potential-v3-continued__step-003751104-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-state-potential-v3-continued__step-003751104",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "missed_pad",
+      "frames": 80,
+      "url": "/model-replays/landing-ppo-state-potential-v3-continued__step-003751104-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-state-potential-v3-continued__step-003751104",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 80,
+      "url": "/model-replays/landing-ppo-state-potential-v3-continued__step-003751104-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-ppo-state-potential-v3-continued__step-003751104",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 74,
+      "url": "/model-replays/landing-ppo-state-potential-v3-continued__step-003751104-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-full-v13-refinement__step-002761136",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 130,
+      "url": "/model-replays/takeoff-ppo-full-v13-refinement__step-002761136-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-full-v13-refinement__step-002761136",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 130,
+      "url": "/model-replays/takeoff-ppo-full-v13-refinement__step-002761136-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-full-v13-refinement__step-002761136",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 129,
+      "url": "/model-replays/takeoff-ppo-full-v13-refinement__step-002761136-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-full-v13-refinement__step-002761136",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 128,
+      "url": "/model-replays/takeoff-ppo-full-v13-refinement__step-002761136-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-full-v13-refinement__step-002261136",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 124,
+      "url": "/model-replays/takeoff-ppo-full-v13-refinement__step-002261136-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-full-v13-refinement__step-002261136",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 123,
+      "url": "/model-replays/takeoff-ppo-full-v13-refinement__step-002261136-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-full-v13-refinement__step-002261136",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 123,
+      "url": "/model-replays/takeoff-ppo-full-v13-refinement__step-002261136-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-full-v13-refinement__step-002261136",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 122,
+      "url": "/model-replays/takeoff-ppo-full-v13-refinement__step-002261136-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-continued__step-002011136",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 129,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-continued__step-002011136-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-continued__step-002011136",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 128,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-continued__step-002011136-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-continued__step-002011136",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 128,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-continued__step-002011136-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-continued__step-002011136",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 127,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-continued__step-002011136-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-continued__step-001757328",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 134,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-continued__step-001757328-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-continued__step-001757328",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 134,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-continued__step-001757328-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-continued__step-001757328",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "success",
+      "frames": 134,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-continued__step-001757328-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-continued__step-001757328",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 134,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-continued__step-001757328-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-pilot__step-001507328",
+      "difficulty": 0.7000000000000003,
+      "seed": 23000,
+      "outcome": "crash_speed",
+      "frames": 145,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-pilot__step-001507328-practice-s23000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-pilot__step-001507328",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 372,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-pilot__step-001507328-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-pilot__step-001507328",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 368,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-pilot__step-001507328-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-pilot__step-001507328",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 364,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-pilot__step-001507328-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-pilot__step-001507328",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 355,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-pilot__step-001507328-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-horizon-v13-pilot__step-001003808",
+      "difficulty": 0.35000000000000003,
+      "seed": 23000,
+      "outcome": "success",
+      "frames": 115,
+      "url": "/model-replays/takeoff-ppo-horizon-v13-pilot__step-001003808-practice-s23000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-goals-v11-pilot__step-000503808",
+      "difficulty": 0.15,
+      "seed": 23000,
+      "outcome": "success",
+      "frames": 88,
+      "url": "/model-replays/takeoff-ppo-goals-v11-pilot__step-000503808-practice-s23000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-v4-pilot__step-000401408",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 95,
+      "url": "/model-replays/takeoff-ppo-v4-pilot__step-000401408-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-v4-pilot__step-000401408",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 104,
+      "url": "/model-replays/takeoff-ppo-v4-pilot__step-000401408-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-v4-pilot__step-000401408",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 113,
+      "url": "/model-replays/takeoff-ppo-v4-pilot__step-000401408-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-v4-pilot__step-000401408",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 136,
+      "url": "/model-replays/takeoff-ppo-v4-pilot__step-000401408-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "landing-sac-full-v14-pilot__step-000200000",
+      "difficulty": 0.2,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 223,
+      "url": "/model-replays/landing-sac-full-v14-pilot__step-000200000-d0.200-s21000.json"
+    },
+    {
+      "checkpoint": "landing-sac-full-v14-pilot__step-000200000",
+      "difficulty": 0.4,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 235,
+      "url": "/model-replays/landing-sac-full-v14-pilot__step-000200000-d0.400-s21000.json"
+    },
+    {
+      "checkpoint": "landing-sac-full-v14-pilot__step-000200000",
+      "difficulty": 0.6,
+      "seed": 21000,
+      "outcome": "crash_speed",
+      "frames": 262,
+      "url": "/model-replays/landing-sac-full-v14-pilot__step-000200000-d0.600-s21000.json"
+    },
+    {
+      "checkpoint": "landing-sac-full-v14-pilot__step-000200000",
+      "difficulty": 1.0,
+      "seed": 21000,
+      "outcome": "out_of_bounds",
+      "frames": 354,
+      "url": "/model-replays/landing-sac-full-v14-pilot__step-000200000-d1.000-s21000.json"
+    },
+    {
+      "checkpoint": "takeoff-ppo-goals-v11-pilot__step-000125000",
+      "difficulty": 0.1,
+      "seed": 23000,
+      "outcome": "success",
+      "frames": 78,
+      "url": "/model-replays/takeoff-ppo-goals-v11-pilot__step-000125000-practice-s23000.json"
+    }
+  ]
+}

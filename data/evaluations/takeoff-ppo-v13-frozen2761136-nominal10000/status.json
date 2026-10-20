@@ -1,0 +1,16 @@
+{
+  "id": "takeoff-ppo-v13-frozen2761136-nominal10000",
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "scenario": "nominal",
+  "checkpoint_id": "takeoff-ppo-full-v13-refinement__step-002761136",
+  "status": "completed",
+  "completed": 10000,
+  "total": 10000,
+  "successes": 9836,
+  "started_at": 1792437528.8117347,
+  "updated_at": 1792438199.9149132,
+  "pid": 19424,
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc"
+}

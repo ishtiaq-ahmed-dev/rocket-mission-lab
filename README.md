@@ -10,9 +10,9 @@ A local 3D rocket landing and takeoff research lab. MuJoCo runs the rigid-body p
 
 The simulator, classical baselines, replay interface, training jobs, checkpoint library and evaluation tooling are implemented. Real RL training is an ongoing experiment, not a solved flight controller. Early PPO and SAC pilot evaluations had zero successes; they remain visible in the results. Full batch results appear only after an actual evaluation completes.
 
-Latest local checks: 33 backend tests and 19 frontend tests passed, as did TypeScript, lint and the production build. The user confirmed that dragging rotates the camera during playback. Browser automation remains blocked by tool security policy; the latest terrain, sound quality, 4K image export, responsive layout and sustained frame rate still need visual/listening checks. Mac M1 has not been tested on physical Apple hardware.
+Latest checks: 30 frontend tests, TypeScript, lint and the production build passed. The full backend suite passed 53 tests, including API transport, training dispatch, physics, continuation, selection, rewards and actual replay checkpoint attribution. Production localhost HTTP checks pass for the current source. The user confirmed rotation earlier, then reported a 3D startup fallback after the performance update. The scheduler host-call binding and generic fallback were corrected; actual scene recovery still needs confirmation. Browser automation remains blocked by tool security policy; the latest terrain, sound quality, 4K image export, responsive layout and sustained frame rate still need visual/listening checks. Mac M1 has not been tested on physical Apple hardware.
 
-The classical L4 nominal landing batch completed 10,000/10,000 observed successes under configuration `15b9d2a4ad7e8f68` on seeds 10000–19999; the Wilson 95% lower bound is 99.9616%. This is a scoped simulation result, not certainty. Fourfold-noise stress failed all 32 pilot episodes. The state-potential-v3 PPO run completed 1,001,472 training steps, reached curriculum difficulty 0.20, and still failed all 20 full-distribution development seeds. A separately logged continuation restores that checkpoint for four million additional steps. See the Training tab for its current state.
+The classical L4 nominal landing batch completed 10,000/10,000 observed successes under configuration `15b9d2a4ad7e8f68` on seeds 10000–19999; the Wilson 95% lower bound is 99.9616%. This is a scoped simulation result, not certainty. Fourfold-noise stress failed all 32 pilot episodes. The v13 takeoff checkpoint at 2,761,136 lineage steps scored 254/256 on the full 400 m development mission (Wilson 95% interval 97.20–99.79%); two runs missed the pad-radius constraint. Its separate frozen nominal batch completed 9,836/10,000 successes (98.36%; Wilson interval 98.0919–98.5910%): 89 pad misses, 65 tilt failures and 10 speed failures. Stress pilots expose further limits, including 0/32 with 20% thrust loss. Landing remains weaker: the v10 continuation at 8,908,272 lineage steps scored 65/256 (25.39%; interval 20.45–31.06%), compared with 45/256 for its earlier actor. Conservative v15 updates and the v16 ground-speed reward did not beat it in the completed trials. A separate frozen landing batch is running; a five-million-step continuation uses larger 256-episode checkpoint samples. Training curves, fixed first-seed failures, and explicitly selected successful examples are available in the Training page. See [the iteration evidence](docs/MODEL-ITERATION-2026-10-19.md) and `data/results/`; development samples do not establish reliability.
 
 ## Start on this Windows PC
 
@@ -21,8 +21,9 @@ The project `.venv` reuses the already installed CUDA PyTorch through `--system-
 ```powershell
 cd 'D:\AI SIDE PROJECTS\ROCKET LANDER + LAUNCHER'
 .\.venv\Scripts\Activate.ps1
-python scripts/dev.py
-# or: .\dev.ps1
+npm --prefix frontend run build
+python scripts/serve.py
+# For hot-reload development: python scripts/dev.py
 ```
 
 If these ports are already serving Rocket Mission Lab, use the running interface. Do not stop another project's service to free a port. For a clean install:
@@ -61,14 +62,14 @@ Apple Metal optimization is not configured. Use `--device cpu` on Apple hardware
 
 ## Explore the interface
 
-- **Flight lab:** select Landing, Takeoff or Combined; choose Classical or RL and a level. Run a simulation or load a saved checkpoint. Drag to rotate in every camera mode, scroll to zoom, and right-drag to pan. Following preserves manual angles; Reset camera restores framing. Space toggles playback; the time slider scrubs; playback speed ranges from 0.25× to 4×.
+- **Flight lab:** select Landing, Takeoff or Combined; choose Classical or RL and a level. Run a simulation or load a saved checkpoint. Use Rotate or Pan to choose what left-drag does; scroll zooms toward the cursor. Shift-drag or right-drag also pans in Rotate mode. Follow can be disabled independently. Following preserves manual angles; Reset camera restores framing. Space toggles playback; the time slider scrubs; playback speed ranges from 0.25× to 4×.
 - **Compare:** overlay Level 1 against the current flight, or RL against classical, on the same start seed. Solid body and translucent comparison share the same clock.
 - **Learning journey:** plays the four real controller versions or checkpoint slots in order. RL slots are labeled Early, Intermediate, Later and Best measured. Best measured can still fail.
 - **Training:** start PPO or SAC, choose the device and step budget, inspect live progress and development evaluations, stop with a checkpoint, and replay a saved policy.
 - **Results:** inspect sample counts, Wilson confidence intervals, speed, offset and failure breakdowns. Full evaluation and pilot samples are labeled separately.
 - **Field notes:** inspect model assumptions, runtime versions and research links.
 - **Recording view:** hides dashboard chrome; Escape exits. Capture with your own recorder. No guaranteed frame rate or video encoder is included.
-- **Graphics and sound:** Ultra is the default, with 4K terrain maps, 0.5 m cells in the central 360 m square, and 1 m cells across the surrounding 960 m coastal range. Balanced and High reduce detail. 4K mode fits a supersampled canvas toward a UHD-sized budget; the measured buffer resolution and FPS are displayed. The download icon renders a separate 3840×2160 scene PNG. It excludes the HTML dashboard. The speaker button enables locally synthesized, telemetry-driven engine/wind sound. Sound starts muted.
+- **Graphics and sound:** High is now the default: 4K ground textures, 2 m central cells, 4 m coastal cells, 24 m distant cells and 1.25x pixel ratio. Ultra and 4K are explicit heavier options. The production preview renders on demand while paused; playback defaults to a 60 FPS budget with 30/120/144 options under advanced controls. Water uses environment reflection in one scene color pass. Rocks use distance-based detail, grass skips its shadow pass, and grid-fin bars are batched. The download icon still exports a 3840x2160 scene PNG. Sound starts muted and requires the speaker button. Actual GPU usage and sustained FPS are unqualified after this change.
 - **Trajectory:** Off by default. Flown shows the actual recorded path up to the playback time; Full shows the complete recording. Neither line is a guidance prediction.
 
 ## Training and evaluation
@@ -94,7 +95,9 @@ PPO continuation restores network/optimizer state, normalization, step count and
 
 Development checkpoint evaluations use fixed seeds beginning at 20000. Full qualification defaults to 10000–19999. Initial exploratory runs used 12 development seeds beginning at 10000 and are not independent qualification data. Some initial pilot evaluations preceded reward tuning; compare their physical outcomes, not raw reward magnitude across reward versions.
 
-Pick algorithms from measured success and reward at comparable configurations and seed pools. The UI selects the best available measured checkpoint, then chronological checkpoint slots. If every candidate fails, the selected best candidate still fails. Do not interpret this selection as flight readiness.
+Pick algorithms from measured success and physical outcomes at comparable configurations and seed pools. The frontend compares checkpoints with identical vehicle/world/mission settings, using each checkpoint's largest full-task sample and Wilson lower bound, followed by sample size, rate and landing physical error; it excludes raw reward across profiles. Ascent speed magnitude is not treated as landing impact speed. It supplies the chosen ID explicitly to the API, then uses chronological earlier slots from that job. Direct API default selection still follows the baseline family; use an explicit checkpoint for variants. If every candidate fails, the selected best candidate still fails. This development-selection rule does not establish flight readiness.
+
+The Difficulty checks table loads saved 32-seed stage probes. Its Watch seed buttons open actual recorded flights using the first seed at each stage, without selecting by outcome. A visible development banner states difficulty, seed and training steps. These files also work without the simulation API. `python scripts/validate_model_artifacts.py` checks summary totals, checkpoint identity, telemetry schema, physical outcomes and public/build asset links; it does not inspect a browser.
 
 ## Tests
 
@@ -144,3 +147,28 @@ The UI has responsive styles and keyboard controls, but screen-reader, Mac, sust
 This demonstrates simulation, guidance, RL experimentation and evidence handling. A pleasing replay is not proof of safe control. Success on one seed is not a reliability rate, and zero observed failures is not certainty. A policy checkpoint is not an aerospace qualification. Inspect the per-seed CSV, model normalization, config version, training curve and failure modes before making a performance claim.
 
 Research sources: [docs/RESEARCH.md](docs/RESEARCH.md). Major decisions and discovered failure modes: [DECISIONS.md](DECISIONS.md).
+
+## Latest model experiment
+
+The original PPO continuation completed 5,003,264 steps and still had 0/20 full-task successes. The 3,751,104-step checkpoint was retained as the measured starting point. Separate development probes on seeds 21000-21031 gave 26/32 successes at difficulty 0.20, 19/32 at 0.40, 4/32 at 0.60 and 0/32 at 1.00. These are stage probes, not qualification.
+
+`config/training-v4.yaml` is an explicit training variant with unchanged physics and observations: a lateral-speed potential, stronger offset costs, longer GAE horizon and smaller PPO updates. Actor-only warm start transfers this project's own trained PPO actor and keeps the critic, optimizer and reward statistics fresh. The 20 initial physical evaluation rows matched the parent exactly. Source snapshots, hashes and transfer lineage are saved with new jobs.
+
+```powershell
+python scripts/training_worker.py landing-ppo-lateral-v4-pilot --steps 200000 --warm-start landing-ppo-state-potential-v3-continued__step-003751104 --config config/training-v4.yaml
+python -m rocket_lab.probe landing-ppo-lateral-v4-pilot__step-003951808 --episodes 32
+```
+
+The first v4 pilot completed 200,704 additional steps. Full-task success remained 0/20; mean impact speed was 7.03 m/s, tilt 3.61 degrees and offset 9.69 m. The drift objective has not yet produced reliable full-task landing. Raw rewards across v3/v4 are not comparable. Exact continuation of a variant requires the same `--config` file. The main `config.yaml` remains unchanged so existing baseline replays keep their identity. See `docs/MODEL-ITERATION-2026-10-19.md`.
+
+Its continuation completed another 802,816 steps, reaching 4,754,624 total lineage steps and curriculum 0.45. Matched stage probes gave 32/32, 24/32, 9/32 and 0/32 at difficulties 0.20/0.40/0.60/1.00. The final checkpoint regressed on the 20 full-task seeds: 0/20, 8.48 m/s mean speed. The earlier 4,351,808-step checkpoint had a better measured full-task objective and was retained for the next experiment.
+
+`config/training-v5.yaml` keeps v4 physics, observations and reward but mixes 20% full-height starts into training-only resets. Easier-stage outcomes alone drive stage advancement. Noise and timeout stay tied to each episode's reset difficulty. The initial transferred actor matched all 20 parent outcome/reward rows; `data/model-mixture-transfer-validation.json` records the check. Evaluation never enables the mixture. This pilot is an experiment, not a reliability claim.
+
+The v5 pilot completed 401,408 additional steps. Its best full-task speed was 5.74 m/s, still 0/20 successes; easier-stage performance declined. The bounded-mean v6 experiment also completed and did not improve overall full-task performance. A v7 exploration-only experiment retains the v5 deterministic actor and resets throttle sampling std to 0.15. Its first 200,000-step checkpoint recorded 1/20 full-task successes, but a separate 32-seed sample remained 0/32. This is early, unstable progress, not a solved RL controller. Exact results and limitations are in the model iteration report.
+
+The longer-horizon v9 pilot completed 6,305,328 total lineage steps. On the same 256 full-difficulty development seeds, it improved to 23/256 successes (8.98%; Wilson 95% interval 6.06-13.12%), compared with v7's 5/256. Mean speed fell from 3.31 to 1.96 m/s; mean pad offset remains 10.69 m. Larger samples and explicitly selected successful examples are visible in Training. A two-million-step continuation and a separate pad-accuracy reward experiment are being measured. The takeoff pilot completed 401,408 steps and still scored 0/20 full-task successes.
+
+The completed v10 pad-accuracy pilot's retained 6,905,328-step checkpoint scored 45/256 on those development seeds (17.58%; Wilson interval 13.40-22.71%), with 2.66 m/s mean speed and 6.89 m mean offset. Impact speed remains too high. A separate terminal-cost experiment is being measured. Takeoff's v11 goal curriculum completed 503,808 steps: it scored 32/32 at the training-only 64.25 m goal, while the full 400 m mission remained 0/20. Its practice replays are explicitly labelled. A longer-horizon ascent continuation is being measured; combined RL is still unqualified.
+
+The v12 terminal-cost experiment completed and scored 6/20 on the small checkpoint batch, but only 29/256 on the matched larger sample. V10 remains the stronger measured choice. The Training page shows these rates and Wilson intervals together; repeated model selection on development seeds is explicitly disclosed.

@@ -1,0 +1,16 @@
+{
+  "id": "takeoff-classical-l4-gusts-native-pilot32",
+  "mission": "takeoff",
+  "method": "classical",
+  "level": 4,
+  "scenario": "gusts",
+  "checkpoint_id": null,
+  "status": "completed",
+  "completed": 32,
+  "total": 32,
+  "successes": 32,
+  "started_at": 1792437816.1860921,
+  "updated_at": 1792437818.7291732,
+  "pid": 12544,
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc"
+}

@@ -30,8 +30,11 @@ class LearnedPolicy:
         normalized=self.norm.normalize_obs(np.array([observation]))
         return self.model.predict(normalized,deterministic=True)[0][0]
 
-def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=None,save=True,config=None):
-    env=RocketEnv(mission,config=config)
+def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=None,save=True,config=None,difficulty=1.,training=False):
+    if not 0<=difficulty<=1:raise ValueError("difficulty must be within [0,1]")
+    if method=='rl' and mission=='combined' and checkpoint_id:
+        raise ValueError('Combined RL selects a separate checkpoint for each phase; one checkpoint ID is not supported')
+    env=RocketEnv(mission,config=config,difficulty=difficulty,training=training)
     observation,_=env.reset(seed=seed)
     controller=ClassicalController(level)
     policies={}
@@ -39,6 +42,9 @@ def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=
         for phase in (["takeoff","landing"] if mission=="combined" else [mission]):
             selected=checkpoint_id if checkpoint_id and mission!="combined" else select_checkpoint(phase,level)["id"]
             policies[phase]=LearnedPolicy(selected,observation_config=env.cfg)
+            if policies[phase].meta['mission']!=phase:
+                raise ValueError(f'Checkpoint mission does not match {phase}')
+        if mission!='combined':checkpoint_id=selected
         meta=policies[env.phase].meta
         steps,algorithm=meta["steps"],meta["algorithm"]
     else: steps,algorithm=None,None
@@ -54,12 +60,17 @@ def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=
         frames.append(frame(reward if method=="rl" else None))
         if terminated or truncated: break
     tag=f"-{checkpoint_id}" if checkpoint_id else ""
-    run_id=f"{mission}-{method}-l{level}-s{seed}{tag}-{config_hash()}"
-    run=RunMeta(id=run_id,mission=mission,method=method,level=level,checkpoint_steps=steps,algorithm=algorithm,
+    if difficulty!=1.:tag+=f"-d{difficulty:.6f}"
+    if training:tag+="-practice"
+    run_hash=config_hash(env.cfg)
+    run_id=f"{mission}-{method}-l{level}-s{seed}{tag}-{run_hash}"
+    run=RunMeta(id=run_id,mission=mission,method=method,level=level,checkpoint_steps=steps,checkpoint_id=checkpoint_id,difficulty=difficulty,algorithm=algorithm,
+                training_mode=training,target_altitude=env.takeoff_altitude if mission=="takeoff" else None,
+                target_velocity=env.takeoff_velocity if mission=="takeoff" else None,
                 seed=seed,outcome=info["outcome"],failure_reason=info["failure_reason"],touchdown_speed=info["touchdown_speed"],
                 tilt=info["tilt"],pad_distance=info["pad_distance"],fuel_used=info["fuel_used"],duration=frames[-1].t,
                 total_reward=env.total_reward,controller_status=controller.plan_status if method=="classical" else "measured checkpoint; maturity not certified")
-    result=Telemetry(config_hash=config_hash(),rocket_length=env.cfg["vehicle"]["length"],initial_fuel=env.cfg["vehicle"]["fuel_mass"]*env.physics.mass_scale,run=run,frames=frames)
+    result=Telemetry(config_hash=run_hash,rocket_length=env.cfg["vehicle"]["length"],initial_fuel=env.cfg["vehicle"]["fuel_mass"]*env.physics.mass_scale,run=run,frames=frames)
     if save:
         atomic_json(DATA/"runs"/f"{run_id}.json",result.model_dump())
         atomic_json(DATA/"runs"/f"{run_id}.meta.json",run.model_dump())

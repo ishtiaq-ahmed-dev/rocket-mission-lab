@@ -1,0 +1,21 @@
+{
+  "id": "landing-rl-l3-s42-landing-ppo-mixed-v5-pilot__step-004651808-62abdd5e196902e2",
+  "mission": "landing",
+  "method": "rl",
+  "level": 3,
+  "checkpoint_steps": 4651808,
+  "checkpoint_id": "landing-ppo-mixed-v5-pilot__step-004651808",
+  "difficulty": 1.0,
+  "algorithm": "PPO",
+  "seed": 42,
+  "outcome": "crash_tilt",
+  "failure_reason": "crash_tilt",
+  "touchdown_speed": 0.7753065706037914,
+  "tilt": 5.3384966866500765,
+  "pad_distance": 8.648753809960798,
+  "fuel_used": 1357.876612260021,
+  "duration": 9.81999999999988,
+  "total_reward": 39.18617293043417,
+  "source": "MuJoCo simulation",
+  "controller_status": "measured checkpoint; maturity not certified"
+}

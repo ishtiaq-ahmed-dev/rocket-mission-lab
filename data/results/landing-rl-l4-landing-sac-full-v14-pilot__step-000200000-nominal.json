@@ -1,0 +1,33 @@
+{
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "landing-sac-full-v14-pilot__step-000200000",
+  "episodes": 20,
+  "seeds": [
+    20000,
+    20019
+  ],
+  "scenario": "nominal",
+  "successes": 0,
+  "success_rate": 0.0,
+  "confidence_interval": [
+    1.3877787807814457e-17,
+    0.1611251580528119
+  ],
+  "mean_reward": -25807.738293888662,
+  "failures": {
+    "out_of_bounds": 4,
+    "crash_speed": 16
+  },
+  "config_hash": "457e3972d8846b23",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 157.22918698044094,
+  "median_touchdown_speed": 157.12529724574568,
+  "mean_tilt": 88.1401185900669,
+  "median_tilt": 89.08968911458362,
+  "mean_pad_distance": 1831.2773754793009,
+  "median_pad_distance": 1819.940113970796,
+  "mean_fuel_used": 6110.292325733526,
+  "median_fuel_used": 6441.264355956556
+}

@@ -2,11 +2,11 @@
 
 ## What it does
 
-The current `state-potential-v3` profile uses the change in a physical-state potential: remaining height/distance, total speed, tilt, angular rate and lateral error. Running costs discourage elapsed time, tilt, rotation, gimbal effort and fuel burn. Terminal rewards distinguish success from failure; capped speed/offset penalties make near misses informative. Historical profiles used distance progress with separate near-ground speed costs.
+The baseline `state-potential-v3` profile uses the change in a physical-state potential: remaining height/distance, total speed, tilt, angular rate and lateral error. The experimental `state-potential-v4` variant adds an explicit horizontal-speed term and stronger pad-offset weights. Running costs discourage elapsed time, tilt, rotation, gimbal effort and fuel burn. Terminal rewards distinguish success from failure; capped speed/offset penalties make near misses informative. Historical profiles used distance progress with separate near-ground speed costs.
 
 ## Why this approach
 
-Named shaping weights are in config.yaml, with the time-cost exception described below. Initial pilots learned faster failure without mission success, prompting reduced progress weight, stronger terminal speed costs and then state-potential shaping. These are empirical design changes, not evidence of convergence. Reward versions must be recorded when comparing curves.
+Baseline shaping weights are in config.yaml; the full v4 snapshot is config/training-v4.yaml. Initial pilots learned faster failure without mission success, prompting reduced progress weight, stronger terminal speed costs and then state-potential shaping. These are empirical design changes, not evidence of convergence. Reward versions must be recorded when comparing curves.
 
 ## Key formulas
 
@@ -14,10 +14,19 @@ Named shaping weights are in config.yaml, with the time-cost exception described
 Phi(s) = -w_height*remaining_height - w_speed*speed
          -w_tilt*(1-cos(tilt)) - w_rate*norm(angular_rate) - w_lateral*offset
 r_v3 = Phi(s_next)-Phi(s) - dt*running_cost - w_fuel*fuel_burn
+Phi_v4(s) = Phi_v3(s) - w_horizontal_speed*norm(velocity_xy)
 r_terminal += success_bonus or failure_penalty - terminal_error_cost
 ```
 
-The current implementation retains a 0.3 per-second time cost in the v3 code path. This constant is an outstanding configuration-centralization limitation; the other named v3 potential/action/fuel/terminal weights are in `config.yaml`. Training snapshots identify the reward profile, and raw reward across profiles should not be ranked as comparable evidence.
+The implementation reads `time_cost` with a 0.3 per-second fallback, preserving old v3 behavior. The v4 snapshot explicitly records 0.3. Its horizontal-speed weight is 12, lateral-position weight is 4 (v3: 2), and terminal-position weight is 2 (v3: 1). Physics, mission thresholds and physical observation scales are unchanged. Training snapshots identify the reward profile; compare actual speed/tilt/offset and success counts across profiles, not raw reward. The first v4 pilot improved easier-stage samples while full-task success remained zero. See [the measured model iteration](MODEL-ITERATION-2026-10-19.md).
+
+The separate v16 experiment adds a dense landing-only physical speed cost below 50 m:
+
+```text
+r_ground = -dt * 2 * max(0, 1-max(0, altitude)/50)^2 * norm(velocity)^2
+```
+
+It gives near-surface high-speed states a continuous debit before the terminal event. It supplies no desired speed curve, burn time, controller action or expert data. It is an empirical reward change, not a guarantee of faster learning or a formally invariant transform. Missing/zero `ground_speed_cost` preserves prior rewards exactly. Tests verify the calculated debit, unchanged physical observations/outcomes, zero effect above the configured height and no takeoff effect. Invalid weights/heights are rejected. Baseline configuration and success criteria remain unchanged.
 
 ## Five interview questions
 

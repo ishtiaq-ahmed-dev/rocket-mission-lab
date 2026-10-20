@@ -1,0 +1,16 @@
+{
+  "id": "takeoff-classical-l4-thrust_loss-native-pilot32",
+  "mission": "takeoff",
+  "method": "classical",
+  "level": 4,
+  "scenario": "thrust_loss",
+  "checkpoint_id": null,
+  "status": "completed",
+  "completed": 32,
+  "total": 32,
+  "successes": 32,
+  "started_at": 1792437822.1890166,
+  "updated_at": 1792437825.4620874,
+  "pid": 12544,
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc"
+}

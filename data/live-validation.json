@@ -1,6 +1,10 @@
 {
+  "verified_at_unix": 1792463277.37191,
+  "scope": "live localhost HTTP/schema/static-assets; no browser visual or GPU measurement",
+  "source_hash": "7474f177c4e8ebd6a78ea3406ed9d8dc1dc1a108e1af3e3f3a0a4fc7e0de99e5",
   "frontend_http": 200,
   "frontend_title": true,
+  "frontend_mode": "production bundle",
   "proxy_health": 200,
   "proxy_missions": 200,
   "proxy_runs": 200,
@@ -15,6 +19,41 @@
   "initial_hud_altitude": 226.4373629133578,
   "outcome": "success",
   "touchdown_speed": 0.7129316082806952,
+  "rl_default_selection": {
+    "landing": {
+      "checkpoint": "landing-ppo-pad-v10-continued__step-008908272",
+      "steps": 8908272,
+      "outcome": "crash_speed",
+      "frames": 121,
+      "speed": 3.0498478437263694,
+      "tilt": 4.147243297287619,
+      "pad_distance": 1.3588737633477277
+    },
+    "takeoff": {
+      "checkpoint": "takeoff-ppo-full-v13-refinement__step-002761136",
+      "steps": 2761136,
+      "outcome": "success",
+      "frames": 135,
+      "speed": 23.68301049637478,
+      "tilt": 3.130067818576713,
+      "pad_distance": 0.5059324773600667
+    }
+  },
+  "published_model_evidence": {
+    "model-probes.json": {
+      "http": 200,
+      "entries": 35
+    },
+    "model-evaluations.json": {
+      "http": 200,
+      "entries": 19
+    },
+    "model-qualifications.json": {
+      "http": 200,
+      "entries": 2
+    }
+  },
+  "selected_example_http": 200,
   "browser_visual_verification": "Automation unavailable under browser tool policy; user confirmed live camera rotation. Latest terrain and 4K export need visual confirmation.",
   "terrain_textures": {
     "ground-color-4k.jpg": {

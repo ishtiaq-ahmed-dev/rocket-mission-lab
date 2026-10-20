@@ -6,7 +6,6 @@ Touchdown is detected before contact resolution, retaining impact velocity.
 """
 import numpy as np
 import mujoco
-from scipy.spatial.transform import Rotation
 from .config import load_config
 
 class RocketPhysics:
@@ -55,8 +54,13 @@ class RocketPhysics:
         self.data.qpos[:], self.data.qvel[:], self.data.time = qpos, qvel, clock
 
     def rotation(self):
-        q = self.data.qpos[3:7]
-        return Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
+        quaternion = self.data.qpos[3:7].copy()
+        norm = mujoco.mju_normalize4(quaternion)
+        if not 0 < norm < np.inf:
+            raise ValueError("Quaternion must have finite nonzero norm")
+        matrix = np.empty(9)
+        mujoco.mju_quat2Mat(matrix, quaternion)
+        return matrix.reshape(3, 3)
 
     def state(self):
         n = self.rotation()[:, 2]
@@ -86,7 +90,7 @@ class RocketPhysics:
             direction = np.array([np.tan(self.gimbal[0]), np.tan(self.gimbal[1]), 1.0])
             force_body = direction / np.linalg.norm(direction) * self.thrust
             force_world = rotation @ force_body
-            torque_world = rotation @ np.cross([0., 0., -self.half], force_body)
+            torque_world = rotation @ np.array([self.half*force_body[1], -self.half*force_body[0], 0.])
             # OU gusts are generated once per integration step from the seeded RNG.
             self.wind += 0.3 * (np.array(self.w["wind_mean"])*self.wind_scale - self.wind)*dt + self.rng.normal(0, self.w["gust_std"]*self.wind_scale*np.sqrt(dt), 3)
             self.wind[2] = 0

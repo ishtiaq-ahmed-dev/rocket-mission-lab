@@ -3,8 +3,9 @@ import json
 import os
 import time
 import uuid
+import math
 from pathlib import Path
-from .config import DATA, ROOT
+from .config import DATA, ROOT, load_config
 
 def atomic_json(path, value):
     path=Path(path); path.parent.mkdir(parents=True,exist_ok=True)
@@ -23,7 +24,9 @@ def read_json(path, fallback=None):
     try: return json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError,ValueError): return fallback
 
-def config_hash(): return hashlib.sha256((ROOT/"config.yaml").read_bytes()).hexdigest()[:16]
+def config_hash(config=None):
+    if config is None or config==load_config():return hashlib.sha256((ROOT/"config.yaml").read_bytes()).hexdigest()[:16]
+    return hashlib.sha256(json.dumps(config,sort_keys=True,separators=(',',':')).encode()).hexdigest()[:16]
 
 def runs():
     current=config_hash()
@@ -55,10 +58,28 @@ def checkpoint_path(identifier):
     raise ValueError("Unknown checkpoint")
 
 def select_checkpoint(mission,level):
-    items=[x for x in checkpoints(mission) if x.get("config_hash")==config_hash() and x.get("evaluation_episodes",0)>0 and x.get("steps",0)>0]
+    cfg=load_config();baseline_hash=config_hash()
+    def compatible(item):
+        recorded=item.get('config')
+        return (all(recorded.get(key)==cfg.get(key) for key in ('vehicle','world','mission')) if recorded else item.get('config_hash')==baseline_hash)
+    items=[x for x in checkpoints(mission) if compatible(x) and x.get("evaluation_episodes",0)>0 and x.get("steps",0)>0]
     if not items: raise ValueError(f"No trained {mission} checkpoint available. Start training first.")
-    # Rank algorithms by measured full-distribution evaluation; no invented maturity.
-    best=max(items,key=lambda x:(x.get("success_rate",0),x.get("mean_reward",-1e9)))
-    sequence=[x for x in items if x["job_id"]==best["job_id"]]
+    results=[value for path in (DATA/'results').glob('*.json') if (value:=read_json(path)) and value.get('mission')==mission and value.get('scenario')=='nominal']
+    def evidence(item):
+        allowed_hashes={baseline_hash,item.get('config_hash')}
+        return max((value for value in results if value.get('checkpoint_id')==item['id'] and value.get('config_hash') in allowed_hashes and value.get('episodes',0)>=item['evaluation_episodes']),key=lambda value:value['episodes'],default=None)
+    def rank(item):
+        result=evidence(item)
+        n=result['episodes'] if result else item['evaluation_episodes']
+        k=result.get('successes',0) if result else item.get('successes',round(item.get('success_rate',0)*n))
+        if not 0<=k<=n:raise ValueError('Invalid saved checkpoint success count')
+        rate=k/n;z=1.95996398454;denominator=1+z*z/n
+        lower=max(0.,(rate+z*z/(2*n)-z*math.sqrt(rate*(1-rate)/n+z*z/(4*n*n)))/denominator)
+        # Ascent records contain speed magnitude, not target-speed error.
+        error=(result['mean_touchdown_speed']/2+result['mean_tilt']/5+result['mean_pad_distance']/5) if result and mission=='landing' else 0.
+        return (lower,n,rate,-error,item['steps'])
+    # Raw rewards across different reward profiles are never compared.
+    best=max(items,key=rank)
+    sequence=sorted([x for x in items if x["job_id"]==best["job_id"] and x['steps']<=best['steps']],key=lambda x:x['steps'])
     index=round((len(sequence)-1)*(level-1)/3)
     return best if level==4 else sequence[index]

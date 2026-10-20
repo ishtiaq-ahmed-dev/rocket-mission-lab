@@ -1,0 +1,16 @@
+{
+  "id": "landing-v15-7305328-native-dev256",
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "scenario": "nominal",
+  "checkpoint_id": "landing-ppo-precision-v15-pilot__step-007305328",
+  "status": "completed",
+  "completed": 256,
+  "total": 256,
+  "successes": 48,
+  "started_at": 1792437330.7227812,
+  "updated_at": 1792437344.6185482,
+  "pid": 32124,
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc"
+}

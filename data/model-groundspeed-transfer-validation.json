@@ -1,0 +1,16 @@
+{
+  "scope": "near-ground reward actor transfer before updates",
+  "parent": "landing-ppo-precision-v15-continued__step-008308848",
+  "child": "landing-ppo-groundspeed-v16-pilot__step-008308848",
+  "episodes": 20,
+  "physical_rows_match_exactly": true,
+  "compared_fields": [
+    "seed",
+    "outcome",
+    "touchdown_speed",
+    "tilt",
+    "pad_distance",
+    "fuel_used"
+  ],
+  "reward_comparison": "Excluded because near-ground physical speed cost changed"
+}

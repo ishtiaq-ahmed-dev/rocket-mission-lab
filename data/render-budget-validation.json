@@ -1,0 +1,54 @@
+{
+  "scope": "CPU geometry assembly and source draw budgets only. Browser GPU/FPS not measured.",
+  "previousDefault": {
+    "quality": "Ultra",
+    "terrain_triangles": 2943464,
+    "terrain_buffer_bytes": 100636268,
+    "dpr": 2.5,
+    "planar_scene_passes": 2,
+    "shadow_map": 4096,
+    "rock_triangles": 539730,
+    "grass_triangles": 313600
+  },
+  "qualities": {
+    "Balanced": {
+      "triangles": 160504,
+      "vertices": 83433,
+      "buffer_bytes": 5597100,
+      "assembly_ms": 73
+    },
+    "High": {
+      "triangles": 282712,
+      "vertices": 145713,
+      "buffer_bytes": 9803916,
+      "assembly_ms": 110
+    },
+    "Ultra": {
+      "triangles": 769480,
+      "vertices": 391449,
+      "buffer_bytes": 26457516,
+      "assembly_ms": 272
+    },
+    "4K": {
+      "triangles": 2712424,
+      "vertices": 1367625,
+      "buffer_bytes": 92724588,
+      "assembly_ms": 914
+    }
+  },
+  "newDefault": {
+    "quality": "High",
+    "dpr": 1.25,
+    "scene_passes": 1,
+    "shadow_map": 2048,
+    "playback_frame_limit": 60,
+    "idle_playback_frames": 0,
+    "rock_triangles_max": 53910,
+    "grass_triangles": 48000
+  },
+  "reduction": {
+    "default_terrain_percent": 90.39526218088619,
+    "default_geometry_bytes_percent": 90.25806879086574,
+    "same_viewport_pixels_percent": 75
+  }
+}

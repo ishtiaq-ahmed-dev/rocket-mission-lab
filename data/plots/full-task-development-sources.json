@@ -1,0 +1,24 @@
+{
+  "scope": "larger development samples, not qualification",
+  "results": [
+    "landing-rl-l4-landing-ppo-exploration-v7-pilot__step-004851808-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-groundspeed-v16-pilot__step-009312368-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-horizon-v9-continued__step-008308272-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-horizon-v9-pilot__step-006305328-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-pad-v10-continued__step-008405328-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-pad-v10-continued__step-008908272-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-pad-v10-pilot__step-006905328-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-precision-v15-continued__step-007305328-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-precision-v15-continued__step-008308848-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-precision-v15-pilot__step-007305328-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-precision-v15-refinement__step-009158272-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-precision-v15-refinement__step-009408272-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-precision-v15-refinement__step-009911792-development-s22000-n256.json",
+    "landing-rl-l4-landing-ppo-touchdown-v12-pilot__step-007306736-development-s22000-n256.json",
+    "takeoff-rl-l4-takeoff-ppo-full-v13-refinement__step-002261136-development-s22000-n256.json",
+    "takeoff-rl-l4-takeoff-ppo-full-v13-refinement__step-002761136-development-s22000-n256.json",
+    "takeoff-rl-l4-takeoff-ppo-full-v13-refinement__step-003014656-development-s22000-n256.json",
+    "takeoff-rl-l4-takeoff-ppo-horizon-v13-continued__step-001757328-development-s22000-n256.json",
+    "takeoff-rl-l4-takeoff-ppo-horizon-v13-continued__step-002011136-development-s22000-n256.json"
+  ]
+}

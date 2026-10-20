@@ -1,5 +1,7 @@
 """Reproducible PPO/SAC jobs; no expert demonstrations or classical hints."""
 import argparse
+import hashlib
+import shutil
 from collections import deque
 from datetime import datetime, timezone
 import os
@@ -11,9 +13,10 @@ from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
-from .config import DATA, load_config
+from stable_baselines3.common.utils import FloatSchedule
+from .config import DATA, ROOT, load_config
 from .envs import RocketEnv
-from .storage import atomic_json, config_hash
+from .storage import atomic_json, config_hash, read_json
 from .evaluate import evaluate, save_result
 
 class TrainingCallback(BaseCallback):
@@ -21,13 +24,14 @@ class TrainingCallback(BaseCallback):
         super().__init__()
         self.job_id,self.mission,self.algorithm,self.total=job_id,mission,algorithm,total
         self.folder=DATA/"jobs"/job_id
-        self.started=time.time(); self.last_write=0; self.recent=deque(maxlen=40)
+        self.started=time.time(); self.last_write=0
         self.history=[]; self.curve=[]; self.completed=set(); self.eval_episodes=eval_episodes
         cfg=config or load_config()
+        self.recent=deque(maxlen=cfg["training"].get("curriculum_window",40))
         self.config=cfg
-        self.training_hash=config_hash()
+        self.training_hash=config_hash(cfg)
         # Add quartiles to short runs so the UI can show a real checkpoint progression.
-        self.milestones=sorted(set([0,total,*[x for x in cfg["training"]["checkpoints"] if x<=total],total//4,total//2,3*total//4]))
+        self.milestones=sorted(set([0,total,*[x for x in cfg["training"]["checkpoints"] if x<=total],*[initial_steps+(total-initial_steps)*k//4 for k in (1,2,3)]]))
         self.difficulty=cfg["training"].get("initial_difficulty",0.)
         self.status="running"
         self.initial_steps=initial_steps
@@ -36,21 +40,24 @@ class TrainingCallback(BaseCallback):
 
     def write_status(self, error=None):
         atomic_json(self.folder/"status.json",dict(id=self.job_id,mission=self.mission,algorithm=self.algorithm,
-                    status=self.status,steps=self.num_timesteps,total_steps=self.total,started_at=self.started,
+                    status=self.status,steps=self.num_timesteps,initial_steps=self.initial_steps,total_steps=self.total,started_at=self.started,
                     updated_at=time.time(),elapsed_seconds=time.time()-self.started,
                     steps_per_second=(self.num_timesteps-self.initial_steps)/max(1,time.time()-self.started),
                     device=str(self.model.device),seed=self.model.seed,difficulty=self.difficulty,
                     episode_count=len(self.history),recent_successes=sum(self.recent),recent_episodes=len(self.recent),
                     curve=self.curve,episodes=self.history[-400:],error=error,pid=os.getpid(),config_hash=self.training_hash))
 
-    def checkpoint(self):
+    def checkpoint(self,final=False):
         steps=self.num_timesteps
-        folder=DATA/"checkpoints"/self.job_id/f"step-{steps:09d}"
+        suffix="-final" if final and any(point["steps"]==steps for point in self.curve) else ""
+        folder=DATA/"checkpoints"/self.job_id/f"step-{steps:09d}{suffix}"
         folder.mkdir(parents=True,exist_ok=True)
         self.model.save(folder/"model.zip")
         self.training_env.save(folder/"normalize.pkl")
         meta=dict(job_id=self.job_id,mission=self.mission,algorithm=self.algorithm,steps=steps,
                   seed=self.model.seed,config_hash=self.training_hash,difficulty=self.difficulty,config=self.config,
+                  source_hash=read_json(self.folder/"source.json",{}).get("source_hash"),
+                  snapshot_phase="post-update final" if final else "rollout callback",
                   created_at=datetime.now(timezone.utc).isoformat(),success_rate=0,mean_reward=-1e9,
                   evaluation_episodes=0,qualification="evaluation pending")
         atomic_json(folder/"checkpoint.json",meta)
@@ -74,12 +81,15 @@ class TrainingCallback(BaseCallback):
         for done,info in zip(self.locals.get("dones",[]),self.locals.get("infos",[])):
             if done:
                 success=info.get("outcome")=="success"
-                self.recent.append(success)
+                # Full-start mixture episodes are logged, but stage advancement
+                # measures the current/easier practice distribution only.
+                episode_difficulty=info.get("episode_difficulty",self.difficulty)
+                if episode_difficulty<=self.difficulty+1e-8:self.recent.append(success)
                 ep=info.get("episode",{})
-                self.history.append(dict(steps=self.num_timesteps,reward=float(ep.get("r",0)),length=int(ep.get("l",0)),outcome=info.get("outcome"),difficulty=self.difficulty))
+                self.history.append(dict(steps=self.num_timesteps,reward=float(ep.get("r",0)),length=int(ep.get("l",0)),outcome=info.get("outcome"),difficulty=episode_difficulty))
         # Advance only after the measured rolling threshold is met.
         threshold=self.config["training"]["curriculum_threshold"]
-        if len(self.recent)==40 and np.mean(self.recent)>=threshold and self.difficulty<1:
+        if len(self.recent)==self.recent.maxlen and np.mean(self.recent)>=threshold and self.difficulty<1:
             self.difficulty=min(1.,self.difficulty+self.config["training"].get("curriculum_increment",.15))
             # env_method traverses Monitor wrappers; set_attr would only shadow
             # an attribute on the wrapper and leave the real environment easy.
@@ -93,45 +103,124 @@ class TrainingCallback(BaseCallback):
             self.last_write=time.time(); self.write_status()
         return not (self.folder/"stop").exists()
 
-def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",job_id=None,eval_episodes=12,resume=None):
+def warm_start_actor(model,identifier,mission,cfg):
+    """Transfer only this project's learned PPO actor, with explicit lineage."""
+    from .storage import checkpoint_path,read_json
+    checkpoint=checkpoint_path(identifier);meta=read_json(checkpoint/"checkpoint.json")
+    if meta["mission"]!=mission or meta["algorithm"]!="PPO":raise ValueError("Warm start requires a matching PPO mission")
+    old=meta.get("config") or read_json(DATA/"jobs"/meta["job_id"]/"config.json",{})
+    for section in ("vehicle","world","mission"):
+        if old.get(section)!=cfg[section]:raise ValueError("Warm start cannot change physics or mission")
+    for key in ("observation_position_scale","observation_velocity_scale","observation_normalization"):
+        if old.get("training",{}).get(key)!=cfg["training"].get(key):raise ValueError("Warm start requires unchanged observation scaling")
+    if cfg["training"].get("observation_normalization",True):raise ValueError("Actor-only transfer requires fixed physical observation scaling")
+    parent=PPO.load(checkpoint/"model.zip",device="cpu")
+    state=model.policy.state_dict()
+    transferred={key:value for key,value in parent.policy.state_dict().items() if key.startswith(("mlp_extractor.policy_net.","action_net.")) or key=="log_std"}
+    state.update(transferred);model.policy.load_state_dict(state)
+    return meta
+
+def configure_warm_start_exploration(model,cfg):
+    """Optional per-action std reset; deterministic actor outputs are unchanged."""
+    overrides=cfg["training"].get("warm_start_action_std")
+    if overrides is None:return None
+    if len(overrides)!=model.action_space.shape[0] or any(value is not None and (not np.isfinite(value) or value<=0) for value in overrides):
+        raise ValueError("warm_start_action_std requires one positive finite value or null per action")
+    with torch.no_grad():
+        for axis,value in enumerate(overrides):
+            if value is not None:model.policy.log_std[axis]=np.log(value)
+    return overrides
+
+def validate_optimizer_adaptation(previous,current):
+    """Keep the learned value function meaningful: only optimizer controls vary."""
+    if {key:value for key,value in previous.items() if key!='training'}!={key:value for key,value in current.items() if key!='training'}:
+        raise ValueError('Optimizer adaptation requires unchanged physics, mission and reward')
+    allowed={'profile','learning_rate','ppo_target_kl'}
+    old={key:value for key,value in previous['training'].items() if key not in allowed}
+    new={key:value for key,value in current['training'].items() if key not in allowed}
+    if old!=new:raise ValueError('Optimizer adaptation permits only learning_rate, ppo_target_kl and profile changes')
+
+def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",job_id=None,eval_episodes=12,resume=None,warm_start=None,config_path=None,adapt_optimizer_from=None):
+    if sum(bool(value) for value in (resume,warm_start,adapt_optimizer_from))>1:raise ValueError("Choose exact-config continuation, actor warm start, or optimizer adaptation")
+    if adapt_optimizer_from and algorithm!='PPO':raise ValueError('Optimizer adaptation requires PPO')
+    if warm_start and algorithm!="PPO":raise ValueError("Actor warm start is implemented for PPO only")
     torch.set_num_threads(2)
     np.random.seed(seed); torch.manual_seed(seed)
-    cfg=load_config()
+    cfg=load_config(config_path) if config_path else load_config()
+    warm_difficulty=cfg["training"].get("warm_start_difficulty")
+    if warm_difficulty is not None and not 0<=warm_difficulty<=1:raise ValueError("warm_start_difficulty must be within [0,1]")
     job_id=job_id or f"{mission}-{algorithm.lower()}-{int(time.time())}"
     folder=DATA/"jobs"/job_id; folder.mkdir(parents=True,exist_ok=True)
     atomic_json(folder/"config.json",cfg)
-    vec=VecNormalize(DummyVecEnv([lambda:Monitor(RocketEnv(mission,config=cfg,difficulty=cfg["training"].get("initial_difficulty",0.))) for _ in range(cfg["training"]["n_envs"])]),norm_obs=cfg["training"].get("observation_normalization",True),norm_reward=cfg["training"].get("reward_normalization",True),clip_obs=10)
+    source_folder=folder/"source";source_folder.mkdir(exist_ok=True)
+    source_names=["physics.py","envs.py","train.py","simulation.py","controllers.py","storage.py","config.py","evaluate.py","schemas.py","policies.py"]
+    source_hash=hashlib.sha256()
+    for name in source_names:
+        source=ROOT/"rocket_lab"/name;source_hash.update(source.read_bytes());shutil.copyfile(source,source_folder/name)
+    atomic_json(folder/"source.json",dict(source_hash=source_hash.hexdigest(),files=source_names))
+    vec=VecNormalize(DummyVecEnv([lambda:Monitor(RocketEnv(mission,config=cfg,difficulty=cfg["training"].get("initial_difficulty",0.),training=True)) for _ in range(cfg["training"]["n_envs"])]),norm_obs=cfg["training"].get("observation_normalization",True),norm_reward=cfg["training"].get("reward_normalization",True),clip_obs=10)
     vec.seed(seed)
     # MLP PPO is generally CPU-bound; CUDA is useful for larger SAC updates.
     if device=="auto": device="cpu" if algorithm=="PPO" else ("cuda" if torch.cuda.is_available() else "cpu")
     common=dict(policy="MlpPolicy",env=vec,learning_rate=cfg["training"]["learning_rate"],seed=seed,device=device,
                 verbose=0,tensorboard_log=str(DATA/"tensorboard"/job_id))
     initial_steps=0;initial_difficulty=None
-    if resume:
+    if resume or adapt_optimizer_from:
         from .storage import checkpoint_path,read_json
-        checkpoint=checkpoint_path(resume);meta=read_json(checkpoint/"checkpoint.json")
+        identifier=resume or adapt_optimizer_from
+        checkpoint=checkpoint_path(identifier);meta=read_json(checkpoint/"checkpoint.json")
         if meta["mission"]!=mission or meta["algorithm"]!=algorithm:raise ValueError("Resume mission and algorithm must match checkpoint")
-        if meta.get("config_hash")!=config_hash():raise ValueError("Configuration changed; resume requires the exact recorded configuration")
+        if adapt_optimizer_from:
+            previous=meta.get('config') or read_json(DATA/'jobs'/meta['job_id']/'config.json',{})
+            validate_optimizer_adaptation(previous,cfg)
+        elif meta.get("config_hash")!=config_hash(cfg):raise ValueError("Configuration changed; resume requires the exact recorded configuration")
         if algorithm!="PPO":raise ValueError("SAC training resume requires replay-buffer persistence; start a new SAC run instead")
         vec=VecNormalize.load(checkpoint/"normalize.pkl",vec.venv)
         vec.training=True;vec.seed(seed)
         model=PPO.load(checkpoint/"model.zip",env=vec,device=device)
         model.tensorboard_log=str(DATA/"tensorboard"/job_id)
         initial_steps=model.num_timesteps;initial_difficulty=meta.get("difficulty",0.)
-        atomic_json(folder/"resume.json",dict(parent_checkpoint=resume,parent_steps=initial_steps,additional_steps=steps))
+        if adapt_optimizer_from:
+            model.learning_rate=float(cfg['training']['learning_rate']);model.lr_schedule=FloatSchedule(model.learning_rate)
+            model.target_kl=cfg['training'].get('ppo_target_kl')
+            for group in model.policy.optimizer.param_groups:group['lr']=model.learning_rate
+            atomic_json(folder/'adaptation.json',dict(parent_checkpoint=identifier,parent_steps=initial_steps,additional_steps=steps,
+                parent_config_hash=meta['config_hash'],new_config_hash=config_hash(cfg),preserved='actor, critic, optimizer moments and normalization',
+                changed=['learning_rate','ppo_target_kl','profile'],deterministic_action_function_changed=False))
+        else:atomic_json(folder/"resume.json",dict(parent_checkpoint=resume,parent_steps=initial_steps,additional_steps=steps))
     elif algorithm=="PPO":
-        model=PPO(**common,n_steps=512,batch_size=256,n_epochs=8,gamma=.995,ent_coef=.0005,policy_kwargs=dict(net_arch=[128,128],log_std_init=cfg["training"].get("policy_log_std",-1.5)))
+        settings=cfg["training"]
+        if settings.get("bounded_action_mean",False):
+            from .policies import BoundedMeanPolicy
+            common["policy"]=BoundedMeanPolicy
+        model=PPO(**common,n_steps=settings.get("ppo_n_steps",512),batch_size=settings.get("ppo_batch_size",256),n_epochs=settings.get("ppo_epochs",8),gamma=settings.get("ppo_gamma",.995),gae_lambda=settings.get("ppo_gae_lambda",.95),ent_coef=settings.get("ppo_entropy",.0005),target_kl=settings.get("ppo_target_kl"),policy_kwargs=dict(net_arch=[128,128],log_std_init=settings.get("policy_log_std",-1.5)))
+        if warm_start:
+            meta=warm_start_actor(model,warm_start,mission,cfg)
+            exploration=configure_warm_start_exploration(model,cfg)
+            initial_steps=int(meta["steps"]);initial_difficulty=float(warm_difficulty if warm_difficulty is not None else meta.get("difficulty",0.));model.num_timesteps=initial_steps
+            parent_bounded=meta.get("config",{}).get("training",{}).get("bounded_action_mean",False)
+            bounded=cfg["training"].get("bounded_action_mean",False)
+            atomic_json(folder/"warm-start.json",dict(parent_checkpoint=warm_start,parent_steps=initial_steps,parent_config_hash=meta.get("config_hash"),new_config_hash=config_hash(cfg),additional_steps=steps,transferred="learned actor weights only",critic="fresh",optimizer="fresh",reward_normalization="fresh",action_mean_transform="tanh" if bounded else "linear",actor_function_changed=parent_bounded!=bounded or exploration is not None,deterministic_action_function_changed=parent_bounded!=bounded,exploration_std_override=exploration,initial_difficulty=initial_difficulty))
     else:
-        model=SAC(**common,batch_size=256,buffer_size=250000,learning_starts=2000,train_freq=4,gradient_steps=1,gamma=.995,policy_kwargs=dict(net_arch=[128,128]))
+        settings=cfg["training"]
+        model=SAC(**common,batch_size=settings.get("sac_batch_size",256),buffer_size=settings.get("sac_buffer_size",250000),learning_starts=settings.get("sac_learning_starts",2000),train_freq=settings.get("sac_train_freq",4),gradient_steps=settings.get("sac_gradient_steps",1),gamma=settings.get("sac_gamma",.995),policy_kwargs=dict(net_arch=[128,128]))
     callback=TrainingCallback(job_id,mission,algorithm,initial_steps+steps,eval_episodes,cfg,initial_steps,initial_difficulty)
     try:
-        model.learn(total_timesteps=steps,callback=callback,reset_num_timesteps=resume is None)
-        if callback.num_timesteps not in [x["steps"] for x in callback.curve]: callback.checkpoint()
+        model.learn(total_timesteps=steps,callback=callback,reset_num_timesteps=not(resume or warm_start or adapt_optimizer_from))
+        # An on-step checkpoint can precede the rollout's last optimization.
+        # Keep a distinct final snapshot so an exact-budget run saves that update.
+        callback.checkpoint(final=True)
         callback.status="stopped" if (folder/"stop").exists() else "completed"
         callback.write_status()
         # Export genuine level snapshots for the frontend after training.
         from .simulation import simulate
-        for level in range(1,5): simulate(mission,"rl",level,42)
+        from .storage import checkpoints
+        candidates=[item for item in checkpoints(mission) if item["job_id"]==job_id and item.get("evaluation_episodes",0)>0]
+        if candidates:
+            best=max(candidates,key=lambda item:(item.get("success_rate",0),item.get("mean_reward",-1e9)))
+            for level in range(1,5):
+                chosen=best if level==4 else candidates[round((len(candidates)-1)*(level-1)/3)]
+                simulate(mission,"rl",level,42,checkpoint_id=chosen["id"],config=cfg)
     except Exception:
         callback.status="failed"; callback.write_status(traceback.format_exc()); raise
     finally: vec.close()
@@ -139,9 +228,9 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser(); parser.add_argument("--mission",default="landing",choices=["landing","takeoff"]); parser.add_argument("--algorithm",default="PPO",choices=["PPO","SAC"]); parser.add_argument("--steps",type=int,default=100000); parser.add_argument("--seed",type=int,default=42); parser.add_argument("--device",default="auto",choices=["auto","cpu","cuda"]); parser.add_argument("--job-id"); parser.add_argument("--eval-episodes",type=int,default=12);parser.add_argument("--resume")
-    args=parser.parse_args()
+    parser.add_argument("--warm-start");parser.add_argument("--config");parser.add_argument('--adapt-optimizer-from');args=parser.parse_args()
     try:
-        train(args.mission,args.algorithm,args.steps,args.seed,args.device,args.job_id,args.eval_episodes,args.resume)
+        train(args.mission,args.algorithm,args.steps,args.seed,args.device,args.job_id,args.eval_episodes,args.resume,args.warm_start,args.config,args.adapt_optimizer_from)
     except BaseException:
         if args.job_id:
             from .storage import read_json

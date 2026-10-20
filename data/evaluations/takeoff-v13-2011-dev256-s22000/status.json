@@ -1,0 +1,16 @@
+{
+  "id": "takeoff-v13-2011-dev256-s22000",
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "scenario": "nominal",
+  "checkpoint_id": "takeoff-ppo-horizon-v13-continued__step-002011136",
+  "status": "completed",
+  "completed": 256,
+  "total": 256,
+  "successes": 190,
+  "started_at": 1792436767.4099572,
+  "updated_at": 1792436789.614937,
+  "pid": 15236,
+  "source_hash": "2108ff98d56dfbf75d93c316a8b8a15a54ef83226e021f50f24c87bb1cbd20d8"
+}

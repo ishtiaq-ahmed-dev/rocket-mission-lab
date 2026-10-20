@@ -1,0 +1,14 @@
+{
+  "scope": "Initial actor-transfer development evaluation, before any v4 update",
+  "episodes": 20,
+  "physical_rows_match_parent_exactly": true,
+  "compared_fields": [
+    "seed",
+    "outcome",
+    "touchdown_speed",
+    "tilt",
+    "pad_distance",
+    "fuel_used"
+  ],
+  "reward_comparison": "Excluded because reward profile changed"
+}

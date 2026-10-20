@@ -1,0 +1,21 @@
+{
+  "id": "landing-rl-l2-s42-landing-ppo-horizon-v9-pilot__step-005801808-f10344bcd3bb0cd4",
+  "mission": "landing",
+  "method": "rl",
+  "level": 2,
+  "checkpoint_steps": 5801808,
+  "checkpoint_id": "landing-ppo-horizon-v9-pilot__step-005801808",
+  "difficulty": 1.0,
+  "algorithm": "PPO",
+  "seed": 42,
+  "outcome": "missed_pad",
+  "failure_reason": "missed_pad",
+  "touchdown_speed": 1.3185612162880704,
+  "tilt": 3.8679190907912235,
+  "pad_distance": 8.980193666481027,
+  "fuel_used": 1494.9209151104242,
+  "duration": 10.999999999999854,
+  "total_reward": 22.913635805037103,
+  "source": "MuJoCo simulation",
+  "controller_status": "measured checkpoint; maturity not certified"
+}

@@ -1,0 +1,32 @@
+{
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "takeoff-ppo-v4-pilot__step-000100000",
+  "episodes": 20,
+  "seeds": [
+    20000,
+    20019
+  ],
+  "scenario": "nominal",
+  "successes": 0,
+  "success_rate": 0.0,
+  "confidence_interval": [
+    1.3877787807814457e-17,
+    0.1611251580528119
+  ],
+  "mean_reward": -2447.2245464905695,
+  "failures": {
+    "crash_speed": 20
+  },
+  "config_hash": "2255ffc440dc1a47",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 32.6695572533234,
+  "median_touchdown_speed": 0.30651358439613746,
+  "mean_tilt": 22.383774211019055,
+  "median_tilt": 2.154344385609983,
+  "mean_pad_distance": 226.6029156254427,
+  "median_pad_distance": 0.05005101945189072,
+  "mean_fuel_used": 1430.7905994893852,
+  "median_fuel_used": 85.39664569145589
+}

@@ -1,0 +1,38 @@
+{
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "takeoff-ppo-full-v13-refinement__step-002761136",
+  "episodes": 32,
+  "seeds": [
+    10000,
+    10031
+  ],
+  "scenario": "extreme_starts",
+  "successes": 7,
+  "success_rate": 0.21875,
+  "confidence_interval": [
+    0.11023836252604396,
+    0.38754993649243025
+  ],
+  "mean_reward": 79.36804100381067,
+  "failures": {
+    "crash_tilt": 18,
+    "missed_pad": 1,
+    "crash_speed": 6
+  },
+  "config_hash": "4f2cb7c24e9839d5",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 21.825232915753404,
+  "median_touchdown_speed": 22.198997154994963,
+  "mean_tilt": 7.433718994548127,
+  "median_tilt": 7.286285646160255,
+  "mean_pad_distance": 5.144340837040105,
+  "median_pad_distance": 3.3753269550108587,
+  "mean_fuel_used": 1988.4698721754494,
+  "median_fuel_used": 1980.7335124590145,
+  "evaluation_role": "32-seed stress pilot; not full stress qualification",
+  "progress_id": "takeoff-takeoff-ppo-full-v13-refinement__step-002761136-extreme_starts-native-pilot32",
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc",
+  "effective_config_hash": "8267b3e73f485e03"
+}

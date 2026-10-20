@@ -69,7 +69,7 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
                 episodes=episodes,seeds=[start_seed,start_seed+episodes-1],scenario=scenario,successes=k,success_rate=k/episodes,
                 confidence_interval=wilson(k,episodes),mean_reward=float(np.mean([x["reward"] for x in rows])),
                 failures=dict(Counter(x["outcome"] for x in rows if x["outcome"]!="success")),
-                config_hash=config_hash(),
+                config_hash=config_hash(config),
                 qualification="full fixed-seed batch" if episodes>=10000 else "pilot sample; 10,000-seed gate pending")
     for metric in ["touchdown_speed","tilt","pad_distance","fuel_used"]:
         result[f"mean_{metric}"]=float(np.mean([x[metric] for x in rows]))

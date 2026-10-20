@@ -1,0 +1,32 @@
+{
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "landing-ppo-lateral-v4-continued__step-004751808",
+  "episodes": 20,
+  "seeds": [
+    20000,
+    20019
+  ],
+  "scenario": "nominal",
+  "successes": 0,
+  "success_rate": 0.0,
+  "confidence_interval": [
+    1.3877787807814457e-17,
+    0.1611251580528119
+  ],
+  "mean_reward": -147.13727242273345,
+  "failures": {
+    "crash_speed": 20
+  },
+  "config_hash": "2255ffc440dc1a47",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 8.291184655857993,
+  "median_touchdown_speed": 9.007945065104135,
+  "mean_tilt": 3.3652732973833155,
+  "median_tilt": 2.787023236915521,
+  "mean_pad_distance": 9.204796137271085,
+  "median_pad_distance": 8.814826486024513,
+  "mean_fuel_used": 1055.8104422179879,
+  "median_fuel_used": 1055.0323791284436
+}

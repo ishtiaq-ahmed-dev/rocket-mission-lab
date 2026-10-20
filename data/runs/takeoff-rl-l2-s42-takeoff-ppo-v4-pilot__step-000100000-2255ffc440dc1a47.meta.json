@@ -1,0 +1,21 @@
+{
+  "id": "takeoff-rl-l2-s42-takeoff-ppo-v4-pilot__step-000100000-2255ffc440dc1a47",
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 2,
+  "checkpoint_steps": 100000,
+  "checkpoint_id": "takeoff-ppo-v4-pilot__step-000100000",
+  "difficulty": 1.0,
+  "algorithm": "PPO",
+  "seed": 42,
+  "outcome": "crash_speed",
+  "failure_reason": "crash_speed",
+  "touchdown_speed": 0.2288610299053265,
+  "tilt": 1.1349200984432597,
+  "pad_distance": 0.020701372485256775,
+  "fuel_used": 62.71001988041462,
+  "duration": 0.5000000000000001,
+  "total_reward": -902.6250353500492,
+  "source": "MuJoCo simulation",
+  "controller_status": "measured checkpoint; maturity not certified"
+}

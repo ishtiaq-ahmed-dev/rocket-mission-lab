@@ -1,0 +1,19 @@
+{
+  "id": "landing-rl-l3-s42-landing-ppo-lateral-v4-continued__step-004551808-2255ffc440dc1a47",
+  "mission": "landing",
+  "method": "rl",
+  "level": 3,
+  "checkpoint_steps": 4551808,
+  "algorithm": "PPO",
+  "seed": 42,
+  "outcome": "crash_speed",
+  "failure_reason": "crash_speed",
+  "touchdown_speed": 3.5050487010304607,
+  "tilt": 6.595679340438548,
+  "pad_distance": 4.737007921796045,
+  "fuel_used": 1167.068698558638,
+  "duration": 8.459999999999908,
+  "total_reward": 13.711533958507005,
+  "source": "MuJoCo simulation",
+  "controller_status": "measured checkpoint; maturity not certified"
+}

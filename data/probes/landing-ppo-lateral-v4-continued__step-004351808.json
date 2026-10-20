@@ -1,0 +1,1373 @@
+{
+  "checkpoint_id": "landing-ppo-lateral-v4-continued__step-004351808",
+  "mission": "landing",
+  "steps": 4351808,
+  "config_hash": "4f2cb7c24e9839d5",
+  "training_config_hash": "2255ffc440dc1a47",
+  "created_at": 1792429744.5580504,
+  "scope": "development curriculum probes; not qualification",
+  "stages": [
+    {
+      "difficulty": 0.2,
+      "episodes": 32,
+      "seeds": [
+        21000,
+        21031
+      ],
+      "successes": 32,
+      "failures": {},
+      "mean_speed": 1.1115718247933204,
+      "mean_tilt": 1.1089114200021983,
+      "mean_offset": 2.2608273525855256,
+      "rows": [
+        {
+          "seed": 21000,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1295332399874152,
+          "tilt": 0.5397682335737742,
+          "pad_distance": 2.5922514476526115,
+          "fuel_used": 981.3099528931725,
+          "phase": "landing"
+        },
+        {
+          "seed": 21001,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.9527768485452308,
+          "tilt": 0.3570291384358716,
+          "pad_distance": 2.6189525201112445,
+          "fuel_used": 1006.0913530646485,
+          "phase": "landing"
+        },
+        {
+          "seed": 21002,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.3388422987987691,
+          "tilt": 2.0418149881381975,
+          "pad_distance": 1.818194119950909,
+          "fuel_used": 946.0241832545398,
+          "phase": "landing"
+        },
+        {
+          "seed": 21003,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1109275107606236,
+          "tilt": 0.8828081365363687,
+          "pad_distance": 0.6843570348716629,
+          "fuel_used": 1022.9139038077574,
+          "phase": "landing"
+        },
+        {
+          "seed": 21004,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0928923235255412,
+          "tilt": 1.7725373496519086,
+          "pad_distance": 0.7895771499047752,
+          "fuel_used": 963.5468091806615,
+          "phase": "landing"
+        },
+        {
+          "seed": 21005,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0538576655520977,
+          "tilt": 1.5241025845092397,
+          "pad_distance": 3.6932241211696977,
+          "fuel_used": 1021.8303949748861,
+          "phase": "landing"
+        },
+        {
+          "seed": 21006,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.9095454082927923,
+          "tilt": 0.13868091231825133,
+          "pad_distance": 2.3275829069211458,
+          "fuel_used": 1031.2015317745027,
+          "phase": "landing"
+        },
+        {
+          "seed": 21007,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.2777738513587353,
+          "tilt": 2.090761188699832,
+          "pad_distance": 2.0301386547543308,
+          "fuel_used": 989.9922056190208,
+          "phase": "landing"
+        },
+        {
+          "seed": 21008,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0397888884407092,
+          "tilt": 1.057154231051536,
+          "pad_distance": 1.5375581535680232,
+          "fuel_used": 1014.1096064332105,
+          "phase": "landing"
+        },
+        {
+          "seed": 21009,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0092036019296369,
+          "tilt": 1.7208215147051937,
+          "pad_distance": 0.6400154976140622,
+          "fuel_used": 1046.482719413816,
+          "phase": "landing"
+        },
+        {
+          "seed": 21010,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0152755212872908,
+          "tilt": 1.2730301376608373,
+          "pad_distance": 2.0695048946277836,
+          "fuel_used": 1041.394699235556,
+          "phase": "landing"
+        },
+        {
+          "seed": 21011,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0979748340706976,
+          "tilt": 1.089922987961444,
+          "pad_distance": 1.4853914977123246,
+          "fuel_used": 997.8474804041125,
+          "phase": "landing"
+        },
+        {
+          "seed": 21012,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.9948653770745457,
+          "tilt": 0.8590793476684394,
+          "pad_distance": 3.280345160528653,
+          "fuel_used": 1018.4500315784771,
+          "phase": "landing"
+        },
+        {
+          "seed": 21013,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1703167478617167,
+          "tilt": 1.150120126414663,
+          "pad_distance": 4.386471284957266,
+          "fuel_used": 974.3118621636931,
+          "phase": "landing"
+        },
+        {
+          "seed": 21014,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.087669118305522,
+          "tilt": 1.106924471746462,
+          "pad_distance": 3.6927582490435684,
+          "fuel_used": 1006.360054125631,
+          "phase": "landing"
+        },
+        {
+          "seed": 21015,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1639640071775175,
+          "tilt": 1.8015245947129424,
+          "pad_distance": 1.4868331058341375,
+          "fuel_used": 942.6459354815852,
+          "phase": "landing"
+        },
+        {
+          "seed": 21016,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1968334419969744,
+          "tilt": 0.9217280410482307,
+          "pad_distance": 2.612040720182049,
+          "fuel_used": 969.6137553013377,
+          "phase": "landing"
+        },
+        {
+          "seed": 21017,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.3999480437117238,
+          "tilt": 0.3647667018629876,
+          "pad_distance": 4.173238794065987,
+          "fuel_used": 899.6759886142117,
+          "phase": "landing"
+        },
+        {
+          "seed": 21018,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.9338234434603591,
+          "tilt": 0.5964611724353656,
+          "pad_distance": 2.76981708488969,
+          "fuel_used": 966.0087765660955,
+          "phase": "landing"
+        },
+        {
+          "seed": 21019,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.2218231234321257,
+          "tilt": 0.6660461078509055,
+          "pad_distance": 1.9504447148762316,
+          "fuel_used": 959.0244529850079,
+          "phase": "landing"
+        },
+        {
+          "seed": 21020,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.2218840016369605,
+          "tilt": 0.6995318829489191,
+          "pad_distance": 0.5096266096458765,
+          "fuel_used": 974.3185370276751,
+          "phase": "landing"
+        },
+        {
+          "seed": 21021,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1896878762682679,
+          "tilt": 1.2542508059647437,
+          "pad_distance": 1.4093262501193367,
+          "fuel_used": 1037.7713752793952,
+          "phase": "landing"
+        },
+        {
+          "seed": 21022,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1668959860416195,
+          "tilt": 1.0167537103754003,
+          "pad_distance": 1.4709229114385223,
+          "fuel_used": 1021.9152173187813,
+          "phase": "landing"
+        },
+        {
+          "seed": 21023,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.2170775177216353,
+          "tilt": 2.898456122970789,
+          "pad_distance": 4.102414389343627,
+          "fuel_used": 1000.9064561474315,
+          "phase": "landing"
+        },
+        {
+          "seed": 21024,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1013220143550413,
+          "tilt": 3.0041467907699686,
+          "pad_distance": 2.7811440327224854,
+          "fuel_used": 1019.0221555207336,
+          "phase": "landing"
+        },
+        {
+          "seed": 21025,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1225305801638064,
+          "tilt": 0.6136207411820077,
+          "pad_distance": 3.7484918203694866,
+          "fuel_used": 969.9295635050494,
+          "phase": "landing"
+        },
+        {
+          "seed": 21026,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0741080641111755,
+          "tilt": 0.4656934838733097,
+          "pad_distance": 2.9931203054610536,
+          "fuel_used": 1031.0737849532416,
+          "phase": "landing"
+        },
+        {
+          "seed": 21027,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.870470517832721,
+          "tilt": 0.6754056763598439,
+          "pad_distance": 1.9622762603940478,
+          "fuel_used": 1054.9397204801226,
+          "phase": "landing"
+        },
+        {
+          "seed": 21028,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.359566754098634,
+          "tilt": 0.5653378263170806,
+          "pad_distance": 2.6209840120093295,
+          "fuel_used": 891.6965235050902,
+          "phase": "landing"
+        },
+        {
+          "seed": 21029,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.145564579782508,
+          "tilt": 0.676918155487965,
+          "pad_distance": 1.1865813022508465,
+          "fuel_used": 995.3133041607525,
+          "phase": "landing"
+        },
+        {
+          "seed": 21030,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.9025409953327229,
+          "tilt": 1.1356492472311341,
+          "pad_distance": 0.8578525994799638,
+          "fuel_used": 1005.7015129917545,
+          "phase": "landing"
+        },
+        {
+          "seed": 21031,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0010142104711381,
+          "tilt": 0.5243190296067394,
+          "pad_distance": 2.065037676266085,
+          "fuel_used": 943.3664218627018,
+          "phase": "landing"
+        }
+      ],
+      "replay_url": "/model-replays/landing-ppo-lateral-v4-continued__step-004351808-d0.200-s21000.json",
+      "replay_seed": 21000,
+      "replay_outcome": "success"
+    },
+    {
+      "difficulty": 0.4,
+      "episodes": 32,
+      "seeds": [
+        21000,
+        21031
+      ],
+      "successes": 23,
+      "failures": {
+        "missed_pad": 5,
+        "crash_speed": 3,
+        "crash_tilt": 1
+      },
+      "mean_speed": 2.242177688076138,
+      "mean_tilt": 5.410025921036603,
+      "mean_offset": 7.843494442768293,
+      "rows": [
+        {
+          "seed": 21000,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.349486107107108,
+          "tilt": 2.826724253169773,
+          "pad_distance": 4.477809751556602,
+          "fuel_used": 1144.8268049997405,
+          "phase": "landing"
+        },
+        {
+          "seed": 21001,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1105076836864383,
+          "tilt": 0.7520349041303864,
+          "pad_distance": 2.7770924068046696,
+          "fuel_used": 1254.5195735123525,
+          "phase": "landing"
+        },
+        {
+          "seed": 21002,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.7532356793825508,
+          "tilt": 3.0335081180096246,
+          "pad_distance": 3.5297481772320776,
+          "fuel_used": 1191.4184053544886,
+          "phase": "landing"
+        },
+        {
+          "seed": 21003,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.8952170930733694,
+          "tilt": 2.620286410304335,
+          "pad_distance": 0.9182985552800496,
+          "fuel_used": 1248.0491113637654,
+          "phase": "landing"
+        },
+        {
+          "seed": 21004,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.9622830145341006,
+          "tilt": 3.092462700242213,
+          "pad_distance": 3.1302607685820463,
+          "fuel_used": 1151.8461659725708,
+          "phase": "landing"
+        },
+        {
+          "seed": 21005,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 1.6188309400275667,
+          "tilt": 4.663847214867952,
+          "pad_distance": 6.984353602464111,
+          "fuel_used": 1188.721473098658,
+          "phase": "landing"
+        },
+        {
+          "seed": 21006,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.6539169658352173,
+          "tilt": 1.6786118737878966,
+          "pad_distance": 1.5331840818724487,
+          "fuel_used": 1262.5869264656485,
+          "phase": "landing"
+        },
+        {
+          "seed": 21007,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.5940308709873048,
+          "tilt": 3.167326349724496,
+          "pad_distance": 4.692535865479396,
+          "fuel_used": 1163.6567388674648,
+          "phase": "landing"
+        },
+        {
+          "seed": 21008,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.9948200909235575,
+          "tilt": 1.7065364714508786,
+          "pad_distance": 2.2065667678771224,
+          "fuel_used": 1232.7781328090077,
+          "phase": "landing"
+        },
+        {
+          "seed": 21009,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.9704827575115156,
+          "tilt": 3.212924230371674,
+          "pad_distance": 2.6273589449291745,
+          "fuel_used": 1359.6991804593818,
+          "phase": "landing"
+        },
+        {
+          "seed": 21010,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.283061787168786,
+          "tilt": 2.974756586336132,
+          "pad_distance": 4.862097215869424,
+          "fuel_used": 1275.1925943368005,
+          "phase": "landing"
+        },
+        {
+          "seed": 21011,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.3432157537990472,
+          "tilt": 2.1131997731390926,
+          "pad_distance": 3.4503633371277664,
+          "fuel_used": 1192.63450454976,
+          "phase": "landing"
+        },
+        {
+          "seed": 21012,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.636383265363285,
+          "tilt": 3.9012501371038746,
+          "pad_distance": 4.114896349127867,
+          "fuel_used": 1244.2364204188743,
+          "phase": "landing"
+        },
+        {
+          "seed": 21013,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 1.1617776368452617,
+          "tilt": 4.341057788724148,
+          "pad_distance": 7.845576402415703,
+          "fuel_used": 1102.2046915165647,
+          "phase": "landing"
+        },
+        {
+          "seed": 21014,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 0.6643345407492541,
+          "tilt": 2.3539481425395943,
+          "pad_distance": 6.5421498091454495,
+          "fuel_used": 1221.3021097183082,
+          "phase": "landing"
+        },
+        {
+          "seed": 21015,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.2225708736554117,
+          "tilt": 3.0932994537842617,
+          "pad_distance": 3.7214423012760878,
+          "fuel_used": 1151.29112148288,
+          "phase": "landing"
+        },
+        {
+          "seed": 21016,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1313158945284016,
+          "tilt": 0.312020793131967,
+          "pad_distance": 4.013198915330122,
+          "fuel_used": 1119.0346090628354,
+          "phase": "landing"
+        },
+        {
+          "seed": 21017,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 1.4864117766155678,
+          "tilt": 2.7759411198438486,
+          "pad_distance": 7.391642558330292,
+          "fuel_used": 1050.3469691328064,
+          "phase": "landing"
+        },
+        {
+          "seed": 21018,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1295948320105713,
+          "tilt": 1.2690576236440732,
+          "pad_distance": 4.303628210241194,
+          "fuel_used": 1241.4099117878632,
+          "phase": "landing"
+        },
+        {
+          "seed": 21019,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.341089154968874,
+          "tilt": 1.2952869336578714,
+          "pad_distance": 2.9728556388510707,
+          "fuel_used": 1154.0990977555412,
+          "phase": "landing"
+        },
+        {
+          "seed": 21020,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0858316655689018,
+          "tilt": 0.4361299853161026,
+          "pad_distance": 1.3819309315572381,
+          "fuel_used": 1205.2884433067702,
+          "phase": "landing"
+        },
+        {
+          "seed": 21021,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.072518696358991,
+          "tilt": 1.3741129751564907,
+          "pad_distance": 2.1121387023980445,
+          "fuel_used": 1232.76694530844,
+          "phase": "landing"
+        },
+        {
+          "seed": 21022,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.037628888370358,
+          "tilt": 1.4406700156991639,
+          "pad_distance": 1.7955397449245427,
+          "fuel_used": 1210.9014029167975,
+          "phase": "landing"
+        },
+        {
+          "seed": 21023,
+          "outcome": "crash_tilt",
+          "failure_reason": "crash_tilt",
+          "touchdown_speed": 1.868351766326905,
+          "tilt": 6.213469089816758,
+          "pad_distance": 8.077801028377886,
+          "fuel_used": 1224.6729814778737,
+          "phase": "landing"
+        },
+        {
+          "seed": 21024,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.366067252714098,
+          "tilt": 6.445865657329916,
+          "pad_distance": 4.7387034017652025,
+          "fuel_used": 1294.6736169268988,
+          "phase": "landing"
+        },
+        {
+          "seed": 21025,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 0.8700012685135933,
+          "tilt": 1.5389573441997122,
+          "pad_distance": 5.686445672688279,
+          "fuel_used": 1176.9332375664962,
+          "phase": "landing"
+        },
+        {
+          "seed": 21026,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.6500116687454897,
+          "tilt": 1.8647402746100363,
+          "pad_distance": 4.887047672222085,
+          "fuel_used": 1223.0256723336352,
+          "phase": "landing"
+        },
+        {
+          "seed": 21027,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 31.37999674814097,
+          "tilt": 95.62742785616595,
+          "pad_distance": 128.73196311129854,
+          "fuel_used": 3865.2659780218382,
+          "phase": "landing"
+        },
+        {
+          "seed": 21028,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1157097477810844,
+          "tilt": 1.169671017588146,
+          "pad_distance": 4.726109187367628,
+          "fuel_used": 1098.8005008848595,
+          "phase": "landing"
+        },
+        {
+          "seed": 21029,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.7620640827190452,
+          "tilt": 0.2684892890473286,
+          "pad_distance": 2.221291970696766,
+          "fuel_used": 1233.2500222040526,
+          "phase": "landing"
+        },
+        {
+          "seed": 21030,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.1805149813635016,
+          "tilt": 2.7958488525733403,
+          "pad_distance": 1.0602511481418715,
+          "fuel_used": 1249.5860761365493,
+          "phase": "landing"
+        },
+        {
+          "seed": 21031,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.0584225330602783,
+          "tilt": 2.761366237704261,
+          "pad_distance": 3.477539937354635,
+          "fuel_used": 1189.315111798951,
+          "phase": "landing"
+        }
+      ],
+      "replay_url": "/model-replays/landing-ppo-lateral-v4-continued__step-004351808-d0.400-s21000.json",
+      "replay_seed": 21000,
+      "replay_outcome": "success"
+    },
+    {
+      "difficulty": 0.6,
+      "episodes": 32,
+      "seeds": [
+        21000,
+        21031
+      ],
+      "successes": 6,
+      "failures": {
+        "missed_pad": 8,
+        "crash_speed": 16,
+        "crash_tilt": 2
+      },
+      "mean_speed": 5.059912460575457,
+      "mean_tilt": 14.099784292174782,
+      "mean_offset": 22.256982625010732,
+      "rows": [
+        {
+          "seed": 21000,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 1.9515840273914589,
+          "tilt": 4.147111875380896,
+          "pad_distance": 7.033545150557659,
+          "fuel_used": 1186.3081743589846,
+          "phase": "landing"
+        },
+        {
+          "seed": 21001,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 39.24487614045974,
+          "tilt": 98.7505412065049,
+          "pad_distance": 108.56660242643447,
+          "fuel_used": 4155.745550319645,
+          "phase": "landing"
+        },
+        {
+          "seed": 21002,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.5896453123577174,
+          "tilt": 4.054623525028825,
+          "pad_distance": 4.827073846704017,
+          "fuel_used": 1304.7519610201598,
+          "phase": "landing"
+        },
+        {
+          "seed": 21003,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.606737900014267,
+          "tilt": 4.566714043773984,
+          "pad_distance": 1.0806209719720843,
+          "fuel_used": 1369.727206114103,
+          "phase": "landing"
+        },
+        {
+          "seed": 21004,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 1.2463714979702414,
+          "tilt": 4.194931500074955,
+          "pad_distance": 5.119761276800412,
+          "fuel_used": 1212.3044249441173,
+          "phase": "landing"
+        },
+        {
+          "seed": 21005,
+          "outcome": "crash_tilt",
+          "failure_reason": "crash_tilt",
+          "touchdown_speed": 1.972050571685025,
+          "tilt": 6.4040087627643745,
+          "pad_distance": 11.377958160062136,
+          "fuel_used": 1203.268048539483,
+          "phase": "landing"
+        },
+        {
+          "seed": 21006,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.4970244468925005,
+          "tilt": 2.541619790959588,
+          "pad_distance": 3.1203161285475582,
+          "fuel_used": 1280.2803570587912,
+          "phase": "landing"
+        },
+        {
+          "seed": 21007,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.282115622934269,
+          "tilt": 4.432681280186581,
+          "pad_distance": 6.865491385609502,
+          "fuel_used": 1255.4392547123025,
+          "phase": "landing"
+        },
+        {
+          "seed": 21008,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.2671684504908858,
+          "tilt": 2.567378538235095,
+          "pad_distance": 3.6869329986608976,
+          "fuel_used": 1275.4546205563965,
+          "phase": "landing"
+        },
+        {
+          "seed": 21009,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 4.065004639251946,
+          "tilt": 4.630973433239552,
+          "pad_distance": 6.573227992671325,
+          "fuel_used": 1551.2290933429267,
+          "phase": "landing"
+        },
+        {
+          "seed": 21010,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 6.660150003307774,
+          "tilt": 19.059443443778086,
+          "pad_distance": 23.073892134428558,
+          "fuel_used": 2090.4830298417073,
+          "phase": "landing"
+        },
+        {
+          "seed": 21011,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.124220253481416,
+          "tilt": 3.3549757078042366,
+          "pad_distance": 5.148425018307235,
+          "fuel_used": 1248.6366285330787,
+          "phase": "landing"
+        },
+        {
+          "seed": 21012,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.1048945073931704,
+          "tilt": 5.566892046036926,
+          "pad_distance": 6.645937337551042,
+          "fuel_used": 1280.3016866318503,
+          "phase": "landing"
+        },
+        {
+          "seed": 21013,
+          "outcome": "crash_tilt",
+          "failure_reason": "crash_tilt",
+          "touchdown_speed": 1.9422456423101702,
+          "tilt": 5.399716732177051,
+          "pad_distance": 11.678329873376798,
+          "fuel_used": 1101.3983737291346,
+          "phase": "landing"
+        },
+        {
+          "seed": 21014,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 0.6952880621396412,
+          "tilt": 3.7274470335624494,
+          "pad_distance": 9.657328200108378,
+          "fuel_used": 1307.8248971150642,
+          "phase": "landing"
+        },
+        {
+          "seed": 21015,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 1.5143244516574914,
+          "tilt": 4.813758278628434,
+          "pad_distance": 5.901008177552669,
+          "fuel_used": 1279.8618289809,
+          "phase": "landing"
+        },
+        {
+          "seed": 21016,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 1.4811860422104877,
+          "tilt": 0.21104208175776018,
+          "pad_distance": 5.6956901323334534,
+          "fuel_used": 1179.8941780794594,
+          "phase": "landing"
+        },
+        {
+          "seed": 21017,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.606602220482908,
+          "tilt": 3.614400096109613,
+          "pad_distance": 10.871765392753487,
+          "fuel_used": 1050.5861216178128,
+          "phase": "landing"
+        },
+        {
+          "seed": 21018,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 31.1223190230267,
+          "tilt": 106.82771564906457,
+          "pad_distance": 173.81664617831618,
+          "fuel_used": 4112.861540183414,
+          "phase": "landing"
+        },
+        {
+          "seed": 21019,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.0779218980720815,
+          "tilt": 2.4745716595496305,
+          "pad_distance": 4.101507144095056,
+          "fuel_used": 1252.3638221950823,
+          "phase": "landing"
+        },
+        {
+          "seed": 21020,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.4018478533085712,
+          "tilt": 1.8401276223549587,
+          "pad_distance": 4.3576664550437645,
+          "fuel_used": 1419.0443631643811,
+          "phase": "landing"
+        },
+        {
+          "seed": 21021,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.4973933980177867,
+          "tilt": 1.7866817444384515,
+          "pad_distance": 3.126597176226839,
+          "fuel_used": 1280.9518944169704,
+          "phase": "landing"
+        },
+        {
+          "seed": 21022,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 1.6095286778931106,
+          "tilt": 1.978131939735195,
+          "pad_distance": 2.150718353321521,
+          "fuel_used": 1231.883819393337,
+          "phase": "landing"
+        },
+        {
+          "seed": 21023,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.8088582780680813,
+          "tilt": 9.30867522840354,
+          "pad_distance": 12.18169501572604,
+          "fuel_used": 1319.230078581253,
+          "phase": "landing"
+        },
+        {
+          "seed": 21024,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 4.946062186132966,
+          "tilt": 10.276644835173256,
+          "pad_distance": 4.527940996892101,
+          "fuel_used": 1481.9890336575281,
+          "phase": "landing"
+        },
+        {
+          "seed": 21025,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 1.5756994946868281,
+          "tilt": 2.741199228097766,
+          "pad_distance": 7.300914482480183,
+          "fuel_used": 1294.4539554274124,
+          "phase": "landing"
+        },
+        {
+          "seed": 21026,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 0.7952471146998926,
+          "tilt": 2.8544876981933966,
+          "pad_distance": 7.237404624001109,
+          "fuel_used": 1284.0176547158262,
+          "phase": "landing"
+        },
+        {
+          "seed": 21027,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 28.98425961694806,
+          "tilt": 115.675634824156,
+          "pad_distance": 236.46740003859037,
+          "fuel_used": 4009.961269643605,
+          "phase": "landing"
+        },
+        {
+          "seed": 21028,
+          "outcome": "missed_pad",
+          "failure_reason": "missed_pad",
+          "touchdown_speed": 0.9836910455259402,
+          "tilt": 2.683813955151446,
+          "pad_distance": 6.343055508531907,
+          "fuel_used": 1198.0671969639297,
+          "phase": "landing"
+        },
+        {
+          "seed": 21029,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 0.9588595525680683,
+          "tilt": 0.93360728356267,
+          "pad_distance": 4.63462179527642,
+          "fuel_used": 1442.6388724692042,
+          "phase": "landing"
+        },
+        {
+          "seed": 21030,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.597124122540585,
+          "tilt": 4.597119594977929,
+          "pad_distance": 4.296054050933057,
+          "fuel_used": 1442.3786547984619,
+          "phase": "landing"
+        },
+        {
+          "seed": 21031,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.706896684494864,
+          "tilt": 5.176426710730875,
+          "pad_distance": 4.757315576477251,
+          "fuel_used": 1400.067486721402,
+          "phase": "landing"
+        }
+      ],
+      "replay_url": "/model-replays/landing-ppo-lateral-v4-continued__step-004351808-d0.600-s21000.json",
+      "replay_seed": 21000,
+      "replay_outcome": "missed_pad"
+    },
+    {
+      "difficulty": 1.0,
+      "episodes": 32,
+      "seeds": [
+        21000,
+        21031
+      ],
+      "successes": 0,
+      "failures": {
+        "crash_speed": 32
+      },
+      "mean_speed": 6.688509842516267,
+      "mean_tilt": 3.6026085479303402,
+      "mean_offset": 10.551432647716851,
+      "rows": [
+        {
+          "seed": 21000,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 10.108974580237566,
+          "tilt": 3.1417617307525485,
+          "pad_distance": 14.451649615396844,
+          "fuel_used": 1034.1045525727568,
+          "phase": "landing"
+        },
+        {
+          "seed": 21001,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 3.2775712537420736,
+          "tilt": 2.0395706156836715,
+          "pad_distance": 8.477897237807287,
+          "fuel_used": 1225.5792409699698,
+          "phase": "landing"
+        },
+        {
+          "seed": 21002,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 4.84613318742411,
+          "tilt": 5.938455629143604,
+          "pad_distance": 8.552787535786278,
+          "fuel_used": 1211.380429511304,
+          "phase": "landing"
+        },
+        {
+          "seed": 21003,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 4.254908047092952,
+          "tilt": 3.7679343997647967,
+          "pad_distance": 4.634895725381693,
+          "fuel_used": 1163.3900855650118,
+          "phase": "landing"
+        },
+        {
+          "seed": 21004,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 7.66711372213875,
+          "tilt": 3.1191800098751594,
+          "pad_distance": 6.341312416337452,
+          "fuel_used": 1068.7496087755953,
+          "phase": "landing"
+        },
+        {
+          "seed": 21005,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 9.177967658717707,
+          "tilt": 4.814882098397513,
+          "pad_distance": 21.239654768148718,
+          "fuel_used": 1056.3334888259396,
+          "phase": "landing"
+        },
+        {
+          "seed": 21006,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 11.283610767527597,
+          "tilt": 3.5754215835353187,
+          "pad_distance": 11.688165679076956,
+          "fuel_used": 1073.962955214669,
+          "phase": "landing"
+        },
+        {
+          "seed": 21007,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 7.388057569576408,
+          "tilt": 5.138571816500396,
+          "pad_distance": 15.6618619789126,
+          "fuel_used": 1082.0060864095885,
+          "phase": "landing"
+        },
+        {
+          "seed": 21008,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 9.357596975216513,
+          "tilt": 2.8012638836770565,
+          "pad_distance": 7.505359795416701,
+          "fuel_used": 1081.4902095306861,
+          "phase": "landing"
+        },
+        {
+          "seed": 21009,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.9545380429658468,
+          "tilt": 6.998922556181557,
+          "pad_distance": 7.854354470469677,
+          "fuel_used": 1291.393816072692,
+          "phase": "landing"
+        },
+        {
+          "seed": 21010,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 6.741283313102532,
+          "tilt": 4.570663923709225,
+          "pad_distance": 15.315023142624886,
+          "fuel_used": 1117.6076047494535,
+          "phase": "landing"
+        },
+        {
+          "seed": 21011,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 7.4075434195148695,
+          "tilt": 3.8719996350357633,
+          "pad_distance": 11.660881647211621,
+          "fuel_used": 1058.755836151402,
+          "phase": "landing"
+        },
+        {
+          "seed": 21012,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 9.963593292256991,
+          "tilt": 3.1546936494707243,
+          "pad_distance": 14.835854550300578,
+          "fuel_used": 1069.0738186878898,
+          "phase": "landing"
+        },
+        {
+          "seed": 21013,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 12.08140789121264,
+          "tilt": 2.925743731615119,
+          "pad_distance": 18.737954787429583,
+          "fuel_used": 973.2754102600775,
+          "phase": "landing"
+        },
+        {
+          "seed": 21014,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 6.916917492784213,
+          "tilt": 2.802324408188885,
+          "pad_distance": 13.877992453578898,
+          "fuel_used": 1106.97813512408,
+          "phase": "landing"
+        },
+        {
+          "seed": 21015,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 3.770319155466441,
+          "tilt": 4.824309224179683,
+          "pad_distance": 11.051353980726175,
+          "fuel_used": 1210.9779735168922,
+          "phase": "landing"
+        },
+        {
+          "seed": 21016,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 9.858173605252174,
+          "tilt": 1.6325486718762057,
+          "pad_distance": 8.123238795687845,
+          "fuel_used": 1028.3564081877794,
+          "phase": "landing"
+        },
+        {
+          "seed": 21017,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 13.00552396489877,
+          "tilt": 2.148624474162533,
+          "pad_distance": 17.86103712302267,
+          "fuel_used": 941.0392355308704,
+          "phase": "landing"
+        },
+        {
+          "seed": 21018,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 2.6498524658004667,
+          "tilt": 3.0298332248607673,
+          "pad_distance": 8.554297273602621,
+          "fuel_used": 1293.2951209691819,
+          "phase": "landing"
+        },
+        {
+          "seed": 21019,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 3.3975885708257687,
+          "tilt": 2.690288951934141,
+          "pad_distance": 6.382324170367492,
+          "fuel_used": 1182.2738724710034,
+          "phase": "landing"
+        },
+        {
+          "seed": 21020,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 3.1547162324278273,
+          "tilt": 0.17941898635758433,
+          "pad_distance": 1.5306538084855486,
+          "fuel_used": 1235.9196242415146,
+          "phase": "landing"
+        },
+        {
+          "seed": 21021,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 10.868968646766685,
+          "tilt": 2.656882887189406,
+          "pad_distance": 4.578599085939551,
+          "fuel_used": 1095.3193097501116,
+          "phase": "landing"
+        },
+        {
+          "seed": 21022,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 10.76671251301012,
+          "tilt": 2.4461067279123636,
+          "pad_distance": 4.067147525342548,
+          "fuel_used": 1047.8854252922556,
+          "phase": "landing"
+        },
+        {
+          "seed": 21023,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 6.7952338545380355,
+          "tilt": 6.858077486155281,
+          "pad_distance": 22.335445090919457,
+          "fuel_used": 1114.1505767324743,
+          "phase": "landing"
+        },
+        {
+          "seed": 21024,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 3.1238776617060733,
+          "tilt": 11.850318557217664,
+          "pad_distance": 17.266035227416797,
+          "fuel_used": 1356.357584920739,
+          "phase": "landing"
+        },
+        {
+          "seed": 21025,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 5.82321701785828,
+          "tilt": 3.5042237660382263,
+          "pad_distance": 15.612234033156113,
+          "fuel_used": 1109.9229477757963,
+          "phase": "landing"
+        },
+        {
+          "seed": 21026,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 7.356340820275826,
+          "tilt": 2.1146514901501807,
+          "pad_distance": 10.622116293206886,
+          "fuel_used": 1123.9866579903737,
+          "phase": "landing"
+        },
+        {
+          "seed": 21027,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 4.013408341594845,
+          "tilt": 2.6083279734588243,
+          "pad_distance": 4.7295728940460355,
+          "fuel_used": 1277.5796281765306,
+          "phase": "landing"
+        },
+        {
+          "seed": 21028,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 3.7934118280297597,
+          "tilt": 1.9836166707633174,
+          "pad_distance": 10.24435833922988,
+          "fuel_used": 1127.9598737021515,
+          "phase": "landing"
+        },
+        {
+          "seed": 21029,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 3.2507109157464256,
+          "tilt": 0.6440847248358156,
+          "pad_distance": 2.9349693034955218,
+          "fuel_used": 1200.5727569111968,
+          "phase": "landing"
+        },
+        {
+          "seed": 21030,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 3.9465915647175462,
+          "tilt": 3.8394953314245135,
+          "pad_distance": 1.292013041271304,
+          "fuel_used": 1176.1757147494864,
+          "phase": "landing"
+        },
+        {
+          "seed": 21031,
+          "outcome": "crash_speed",
+          "failure_reason": "crash_speed",
+          "touchdown_speed": 5.030450588094747,
+          "tilt": 3.6112747137230397,
+          "pad_distance": 9.624802937143038,
+          "fuel_used": 1114.410988887099,
+          "phase": "landing"
+        }
+      ],
+      "replay_url": "/model-replays/landing-ppo-lateral-v4-continued__step-004351808-d1.000-s21000.json",
+      "replay_seed": 21000,
+      "replay_outcome": "crash_speed"
+    }
+  ]
+}

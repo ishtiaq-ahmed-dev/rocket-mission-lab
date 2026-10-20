@@ -1,0 +1,16 @@
+{
+  "id": "takeoff-classical-l4-native-nominal10000",
+  "mission": "takeoff",
+  "method": "classical",
+  "level": 4,
+  "scenario": "nominal",
+  "checkpoint_id": null,
+  "status": "completed",
+  "completed": 10000,
+  "total": 10000,
+  "successes": 10000,
+  "started_at": 1792437521.203457,
+  "updated_at": 1792438461.0262127,
+  "pid": 33248,
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc"
+}

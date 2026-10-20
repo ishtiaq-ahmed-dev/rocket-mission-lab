@@ -1,0 +1,35 @@
+{
+  "mission": "takeoff",
+  "method": "classical",
+  "level": 4,
+  "checkpoint_id": null,
+  "episodes": 10000,
+  "seeds": [
+    10000,
+    19999
+  ],
+  "scenario": "nominal",
+  "successes": 10000,
+  "success_rate": 1.0,
+  "confidence_interval": [
+    0.9996160016293234,
+    1.0
+  ],
+  "mean_reward": 434.4724711383747,
+  "failures": {},
+  "config_hash": "4f2cb7c24e9839d5",
+  "qualification": "full fixed-seed batch",
+  "mean_touchdown_speed": 24.96071464692253,
+  "median_touchdown_speed": 24.964802448063313,
+  "mean_tilt": 0.6652191230606677,
+  "median_tilt": 0.6163275188721253,
+  "mean_pad_distance": 0.5685306959826668,
+  "median_pad_distance": 0.5335416023684485,
+  "mean_fuel_used": 3363.2627381453485,
+  "median_fuel_used": 3361.718021536135,
+  "evaluation_role": "frozen-candidate nominal qualification",
+  "progress_id": "takeoff-classical-l4-native-nominal10000",
+  "manifest_file": "takeoff-classical-l4-native-nominal10000.manifest.json",
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc",
+  "completed_at": 1792438461.0272136
+}

@@ -1,6 +1,7 @@
 import {useLayoutEffect,useMemo,useRef} from 'react';
 import {Canvas,useFrame,useThree} from '@react-three/fiber';
 import * as THREE from 'three';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import World,{useVehicleTexture} from './World';
 import {useLab} from './store';
 import {sample} from './telemetry';
@@ -9,21 +10,27 @@ import CameraRig from './CameraRig';
 import Trajectory from './Trajectory';
 import Engine from './Engine';
 import RenderOutput from './RenderOutput';
+import FrameDriver from './FrameDriver';
+import {physicsPosition,physicsRotation} from './coordinates';
 import type {Telemetry} from './types';
 
-const C=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2),Ci=C.clone().invert();
-const world=(p:number[]):[number,number,number]=>[p[0],p[2],-p[1]];
 function Strut({from,to,radius=.12,color='#8b9698'}:{from:[number,number,number];to:[number,number,number];radius?:number;color?:string}){
   const a=new THREE.Vector3(...from),b=new THREE.Vector3(...to),mid=a.clone().add(b).multiplyScalar(.5),q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),b.clone().sub(a).normalize());
   return <mesh position={mid} quaternion={q} castShadow><cylinderGeometry args={[radius,radius,a.distanceTo(b),16]}/><meshPhysicalMaterial color={color} metalness={.8} roughness={.24}/></mesh>;
 }
 function Rocket({telemetry,ghost=false}:{telemetry:Telemetry;ghost?:boolean}){
   const root=useRef<THREE.Group>(null);const map=useVehicleTexture();
+  const fin=useMemo(()=>{
+    const parts:THREE.BufferGeometry[]=[];
+    for(let k=0;k<7;k++){parts.push(new THREE.BoxGeometry(2.15,.13,.045).translate(0,0,(k-3)*.3));parts.push(new THREE.BoxGeometry(.045,.15,1.95).translate((k-3)*.32,0,0));}
+    for(const n of [-1,1])parts.push(new THREE.BoxGeometry(.08,.24,2.08).translate(n*1.08,0,0));
+    const geometry=mergeGeometries(parts);parts.forEach(part=>part.dispose());return geometry;
+  },[]);
   const legShell=useMemo(()=>{const shape=new THREE.Shape();shape.moveTo(1.73,-11);shape.lineTo(2.28,-11.5);shape.lineTo(6.2,-19.6);shape.lineTo(5.5,-19.5);shape.lineTo(2,-14.1);shape.closePath();const geometry=new THREE.ExtrudeGeometry(shape,{depth:.42,bevelEnabled:true,bevelThickness:.04,bevelSize:.04,bevelSegments:2,steps:1});geometry.translate(0,0,-.21);return geometry;},[]);
   const material=useMemo(()=>new THREE.MeshPhysicalMaterial({map:ghost?null:map,color:ghost?'#79d5df':'#ffffff',metalness:ghost?.1:.2,roughness:.33,clearcoat:.22,clearcoatRoughness:.35,transparent:ghost,opacity:ghost?.22:1,depthWrite:!ghost}),[ghost,map]);
   useFrame(()=>{
     const {time}=useLab.getState(),f=sample(telemetry.frames,time);if(!root.current)return;
-    root.current.position.set(...world(f.position));root.current.quaternion.copy(C).multiply(new THREE.Quaternion(f.quaternion[1],f.quaternion[2],f.quaternion[3],f.quaternion[0])).multiply(Ci);
+    root.current.position.set(...physicsPosition(f.position));physicsRotation(f.quaternion,root.current.quaternion);
   });
   return <group ref={root}>
     <mesh material={material} castShadow={!ghost} receiveShadow><cylinderGeometry args={[1.8,1.8,34,96,16]}/></mesh>
@@ -37,11 +44,7 @@ function Rocket({telemetry,ghost=false}:{telemetry:Telemetry;ghost?:boolean}){
       <Strut from={[2.8,-13.4,0]} to={[5.2,-17.6,0]} radius={.085} color="#c1c8c6"/>
       <mesh position={[1.85,-11.3,0]} castShadow><sphereGeometry args={[.25,20,16]}/><meshPhysicalMaterial color="#68777a" metalness={.8} roughness={.25}/></mesh>
       <mesh position={[6.2,-19.85,0]} castShadow><cylinderGeometry args={[.72,.82,.3,32]}/><meshPhysicalMaterial color="#2f3637" metalness={.5} roughness={.65}/></mesh>
-      <group position={[2.65,12,0]}>
-        {Array.from({length:7},(_,k)=><mesh key={k} position={[0,0,(k-3)*.3]} castShadow><boxGeometry args={[2.15,.13,.045]}/><meshPhysicalMaterial color="#59676c" metalness={.8} roughness={.24}/></mesh>)}
-        {Array.from({length:7},(_,k)=><mesh key={k} position={[(k-3)*.32,0,0]} castShadow><boxGeometry args={[.045,.15,1.95]}/><meshPhysicalMaterial color="#59676c" metalness={.8} roughness={.24}/></mesh>)}
-        {[-1,1].map(n=><mesh key={n} position={[n*1.08,0,0]}><boxGeometry args={[.08,.24,2.08]}/><meshPhysicalMaterial color="#576a70" metalness={.8} roughness={.3}/></mesh>)}
-      </group>
+      <mesh position={[2.65,12,0]} geometry={fin} castShadow><meshPhysicalMaterial color="#59676c" metalness={.8} roughness={.24}/></mesh>
       <mesh position={[1.81,-1,0]}><cylinderGeometry args={[.065,.065,20,12]}/><meshPhysicalMaterial color="#b6beb8" metalness={.6} roughness={.4}/></mesh>
     </group>)}
     {!ghost&&<Engine telemetry={telemetry}/>}
@@ -71,7 +74,6 @@ function Exhaust({telemetry}:{telemetry:Telemetry}){
 }
 function FlightScene(){
   const telemetry=useLab(s=>s.telemetry),ghost=useLab(s=>s.ghost);
-  useFrame((_,dt)=>useLab.getState().advance(Math.min(dt,.1)));
-  return <><World/>{telemetry&&<><Rocket telemetry={telemetry}/><Exhaust telemetry={telemetry}/><Trajectory telemetry={telemetry}/></>}{ghost&&<><Rocket telemetry={ghost} ghost/><Trajectory telemetry={ghost} ghost/></>}<CameraRig/><RenderOutput/></>;
+  return <><FrameDriver/><World/>{telemetry&&<><Rocket telemetry={telemetry}/><Exhaust telemetry={telemetry}/><Trajectory telemetry={telemetry}/></>}{ghost&&<><Rocket telemetry={ghost} ghost/><Trajectory telemetry={ghost} ghost/></>}<CameraRig/><RenderOutput/></>;
 }
-export default function Scene(){return <Canvas shadows camera={{position:[75,245,80],fov:40,near:1,far:12000}} dpr={1} gl={{antialias:true,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:1.05,outputColorSpace:THREE.SRGBColorSpace}}><FlightScene/></Canvas>;}
+export default function Scene(){return <Canvas frameloop="demand" shadows camera={{position:[75,245,80],fov:40,near:1,far:12000}} dpr={1} gl={{antialias:true,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:1.05,outputColorSpace:THREE.SRGBColorSpace}}><FlightScene/></Canvas>;}

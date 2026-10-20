@@ -1,0 +1,16 @@
+{
+  "scope": "Initial pad-objective transfer before updates",
+  "parent": "landing-ppo-horizon-v9-pilot__step-006305328",
+  "child": "landing-ppo-pad-v10-pilot__step-006305328",
+  "episodes": 20,
+  "physical_rows_match_exactly": true,
+  "compared_fields": [
+    "seed",
+    "outcome",
+    "touchdown_speed",
+    "tilt",
+    "pad_distance",
+    "fuel_used"
+  ],
+  "reward_comparison": "Excluded because pad weights changed"
+}

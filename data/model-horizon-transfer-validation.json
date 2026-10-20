@@ -1,0 +1,16 @@
+{
+  "scope": "Initial longer-credit actor transfer before updates",
+  "parent": "landing-ppo-full-v8-pilot__step-005301808",
+  "child": "landing-ppo-horizon-v9-pilot__step-005301808",
+  "episodes": 20,
+  "physical_rows_and_rewards_match_exactly": true,
+  "compared_fields": [
+    "seed",
+    "outcome",
+    "touchdown_speed",
+    "tilt",
+    "pad_distance",
+    "fuel_used",
+    "reward"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "scope": "Initial mixed-start actor transfer; before any v5 update",
+  "parent": "landing-ppo-lateral-v4-continued__step-004351808",
+  "child": "landing-ppo-mixed-v5-pilot__step-004351808",
+  "episodes": 20,
+  "physical_rows_and_rewards_match_exactly": true,
+  "compared_fields": [
+    "seed",
+    "outcome",
+    "touchdown_speed",
+    "tilt",
+    "pad_distance",
+    "fuel_used",
+    "reward"
+  ]
+}

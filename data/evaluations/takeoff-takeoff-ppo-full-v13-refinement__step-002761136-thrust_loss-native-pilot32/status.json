@@ -1,0 +1,16 @@
+{
+  "id": "takeoff-takeoff-ppo-full-v13-refinement__step-002761136-thrust_loss-native-pilot32",
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "scenario": "thrust_loss",
+  "checkpoint_id": "takeoff-ppo-full-v13-refinement__step-002761136",
+  "status": "completed",
+  "completed": 32,
+  "total": 32,
+  "successes": 0,
+  "started_at": 1792437841.593541,
+  "updated_at": 1792437847.8267908,
+  "pid": 12544,
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc"
+}

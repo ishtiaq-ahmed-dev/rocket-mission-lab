@@ -16,7 +16,7 @@ app.add_middleware(CORSMiddleware,allow_origins=["http://localhost:5180","http:/
 job_lock=threading.Lock()
 
 @app.get("/health")
-def health(): return {"status":"ok","physics":"MuJoCo","schema_version":"1.0"}
+def health(): return {"status":"ok","physics":"MuJoCo","schema_version":"1.1"}
 
 @app.get("/missions")
 def missions():

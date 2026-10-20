@@ -1,0 +1,33 @@
+{
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "landing-ppo-precision-v15-continued__step-008055328",
+  "episodes": 20,
+  "seeds": [
+    20000,
+    20019
+  ],
+  "scenario": "nominal",
+  "successes": 1,
+  "success_rate": 0.05,
+  "confidence_interval": [
+    0.008881448800795763,
+    0.236131193446735
+  ],
+  "mean_reward": 29.793864912407894,
+  "failures": {
+    "crash_speed": 14,
+    "missed_pad": 5
+  },
+  "config_hash": "cd66a59541c67291",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 3.00977640495124,
+  "median_touchdown_speed": 2.954058810235258,
+  "mean_tilt": 3.8978717746295337,
+  "median_tilt": 3.0763565279097325,
+  "mean_pad_distance": 4.785286976078668,
+  "median_pad_distance": 5.164056749930869,
+  "mean_fuel_used": 1848.642160402122,
+  "median_fuel_used": 1747.3675836588427
+}

@@ -1,0 +1,16 @@
+{
+  "id": "landing-v7-dev256-s22000",
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "scenario": "nominal",
+  "checkpoint_id": "landing-ppo-exploration-v7-pilot__step-004851808",
+  "status": "completed",
+  "completed": 256,
+  "total": 256,
+  "successes": 5,
+  "started_at": 1792430860.3947122,
+  "updated_at": 1792430875.7982044,
+  "pid": 37480,
+  "source_hash": "8b3b7389d8d9582f519a76c21afe035e5466b54997e8561b8ba8445ce8fb9c49"
+}

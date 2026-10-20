@@ -1,0 +1,16 @@
+{
+  "id": "takeoff-classical-l4-noise-native-pilot32",
+  "mission": "takeoff",
+  "method": "classical",
+  "level": 4,
+  "scenario": "noise",
+  "checkpoint_id": null,
+  "status": "completed",
+  "completed": 32,
+  "total": 32,
+  "successes": 2,
+  "started_at": 1792437818.7449548,
+  "updated_at": 1792437822.1697729,
+  "pid": 12544,
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc"
+}

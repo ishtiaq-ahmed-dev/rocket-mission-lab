@@ -204,6 +204,54 @@
           "default": null,
           "title": "Checkpoint Steps"
         },
+        "checkpoint_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checkpoint Id"
+        },
+        "difficulty": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Difficulty",
+          "type": "number"
+        },
+        "training_mode": {
+          "default": false,
+          "title": "Training Mode",
+          "type": "boolean"
+        },
+        "target_altitude": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Altitude"
+        },
+        "target_velocity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Velocity"
+        },
         "algorithm": {
           "anyOf": [
             {
@@ -317,8 +365,11 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "default": "1.1",
+      "enum": [
+        "1.0",
+        "1.1"
+      ],
       "title": "Schema Version",
       "type": "string"
     },

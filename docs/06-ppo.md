@@ -6,7 +6,11 @@ PPO alternates policy rollouts and several minibatch optimization epochs. A prob
 
 ## Why this approach
 
-SB3 supplies the tested algorithm. This project uses a small MLP, normalized observations/rewards and a fixed seed. MLP PPO defaults to CPU because the environment loop and small batch transfers often dominate. Its final step count can exceed the budget by a rollout.
+SB3 supplies the tested algorithm. This project uses a small MLP, fixed physical observation scaling (running observation normalization is disabled in v3/v4), running reward normalization and a fixed seed. MLP PPO defaults to CPU because the environment loop and small batch transfers often dominate. Its final step count can exceed the budget by a rollout.
+
+The v4 experiment uses gamma 0.997, GAE lambda 0.98, 1024 steps per environment, batch size 512, ten epochs, learning rate 0.00015 and target KL 0.02. The longer advantage horizon and smaller updates are a measured experiment, not a convergence guarantee. Exact-config continuation restores optimizer and normalization; changing the reward uses explicit actor-only transfer with a fresh critic, optimizer and reward statistics. Only this project's own learned actor is transferred, with unchanged physics and observation scales; no classical actions or demonstrations are supplied.
+
+The v6 architecture optionally applies tanh to the Gaussian mean before sampling. This keeps the center of exploration inside actuator bounds when an inherited actor's unconstrained output drifts outside them. It is not a fully squashed action distribution; SB3 still clips tail samples and uses the ordinary Gaussian log likelihood. Transferring linear-actor weights into this architecture changes its behavior, which is recorded explicitly rather than treated as action-equivalent continuation. Its effectiveness must be judged from measured outcomes.
 
 ## Key formulas
 

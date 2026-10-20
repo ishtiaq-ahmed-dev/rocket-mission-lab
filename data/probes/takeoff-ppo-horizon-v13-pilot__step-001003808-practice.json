@@ -1,0 +1,386 @@
+{
+  "checkpoint_id": "takeoff-ppo-horizon-v13-pilot__step-001003808",
+  "mission": "takeoff",
+  "steps": 1003808,
+  "config_hash": "0b566b8242b02a08",
+  "training_config_hash": "0b566b8242b02a08",
+  "created_at": 1792436142.599305,
+  "practice": true,
+  "scope": "short ascent training-stage practice; not full 400m mission evaluation",
+  "stages": [
+    {
+      "difficulty": 0.35000000000000003,
+      "episodes": 32,
+      "seeds": [
+        23000,
+        23031
+      ],
+      "successes": 30,
+      "failures": {
+        "crash_tilt": 2
+      },
+      "mean_speed": 10.747968836728798,
+      "mean_tilt": 2.1750107854491887,
+      "mean_offset": 1.3609164312380908,
+      "target_altitude": 143.25,
+      "target_velocity": 10.700000000000001,
+      "rows": [
+        {
+          "seed": 23000,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 7.904676585902268,
+          "tilt": 3.6896168225017933,
+          "pad_distance": 2.166810808307252,
+          "fuel_used": 1529.5939454945074,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23001,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 12.128713668000017,
+          "tilt": 1.0013657345159137,
+          "pad_distance": 0.9713319046176208,
+          "fuel_used": 1394.0950656823952,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23002,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 11.218743994177261,
+          "tilt": 3.1350365974197887,
+          "pad_distance": 0.8155806996610306,
+          "fuel_used": 1414.3034040996736,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23003,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.824866111616053,
+          "tilt": 4.244168623833654,
+          "pad_distance": 0.7041224469453419,
+          "fuel_used": 1387.4191937937758,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23004,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.215341014997206,
+          "tilt": 1.6185085980243463,
+          "pad_distance": 1.3136250254201642,
+          "fuel_used": 1478.0358925570545,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23005,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 13.002610759409462,
+          "tilt": 1.036245596630993,
+          "pad_distance": 0.9694033417710346,
+          "fuel_used": 1366.211319544991,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23006,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.511454719112201,
+          "tilt": 4.3790666165360355,
+          "pad_distance": 1.408504161996009,
+          "fuel_used": 1411.580539175593,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23007,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 11.585659133072205,
+          "tilt": 0.7042121854432788,
+          "pad_distance": 2.5404865659845295,
+          "fuel_used": 1459.0521935854395,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23008,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.213131640999704,
+          "tilt": 0.9497423814427431,
+          "pad_distance": 1.084496139553728,
+          "fuel_used": 1447.2694506023254,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23009,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.929412591873783,
+          "tilt": 3.5910310465840656,
+          "pad_distance": 0.8150824455703362,
+          "fuel_used": 1456.9580122525076,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23010,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.768002373053626,
+          "tilt": 1.04777469290508,
+          "pad_distance": 0.6031132092743205,
+          "fuel_used": 1417.4973339021471,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23011,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 9.94031514392679,
+          "tilt": 0.8940042788692213,
+          "pad_distance": 1.8581906629569949,
+          "fuel_used": 1490.2790479049054,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23012,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 12.700561236387937,
+          "tilt": 0.3148734787964934,
+          "pad_distance": 2.4191557095871334,
+          "fuel_used": 1409.0292582639995,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23013,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 11.205933243147973,
+          "tilt": 1.6495076006126574,
+          "pad_distance": 0.46372210151621884,
+          "fuel_used": 1395.4910399449182,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23014,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 11.76937324474374,
+          "tilt": 1.9375539766449432,
+          "pad_distance": 0.7385414715405448,
+          "fuel_used": 1407.6112735061542,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23015,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 8.496836170880876,
+          "tilt": 4.341629619568606,
+          "pad_distance": 1.7548881499306563,
+          "fuel_used": 1489.8170899786965,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23016,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.33706037559867,
+          "tilt": 1.8800538611085722,
+          "pad_distance": 1.742115155801716,
+          "fuel_used": 1444.0269329363673,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23017,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 9.125664551337318,
+          "tilt": 3.9958484460630577,
+          "pad_distance": 2.523001332023298,
+          "fuel_used": 1439.5450389208509,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23018,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 12.49945696288712,
+          "tilt": 0.39942939860653476,
+          "pad_distance": 2.54423870890403,
+          "fuel_used": 1425.696922186089,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23019,
+          "outcome": "crash_tilt",
+          "failure_reason": "crash_tilt",
+          "touchdown_speed": 9.942775401789193,
+          "tilt": 5.00933193801292,
+          "pad_distance": 0.5945883272086099,
+          "fuel_used": 1478.7291060612642,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23020,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 12.782036455252836,
+          "tilt": 0.14144114484437853,
+          "pad_distance": 2.581737161649553,
+          "fuel_used": 1387.4217531657996,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23021,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.81665711772269,
+          "tilt": 3.038043246773379,
+          "pad_distance": 1.6876310704414883,
+          "fuel_used": 1466.1317211499227,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23022,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.42745813233616,
+          "tilt": 0.9698548365695253,
+          "pad_distance": 1.6596590672942884,
+          "fuel_used": 1439.5487885214425,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23023,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 11.255097268294113,
+          "tilt": 3.365880836987686,
+          "pad_distance": 0.331966139304549,
+          "fuel_used": 1398.8668271813276,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23024,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 9.970514614330256,
+          "tilt": 3.974822647677694,
+          "pad_distance": 1.116602575890702,
+          "fuel_used": 1403.0706104596084,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23025,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 9.509158926630858,
+          "tilt": 0.710808457633132,
+          "pad_distance": 1.4273676966712296,
+          "fuel_used": 1479.1270707424428,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23026,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 12.072905317453056,
+          "tilt": 0.38435140610383256,
+          "pad_distance": 2.2100073410167185,
+          "fuel_used": 1418.2601482184145,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23027,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.033133806439457,
+          "tilt": 2.560383195387488,
+          "pad_distance": 0.7573506907804535,
+          "fuel_used": 1445.27942673305,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23028,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 10.451387918365656,
+          "tilt": 1.6751029917649591,
+          "pad_distance": 0.47287104574998284,
+          "fuel_used": 1449.6107820699126,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23029,
+          "outcome": "crash_tilt",
+          "failure_reason": "crash_tilt",
+          "touchdown_speed": 10.355839997261128,
+          "tilt": 5.3798316871312295,
+          "pad_distance": 0.41361359200936526,
+          "fuel_used": 1468.3484590636817,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23030,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 8.840940511355832,
+          "tilt": 1.4323098581077158,
+          "pad_distance": 0.47758639914635026,
+          "fuel_used": 1511.347316442434,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        },
+        {
+          "seed": 23031,
+          "outcome": "success",
+          "failure_reason": null,
+          "touchdown_speed": 12.09928378696613,
+          "tilt": 0.14851333127232075,
+          "pad_distance": 2.3819346510936574,
+          "fuel_used": 1415.1363425008822,
+          "phase": "takeoff",
+          "episode_difficulty": 0.35000000000000003
+        }
+      ],
+      "replay_url": "/model-replays/takeoff-ppo-horizon-v13-pilot__step-001003808-practice-s23000.json",
+      "replay_seed": 23000,
+      "replay_outcome": "success"
+    }
+  ]
+}

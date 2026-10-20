@@ -1,0 +1,417 @@
+{
+  "scope": "64 full-difficulty closed-loop regression episodes, fixed seeds 24000-24015; numerical equivalence, not reliability qualification",
+  "reference_sha256": "7ea783e6f685aeae626eae4c01b6824e814c6a61b8b192bbf4abeccd54298794",
+  "live_sha256": "03d9c5f843f181fe143ebdccc49365a82a23c7020f3f12a2abb4701509999d20",
+  "tolerance": 1e-05,
+  "all_outcomes_and_termination_steps_equal": true,
+  "cases": [
+    {
+      "mission": "landing",
+      "method": "classical",
+      "checkpoint_id": null,
+      "episodes": [
+        {
+          "seed": 24000,
+          "steps": 178,
+          "outcome": "success"
+        },
+        {
+          "seed": 24001,
+          "steps": 182,
+          "outcome": "success"
+        },
+        {
+          "seed": 24002,
+          "steps": 186,
+          "outcome": "success"
+        },
+        {
+          "seed": 24003,
+          "steps": 195,
+          "outcome": "success"
+        },
+        {
+          "seed": 24004,
+          "steps": 165,
+          "outcome": "success"
+        },
+        {
+          "seed": 24005,
+          "steps": 187,
+          "outcome": "success"
+        },
+        {
+          "seed": 24006,
+          "steps": 181,
+          "outcome": "success"
+        },
+        {
+          "seed": 24007,
+          "steps": 200,
+          "outcome": "success"
+        },
+        {
+          "seed": 24008,
+          "steps": 200,
+          "outcome": "success"
+        },
+        {
+          "seed": 24009,
+          "steps": 206,
+          "outcome": "success"
+        },
+        {
+          "seed": 24010,
+          "steps": 195,
+          "outcome": "success"
+        },
+        {
+          "seed": 24011,
+          "steps": 178,
+          "outcome": "success"
+        },
+        {
+          "seed": 24012,
+          "steps": 193,
+          "outcome": "success"
+        },
+        {
+          "seed": 24013,
+          "steps": 185,
+          "outcome": "success"
+        },
+        {
+          "seed": 24014,
+          "steps": 164,
+          "outcome": "success"
+        },
+        {
+          "seed": 24015,
+          "steps": 198,
+          "outcome": "success"
+        }
+      ],
+      "outcomes": {
+        "success": 16
+      },
+      "maximum_absolute_differences": {
+        "position": 1.3145040611561853e-12,
+        "velocity": 2.283728761653947e-13,
+        "quaternion": 1.4396036446262528e-15,
+        "angular_velocity": 3.191891195797325e-16,
+        "fuel_mass": 0.0,
+        "wind": 0.0,
+        "tilt": 1.5244707579631367e-10,
+        "action": 0.0,
+        "reward": 1.3073986337985843e-12
+      }
+    },
+    {
+      "mission": "takeoff",
+      "method": "classical",
+      "checkpoint_id": null,
+      "episodes": [
+        {
+          "seed": 24000,
+          "steps": 247,
+          "outcome": "success"
+        },
+        {
+          "seed": 24001,
+          "steps": 256,
+          "outcome": "success"
+        },
+        {
+          "seed": 24002,
+          "steps": 248,
+          "outcome": "success"
+        },
+        {
+          "seed": 24003,
+          "steps": 252,
+          "outcome": "success"
+        },
+        {
+          "seed": 24004,
+          "steps": 246,
+          "outcome": "success"
+        },
+        {
+          "seed": 24005,
+          "steps": 246,
+          "outcome": "success"
+        },
+        {
+          "seed": 24006,
+          "steps": 246,
+          "outcome": "success"
+        },
+        {
+          "seed": 24007,
+          "steps": 247,
+          "outcome": "success"
+        },
+        {
+          "seed": 24008,
+          "steps": 254,
+          "outcome": "success"
+        },
+        {
+          "seed": 24009,
+          "steps": 246,
+          "outcome": "success"
+        },
+        {
+          "seed": 24010,
+          "steps": 245,
+          "outcome": "success"
+        },
+        {
+          "seed": 24011,
+          "steps": 252,
+          "outcome": "success"
+        },
+        {
+          "seed": 24012,
+          "steps": 249,
+          "outcome": "success"
+        },
+        {
+          "seed": 24013,
+          "steps": 253,
+          "outcome": "success"
+        },
+        {
+          "seed": 24014,
+          "steps": 253,
+          "outcome": "success"
+        },
+        {
+          "seed": 24015,
+          "steps": 248,
+          "outcome": "success"
+        }
+      ],
+      "outcomes": {
+        "success": 16
+      },
+      "maximum_absolute_differences": {
+        "position": 3.4489078259980488e-12,
+        "velocity": 4.832245714680994e-13,
+        "quaternion": 2.1957262397176436e-15,
+        "angular_velocity": 3.1138286393783687e-16,
+        "fuel_mass": 0.0,
+        "wind": 0.0,
+        "tilt": 4.903227927843812e-10,
+        "action": 0.0,
+        "reward": 3.2110980541233403e-12
+      }
+    },
+    {
+      "mission": "landing",
+      "method": "rl",
+      "checkpoint_id": "landing-ppo-pad-v10-pilot__step-006905328",
+      "episodes": [
+        {
+          "seed": 24000,
+          "steps": 106,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24001,
+          "steps": 148,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24002,
+          "steps": 126,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24003,
+          "steps": 108,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24004,
+          "steps": 102,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24005,
+          "steps": 103,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24006,
+          "steps": 110,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24007,
+          "steps": 118,
+          "outcome": "success"
+        },
+        {
+          "seed": 24008,
+          "steps": 112,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24009,
+          "steps": 120,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24010,
+          "steps": 114,
+          "outcome": "crash_tilt"
+        },
+        {
+          "seed": 24011,
+          "steps": 112,
+          "outcome": "crash_tilt"
+        },
+        {
+          "seed": 24012,
+          "steps": 112,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24013,
+          "steps": 113,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24014,
+          "steps": 87,
+          "outcome": "crash_speed"
+        },
+        {
+          "seed": 24015,
+          "steps": 115,
+          "outcome": "crash_speed"
+        }
+      ],
+      "outcomes": {
+        "crash_speed": 13,
+        "success": 1,
+        "crash_tilt": 2
+      },
+      "maximum_absolute_differences": {
+        "position": 4.938272013532696e-13,
+        "velocity": 9.303668946358812e-14,
+        "quaternion": 1.457167719820518e-16,
+        "angular_velocity": 5.551115123125783e-17,
+        "fuel_mass": 0.0,
+        "wind": 0.0,
+        "tilt": 5.537802161281746e-11,
+        "action": 0.0,
+        "reward": 4.547473508864641e-13
+      }
+    },
+    {
+      "mission": "takeoff",
+      "method": "rl",
+      "checkpoint_id": "takeoff-ppo-horizon-v13-continued__step-002011136",
+      "episodes": [
+        {
+          "seed": 24000,
+          "steps": 131,
+          "outcome": "success"
+        },
+        {
+          "seed": 24001,
+          "steps": 128,
+          "outcome": "success"
+        },
+        {
+          "seed": 24002,
+          "steps": 131,
+          "outcome": "success"
+        },
+        {
+          "seed": 24003,
+          "steps": 134,
+          "outcome": "crash_tilt"
+        },
+        {
+          "seed": 24004,
+          "steps": 129,
+          "outcome": "success"
+        },
+        {
+          "seed": 24005,
+          "steps": 121,
+          "outcome": "success"
+        },
+        {
+          "seed": 24006,
+          "steps": 124,
+          "outcome": "success"
+        },
+        {
+          "seed": 24007,
+          "steps": 123,
+          "outcome": "success"
+        },
+        {
+          "seed": 24008,
+          "steps": 135,
+          "outcome": "missed_pad"
+        },
+        {
+          "seed": 24009,
+          "steps": 123,
+          "outcome": "crash_tilt"
+        },
+        {
+          "seed": 24010,
+          "steps": 123,
+          "outcome": "success"
+        },
+        {
+          "seed": 24011,
+          "steps": 126,
+          "outcome": "success"
+        },
+        {
+          "seed": 24012,
+          "steps": 122,
+          "outcome": "success"
+        },
+        {
+          "seed": 24013,
+          "steps": 132,
+          "outcome": "success"
+        },
+        {
+          "seed": 24014,
+          "steps": 141,
+          "outcome": "success"
+        },
+        {
+          "seed": 24015,
+          "steps": 125,
+          "outcome": "success"
+        }
+      ],
+      "outcomes": {
+        "success": 13,
+        "crash_tilt": 2,
+        "missed_pad": 1
+      },
+      "maximum_absolute_differences": {
+        "position": 8.526512829121202e-13,
+        "velocity": 9.237055564881302e-14,
+        "quaternion": 4.475586568020162e-16,
+        "angular_velocity": 1.4051260155412137e-16,
+        "fuel_mass": 0.0,
+        "wind": 0.0,
+        "tilt": 1.575026220557163e-11,
+        "action": 0.0,
+        "reward": 2.6574298317427747e-12
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scope": "Initial full-task fine-tuning transfer before updates",
+  "parent": "landing-ppo-exploration-v7-pilot__step-004851808",
+  "child": "landing-ppo-full-v8-pilot__step-004851808",
+  "episodes": 20,
+  "physical_rows_and_rewards_match_exactly": true,
+  "compared_fields": [
+    "seed",
+    "outcome",
+    "touchdown_speed",
+    "tilt",
+    "pad_distance",
+    "fuel_used",
+    "reward"
+  ],
+  "training_difficulty": 1.0
+}

@@ -1,0 +1,16 @@
+{
+  "scope": "Initial terminal-cost transfer before updates",
+  "parent": "landing-ppo-pad-v10-pilot__step-006905328",
+  "child": "landing-ppo-touchdown-v12-pilot__step-006905328",
+  "episodes": 20,
+  "physical_rows_match_exactly": true,
+  "compared_fields": [
+    "seed",
+    "outcome",
+    "touchdown_speed",
+    "tilt",
+    "pad_distance",
+    "fuel_used"
+  ],
+  "reward_comparison": "Excluded because terminal costs changed"
+}

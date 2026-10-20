@@ -1,0 +1,17 @@
+{
+  "scope": "Initial exploration reset; before any v7 update",
+  "parent": "landing-ppo-mixed-v5-pilot__step-004651808",
+  "child": "landing-ppo-exploration-v7-pilot__step-004651808",
+  "episodes": 20,
+  "deterministic_physical_rows_and_rewards_match_exactly": true,
+  "compared_fields": [
+    "seed",
+    "outcome",
+    "touchdown_speed",
+    "tilt",
+    "pad_distance",
+    "fuel_used",
+    "reward"
+  ],
+  "distribution_change": "Throttle std reset to 0.15; gimbal std unchanged"
+}

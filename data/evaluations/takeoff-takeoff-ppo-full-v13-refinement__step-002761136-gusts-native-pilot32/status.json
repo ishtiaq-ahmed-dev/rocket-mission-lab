@@ -1,0 +1,16 @@
+{
+  "id": "takeoff-takeoff-ppo-full-v13-refinement__step-002761136-gusts-native-pilot32",
+  "mission": "takeoff",
+  "method": "rl",
+  "level": 4,
+  "scenario": "gusts",
+  "checkpoint_id": "takeoff-ppo-full-v13-refinement__step-002761136",
+  "status": "completed",
+  "completed": 32,
+  "total": 32,
+  "successes": 32,
+  "started_at": 1792437836.9561145,
+  "updated_at": 1792437839.1755753,
+  "pid": 12544,
+  "source_hash": "845c7dcbadd3e7813ba8505f8f3242c5c5b98eb83360ca7af154fda05b84acfc"
+}

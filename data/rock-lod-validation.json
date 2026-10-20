@@ -1,0 +1,23 @@
+[
+  {
+    "name": "web",
+    "triangles": 29985,
+    "vertices": 18298,
+    "buffer_bytes": 945356,
+    "relative_error": 0.002341479528695345
+  },
+  {
+    "name": "mid",
+    "triangles": 2995,
+    "vertices": 2631,
+    "buffer_bytes": 120132,
+    "relative_error": 0.010143443010747433
+  },
+  {
+    "name": "low",
+    "triangles": 1322,
+    "vertices": 1477,
+    "buffer_bytes": 63128,
+    "relative_error": 0.04867350682616234
+  }
+]

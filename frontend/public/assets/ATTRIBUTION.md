@@ -4,7 +4,7 @@ Downloaded 19 October 2026 from Poly Haven. These assets are CC0 and are bundled
 
 - **Rocky Terrain 02**, Amal Kumar. Diffuse, OpenGL normal and roughness maps at 2K and 4K. [Source](https://polyhaven.com/a/rocky_terrain_02).
 - **Kloppenheim 06 (Pure Sky)**, Greg Zaal and Jarod Guest. 2K HDR sky/environment. [Source](https://polyhaven.com/a/kloppenheim_06_puresky).
-- **Coast Rocks 05**, Rob Tuytel. Scanned glTF mesh with 1K PBR textures. [Source](https://polyhaven.com/a/coast_rocks_05). A local web derivative reduces the original 771,724 triangles to 29,985 using the MIT-licensed meshoptimizer simplifier; UVs and material maps are retained.
+- **Coast Rocks 05**, Rob Tuytel. Scanned glTF mesh with 1K PBR textures. [Source](https://polyhaven.com/a/coast_rocks_05). Local meshoptimizer derivatives contain 29,985 / 2,995 / 1,322 triangles for near/mid/far detail. Unused vertices are compacted, reducing the near mesh buffer from 13.2 MB to 0.95 MB. UVs and PBR maps are retained.
 - **Grass Medium 01**, Rico Cilliers and Rob Tuytel. Downloaded for review; the scene uses locally generated curved blades to avoid opaque vegetation-card artifacts. [Source](https://polyhaven.com/a/grass_medium_01).
 - [Poly Haven CC0 asset license](https://polyhaven.com/license).
 

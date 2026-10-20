@@ -3,7 +3,7 @@ import type {Frame,Telemetry,V3} from './types';
 export function parseTelemetry(input:unknown):Telemetry {
   if(!input || typeof input!=='object') throw new Error('Invalid telemetry document');
   const t=input as Telemetry;
-  if(t.schema_version!=='1.0'||!t.run||!Array.isArray(t.frames)||t.frames.length<2||!Number.isFinite(t.rocket_length)||t.rocket_length<=0||!Number.isFinite(t.initial_fuel)||t.initial_fuel<=0) throw new Error('Unsupported or incomplete telemetry');
+  if(!['1.0','1.1'].includes(t.schema_version)||!t.run||!Array.isArray(t.frames)||t.frames.length<2||!Number.isFinite(t.rocket_length)||t.rocket_length<=0||!Number.isFinite(t.initial_fuel)||t.initial_fuel<=0) throw new Error('Unsupported or incomplete telemetry');
   let previous=-1;
   for(const f of t.frames){
     const vectors=[f.position,f.quaternion,f.velocity,f.angular_velocity,f.gimbal,f.wind];

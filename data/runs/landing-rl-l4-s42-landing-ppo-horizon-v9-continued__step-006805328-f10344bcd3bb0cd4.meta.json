@@ -1,0 +1,21 @@
+{
+  "id": "landing-rl-l4-s42-landing-ppo-horizon-v9-continued__step-006805328-f10344bcd3bb0cd4",
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_steps": 6805328,
+  "checkpoint_id": "landing-ppo-horizon-v9-continued__step-006805328",
+  "difficulty": 1.0,
+  "algorithm": "PPO",
+  "seed": 42,
+  "outcome": "crash_speed",
+  "failure_reason": "crash_speed",
+  "touchdown_speed": 2.1273090264690047,
+  "tilt": 4.781844919107669,
+  "pad_distance": 8.815646173331736,
+  "fuel_used": 1440.7572430230757,
+  "duration": 10.579999999999863,
+  "total_reward": 5.50228375225052,
+  "source": "MuJoCo simulation",
+  "controller_status": "measured checkpoint; maturity not certified"
+}

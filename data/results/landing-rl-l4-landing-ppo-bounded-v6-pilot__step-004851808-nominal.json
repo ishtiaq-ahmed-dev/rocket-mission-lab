@@ -1,0 +1,32 @@
+{
+  "mission": "landing",
+  "method": "rl",
+  "level": 4,
+  "checkpoint_id": "landing-ppo-bounded-v6-pilot__step-004851808",
+  "episodes": 20,
+  "seeds": [
+    20000,
+    20019
+  ],
+  "scenario": "nominal",
+  "successes": 0,
+  "success_rate": 0.0,
+  "confidence_interval": [
+    1.3877787807814457e-17,
+    0.1611251580528119
+  ],
+  "mean_reward": -169.49928934418807,
+  "failures": {
+    "crash_speed": 20
+  },
+  "config_hash": "c30ba642a907ae19",
+  "qualification": "pilot sample; 10,000-seed gate pending",
+  "mean_touchdown_speed": 7.478680763578606,
+  "median_touchdown_speed": 7.325577963668667,
+  "mean_tilt": 5.009212479754501,
+  "median_tilt": 5.091090484379952,
+  "mean_pad_distance": 15.094241978528604,
+  "median_pad_distance": 14.350475180173898,
+  "mean_fuel_used": 1294.269570738778,
+  "median_fuel_used": 1294.528855375498
+}

@@ -30,4 +30,6 @@ q_dot = 0.5 q multiply [0, omega]
 
 ## Evidence and further reading
 
+The native MuJoCo quaternion conversion normalizes a copy of the live wxyz quaternion, then calls `mju_quat2Mat`. The engine torque uses the exact expansion of `[0, 0, -length/2] cross F`. Neither change alters a physical parameter or the integrator. A concurrent-training microbenchmark measured 3,427 versus 6,980 control steps/s (2.04 times); this is headless dynamics only, not browser FPS or full training throughput. Saved pre-change and live dynamics matched outcomes and termination steps in 64 closed-loop classical/PPO landing/takeoff episodes. State errors were below 1e-5, with largest position error about 3.45e-12 m. See `data/physics-performance-validation.json` and `data/physics-closed-loop-validation.json`.
+
 See [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the actual validation record in [VALIDATION.md](VALIDATION.md).

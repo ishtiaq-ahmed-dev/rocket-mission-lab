@@ -70,8 +70,38 @@
     "application": "Locally bundled CC0 2K and 4K PBR textures at the documented 90-meter tile scale."
   },
   {
+    "title": "R3F scaling performance",
+    "url": "https://r3f.docs.pmnd.rs/advanced/scaling-performance",
+    "application": "Demand rendering, cached assets, instancing and bounded geometry detail."
+  },
+  {
+    "title": "Three.js level of detail",
+    "url": "https://threejs.org/docs/pages/LOD.html",
+    "application": "Distance-based scanned-rock detail while retaining close-up geometry."
+  },
+  {
+    "title": "Generalized Advantage Estimation",
+    "url": "https://arxiv.org/abs/1506.02438",
+    "application": "Explicit longer-horizon gamma/lambda experiment with measured outcome comparison."
+  },
+  {
+    "title": "SB3 RL experiment guidance",
+    "url": "https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html",
+    "application": "Shaped rewards, easier stages and separate deterministic evaluation; retain failures."
+  },
+  {
+    "title": "SB3 policy networks and action bounds",
+    "url": "https://stable-baselines3.readthedocs.io/en/master/guide/custom_policy.html",
+    "application": "Diagnose clipped Gaussian actions; distinguish bounded-mean architecture from exploration-only changes."
+  },
+  {
     "title": "Web Audio best practices",
     "url": "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices",
     "application": "Explicit user audio activation, controlled volume and playback/visibility lifecycle."
+  },
+  {
+    "title": "MuJoCo: native quaternion math",
+    "url": "https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mju-quat2mat",
+    "application": "Normalize a copied quaternion and use native matrix conversion; measured numerical regression and headless throughput checks."
   }
 ]
