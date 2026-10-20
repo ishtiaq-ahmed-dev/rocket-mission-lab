@@ -107,3 +107,17 @@ Thrust-loss pilots above reduce the configured maximum thrust. The classical con
 The full current backend suite passed 53 tests in 16.45 seconds. Live production HTTP verification confirms all nine API routes through the Vite proxy, schema 1.1, default learned-policy checkpoint attribution, published model evidence, a linked selected-success recording and all three 4096-square terrain textures. The default landing seed 42 still fails at 3.05 m/s; the takeoff seed 42 succeeds. A functioning endpoint and correct replay identity do not imply successful landing. These exact live values are saved in `data/live-validation.json` with verification time and source hash.
 
 The long v10 continuation runs in its own hidden Windows process, with status/PID/log/checkpoints under its job folder. It uses 256 fixed development episodes per checkpoint and preserves the previous best model. It is a bounded local training worker, not a boot service or a guarantee of survival after reboot. The separate landing nominal qualification batches are frozen before their own 10,000 seeds; read their completed result files for final counts.
+
+
+## Disk exhaustion and recovery
+
+D: reached zero free bytes during Git's automatic background repack and concurrent runtime writes. Commit `c56265c` completed, but the maintenance repack and the new landing workers failed. Completed checkpoints and takeoff qualification remain intact. The interrupted v10 continuation had no later saved checkpoint beyond its initial 8,908,272 actor; unsaved updates were lost and are not counted as retained training progress. Partial evaluation journals are preserved and marked failed, with restarted `-r2` batches under new source identities. They are not reported as completed qualification.
+
+Cleanup removed only disposable workspace test directories (73.37 MiB) and moved the failed Git temporary pack (43.375 MiB) to this task's authorized C: recovery folder with a matching SHA256. About 120 MiB became available. No model checkpoint, completed result or unrelated file was deleted. Further commits disable automatic maintenance for the command to avoid another repack. Tests now use C: task temporary directories.
+
+Atomic JSON writes clean up their own failed temporary files and preserve the previous record. The training callback requests a graceful stop below 64 MiB free and refuses a new checkpoint below 32 MiB. Two executed fault tests cover partial write preservation and low-space stopping. The recovered long job starts from the last intact actor; reboot survival and unlimited storage are not promised. D: still needs additional free capacity for extended work.
+
+
+After low-space recovery and the Results batch-isolation change, the complete suite passed 55 backend tests (including API transport and storage fault drills), plus 32 frontend tests, TypeScript, lint and production build. The Results page now selects one failure sample and one configuration explicitly, and uses the largest nominal classical sample per level. It no longer sums overlapping seed pools or displays duplicate same-configuration controller bars. The API publishes its current configuration hash for this filter. Browser visual inspection remains unavailable under the existing policy.
+
+A later capacity check found about 4.85 GiB available on D:. No additional unrelated files were removed by this task; the cause of that capacity change was not investigated. The low-space protections remain active.

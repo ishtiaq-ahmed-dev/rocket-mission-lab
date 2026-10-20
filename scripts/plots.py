@@ -10,6 +10,13 @@ import matplotlib.pyplot as plt
 from rocket_lab.config import DATA
 from rocket_lab.storage import training_jobs,read_json,checkpoint_path,atomic_json
 
+def save_figure(fig,path):
+    fig.savefig(path,dpi=180)
+    if path.suffix=='.svg':
+        # Matplotlib adds line-end spaces inside path data; preserve the same
+        # SVG tokens while keeping generated files clean in source control.
+        path.write_text('\n'.join(line.rstrip() for line in path.read_text(encoding='utf-8').splitlines())+'\n',encoding='utf-8',newline='\n')
+
 def development_plot(target):
     rows=[]
     for path in (DATA/'results').glob('*.json'):
@@ -38,7 +45,7 @@ def development_plot(target):
     fig.suptitle('Measured full-task development samples / 95% Wilson intervals')
     fig.text(.5,.025,'Repeated development seeds 22000–22255; intervals do not adjust for model selection.\nSteps are each checkpoint\'s training lineage, not total experiment cost. Development comparisons do not replace separate nominal qualification.',ha='center',fontsize=9)
     fig.subplots_adjust(bottom=.25,top=.87,wspace=.18)
-    for extension in ('png','svg'):fig.savefig(target/f'full-task-development.{extension}',dpi=180)
+    for extension in ('png','svg'):save_figure(fig,target/f'full-task-development.{extension}')
     plt.close(fig)
     atomic_json(target/'full-task-development-sources.json',dict(scope='larger development samples, not qualification',results=[row['result_file'] for row in rows]))
 
@@ -60,7 +67,7 @@ def qualification_plot(target):
             ax.text(index,100*(1-row['confidence_interval'][0])+.12,f"{row['episodes']-row['successes']:,} / {row['episodes']:,} failures",ha='center')
         fig.text(.5,.04,f'95% Wilson intervals. Matched seeds 10000–19999; configuration {config}.\nExact frozen nominal candidates only; stress, other snapshots and real flight remain separate.',ha='center',fontsize=9)
         fig.subplots_adjust(bottom=.23)
-        for extension in ('png','svg'):fig.savefig(target/f'{mission}-frozen-qualification.{extension}',dpi=180)
+        for extension in ('png','svg'):save_figure(fig,target/f'{mission}-frozen-qualification.{extension}')
         plt.close(fig)
     atomic_json(target/'qualification-sources.json',dict(scope='frozen nominal candidates',results=[row['result_file'] for row in rows]))
 

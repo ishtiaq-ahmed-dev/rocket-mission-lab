@@ -1,0 +1,11 @@
+{
+  "reason": "D: reached zero free space during Git background repack and concurrent runtime writes",
+  "cleanup": "Removed 73.37 MiB of disposable test workspaces; moved the 43.375 MiB failed Git temporary pack to authorized C: recovery storage with SHA256 verification",
+  "failed_training_job": "landing-ppo-pad-v10-long",
+  "last_saved_checkpoint": "landing-ppo-pad-v10-continued__step-008908272",
+  "replacement_training_job": "landing-ppo-pad-v10-long-recovered",
+  "preserved": "all completed model/evaluation artifacts and original interrupted journals",
+  "safeguards": "atomic JSON cleanup on failed write; stop training below 64 MiB before final save; refuse checkpoint below 32 MiB",
+  "free_bytes_after_recovery": 124641280,
+  "recorded_at": 1792463730.1202338
+}

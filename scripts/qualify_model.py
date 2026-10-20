@@ -6,6 +6,7 @@ import hashlib
 import sys
 import time
 import shutil
+import traceback
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from rocket_lab.config import DATA,ROOT,load_config
@@ -49,4 +50,12 @@ def run(mission,checkpoint,identifier):
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--mission',required=True,choices=['landing','takeoff'])
     parser.add_argument('--checkpoint');parser.add_argument('--id',required=True)
-    args=parser.parse_args();run(args.mission,args.checkpoint,args.id)
+    args=parser.parse_args()
+    try:run(args.mission,args.checkpoint,args.id)
+    except Exception:
+        if args.id.replace('-','').isalnum():
+            path=DATA/'evaluations'/args.id/'status.json';status=read_json(path,{})
+            status.update(id=args.id,status='failed',error=traceback.format_exc(),updated_at=time.time())
+            try:atomic_json(path,status)
+            except OSError:pass # the original disk/I/O error remains authoritative
+        raise

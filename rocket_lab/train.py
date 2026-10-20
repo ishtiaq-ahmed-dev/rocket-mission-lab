@@ -35,6 +35,7 @@ class TrainingCallback(BaseCallback):
         self.difficulty=cfg["training"].get("initial_difficulty",0.)
         self.status="running"
         self.initial_steps=initial_steps
+        self.stop_reason=None
         if initial_difficulty is not None:self.difficulty=initial_difficulty
         self.completed={x for x in self.milestones if x<initial_steps}
 
@@ -45,9 +46,11 @@ class TrainingCallback(BaseCallback):
                     steps_per_second=(self.num_timesteps-self.initial_steps)/max(1,time.time()-self.started),
                     device=str(self.model.device),seed=self.model.seed,difficulty=self.difficulty,
                     episode_count=len(self.history),recent_successes=sum(self.recent),recent_episodes=len(self.recent),
-                    curve=self.curve,episodes=self.history[-400:],error=error,pid=os.getpid(),config_hash=self.training_hash))
+                    curve=self.curve,episodes=self.history[-400:],error=error or self.stop_reason,pid=os.getpid(),config_hash=self.training_hash))
 
     def checkpoint(self,final=False):
+        if shutil.disk_usage(self.folder).free<32*1024**2:
+            raise OSError('Checkpoint needs at least 32 MiB of free disk space; existing checkpoints are preserved')
         steps=self.num_timesteps
         suffix="-final" if final and any(point["steps"]==steps for point in self.curve) else ""
         folder=DATA/"checkpoints"/self.job_id/f"step-{steps:09d}{suffix}"
@@ -100,6 +103,11 @@ class TrainingCallback(BaseCallback):
                 if self.num_timesteps>=x: self.completed.add(x)
             self.checkpoint()
         if time.time()-self.last_write>2:
+            if shutil.disk_usage(self.folder).free<64*1024**2:
+                self.stop_reason='Stopped before disk exhaustion: less than 64 MiB free. Final checkpoint requested; free space before continuing.'
+                (self.folder/'stop').touch()
+                self.write_status()
+                return False
             self.last_write=time.time(); self.write_status()
         return not (self.folder/"stop").exists()
 

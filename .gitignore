@@ -5,6 +5,9 @@ frontend/dist/
 __pycache__/
 .pytest_cache/
 .pytest_work/
+data/**/*.tmp
+frontend/public/**/*.tmp
+frontend/public/model-qualification-progress.json
 .ruff_cache/
 *.pyc
 data/checkpoints/

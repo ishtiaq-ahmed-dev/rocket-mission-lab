@@ -1,5 +1,5 @@
 {
-  "verified_at_unix": 1792463277.37191,
+  "verified_at_unix": 1792464068.7421515,
   "scope": "live localhost HTTP/schema/static-assets; no browser visual or GPU measurement",
   "source_hash": "7474f177c4e8ebd6a78ea3406ed9d8dc1dc1a108e1af3e3f3a0a4fc7e0de99e5",
   "frontend_http": 200,
@@ -13,6 +13,7 @@
   "proxy_results/summary": 200,
   "proxy_results/failures": 200,
   "proxy_system": 200,
+  "current_config_hash": "4f2cb7c24e9839d5",
   "proxy_schema/telemetry": 200,
   "telemetry_http": 200,
   "frame_count": 202,

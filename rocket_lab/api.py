@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .config import DATA, ROOT, load_config
 from .schemas import SimRequest, TrainRequest, RunMeta, Telemetry
-from .storage import runs, read_json, training_jobs, checkpoints, atomic_json
+from .storage import runs, read_json, training_jobs, checkpoints, atomic_json, config_hash
 from .simulation import simulate
 
 app=FastAPI(title="Rocket Mission Lab",version="1.0.0")
@@ -75,4 +75,4 @@ def stop_training(job_id:str):
 
 @app.get("/system")
 def system():
-    return {"runtime":read_json(DATA/"runtime.json",{}),"config":load_config(),"research":read_json(DATA/"research.json",[])}
+    return {"runtime":read_json(DATA/"runtime.json",{}),"config":load_config(),"config_hash":config_hash(),"research":read_json(DATA/"research.json",[])}

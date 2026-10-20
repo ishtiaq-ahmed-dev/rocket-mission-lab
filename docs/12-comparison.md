@@ -31,3 +31,6 @@ comparison: same dynamics, start seeds, outcome thresholds and scenario
 ## Evidence and further reading
 
 See [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the actual validation record in [VALIDATION.md](VALIDATION.md).
+
+
+The Results register preserves each batch separately. Its controller chart chooses the largest nominal batch per level under one configuration, while failure counts refer to one explicitly selected batch. Repeated seeds across checkpoints, archived configurations and reward experiments must not be pooled into a reliability estimate. The classical wind/model information advantage and independently noisy relative-goal policy features remain disclosed limits.

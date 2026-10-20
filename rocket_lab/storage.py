@@ -10,15 +10,21 @@ from .config import DATA, ROOT, load_config
 def atomic_json(path, value):
     path=Path(path); path.parent.mkdir(parents=True,exist_ok=True)
     temp=path.with_suffix(f".{os.getpid()}.{uuid.uuid4().hex[:8]}.tmp")
-    temp.write_text(json.dumps(value,indent=2,allow_nan=False),encoding="utf-8")
-    # Windows readers/antivirus can briefly deny replacement of an open file.
-    for attempt in range(12):
-        try:
-            os.replace(temp,path)
-            return
-        except PermissionError:
-            if attempt==11: raise
-            time.sleep(.01*(attempt+1))
+    try:
+        temp.write_text(json.dumps(value,indent=2,allow_nan=False),encoding="utf-8")
+        # Windows readers/antivirus can briefly deny replacement of an open file.
+        for attempt in range(12):
+            try:
+                os.replace(temp,path)
+                return
+            except PermissionError:
+                if attempt==11: raise
+                time.sleep(.01*(attempt+1))
+    finally:
+        # An interrupted/full-disk write must not leave a corrupt record in
+        # place of the previous value or accumulate temporary files.
+        try:temp.unlink(missing_ok=True)
+        except OSError:pass
 
 def read_json(path, fallback=None):
     try: return json.loads(Path(path).read_text(encoding="utf-8"))

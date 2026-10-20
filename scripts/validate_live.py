@@ -22,6 +22,9 @@ def main():
     checks["frontend_mode"]="production bundle" if b'/@vite/client' not in html and b'/assets/index-' in html else "development"
     for path in ["health","missions","runs","training","checkpoints","results/summary","results/failures","system","schema/telemetry"]:
         status,body=get(f"http://127.0.0.1:5180/api/{path}");json.loads(body);checks[f"proxy_{path}"]=status
+        if path=='system':
+            assert json.loads(body).get('config_hash'),'Running API must identify the current results configuration'
+            checks['current_config_hash']=json.loads(body)['config_hash']
     _,body=get("http://127.0.0.1:5180/api/runs?mission=landing&method=classical&level=4&seed=42")
     metadata=json.loads(body)[0]
     status,body=get(f"http://127.0.0.1:5180/api/runs/{metadata['id']}/telemetry")

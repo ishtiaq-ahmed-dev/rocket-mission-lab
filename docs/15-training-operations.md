@@ -75,3 +75,6 @@ The production Training page reads static qualification summaries and current-ba
 
 
 The running API was updated on 20 October and the live default selector/telemetry attribution checked through the production proxy. `training_worker.py --eval-episodes 256` gives longer landing continuations a larger fixed checkpoint pool. The `landing-ppo-pad-v10-long` job is launched independently of the interactive terminal through the existing Windows process mechanism; inspect its actual heartbeat/PID/log before assuming it is active. It still requires the PC to stay on and is not configured to start before login or after reboot.
+
+
+After the D: exhaustion incident, the current five-million-step job is `landing-ppo-pad-v10-long-recovered`, starting from the intact 8,908,272-step checkpoint. The interrupted predecessor is retained as failed. A low-space stop below 64 MiB requests a final checkpoint; below 32 MiB no new checkpoint is attempted. Free adequate disk space before resuming a stopped worker. Failed partial qualification journals remain immutable evidence; restarted `-r2` batches use new source identities and manifests.
