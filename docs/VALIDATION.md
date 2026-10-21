@@ -1,3 +1,7 @@
+# Historical validation (19-20 October 2026)
+
+The active October 21 renderer, controller and mission changes are recorded in [VALIDATION-2026-10-21.md](VALIDATION-2026-10-21.md). The results below apply to earlier snapshots.
+
 # Validation record
 
 Local work on 19 October 2026, Windows, RTX 5070 Ti. Results below are from executed commands and actual simulation records.

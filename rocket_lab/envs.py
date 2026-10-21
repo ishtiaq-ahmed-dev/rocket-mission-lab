@@ -1,4 +1,5 @@
 import gymnasium as gym
+import copy
 from gymnasium import spaces
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -10,7 +11,8 @@ class RocketEnv(gym.Env):
 
     def __init__(self, mission="landing", config=None, difficulty=1.0, randomize=True, noise=True, training=False):
         super().__init__()
-        self.cfg = config or load_config()
+        self.cfg = copy.deepcopy(config or load_config())
+        if mission=='combined':self.cfg['vehicle'].setdefault('upper_stage_mass',2500.)
         self.mission = mission
         self.difficulty = difficulty
         self.episode_difficulty = difficulty
@@ -44,7 +46,7 @@ class RocketEnv(gym.Env):
         self.episode_difficulty=d
         self.takeoff_altitude=m["takeoff_altitude"];self.takeoff_velocity=m["takeoff_velocity"]
         settings=self.cfg["training"]
-        if self.training and self.mission=="takeoff" and settings.get("takeoff_goal_curriculum",False):
+        if self.training and self.mission in ('takeoff','combined') and settings.get("takeoff_goal_curriculum",False):
             start_height=settings["takeoff_curriculum_altitude"]
             start_velocity=settings["takeoff_curriculum_velocity"]
             if not 0<start_height<=m["takeoff_altitude"] or not 0<start_velocity<=m["takeoff_velocity"]:
@@ -53,14 +55,19 @@ class RocketEnv(gym.Env):
             self.takeoff_velocity=start_velocity+d*(m["takeoff_velocity"]-start_velocity)
         self.phase = "takeoff" if self.mission in ("takeoff", "combined") else "landing"
         self.separated = False
+        self.separation = None
+        self.launch=np.array(m.get('launch',m['pad'][:2]),dtype=float)
+        self.landing=np.array(m['pad'][:2],dtype=float)
+        if self.training and settings.get('target_curriculum',False):
+            self.landing=self.launch+d*(self.landing-self.launch)
         if self.phase == "landing":
             # The first curriculum stage is genuinely easy: 3 m, -0.8 m/s,
             # centered and upright. d=1 preserves the complete mission ranges.
             h = 3. + d*(rng.uniform(*m["landing_altitude"])-3.)
-            pos = [*rng.uniform(-m["horizontal_position"]*d, m["horizontal_position"]*d, 2), h+self.physics.half]
+            pos = [*(self.launch+rng.uniform(-m["horizontal_position"]*d, m["horizontal_position"]*d, 2)), h+self.physics.half]
             vel = [*rng.uniform(-m["horizontal_velocity"]*d, m["horizontal_velocity"]*d, 2), -.8+d*(rng.uniform(*m["landing_vertical_velocity"])+.8)]
         else:
-            pos, vel = [0, 0, self.physics.half+0.05], [0, 0, 0]
+            pos, vel = [*self.launch, self.physics.half+0.05], [0, 0, 0]
         q = Rotation.from_euler("xy", rng.uniform(-m["initial_tilt_deg"]*d, m["initial_tilt_deg"]*d, 2), degrees=True).as_quat()
         mass_scale = rng.uniform(1-.05*d, 1+.05*d) if self.randomize else 1.0
         thrust_scale = rng.uniform(1-.03*d, 1+.03*d) if self.randomize else 1.0
@@ -76,14 +83,16 @@ class RocketEnv(gym.Env):
         return self._obs(self.last_state), {}
 
     def _target(self):
-        return np.array([*self.cfg["mission"]["pad"][:2], self.physics.half + (self.takeoff_altitude if self.phase == "takeoff" else 0.)])
+        xy=self.launch if self.phase=='takeoff' else self.landing
+        return np.array([*xy, self.physics.half + (self.takeoff_altitude if self.phase == "takeoff" else 0.)])
 
     def _obs(self, s):
         # Only physical state, clock and relative goal. No controller/expert action.
         train=self.cfg["training"]
         position_scale=np.asarray(train.get("observation_position_scale",[400,400,400]))
         velocity_scale=np.asarray(train.get("observation_velocity_scale",[50,50,50]))
-        obs = np.concatenate([np.asarray(s["position"])/position_scale, np.asarray(s["velocity"])/velocity_scale,
+        origin=np.array([*self.launch,0.])
+        obs = np.concatenate([(np.asarray(s["position"])-origin)/position_scale, np.asarray(s["velocity"])/velocity_scale,
                               s["quaternion"], np.asarray(s["angular_velocity"])/2,
                               [s["fuel_mass"] / (self.cfg["vehicle"]["fuel_mass"]*self.physics.mass_scale), s["t"]/90],
                               (self._target()-s["position"])/position_scale,
@@ -97,7 +106,7 @@ class RocketEnv(gym.Env):
         if self.noise:
             obs[:3]-=noise[:3];obs[:3]+=noise[:3]*400/position_scale
             obs[3:6]-=noise[3:6];obs[3:6]+=noise[3:6]*50/velocity_scale
-        self.sensed_state={**s,"position":obs[:3]*position_scale,"velocity":obs[3:6]*velocity_scale,"angular_velocity":obs[10:13]*2}
+        self.sensed_state={**s,"position":obs[:3]*position_scale+origin,"velocity":obs[3:6]*velocity_scale,"angular_velocity":obs[10:13]*2}
         return obs.astype(np.float32)
 
     def _potential(self, s):
@@ -116,7 +125,7 @@ class RocketEnv(gym.Env):
         s = self.physics.step(action)
         m, r = self.cfg["mission"], self.cfg["reward"]
         speed = float(np.linalg.norm(s["velocity"]))
-        distance = float(np.linalg.norm(s["position"][:2]-np.array(m["pad"][:2])))
+        distance = float(np.linalg.norm(s["position"][:2]-self._target()[:2]))
         reason = None
         phase_changed = False
         if self.phase == "takeoff" and s["altitude"] >= self.takeoff_altitude:
@@ -127,7 +136,10 @@ class RocketEnv(gym.Env):
             elif distance > m["pad_radius"]:
                 reason = "missed_pad"
             elif self.mission == "combined":
+                self.separation=self.physics.separate()
                 self.phase, self.separated, phase_changed = "landing", True, True
+                s=self.physics.state()
+                distance=float(np.linalg.norm(s['position'][:2]-self._target()[:2]))
             else:
                 reason = "success"
         if s["altitude"] <= 0 and reason is None:
@@ -143,7 +155,9 @@ class RocketEnv(gym.Env):
                 reason = "success"
         if reason is None and s["fuel_mass"] <= 0:
             reason = "out_of_fuel"
-        if reason is None and (np.linalg.norm(s["position"][:2]) > m["bounds"] or s["altitude"] > m["bounds"]):
+        corridor=max(np.linalg.norm(s['position'][:2]-self.launch),np.linalg.norm(s['position'][:2]-np.array(m['pad'][:2])))
+        allowed=m['bounds']+np.linalg.norm(self.launch-np.array(m['pad'][:2]))
+        if reason is None and (corridor > allowed or s["altitude"] > m["bounds"]):
             reason = "out_of_bounds"
         timeout=m["timeout"]*(.2+.8*self.episode_difficulty) if self.mission=="landing" else m["timeout"]
         if reason is None and s["t"] >= timeout:

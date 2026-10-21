@@ -1,5 +1,56 @@
 {
   "$defs": {
+    "FlightPlan": {
+      "additionalProperties": false,
+      "description": "Local meters on the flat z=0 surface, x east and y north.",
+      "properties": {
+        "launch": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Launch",
+          "type": "array"
+        },
+        "landing": {
+          "default": [
+            0.0,
+            0.0
+          ],
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Landing",
+          "type": "array"
+        },
+        "separation_altitude": {
+          "default": 400.0,
+          "maximum": 1500,
+          "minimum": 80,
+          "title": "Separation Altitude",
+          "type": "number"
+        }
+      },
+      "title": "FlightPlan",
+      "type": "object"
+    },
     "Frame": {
       "additionalProperties": false,
       "properties": {
@@ -341,6 +392,40 @@
           ],
           "default": null,
           "title": "Controller Status"
+        },
+        "flight_plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FlightPlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "separation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Separation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "dynamics_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dynamics Hash"
         }
       },
       "required": [
@@ -359,6 +444,82 @@
         "total_reward"
       ],
       "title": "RunMeta",
+      "type": "object"
+    },
+    "Separation": {
+      "additionalProperties": false,
+      "properties": {
+        "t": {
+          "title": "T",
+          "type": "number"
+        },
+        "position": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Position",
+          "type": "array"
+        },
+        "velocity": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Velocity",
+          "type": "array"
+        },
+        "quaternion": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Quaternion",
+          "type": "array"
+        },
+        "mass": {
+          "title": "Mass",
+          "type": "number"
+        }
+      },
+      "required": [
+        "t",
+        "position",
+        "velocity",
+        "quaternion",
+        "mass"
+      ],
+      "title": "Separation",
       "type": "object"
     }
   },

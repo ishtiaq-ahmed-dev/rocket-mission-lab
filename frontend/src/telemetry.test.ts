@@ -15,4 +15,11 @@ describe('versioned telemetry',()=>{
  it('rejects nonfinite and wrong length vectors',()=>expect(()=>parseTelemetry({...telemetry,frames:[{...frame,position:[NaN,0,0]},telemetry.frames[1]]})).toThrow());
  it('interpolates physical state and fuel',()=>{const f=sample(telemetry.frames,.5);expect(f.position[0]).toBeCloseTo(5);expect(f.position[2]).toBeCloseTo(215);expect(f.fuel_mass).toBeCloseTo(950);expect(Math.hypot(...f.quaternion)).toBeCloseTo(1);expect(tilt(f)).toBeCloseTo(.1*180/Math.PI);});
  it('clamps to the first and last frames',()=>{expect(sample(telemetry.frames,-1)).toBe(frame);expect(sample(telemetry.frames,20)).toBe(telemetry.frames[1]);});
+ it('does not invent a low throttle flame while an engine is shut down or tween away stage mass',()=>{
+  const coast={...frame,throttle:0,phase:'takeoff' as const,mass:25500};
+  const separated={...frame,t:1,phase:'landing' as const,mass:23000};
+  const before=sample([coast,separated],.8);
+  expect(before.throttle).toBe(0);expect(before.phase).toBe('takeoff');expect(before.mass).toBe(25500);
+  expect(sample([coast,separated],1).mass).toBe(23000);
+ });
 });

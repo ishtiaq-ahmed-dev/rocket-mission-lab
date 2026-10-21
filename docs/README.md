@@ -15,3 +15,10 @@
 
 - [Research sources](RESEARCH.md)
 - [Validation record](VALIDATION.md)
+
+
+## Mission Control update (21 October 2026)
+
+- [Mission geometry, rendering and worker contracts](21-mission-controls.md)
+- [Dated validation and current limits](VALIDATION-2026-10-21.md)
+- [Raw pilot and worker evidence](evidence/2026-10-21/)

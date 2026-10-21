@@ -2,8 +2,9 @@ import numpy as np
 from .envs import RocketEnv
 from .controllers import ClassicalController
 from .schemas import Frame, RunMeta, Telemetry
-from .storage import atomic_json, config_hash, checkpoint_path, select_checkpoint
+from .storage import atomic_json, config_hash, checkpoint_path, select_checkpoint,dynamics_hash
 from .config import DATA, load_config
+from .missions import configure_flight
 
 class LearnedPolicy:
     def __init__(self, identifier, observation_config=None):
@@ -30,17 +31,28 @@ class LearnedPolicy:
         normalized=self.norm.normalize_obs(np.array([observation]))
         return self.model.predict(normalized,deterministic=True)[0][0]
 
-def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=None,save=True,config=None,difficulty=1.,training=False):
+def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=None,save=True,config=None,difficulty=1.,training=False,flight_plan=None):
     if not 0<=difficulty<=1:raise ValueError("difficulty must be within [0,1]")
-    if method=='rl' and mission=='combined' and checkpoint_id:
-        raise ValueError('Combined RL selects a separate checkpoint for each phase; one checkpoint ID is not supported')
-    env=RocketEnv(mission,config=config,difficulty=difficulty,training=training)
+    cfg,plan=configure_flight(config or load_config(),flight_plan,mission)
+    env=RocketEnv(mission,config=cfg,difficulty=difficulty,training=training)
     observation,_=env.reset(seed=seed)
     controller=ClassicalController(level)
     policies={}
     if method=="rl":
+        if mission=='combined' and not checkpoint_id:
+            try:checkpoint_id=select_checkpoint('combined',level,config=env.cfg)['id']
+            except ValueError:pass # legacy phase chaining remains available before a combined policy exists
+        if mission=='combined' and checkpoint_id:
+            policy=LearnedPolicy(checkpoint_id,observation_config=env.cfg)
+            if policy.meta['mission']!='combined':
+                raise ValueError('Select a combined policy, or omit the ID to use a separate checkpoint for each phase')
+            policies={'takeoff':policy,'landing':policy}
         for phase in (["takeoff","landing"] if mission=="combined" else [mission]):
-            selected=checkpoint_id if checkpoint_id and mission!="combined" else select_checkpoint(phase,level)["id"]
+            if phase in policies:continue
+            if checkpoint_id and mission!='combined':selected=checkpoint_id
+            else:
+                try:selected=select_checkpoint(phase,level,config=env.cfg)['id']
+                except ValueError:selected=select_checkpoint(phase,level)['id']
             policies[phase]=LearnedPolicy(selected,observation_config=env.cfg)
             if policies[phase].meta['mission']!=phase:
                 raise ValueError(f'Checkpoint mission does not match {phase}')
@@ -60,16 +72,23 @@ def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=
         frames.append(frame(reward if method=="rl" else None))
         if terminated or truncated: break
     tag=f"-{checkpoint_id}" if checkpoint_id else ""
+    if method=='rl' and mission=='combined' and not checkpoint_id:
+        # The identity must include both actors; a different phase policy is a different flight.
+        import hashlib
+        identities='|'.join(str(policies[p].meta.get('job_id',''))+':'+str(policies[p].meta['steps']) for p in ('takeoff','landing'))
+        tag+='-phases-'+hashlib.sha256(identities.encode()).hexdigest()[:12]
     if difficulty!=1.:tag+=f"-d{difficulty:.6f}"
     if training:tag+="-practice"
     run_hash=config_hash(env.cfg)
-    run_id=f"{mission}-{method}-l{level}-s{seed}{tag}-{run_hash}"
+    source_hash=dynamics_hash()
+    run_id=f"{mission}-{method}-l{level}-s{seed}{tag}-src{source_hash[:12]}-{run_hash}"
     run=RunMeta(id=run_id,mission=mission,method=method,level=level,checkpoint_steps=steps,checkpoint_id=checkpoint_id,difficulty=difficulty,algorithm=algorithm,
-                training_mode=training,target_altitude=env.takeoff_altitude if mission=="takeoff" else None,
+                training_mode=training,target_altitude=env.takeoff_altitude if mission in ('takeoff','combined') else None,
                 target_velocity=env.takeoff_velocity if mission=="takeoff" else None,
                 seed=seed,outcome=info["outcome"],failure_reason=info["failure_reason"],touchdown_speed=info["touchdown_speed"],
                 tilt=info["tilt"],pad_distance=info["pad_distance"],fuel_used=info["fuel_used"],duration=frames[-1].t,
-                total_reward=env.total_reward,controller_status=controller.plan_status if method=="classical" else "measured checkpoint; maturity not certified")
+                total_reward=env.total_reward,flight_plan=plan,separation=env.separation,dynamics_hash=source_hash,
+                controller_status=controller.plan_status if method=="classical" else "measured checkpoint; maturity not certified")
     result=Telemetry(config_hash=run_hash,rocket_length=env.cfg["vehicle"]["length"],initial_fuel=env.cfg["vehicle"]["fuel_mass"]*env.physics.mass_scale,run=run,frames=frames)
     if save:
         atomic_json(DATA/"runs"/f"{run_id}.json",result.model_dump())

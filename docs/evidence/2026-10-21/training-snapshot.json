@@ -1,0 +1,156 @@
+{
+  "observed_at": 1792553034.0197382,
+  "status": "running",
+  "campaign_id": "mission-v18-20261021",
+  "steps": 2720692,
+  "budget": 100000000,
+  "active_job": "mission-v18-20261021-landing-r4",
+  "flight_plan": {
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "landing": [
+      80.0,
+      40.0
+    ],
+    "separation_altitude": 400.0
+  },
+  "missions": {
+    "landing": {
+      "steps": 717076,
+      "best_successes": 0,
+      "plateau": 2,
+      "qualified": false,
+      "checkpoint_id": "mission-v18-20261021-landing-r0__step-000124928",
+      "latest_checkpoint_id": "mission-v18-20261021-landing-r3__step-000698372",
+      "development": {
+        "mission": "landing",
+        "method": "rl",
+        "level": 4,
+        "checkpoint_id": "mission-v18-20261021-landing-r2__step-000562176",
+        "episodes": 256,
+        "seeds": [
+          30000,
+          30255
+        ],
+        "scenario": "nominal",
+        "successes": 0,
+        "success_rate": 0.0,
+        "confidence_interval": [
+          0.0,
+          0.014783856425870627
+        ],
+        "mean_reward": -5826.782451033639,
+        "failures": {
+          "crash_speed": 256
+        },
+        "config_hash": "99294c1e905aa748",
+        "dynamics_hash": "f3d18ab34df9a395fdb78646a1f48f84ad6447b6f4bcb8ef0fcbf4c6f464a24f",
+        "qualification": "pilot sample; 10,000-seed gate pending",
+        "mean_touchdown_speed": 36.19505161622105,
+        "median_touchdown_speed": 34.2867990524054,
+        "mean_tilt": 54.78978742697912,
+        "median_tilt": 52.96749473554789,
+        "mean_pad_distance": 126.34452647443015,
+        "median_pad_distance": 126.24408354849407,
+        "mean_fuel_used": 1779.1990399383571,
+        "median_fuel_used": 1764.4793768696481,
+        "evaluation_role": "development selection"
+      },
+      "last_round": 3
+    },
+    "takeoff": {
+      "steps": 948516,
+      "best_successes": 0,
+      "plateau": 0,
+      "qualified": false,
+      "checkpoint_id": "mission-v18-20261021-takeoff-r3__step-000936960",
+      "latest_checkpoint_id": "mission-v18-20261021-takeoff-r3__step-000948516",
+      "development": {
+        "mission": "takeoff",
+        "method": "rl",
+        "level": 4,
+        "checkpoint_id": "mission-v18-20261021-takeoff-r3__step-000936960",
+        "episodes": 256,
+        "seeds": [
+          30000,
+          30255
+        ],
+        "scenario": "nominal",
+        "successes": 0,
+        "success_rate": 0.0,
+        "confidence_interval": [
+          0.0,
+          0.014783856425870627
+        ],
+        "mean_reward": -2799.6123147678904,
+        "failures": {
+          "crash_tilt": 133,
+          "crash_speed": 123
+        },
+        "config_hash": "99294c1e905aa748",
+        "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+        "qualification": "pilot sample; 10,000-seed gate pending",
+        "mean_touchdown_speed": 30.444949577416878,
+        "median_touchdown_speed": 19.434639356986786,
+        "mean_tilt": 39.695298928258396,
+        "median_tilt": 34.5129160632562,
+        "mean_pad_distance": 98.32108858893851,
+        "median_pad_distance": 85.53355814964684,
+        "mean_fuel_used": 2334.777179196066,
+        "median_fuel_used": 2042.0165552506478,
+        "evaluation_role": "development selection"
+      },
+      "last_round": 3,
+      "best_error": 28.28389620061649,
+      "best_difficulty": 0.37500000000000006
+    },
+    "combined": {
+      "steps": 999424,
+      "best_successes": 0,
+      "plateau": 0,
+      "qualified": false,
+      "checkpoint_id": "mission-v18-20261021-combined-r3__step-000874496",
+      "latest_checkpoint_id": "mission-v18-20261021-combined-r3__step-000999424-final",
+      "development": {
+        "mission": "combined",
+        "method": "rl",
+        "level": 4,
+        "checkpoint_id": "mission-v18-20261021-combined-r3__step-000874496",
+        "episodes": 256,
+        "seeds": [
+          30000,
+          30255
+        ],
+        "scenario": "nominal",
+        "successes": 0,
+        "success_rate": 0.0,
+        "confidence_interval": [
+          0.0,
+          0.014783856425870627
+        ],
+        "mean_reward": -6751.378221271894,
+        "failures": {
+          "crash_speed": 256
+        },
+        "config_hash": "b281ceeb0aa68504",
+        "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+        "qualification": "pilot sample; 10,000-seed gate pending",
+        "mean_touchdown_speed": 56.79994694199097,
+        "median_touchdown_speed": 53.465003323275084,
+        "mean_tilt": 61.299301731909225,
+        "median_tilt": 55.07634888852783,
+        "mean_pad_distance": 243.9734267576966,
+        "median_pad_distance": 225.88037720571242,
+        "mean_fuel_used": 3223.4963155001105,
+        "median_fuel_used": 3091.173334826508,
+        "evaluation_role": "development selection"
+      },
+      "last_round": 3,
+      "best_error": 89.45451916891665,
+      "best_difficulty": 0
+    }
+  },
+  "qualification": "No current learned policy has passed the new full-task qualification gate"
+}

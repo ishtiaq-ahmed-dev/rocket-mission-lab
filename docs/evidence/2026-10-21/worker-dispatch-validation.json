@@ -1,0 +1,14 @@
+{
+  "started_at": 1792552827.832274,
+  "api_result": {
+    "id": "landing-ppo-1792552827542295600",
+    "pid": 11260,
+    "status": "starting"
+  },
+  "scope": "actual API to independent Windows worker",
+  "verified_at": 1792552854.8563542,
+  "final_status": "completed",
+  "steps": 4096,
+  "checkpoint_count": 6,
+  "last_checkpoint": "landing-ppo-1792552827542295600__step-000004096"
+}

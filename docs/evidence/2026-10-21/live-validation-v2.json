@@ -1,0 +1,75 @@
+{
+  "verified_at_unix": 1792552245.6370897,
+  "scope": "production localhost HTTP, schema, configured mission and replay identity",
+  "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+  "production_bundle": true,
+  "health": 200,
+  "missions": 200,
+  "runs": 200,
+  "training": 200,
+  "campaigns": 200,
+  "checkpoints": 200,
+  "results/summary": 200,
+  "results/failures": 200,
+  "system": 200,
+  "schema/telemetry": 200,
+  "configured_flight": {
+    "id": "combined-classical-l4-s42-srcdcd106afbe65-a73738013ab68bbc",
+    "mission": "combined",
+    "method": "classical",
+    "level": 4,
+    "checkpoint_steps": null,
+    "checkpoint_id": null,
+    "difficulty": 1.0,
+    "training_mode": false,
+    "target_altitude": 300.0,
+    "target_velocity": null,
+    "algorithm": null,
+    "seed": 42,
+    "outcome": "success",
+    "failure_reason": null,
+    "touchdown_speed": 0.35469135887521064,
+    "tilt": 0.9965268594629229,
+    "pad_distance": 1.0966813381158065,
+    "fuel_used": 8081.513806392719,
+    "duration": 67.10000000000379,
+    "total_reward": 702.0972736190724,
+    "source": "MuJoCo simulation",
+    "controller_status": "not_requested",
+    "flight_plan": {
+      "launch": [
+        200.0,
+        -100.0
+      ],
+      "landing": [
+        240.0,
+        -80.0
+      ],
+      "separation_altitude": 300.0
+    },
+    "separation": {
+      "t": 20.399999999999654,
+      "position": [
+        199.73917440595008,
+        -99.86034321127487,
+        320.4505916235051
+      ],
+      "velocity": [
+        0.3085177856295369,
+        -0.10962444948084583,
+        24.931719758995275
+      ],
+      "quaternion": [
+        0.9999641859229389,
+        0.003431525386895754,
+        -4.188256490482829e-05,
+        -0.007736262071891203
+      ],
+      "mass": 2589.6494799778457
+    },
+    "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6"
+  },
+  "demo.json": 200,
+  "demo-runs.json": 200,
+  "browser_scope": "Separate manual browser record; this script does not measure FPS or inspect WebGL."
+}

@@ -18,6 +18,7 @@ from .config import DATA, ROOT, load_config
 from .envs import RocketEnv
 from .storage import atomic_json, config_hash, read_json
 from .evaluate import evaluate, save_result
+from .missions import configure_flight
 
 class TrainingCallback(BaseCallback):
     def __init__(self, job_id, mission, algorithm, total, eval_episodes=12, config=None, initial_steps=0, initial_difficulty=None):
@@ -26,12 +27,16 @@ class TrainingCallback(BaseCallback):
         self.folder=DATA/"jobs"/job_id
         self.started=time.time(); self.last_write=0
         self.history=[]; self.curve=[]; self.completed=set(); self.eval_episodes=eval_episodes
+        self.episode_count=0
         cfg=config or load_config()
         self.recent=deque(maxlen=cfg["training"].get("curriculum_window",40))
         self.config=cfg
         self.training_hash=config_hash(cfg)
         # Add quartiles to short runs so the UI can show a real checkpoint progression.
-        self.milestones=sorted(set([0,total,*[x for x in cfg["training"]["checkpoints"] if x<=total],*[initial_steps+(total-initial_steps)*k//4 for k in (1,2,3)]]))
+        # Bounded checkpoint cadence for long (up to 100M step) experiments.
+        interval=cfg['training'].get('checkpoint_interval',1000000)
+        self.milestones=sorted(set([0,total,*[x for x in cfg["training"]["checkpoints"] if x<=total],
+            *range(initial_steps+interval,total,interval),*[initial_steps+(total-initial_steps)*k//4 for k in (1,2,3)]]))
         self.difficulty=cfg["training"].get("initial_difficulty",0.)
         self.status="running"
         self.initial_steps=initial_steps
@@ -45,7 +50,7 @@ class TrainingCallback(BaseCallback):
                     updated_at=time.time(),elapsed_seconds=time.time()-self.started,
                     steps_per_second=(self.num_timesteps-self.initial_steps)/max(1,time.time()-self.started),
                     device=str(self.model.device),seed=self.model.seed,difficulty=self.difficulty,
-                    episode_count=len(self.history),recent_successes=sum(self.recent),recent_episodes=len(self.recent),
+                    episode_count=self.episode_count,recent_successes=sum(self.recent),recent_episodes=len(self.recent),
                     curve=self.curve,episodes=self.history[-400:],error=error or self.stop_reason,pid=os.getpid(),config_hash=self.training_hash))
 
     def checkpoint(self,final=False):
@@ -83,6 +88,7 @@ class TrainingCallback(BaseCallback):
     def _on_step(self):
         for done,info in zip(self.locals.get("dones",[]),self.locals.get("infos",[])):
             if done:
+                self.episode_count+=1
                 success=info.get("outcome")=="success"
                 # Full-start mixture episodes are logged, but stage advancement
                 # measures the current/easier practice distribution only.
@@ -90,6 +96,7 @@ class TrainingCallback(BaseCallback):
                 if episode_difficulty<=self.difficulty+1e-8:self.recent.append(success)
                 ep=info.get("episode",{})
                 self.history.append(dict(steps=self.num_timesteps,reward=float(ep.get("r",0)),length=int(ep.get("l",0)),outcome=info.get("outcome"),difficulty=episode_difficulty))
+                self.history=self.history[-400:]
         # Advance only after the measured rolling threshold is met.
         threshold=self.config["training"]["curriculum_threshold"]
         if len(self.recent)==self.recent.maxlen and np.mean(self.recent)>=threshold and self.difficulty<1:
@@ -155,13 +162,14 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
     torch.set_num_threads(2)
     np.random.seed(seed); torch.manual_seed(seed)
     cfg=load_config(config_path) if config_path else load_config()
+    cfg,_=configure_flight(cfg,mission=mission)
     warm_difficulty=cfg["training"].get("warm_start_difficulty")
     if warm_difficulty is not None and not 0<=warm_difficulty<=1:raise ValueError("warm_start_difficulty must be within [0,1]")
     job_id=job_id or f"{mission}-{algorithm.lower()}-{int(time.time())}"
     folder=DATA/"jobs"/job_id; folder.mkdir(parents=True,exist_ok=True)
     atomic_json(folder/"config.json",cfg)
     source_folder=folder/"source";source_folder.mkdir(exist_ok=True)
-    source_names=["physics.py","envs.py","train.py","simulation.py","controllers.py","storage.py","config.py","evaluate.py","schemas.py","policies.py"]
+    source_names=["physics.py","envs.py","train.py","simulation.py","controllers.py","storage.py","config.py","evaluate.py","schemas.py","policies.py","missions.py"]
     source_hash=hashlib.sha256()
     for name in source_names:
         source=ROOT/"rocket_lab"/name;source_hash.update(source.read_bytes());shutil.copyfile(source,source_folder/name)
@@ -186,6 +194,8 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
         vec=VecNormalize.load(checkpoint/"normalize.pkl",vec.venv)
         vec.training=True;vec.seed(seed)
         model=PPO.load(checkpoint/"model.zip",env=vec,device=device)
+        model.seed=seed
+        model.set_random_seed(seed)
         model.tensorboard_log=str(DATA/"tensorboard"/job_id)
         initial_steps=model.num_timesteps;initial_difficulty=meta.get("difficulty",0.)
         if adapt_optimizer_from:
@@ -235,7 +245,7 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
     return job_id
 
 if __name__=="__main__":
-    parser=argparse.ArgumentParser(); parser.add_argument("--mission",default="landing",choices=["landing","takeoff"]); parser.add_argument("--algorithm",default="PPO",choices=["PPO","SAC"]); parser.add_argument("--steps",type=int,default=100000); parser.add_argument("--seed",type=int,default=42); parser.add_argument("--device",default="auto",choices=["auto","cpu","cuda"]); parser.add_argument("--job-id"); parser.add_argument("--eval-episodes",type=int,default=12);parser.add_argument("--resume")
+    parser=argparse.ArgumentParser(); parser.add_argument("--mission",default="landing",choices=["landing","takeoff","combined"]); parser.add_argument("--algorithm",default="PPO",choices=["PPO","SAC"]); parser.add_argument("--steps",type=int,default=100000); parser.add_argument("--seed",type=int,default=42); parser.add_argument("--device",default="auto",choices=["auto","cpu","cuda"]); parser.add_argument("--job-id"); parser.add_argument("--eval-episodes",type=int,default=12);parser.add_argument("--resume")
     parser.add_argument("--warm-start");parser.add_argument("--config");parser.add_argument('--adapt-optimizer-from');args=parser.parse_args()
     try:
         train(args.mission,args.algorithm,args.steps,args.seed,args.device,args.job_id,args.eval_episodes,args.resume,args.warm_start,args.config,args.adapt_optimizer_from)

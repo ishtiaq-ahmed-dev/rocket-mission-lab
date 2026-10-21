@@ -10,6 +10,8 @@ class ClassicalController:
         self.lqr_gain = None
         self.velocity_integral=0.
         self.attitude_integral=np.zeros(3)
+        self.engine_on=True
+        self.estimate=None
 
     def _solve_descent(self, env):
         import cvxpy as cp
@@ -39,15 +41,28 @@ class ClassicalController:
     def action(self, env):
         ph=env.physics
         s, cfg=getattr(env,"sensed_state",ph.state()), env.cfg
+        if self.level>=3:
+            measured=s
+            if self.estimate is not None and s['t']>self.estimate['t']:
+                dt=s['t']-self.estimate['t']
+                predicted=self.estimate['position']+self.estimate['velocity']*dt
+                s={**s,'position':predicted+.18*(s['position']-predicted),
+                   'velocity':self.estimate['velocity']+.4*(s['velocity']-self.estimate['velocity'])}
+            self.estimate={**measured,'position':s['position'].copy(),'velocity':s['velocity'].copy()}
         velocity, position=s["velocity"], s["position"]
         h=float(position[2]-ph.half)
+        lateral_error=position[:2]-env._target()[:2]
+        # Keep a clearance shelf during long transfers. The governor bounds the
+        # lateral step presented to LQR, avoiding gimbal saturation and flips.
+        transfer=np.linalg.norm(lateral_error)>12 and env.phase=='landing'
+        guidance_height=h-(60. if transfer else 0.)
         g=cfg["world"]["gravity"]
         if self.level==1:
             # Deliberately untuned altitude/attitude gains, a real failing baseline.
             target_speed=-0.25*h if env.phase=="landing" else 20
             az = 0.12*(target_speed-velocity[2])
         elif env.phase=="takeoff":
-            target_speed=min(cfg["mission"]["takeoff_velocity"], 5+0.12*h)
+            target_speed=min(env.takeoff_velocity, 5+0.12*h)
             az=np.clip(1.1*(target_speed-velocity[2]), -5, 6)
         else:
             target_speed=-min(28., np.sqrt(max(0., 3.0*h)), 0.5*max(h,0)+0.65)
@@ -56,7 +71,7 @@ class ClassicalController:
             dt=cfg["world"]["timestep"]*cfg["world"]["control_substeps"]
             self.velocity_integral=np.clip(self.velocity_integral+(target_speed-velocity[2])*dt,-2.,2.)
             az+=(.005 if self.level==1 else .03)*self.velocity_integral
-        lateral=-0.025*(position[:2]-np.array(cfg["mission"]["pad"][:2]))-0.45*velocity[:2]
+        lateral=-0.025*(position[:2]-env._target()[:2])-0.45*velocity[:2]
         if self.level==3 and env.phase=="landing":
             if self.plan_phase!=env.phase:
                 self.plan_phase=env.phase
@@ -77,11 +92,13 @@ class ClassicalController:
             if env.phase=="landing":
                 # Feed forward the derivative of the altitude-dependent speed
                 # reference. Without this term, feedback alone lags touchdown.
-                href=max(0.,h)
-                candidates=[28.,np.sqrt(3*href+.25),.5*href+.5]
+                href=max(0.,guidance_height)
+                candidates=[28.,np.sqrt(3*href+.25),.25*href+.35]
                 which=int(np.argmin(candidates))
-                reference=-candidates[which]
-                derivative=0. if which==0 else (-1.5/max(np.sqrt(3*href+.25),.1) if which==1 else -.5)
+                reference=-candidates[which] if guidance_height>=0 else min(3.,-guidance_height*.5)
+                if transfer and guidance_height<2:reference=np.clip(-guidance_height*.5,-2,3)
+                target_speed=reference
+                derivative=0. if which==0 else (-1.5/max(np.sqrt(3*href+.25),.1) if which==1 else -.25)
                 az=np.clip(derivative*velocity[2]+2*(reference-velocity[2])-drag[2]/s["mass"],-8,12)
         lateral=np.clip(lateral,-1.0,1.0)
         desired=np.array([*lateral, max(1., g+az)])
@@ -115,9 +132,16 @@ class ClassicalController:
             n_dot=rot@np.cross(s["angular_velocity"],[0.,0.,1.])
             desired_gimbal=[]
             for axis in range(2):
-                state=[position[axis]-cfg["mission"]["pad"][axis],velocity[axis],n[axis],n_dot[axis]]
+                state=[np.clip(lateral_error[axis],-12.,12.),velocity[axis],n[axis],n_dot[axis]]
                 desired_gimbal.append(-float(self.lqr_gain@state))
             body_gimbal=rot.T@np.array([*desired_gimbal,0.])
             gx,gy=body_gimbal[:2]
         limit=np.deg2rad(ph.v["gimbal_limit_deg"])
+        if self.level>=3 and 0<throttle<ph.v['min_throttle']:
+            # Below the engine floor use velocity hysteresis, with a real off
+            # command. Clamping every request to minimum thrust causes a light
+            # booster to climb indefinitely as its mass falls.
+            if velocity[2]>target_speed+.5:self.engine_on=False
+            elif velocity[2]<target_speed-.5:self.engine_on=True
+            throttle=ph.v['min_throttle'] if self.engine_on else 0.
         return np.clip([2*throttle-1,gx/limit,gy/limit],-1,1).astype(np.float32)

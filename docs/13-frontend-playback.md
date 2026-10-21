@@ -1,3 +1,7 @@
+# Current browser rendering
+
+The active renderer now uses a white plane, separate site markers, expanded camera controls, and telemetry-driven rocket/exhaust. See [21-mission-controls.md](21-mission-controls.md). The terrain/ship description below is retained as historical implementation context and is no longer the active scene.
+
 # Browser rendering and playback
 
 ## What it does

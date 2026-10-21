@@ -1,0 +1,11 @@
+{
+  "launch": [
+    0,
+    0
+  ],
+  "landing": [
+    80,
+    40
+  ],
+  "separation_altitude": 400
+}

@@ -1,6 +1,9 @@
 import {describe,it,expect} from 'vitest';
-import {rocketFrameDistance,translateFollowFrame} from './camera';
+import {rocketFrameDistance,translateFollowFrame,CAMERA_MAX_DISTANCE} from './camera';
 import {Vector3} from 'three';
+it('allows mission-scale zoom beyond the previous 2.2 km limit',()=>{
+ expect(CAMERA_MAX_DISTANCE).toBe(100000);
+});
 describe('full rocket camera framing',()=>{
   for(const aspect of [.5,.77,1,1.6,2.4])it(`retains full vehicle inside the frustum at aspect ${aspect}`,()=>{
     const distance=rocketFrameDistance(aspect);

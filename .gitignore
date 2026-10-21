@@ -14,6 +14,13 @@ data/checkpoints/
 data/tensorboard/
 data/jobs/
 logs/
+data/campaigns/
+# Generated telemetry and per-checkpoint evaluations stay local. Selected
+# validation evidence is explicitly published under docs/evidence/.
+data/runs/*-src*.json
+data/results/*-src*.json
+data/results/*-src*.csv
+data/results/*-src*.md
 test-results/
 playwright-report/
 *.tsbuildinfo

@@ -1,0 +1,16 @@
+{
+  "started_at": 1792552877.3042796,
+  "launch_pid": 40572,
+  "campaign": "mission-v18-20261021",
+  "initial_budget_steps": 2452132,
+  "scope": "independent Windows worker survival across API/preview restart; no reboot/soak claim",
+  "verified_at": 1792553034.0037386,
+  "worker_pid": 26404,
+  "worker_started_at": 1792552877.355744,
+  "fresh_heartbeat": true,
+  "heartbeat_age": 1.4799396991729736,
+  "steps_after_restart": 2720692,
+  "active_job": "mission-v18-20261021-landing-r4",
+  "api_supervisor_pid": 40156,
+  "observed_api_preview_restart_survival": true
+}

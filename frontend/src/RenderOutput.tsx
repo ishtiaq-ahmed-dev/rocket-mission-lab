@@ -9,7 +9,7 @@ export default function RenderOutput(){
  useFrame(state=>{
   const sample=measurement.current;
   if(!playing){
-   gl.getDrawingBufferSize(buffer.current);const info=`${buffer.current.x} × ${buffer.current.y} · IDLE`;
+   gl.getDrawingBufferSize(buffer.current);const info=`${buffer.current.x} × ${buffer.current.y} · IDLE · ${gl.info.render.calls} draws`;
    if(useLab.getState().renderInfo!==info)useLab.getState().set({renderInfo:info});
    sample.time=-1;sample.frames=0;return;
   }
@@ -18,7 +18,7 @@ export default function RenderOutput(){
   const elapsed=state.clock.elapsedTime-sample.time;
   if(elapsed>=1){
    gl.getDrawingBufferSize(buffer.current);
-   useLab.getState().set({renderInfo:`${buffer.current.x} × ${buffer.current.y} · ${Math.round(sample.frames/elapsed)} FPS`});
+   useLab.getState().set({renderInfo:`${buffer.current.x} × ${buffer.current.y} · ${Math.round(sample.frames/elapsed)} FPS · ${gl.info.render.calls} draws`});
    sample.time=state.clock.elapsedTime;sample.frames=0;
   }
  });

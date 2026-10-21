@@ -1,0 +1,408 @@
+{
+  "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+  "scope": "fixed-seed development pilots, not 10,000-flight qualification",
+  "results": [
+    {
+      "mission": "landing",
+      "method": "classical",
+      "level": 4,
+      "checkpoint_id": null,
+      "episodes": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "scenario": "nominal",
+      "successes": 100,
+      "success_rate": 1.0,
+      "confidence_interval": [
+        0.9630065017930163,
+        1.0
+      ],
+      "mean_reward": 374.57772956599956,
+      "failures": {},
+      "config_hash": "23efbd238f1e7e91",
+      "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+      "qualification": "pilot sample; 10,000-seed gate pending",
+      "mean_touchdown_speed": 0.5170720618571295,
+      "median_touchdown_speed": 0.5211556138407532,
+      "mean_tilt": 0.5087935230644307,
+      "median_tilt": 0.46203191619820705,
+      "mean_pad_distance": 0.6761670646652175,
+      "median_pad_distance": 0.6636457077502962,
+      "mean_fuel_used": 3324.7508357734023,
+      "median_fuel_used": 3294.02198368841,
+      "flight_plan": {
+        "launch": [
+          0,
+          0
+        ],
+        "landing": [
+          0,
+          0
+        ],
+        "separation_altitude": 400
+      },
+      "evaluation_role": "custom-plan development pilot",
+      "case": "same-pad"
+    },
+    {
+      "mission": "takeoff",
+      "method": "classical",
+      "level": 4,
+      "checkpoint_id": null,
+      "episodes": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "scenario": "nominal",
+      "successes": 100,
+      "success_rate": 1.0,
+      "confidence_interval": [
+        0.9630065017930163,
+        1.0
+      ],
+      "mean_reward": 435.4634756520242,
+      "failures": {},
+      "config_hash": "23efbd238f1e7e91",
+      "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+      "qualification": "pilot sample; 10,000-seed gate pending",
+      "mean_touchdown_speed": 24.989504359899094,
+      "median_touchdown_speed": 25.00490215415025,
+      "mean_tilt": 0.5740118350742917,
+      "median_tilt": 0.517529001227411,
+      "mean_pad_distance": 0.469820264250737,
+      "median_pad_distance": 0.4377083455277515,
+      "mean_fuel_used": 3307.7111672162077,
+      "median_fuel_used": 3312.0697614015035,
+      "flight_plan": {
+        "launch": [
+          0,
+          0
+        ],
+        "landing": [
+          0,
+          0
+        ],
+        "separation_altitude": 400
+      },
+      "evaluation_role": "custom-plan development pilot",
+      "case": "same-pad"
+    },
+    {
+      "mission": "combined",
+      "method": "classical",
+      "level": 4,
+      "checkpoint_id": null,
+      "episodes": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "scenario": "nominal",
+      "successes": 99,
+      "success_rate": 0.99,
+      "confidence_interval": [
+        0.9455138038212967,
+        0.9982325679358592
+      ],
+      "mean_reward": 649.5086850871744,
+      "failures": {
+        "crash_speed": 1
+      },
+      "config_hash": "26f2e6f9df5382b7",
+      "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+      "qualification": "pilot sample; 10,000-seed gate pending",
+      "mean_touchdown_speed": 1.2120533209779956,
+      "median_touchdown_speed": 0.6503777744981037,
+      "mean_tilt": 1.2341343147426451,
+      "median_tilt": 0.5268313301052194,
+      "mean_pad_distance": 0.8112676735615171,
+      "median_pad_distance": 0.4976003021895039,
+      "mean_fuel_used": 7200.634022723889,
+      "median_fuel_used": 7166.790318102041,
+      "flight_plan": {
+        "launch": [
+          0,
+          0
+        ],
+        "landing": [
+          0,
+          0
+        ],
+        "separation_altitude": 400
+      },
+      "evaluation_role": "custom-plan development pilot",
+      "case": "same-pad"
+    },
+    {
+      "mission": "landing",
+      "method": "classical",
+      "level": 4,
+      "checkpoint_id": null,
+      "episodes": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "scenario": "nominal",
+      "successes": 100,
+      "success_rate": 1.0,
+      "confidence_interval": [
+        0.9630065017930163,
+        1.0
+      ],
+      "mean_reward": 436.2564516487789,
+      "failures": {},
+      "config_hash": "05b079572c3c4702",
+      "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+      "qualification": "pilot sample; 10,000-seed gate pending",
+      "mean_touchdown_speed": 0.5773171800399641,
+      "median_touchdown_speed": 0.5332287777584432,
+      "mean_tilt": 0.5726378913918033,
+      "median_tilt": 0.538526327943498,
+      "mean_pad_distance": 1.0473219987847466,
+      "median_pad_distance": 1.0659623621083907,
+      "mean_fuel_used": 5044.826847838917,
+      "median_fuel_used": 5012.307812259197,
+      "flight_plan": {
+        "launch": [
+          200,
+          -100
+        ],
+        "landing": [
+          240,
+          -80
+        ],
+        "separation_altitude": 300
+      },
+      "evaluation_role": "custom-plan development pilot",
+      "case": "separate-site"
+    },
+    {
+      "mission": "takeoff",
+      "method": "classical",
+      "level": 4,
+      "checkpoint_id": null,
+      "episodes": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "scenario": "nominal",
+      "successes": 100,
+      "success_rate": 1.0,
+      "confidence_interval": [
+        0.9630065017930163,
+        1.0
+      ],
+      "mean_reward": 412.00270936127595,
+      "failures": {},
+      "config_hash": "05b079572c3c4702",
+      "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+      "qualification": "pilot sample; 10,000-seed gate pending",
+      "mean_touchdown_speed": 25.00065026839258,
+      "median_touchdown_speed": 24.996659667014573,
+      "mean_tilt": 0.5356060100846498,
+      "median_tilt": 0.508331760111282,
+      "mean_pad_distance": 0.4885441356702653,
+      "median_pad_distance": 0.46049238109362156,
+      "mean_fuel_used": 2840.21845346914,
+      "median_fuel_used": 2841.0716577383573,
+      "flight_plan": {
+        "launch": [
+          200,
+          -100
+        ],
+        "landing": [
+          240,
+          -80
+        ],
+        "separation_altitude": 300
+      },
+      "evaluation_role": "custom-plan development pilot",
+      "case": "separate-site"
+    },
+    {
+      "mission": "combined",
+      "method": "classical",
+      "level": 4,
+      "checkpoint_id": null,
+      "episodes": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "scenario": "nominal",
+      "successes": 98,
+      "success_rate": 0.98,
+      "confidence_interval": [
+        0.9299882092714581,
+        0.9944980324498375
+      ],
+      "mean_reward": 665.1134500785498,
+      "failures": {
+        "crash_speed": 2
+      },
+      "config_hash": "a73738013ab68bbc",
+      "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+      "qualification": "pilot sample; 10,000-seed gate pending",
+      "mean_touchdown_speed": 2.2480378059176993,
+      "median_touchdown_speed": 0.6166974291897666,
+      "mean_tilt": 2.503584301238254,
+      "median_tilt": 0.5416203035944209,
+      "mean_pad_distance": 1.5872257650953987,
+      "median_pad_distance": 1.1506126450236438,
+      "mean_fuel_used": 7677.247099080692,
+      "median_fuel_used": 7719.123488237248,
+      "flight_plan": {
+        "launch": [
+          200,
+          -100
+        ],
+        "landing": [
+          240,
+          -80
+        ],
+        "separation_altitude": 300
+      },
+      "evaluation_role": "custom-plan development pilot",
+      "case": "separate-site"
+    },
+    {
+      "mission": "landing",
+      "method": "classical",
+      "level": 4,
+      "checkpoint_id": null,
+      "episodes": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "scenario": "nominal",
+      "successes": 100,
+      "success_rate": 1.0,
+      "confidence_interval": [
+        0.9630065017930163,
+        1.0
+      ],
+      "mean_reward": 511.4685798439127,
+      "failures": {},
+      "config_hash": "a4a289c1c3d3350a",
+      "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+      "qualification": "pilot sample; 10,000-seed gate pending",
+      "mean_touchdown_speed": 0.7472249848944474,
+      "median_touchdown_speed": 0.6852703571968377,
+      "mean_tilt": 0.5351970859983533,
+      "median_tilt": 0.5243565838355082,
+      "mean_pad_distance": 1.1507327151931575,
+      "median_pad_distance": 1.1201406227268556,
+      "mean_fuel_used": 8040.688991314868,
+      "median_fuel_used": 8022.192062707565,
+      "flight_plan": {
+        "launch": [
+          0,
+          0
+        ],
+        "landing": [
+          80,
+          40
+        ],
+        "separation_altitude": 400
+      },
+      "evaluation_role": "custom-plan development pilot",
+      "case": "default-transfer"
+    },
+    {
+      "mission": "takeoff",
+      "method": "classical",
+      "level": 4,
+      "checkpoint_id": null,
+      "episodes": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "scenario": "nominal",
+      "successes": 100,
+      "success_rate": 1.0,
+      "confidence_interval": [
+        0.9630065017930163,
+        1.0
+      ],
+      "mean_reward": 435.4634756520242,
+      "failures": {},
+      "config_hash": "a4a289c1c3d3350a",
+      "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+      "qualification": "pilot sample; 10,000-seed gate pending",
+      "mean_touchdown_speed": 24.989504359899094,
+      "median_touchdown_speed": 25.00490215415025,
+      "mean_tilt": 0.5740118350742917,
+      "median_tilt": 0.517529001227411,
+      "mean_pad_distance": 0.469820264250737,
+      "median_pad_distance": 0.4377083455277515,
+      "mean_fuel_used": 3307.7111672162077,
+      "median_fuel_used": 3312.0697614015035,
+      "flight_plan": {
+        "launch": [
+          0,
+          0
+        ],
+        "landing": [
+          80,
+          40
+        ],
+        "separation_altitude": 400
+      },
+      "evaluation_role": "custom-plan development pilot",
+      "case": "default-transfer"
+    },
+    {
+      "mission": "combined",
+      "method": "classical",
+      "level": 4,
+      "checkpoint_id": null,
+      "episodes": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "scenario": "nominal",
+      "successes": 98,
+      "success_rate": 0.98,
+      "confidence_interval": [
+        0.9299882092714581,
+        0.9944980324498375
+      ],
+      "mean_reward": 800.4728169559104,
+      "failures": {
+        "crash_speed": 2
+      },
+      "config_hash": "8f6a161c3975caac",
+      "dynamics_hash": "dcd106afbe6510059063b16bf90cd3aa95fe2e38ccca94c4247497884b43d1c6",
+      "qualification": "pilot sample; 10,000-seed gate pending",
+      "mean_touchdown_speed": 1.656555825664397,
+      "median_touchdown_speed": 1.0429925207133524,
+      "mean_tilt": 2.1738904623551836,
+      "median_tilt": 0.5245855488682809,
+      "mean_pad_distance": 2.126250983932427,
+      "median_pad_distance": 1.5713903684147228,
+      "mean_fuel_used": 10777.002577567146,
+      "median_fuel_used": 10767.274193456755,
+      "flight_plan": {
+        "launch": [
+          0,
+          0
+        ],
+        "landing": [
+          80,
+          40
+        ],
+        "separation_altitude": 400
+      },
+      "evaluation_role": "custom-plan development pilot",
+      "case": "default-transfer"
+    }
+  ]
+}

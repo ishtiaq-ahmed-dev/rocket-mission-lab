@@ -13,8 +13,9 @@ import numpy as np
 from .envs import RocketEnv
 from .controllers import ClassicalController
 from .simulation import LearnedPolicy
-from .storage import atomic_json, config_hash, read_json
+from .storage import atomic_json, config_hash, read_json,dynamics_hash
 from .config import DATA, ROOT, load_config
+from .missions import configure_flight
 
 def wilson(k,n):
     if n==0: return [0.,1.]
@@ -25,7 +26,7 @@ def wilson(k,n):
 
 def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_seed=10000,scenario="nominal",config=None,progress_id=None):
     if episodes<1:raise ValueError("episodes must be positive")
-    cfg=copy.deepcopy(config or load_config())
+    cfg,_=configure_flight(config or load_config(),mission=mission)
     if scenario=="gusts": cfg["world"]["gust_std"]*=4; cfg["world"]["wind_mean"]=[12,-8,0]
     elif scenario=="noise": cfg["world"]["sensor_noise"]*=4
     elif scenario=="thrust_loss": cfg["vehicle"]["max_thrust"]*=.8
@@ -69,7 +70,7 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
                 episodes=episodes,seeds=[start_seed,start_seed+episodes-1],scenario=scenario,successes=k,success_rate=k/episodes,
                 confidence_interval=wilson(k,episodes),mean_reward=float(np.mean([x["reward"] for x in rows])),
                 failures=dict(Counter(x["outcome"] for x in rows if x["outcome"]!="success")),
-                config_hash=config_hash(config),
+                config_hash=config_hash(env.cfg),dynamics_hash=dynamics_hash(),
                 qualification="full fixed-seed batch" if episodes>=10000 else "pilot sample; 10,000-seed gate pending")
     for metric in ["touchdown_speed","tilt","pad_distance","fuel_used"]:
         result[f"mean_{metric}"]=float(np.mean([x[metric] for x in rows]))
@@ -80,6 +81,7 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
 
 def save_result(result,rows):
     identifier=f"{result['mission']}-{result['method']}-l{result['level']}-{result['checkpoint_id'] or 'controller'}-{result['scenario']}"
+    if result.get('dynamics_hash'):identifier+=f"-{result['config_hash']}-src{result['dynamics_hash'][:12]}"
     folder=DATA/"results"; folder.mkdir(parents=True,exist_ok=True)
     # Preserve a completed full batch when a smaller pilot for that controller
     # finishes later. Keep the pilot separately rather than overwriting evidence.

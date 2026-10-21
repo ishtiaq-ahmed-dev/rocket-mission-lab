@@ -67,3 +67,14 @@
 - Use the largest compatible nominal sample and Wilson lower bound for both backend and frontend selection, excluding cross-profile raw reward. The running API still requires its pending restart to import source changes.
 - Use native MuJoCo quaternion math and an exact engine-lever expansion only after measured throughput and closed-loop numerical regression checks. The dynamics microbenchmark does not measure renderer GPU usage or end-to-end training speed.
 - Test a separate v16 near-ground speed debit after the landing continuations plateaued. Preserve physics, observations and success thresholds; the reward supplies physical penalties, without an expert action or reference trajectory. Initial 20 physical rows match its parent exactly; learning improvement must be measured.
+
+
+## 21 October 2026 — mission controls and white-plane renderer
+
+- Remove scenery from the active renderer to focus the graphics budget on the rocket. Keep old research assets available; new default graphics quality is Balanced.
+- Use charcoal/amber/olive dashboard surfaces, separate draft mission fields from the applied telemetry plan, and keep Run accessible while the setup panel scrolls.
+- Use distinct launch and landing phase targets, launch-relative observations, bounded LQR transfer references, a simple sensor estimate, and a gentler terminal descent. Preserve failure outcomes instead of snapping the rocket onto its destination.
+- Model generic attached upper-stage mass removal in combined flight and explicitly label the released-stage drawing as an ideal unpowered ballistic preview.
+- Bind new run IDs and current result views to source/configuration identity, retaining earlier measurements as historical records.
+- Treat 100 million steps as a shared upper budget for measured three-mission training. Keep pure learned policies separate from classical control and require a separate nominal qualification gate.
+- A Start-Process worker disappeared during validation. Recover durable checkpoints, account for consumed/lost rollout steps, and use an independent hidden WMI worker on Windows. Real API dispatch and survival across web-server restart were observed; reboot and long unattended qualification remain open.

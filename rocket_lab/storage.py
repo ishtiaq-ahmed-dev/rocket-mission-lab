@@ -34,9 +34,12 @@ def config_hash(config=None):
     if config is None or config==load_config():return hashlib.sha256((ROOT/"config.yaml").read_bytes()).hexdigest()[:16]
     return hashlib.sha256(json.dumps(config,sort_keys=True,separators=(',',':')).encode()).hexdigest()[:16]
 
+def dynamics_hash():
+    names=('physics.py','envs.py','controllers.py','simulation.py','missions.py')
+    return hashlib.sha256(b''.join((ROOT/'rocket_lab'/name).read_bytes() for name in names)).hexdigest()
+
 def runs():
-    current=config_hash()
-    return sorted([v for p in (DATA/"runs").glob("*.meta.json") if (v:=read_json(p)) and v["id"].endswith(current)],key=lambda x:(x["mission"],x["method"],x["level"]))
+    return sorted([v for p in (DATA/"runs").glob("*.meta.json") if (v:=read_json(p))],key=lambda x:(x["mission"],x["method"],x["level"]))
 
 def training_jobs():
     jobs=[v for p in (DATA/"jobs").glob("*/status.json") if (v:=read_json(p))]
@@ -63,8 +66,11 @@ def checkpoint_path(identifier):
             return DATA/"checkpoints"/job/folder
     raise ValueError("Unknown checkpoint")
 
-def select_checkpoint(mission,level):
-    cfg=load_config();baseline_hash=config_hash()
+def select_checkpoint(mission,level,config=None):
+    cfg=config or load_config();baseline_hash=config_hash()
+    if mission=='combined':
+        from .missions import configure_flight
+        cfg,_=configure_flight(cfg,mission=mission)
     def compatible(item):
         recorded=item.get('config')
         return (all(recorded.get(key)==cfg.get(key) for key in ('vehicle','world','mission')) if recorded else item.get('config_hash')==baseline_hash)

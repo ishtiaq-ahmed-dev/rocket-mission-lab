@@ -29,6 +29,7 @@ class RocketPhysics:
         self.rng = np.random.default_rng(seed)
         self.mass_scale, self.wind_scale, self.thrust_scale = mass_scale, wind_scale, thrust_scale
         self.fuel = self.v["fuel_mass"] * mass_scale
+        self.attached_mass = self.v.get('upper_stage_mass',0.) * mass_scale
         self.gimbal = np.zeros(2)
         self.throttle = 0.0
         self.thrust = 0.0
@@ -43,7 +44,20 @@ class RocketPhysics:
 
     @property
     def mass(self):
-        return self.v["dry_mass"] * self.mass_scale + self.fuel
+        return self.v["dry_mass"] * self.mass_scale + self.fuel + self.attached_mass
+
+    def separate(self):
+        """No separation impulse: both bodies retain their release velocity.
+
+        Only the returning booster is dynamically integrated after release.
+        The UI displays the released payload with a labelled ballistic preview.
+        """
+        state=self.state()
+        event=dict(t=state['t'],position=state['position'].tolist(),velocity=state['velocity'].tolist(),
+                   quaternion=state['quaternion'].tolist(),mass=float(self.attached_mass))
+        self.attached_mass=0.
+        self._mass_update()
+        return event
 
     def _mass_update(self):
         # mj_setConst uses qpos0 and overwrites data.qpos; preserve live state.

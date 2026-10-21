@@ -79,10 +79,8 @@ def test_training_dispatch_is_bounded(monkeypatch,tmp_path):
     monkeypatch.setattr(module,"DATA",tmp_path)
     monkeypatch.setattr(module,"training_jobs",lambda:[])
     commands=[]
-    class FakeProcess:
-        pid=12345
-        def __init__(self,command,**kwargs):commands.append(command)
-    monkeypatch.setattr(module.subprocess,"Popen",FakeProcess)
+    def launch(command,folder):commands.append(command);return 12345
+    monkeypatch.setattr(module,'launch_job',launch)
     response=client.post("/training",json={"mission":"landing","algorithm":"PPO","steps":1000,"device":"cpu"})
     assert response.status_code==202
     assert commands[0][1:3]==["-m","rocket_lab.train"]
