@@ -5,16 +5,16 @@ import {terrainHeight,shoreline} from './terrain';
  * Both resolutions contribute all their boundary vertices to each collar.
  * Geometry shares UVs in world meters across every patch, avoiding texture seams.
  */
-export function createTerrainMesh(quality:string){
+export function createTerrainMesh(quality:string,sites:readonly [number,number][]=[]){
  const positions:number[]=[],uvs:number[]=[],indices:number[]=[],normals:number[]=[],colors:number[]=[];
- const nearStep=quality==='Balanced'?4:quality==='High'?2:quality==='Ultra'?1:.5;
- const rangeStep=quality==='Balanced'?8:quality==='High'?4:quality==='Ultra'?2:1;
+ const nearStep=quality==='Performance'?8:quality==='Balanced'?4:quality==='High'?2:quality==='Ultra'?1:.5;
+ const rangeStep=quality==='Performance'?16:quality==='Balanced'?8:quality==='High'?4:quality==='Ultra'?2:1;
  const farStep=24,farBoundary=504;
  function vertex(x:number,z:number){
-  const id=positions.length/3,y=terrainHeight(x,z);positions.push(x,y,z);uvs.push(x/90,z/90);
+  const id=positions.length/3,y=terrainHeight(x,z,sites);positions.push(x,y,z);uvs.push(x/90,z/90);
   // Identical normals at patch boundaries prevent lighting seams when the
   // neighboring patches use different triangle sizes.
-  const epsilon=.25,dx=(terrainHeight(x+epsilon,z)-terrainHeight(x-epsilon,z))/(2*epsilon),dz=(terrainHeight(x,z+epsilon)-terrainHeight(x,z-epsilon))/(2*epsilon),length=Math.hypot(dx,1,dz);
+  const epsilon=.25,dx=(terrainHeight(x+epsilon,z,sites)-terrainHeight(x-epsilon,z,sites))/(2*epsilon),dz=(terrainHeight(x,z+epsilon,sites)-terrainHeight(x,z-epsilon,sites))/(2*epsilon),length=Math.hypot(dx,1,dz);
   normals.push(-dx/length,1/length,-dz/length);
   const inland=Math.max(0,Math.min(1,(shoreline(z)-x-65)/100));
   const variation=.94+.06*Math.sin(x*.043+Math.cos(z*.029)*2)*Math.cos(z*.037),dry=Math.max(0,Math.min(1,(y+1.2)/1.45)),wet=.68+.32*dry*dry*(3-2*dry);

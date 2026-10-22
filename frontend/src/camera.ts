@@ -1,5 +1,5 @@
 /** Frame the entire 40 m vehicle, including deployed legs, at every attitude. */
-export const CAMERA_MAX_DISTANCE=100000;
+export const CAMERA_MAX_DISTANCE=1500000;
 export function rocketFrameDistance(aspect:number,fov=40,radius=25){
   const vertical=fov*Math.PI/360;
   const horizontal=Math.atan(Math.tan(vertical)*Math.max(.25,aspect));

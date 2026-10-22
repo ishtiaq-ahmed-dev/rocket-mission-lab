@@ -1,0 +1,2924 @@
+{
+  "observed_at_unix": 1792596458.6441984,
+  "campaign": {
+    "id": "mission-campaign-1792595301877641600",
+    "status": "running",
+    "budget": 100000000,
+    "steps": 190116,
+    "started_at": 1792595304.967506,
+    "updated_at": 1792596457.6295614,
+    "active_job": "mission-campaign-1792595301877641600-takeoff-r0",
+    "flight_plan": {
+      "launch": [
+        0.0,
+        0.0
+      ],
+      "landing": [
+        80.0,
+        40.0
+      ],
+      "separation_altitude": 400.0,
+      "profile": "research"
+    },
+    "pid": 10056,
+    "dynamics_hash": "05d6ce3a455c4bbc0d0cb5df846fae29a755c6e21dd4684a0d7e5479bf6c22dd",
+    "missions": {
+      "landing": {
+        "steps": 100000,
+        "best_successes": -1,
+        "plateau": 0,
+        "qualified": false,
+        "checkpoint_id": null,
+        "latest_checkpoint_id": "mission-campaign-1792595301877641600-landing-r0__step-000100000",
+        "last_round": 0
+      },
+      "takeoff": {
+        "steps": 90116,
+        "best_successes": -1,
+        "plateau": 0,
+        "qualified": false,
+        "checkpoint_id": null,
+        "last_round": -1
+      },
+      "combined": {
+        "steps": 0,
+        "best_successes": -1,
+        "plateau": 0,
+        "qualified": false,
+        "checkpoint_id": null,
+        "last_round": -1
+      }
+    },
+    "error": null,
+    "recovery": {
+      "failed_job": "mission-campaign-1792595301877641600-landing-r0",
+      "checkpoint": "mission-campaign-1792595301877641600-landing-r0__step-000100000",
+      "restored_steps": 100000,
+      "note": "Optimizer/normalization recovered; environment and RNG restart from the recorded seed policy"
+    },
+    "active_job_status": "running"
+  },
+  "active_job": {
+    "id": "mission-campaign-1792595301877641600-takeoff-r0",
+    "mission": "takeoff",
+    "algorithm": "PPO",
+    "status": "running",
+    "steps": 90116,
+    "initial_steps": 0,
+    "total_steps": 999424,
+    "started_at": 1792596363.8402977,
+    "updated_at": 1792596457.6295614,
+    "elapsed_seconds": 93.78926372528076,
+    "steps_per_second": 960.8349231097478,
+    "device": "cpu",
+    "seed": 42,
+    "difficulty": 0.07500000000000001,
+    "episode_count": 1690,
+    "recent_successes": 20,
+    "recent_episodes": 40,
+    "curve": [
+      {
+        "steps": 0,
+        "reward": -1773.5060203348871,
+        "success_rate": 0.0,
+        "successes": 0,
+        "episodes": 20,
+        "checkpoint_id": "mission-campaign-1792595301877641600-takeoff-r0__step-000000000"
+      },
+      {
+        "steps": 10000,
+        "reward": -2181.238943895064,
+        "success_rate": 0.0,
+        "successes": 0,
+        "episodes": 20,
+        "checkpoint_id": "mission-campaign-1792595301877641600-takeoff-r0__step-000010000"
+      }
+    ],
+    "episodes": [
+      {
+        "steps": 67056,
+        "reward": -450.668366,
+        "length": 50,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67096,
+        "reward": -335.553868,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67184,
+        "reward": 771.151131,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67200,
+        "reward": -342.93279,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67280,
+        "reward": 818.974993,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67320,
+        "reward": -174.888795,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67408,
+        "reward": 872.084453,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67408,
+        "reward": -344.805392,
+        "length": 52,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67500,
+        "reward": 707.843659,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67540,
+        "reward": 896.576981,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67620,
+        "reward": 760.423368,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67668,
+        "reward": -538.345206,
+        "length": 65,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67724,
+        "reward": 808.347715,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67756,
+        "reward": -524.677151,
+        "length": 54,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67848,
+        "reward": -410.990289,
+        "length": 57,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67884,
+        "reward": 718.335785,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67928,
+        "reward": 707.498687,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 67992,
+        "reward": 658.921687,
+        "length": 59,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68068,
+        "reward": -306.552423,
+        "length": 55,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68100,
+        "reward": 746.553111,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68152,
+        "reward": 790.256447,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68208,
+        "reward": 843.62249,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68288,
+        "reward": 905.565588,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68336,
+        "reward": -434.368848,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68372,
+        "reward": 852.314627,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68496,
+        "reward": -363.504771,
+        "length": 72,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68516,
+        "reward": -284.912726,
+        "length": 57,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68568,
+        "reward": 744.753393,
+        "length": 49,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68592,
+        "reward": -332.824121,
+        "length": 64,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68732,
+        "reward": 809.211078,
+        "length": 59,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68736,
+        "reward": 820.113386,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68800,
+        "reward": 849.520718,
+        "length": 58,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68808,
+        "reward": -366.838018,
+        "length": 54,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68936,
+        "reward": 748.838116,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 68956,
+        "reward": -286.687378,
+        "length": 55,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69012,
+        "reward": 664.88434,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69036,
+        "reward": -516.133578,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69144,
+        "reward": -481.164142,
+        "length": 47,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69164,
+        "reward": 783.551827,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69232,
+        "reward": -427.78881,
+        "length": 49,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69260,
+        "reward": -258.659498,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69384,
+        "reward": -261.675822,
+        "length": 60,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69388,
+        "reward": -441.900837,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69460,
+        "reward": 806.133457,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69504,
+        "reward": -296.865244,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69608,
+        "reward": 686.64443,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69616,
+        "reward": 772.725968,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69692,
+        "reward": -321.051433,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69728,
+        "reward": 793.99193,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69816,
+        "reward": -344.522858,
+        "length": 52,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69844,
+        "reward": 798.142831,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69920,
+        "reward": 799.427805,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 69936,
+        "reward": -444.586173,
+        "length": 52,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70096,
+        "reward": -289.862422,
+        "length": 70,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70104,
+        "reward": -410.463324,
+        "length": 65,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70120,
+        "reward": 625.33899,
+        "length": 50,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70136,
+        "reward": 787.24133,
+        "length": 50,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70140,
+        "reward": -270.854595,
+        "length": 5,
+        "outcome": "crash_speed",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70348,
+        "reward": -345.321234,
+        "length": 63,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70352,
+        "reward": 716.967322,
+        "length": 62,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70360,
+        "reward": 788.297236,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70364,
+        "reward": 713.782792,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70552,
+        "reward": 473.547306,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70572,
+        "reward": 755.994252,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70584,
+        "reward": -328.686191,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70600,
+        "reward": -240.347139,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70760,
+        "reward": 873.711869,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70792,
+        "reward": -229.389751,
+        "length": 55,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70796,
+        "reward": 851.347172,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70828,
+        "reward": -225.859804,
+        "length": 57,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 70964,
+        "reward": 789.964948,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71008,
+        "reward": 670.333395,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71028,
+        "reward": -271.35968,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71068,
+        "reward": -188.623935,
+        "length": 60,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71180,
+        "reward": -413.512541,
+        "length": 54,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71232,
+        "reward": 762.629548,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71236,
+        "reward": -465.188125,
+        "length": 52,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71324,
+        "reward": 857.107499,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71392,
+        "reward": 787.486172,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71440,
+        "reward": -348.882086,
+        "length": 52,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71456,
+        "reward": 834.79004,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71564,
+        "reward": 703.909105,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71612,
+        "reward": 893.561826,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71656,
+        "reward": -334.41075,
+        "length": 50,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71660,
+        "reward": 688.742672,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71792,
+        "reward": 716.424746,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71816,
+        "reward": 668.757389,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71892,
+        "reward": -383.694013,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 71904,
+        "reward": 620.449276,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72008,
+        "reward": 697.789321,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72072,
+        "reward": 793.289617,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72092,
+        "reward": 738.239251,
+        "length": 50,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72128,
+        "reward": -293.912554,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72224,
+        "reward": 827.802345,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72312,
+        "reward": 784.78356,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72328,
+        "reward": 802.029696,
+        "length": 59,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72348,
+        "reward": 864.164704,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72460,
+        "reward": 770.589467,
+        "length": 59,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72528,
+        "reward": 805.494889,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72532,
+        "reward": 821.110084,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72572,
+        "reward": 927.770305,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72672,
+        "reward": 826.487952,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72752,
+        "reward": -255.471627,
+        "length": 55,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72776,
+        "reward": -380.659859,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72788,
+        "reward": 777.620313,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72864,
+        "reward": 604.147287,
+        "length": 48,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 72988,
+        "reward": -276.918272,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73000,
+        "reward": 736.500975,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73012,
+        "reward": -400.79571,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73096,
+        "reward": 799.401759,
+        "length": 58,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73192,
+        "reward": 751.799118,
+        "length": 48,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73260,
+        "reward": 891.316696,
+        "length": 68,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73268,
+        "reward": -421.619196,
+        "length": 64,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73336,
+        "reward": -242.080526,
+        "length": 60,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73408,
+        "reward": 746.42702,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73484,
+        "reward": 920.562345,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73500,
+        "reward": -316.529841,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73560,
+        "reward": -459.15035,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73640,
+        "reward": -281.477309,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73688,
+        "reward": -356.441343,
+        "length": 51,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73692,
+        "reward": -270.858006,
+        "length": 13,
+        "outcome": "crash_speed",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73716,
+        "reward": 713.463523,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73764,
+        "reward": 831.133568,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73916,
+        "reward": -207.785085,
+        "length": 57,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73920,
+        "reward": -387.146304,
+        "length": 57,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73972,
+        "reward": 773.215203,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 73984,
+        "reward": 834.576582,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74132,
+        "reward": 616.109172,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74140,
+        "reward": 749.564702,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74176,
+        "reward": -351.553444,
+        "length": 51,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74192,
+        "reward": -274.185125,
+        "length": 52,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74336,
+        "reward": 736.512886,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74360,
+        "reward": 786.767226,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74388,
+        "reward": -415.271351,
+        "length": 53,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74420,
+        "reward": 828.696766,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74588,
+        "reward": 767.326913,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74592,
+        "reward": 774.237594,
+        "length": 58,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74636,
+        "reward": -250.838468,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74636,
+        "reward": -260.409204,
+        "length": 54,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74792,
+        "reward": 709.407754,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74828,
+        "reward": -227.124682,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74844,
+        "reward": 842.618652,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 74864,
+        "reward": 713.439932,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75000,
+        "reward": 781.654902,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75044,
+        "reward": -501.751006,
+        "length": 54,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75064,
+        "reward": -509.925117,
+        "length": 50,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75068,
+        "reward": -271.055553,
+        "length": 6,
+        "outcome": "crash_speed",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75076,
+        "reward": 787.097797,
+        "length": 58,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75232,
+        "reward": -227.221837,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75284,
+        "reward": 814.954233,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75296,
+        "reward": -314.16863,
+        "length": 55,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75324,
+        "reward": -320.101111,
+        "length": 65,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75432,
+        "reward": 783.644733,
+        "length": 50,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75460,
+        "reward": -268.540614,
+        "length": 7,
+        "outcome": "crash_speed",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75500,
+        "reward": 733.559101,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75504,
+        "reward": -399.73863,
+        "length": 55,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75544,
+        "reward": 771.375084,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75656,
+        "reward": 632.409721,
+        "length": 49,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75724,
+        "reward": -238.689266,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75728,
+        "reward": -233.012547,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75768,
+        "reward": -196.275186,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75788,
+        "reward": -272.853147,
+        "length": 5,
+        "outcome": "crash_speed",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75880,
+        "reward": 671.204165,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75928,
+        "reward": -376.797057,
+        "length": 51,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75940,
+        "reward": 643.696917,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 75992,
+        "reward": -359.069973,
+        "length": 51,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76084,
+        "reward": 722.768558,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76148,
+        "reward": 866.066497,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76160,
+        "reward": -322.183988,
+        "length": 55,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76224,
+        "reward": -224.564177,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76320,
+        "reward": -343.815844,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76348,
+        "reward": 777.400555,
+        "length": 50,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76364,
+        "reward": -267.939637,
+        "length": 51,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76460,
+        "reward": 811.555426,
+        "length": 59,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76480,
+        "reward": -269.334126,
+        "length": 5,
+        "outcome": "crash_speed",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76560,
+        "reward": 905.422353,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76564,
+        "reward": 826.017251,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76588,
+        "reward": 861.114066,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76716,
+        "reward": 738.117791,
+        "length": 59,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76776,
+        "reward": -315.472645,
+        "length": 54,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76788,
+        "reward": 859.60742,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76792,
+        "reward": 713.102092,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76908,
+        "reward": 804.031192,
+        "length": 48,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 76992,
+        "reward": 682.030482,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77000,
+        "reward": -294.178159,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77008,
+        "reward": -352.821407,
+        "length": 54,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77132,
+        "reward": 836.993437,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77196,
+        "reward": -464.8643,
+        "length": 51,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77208,
+        "reward": 672.495447,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77228,
+        "reward": 809.405229,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77364,
+        "reward": -356.685565,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77408,
+        "reward": 765.857388,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77440,
+        "reward": 776.432123,
+        "length": 58,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77452,
+        "reward": 499.039552,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77580,
+        "reward": 747.183943,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77656,
+        "reward": -335.094536,
+        "length": 54,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77660,
+        "reward": -361.519373,
+        "length": 63,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77708,
+        "reward": 812.811003,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77800,
+        "reward": 797.889759,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77864,
+        "reward": 614.143736,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77888,
+        "reward": 862.524395,
+        "length": 58,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 77932,
+        "reward": -279.280281,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78000,
+        "reward": 666.859476,
+        "length": 50,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78068,
+        "reward": 714.883636,
+        "length": 51,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78104,
+        "reward": 813.504302,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78148,
+        "reward": 929.25513,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78212,
+        "reward": -455.555816,
+        "length": 53,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78276,
+        "reward": 823.888742,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78304,
+        "reward": -474.360492,
+        "length": 50,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78356,
+        "reward": 624.599027,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78424,
+        "reward": 815.225317,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78492,
+        "reward": 661.423135,
+        "length": 54,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78528,
+        "reward": 653.250158,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78576,
+        "reward": -229.649419,
+        "length": 55,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78652,
+        "reward": -274.472821,
+        "length": 57,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78700,
+        "reward": 725.932503,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78712,
+        "reward": 726.886328,
+        "length": 46,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78788,
+        "reward": 620.305309,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78876,
+        "reward": 878.02628,
+        "length": 56,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78892,
+        "reward": 674.700596,
+        "length": 48,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 78932,
+        "reward": 792.844322,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 79000,
+        "reward": 695.704737,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 79084,
+        "reward": 776.762456,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 79100,
+        "reward": 797.669091,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 79152,
+        "reward": 725.911654,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 79212,
+        "reward": 643.393916,
+        "length": 53,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 79300,
+        "reward": -320.940419,
+        "length": 54,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 79308,
+        "reward": 535.174713,
+        "length": 52,
+        "outcome": "success",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 79352,
+        "reward": -434.673167,
+        "length": 50,
+        "outcome": "crash_tilt",
+        "difficulty": 0.05
+      },
+      {
+        "steps": 79480,
+        "reward": 788.222751,
+        "length": 67,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 79528,
+        "reward": 532.779206,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 79540,
+        "reward": -435.889559,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 79592,
+        "reward": 691.454361,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 79708,
+        "reward": 611.248248,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 79748,
+        "reward": -711.792117,
+        "length": 55,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 79784,
+        "reward": -568.075623,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 79836,
+        "reward": -293.617546,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 79956,
+        "reward": -385.316134,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 79996,
+        "reward": 582.784213,
+        "length": 62,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80020,
+        "reward": -419.294736,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80128,
+        "reward": -422.707357,
+        "length": 73,
+        "outcome": "missed_pad",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80208,
+        "reward": -585.015478,
+        "length": 53,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80224,
+        "reward": -358.470553,
+        "length": 67,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80276,
+        "reward": -437.724328,
+        "length": 64,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80392,
+        "reward": -422.549446,
+        "length": 66,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80436,
+        "reward": -505.725849,
+        "length": 57,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80500,
+        "reward": -401.395478,
+        "length": 69,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80504,
+        "reward": 582.038147,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80660,
+        "reward": -509.058563,
+        "length": 67,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80692,
+        "reward": -488.485254,
+        "length": 64,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80732,
+        "reward": 646.93529,
+        "length": 58,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80736,
+        "reward": -496.427266,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80912,
+        "reward": -387.039336,
+        "length": 63,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80936,
+        "reward": 688.116291,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 80988,
+        "reward": 626.111738,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81004,
+        "reward": -426.53473,
+        "length": 67,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81172,
+        "reward": -359.648381,
+        "length": 65,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81172,
+        "reward": 677.341945,
+        "length": 59,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81232,
+        "reward": -423.958254,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81244,
+        "reward": -421.163308,
+        "length": 60,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81400,
+        "reward": 605.086592,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81436,
+        "reward": -388.5762,
+        "length": 66,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81464,
+        "reward": 662.914178,
+        "length": 55,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81488,
+        "reward": 599.70769,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81676,
+        "reward": 745.126266,
+        "length": 69,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81684,
+        "reward": -648.911078,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81716,
+        "reward": 725.824461,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81736,
+        "reward": 690.507789,
+        "length": 62,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81932,
+        "reward": -417.024738,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81940,
+        "reward": 596.068349,
+        "length": 66,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 81956,
+        "reward": -647.149927,
+        "length": 60,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82004,
+        "reward": 722.332689,
+        "length": 67,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82180,
+        "reward": 585.56313,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82196,
+        "reward": -378.038978,
+        "length": 66,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82220,
+        "reward": 658.395522,
+        "length": 66,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82260,
+        "reward": 748.979222,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82440,
+        "reward": -372.755221,
+        "length": 65,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82452,
+        "reward": 802.451492,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82468,
+        "reward": -422.727813,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82508,
+        "reward": 644.450284,
+        "length": 62,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82704,
+        "reward": 659.479623,
+        "length": 66,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82716,
+        "reward": -378.92076,
+        "length": 66,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82716,
+        "reward": 566.349934,
+        "length": 62,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82760,
+        "reward": 762.22481,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82952,
+        "reward": -502.77782,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82988,
+        "reward": -415.625882,
+        "length": 68,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 82996,
+        "reward": -537.616143,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83000,
+        "reward": 755.259631,
+        "length": 71,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83196,
+        "reward": 540.406857,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83224,
+        "reward": -373.869599,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83268,
+        "reward": 735.264404,
+        "length": 68,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83276,
+        "reward": 776.485438,
+        "length": 69,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83460,
+        "reward": -539.204609,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83468,
+        "reward": -210.762312,
+        "length": 68,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83512,
+        "reward": -443.388554,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83528,
+        "reward": -441.605955,
+        "length": 63,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83728,
+        "reward": -586.790295,
+        "length": 65,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83748,
+        "reward": 751.196745,
+        "length": 72,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83760,
+        "reward": 713.925893,
+        "length": 58,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83776,
+        "reward": 557.019094,
+        "length": 66,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83980,
+        "reward": 576.461261,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 83992,
+        "reward": 566.23048,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84020,
+        "reward": 690.361056,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84036,
+        "reward": -490.540358,
+        "length": 69,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84232,
+        "reward": 708.024472,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84244,
+        "reward": 741.169792,
+        "length": 66,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84264,
+        "reward": 751.469448,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84276,
+        "reward": -434.593043,
+        "length": 60,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84480,
+        "reward": -341.791863,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84484,
+        "reward": 737.003529,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84508,
+        "reward": 772.687143,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84528,
+        "reward": 716.758633,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84720,
+        "reward": 806.582366,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84736,
+        "reward": -571.60136,
+        "length": 57,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84736,
+        "reward": 700.063653,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84808,
+        "reward": 752.338775,
+        "length": 70,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84980,
+        "reward": -399.394441,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84984,
+        "reward": 812.046964,
+        "length": 66,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 84988,
+        "reward": 593.512883,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85052,
+        "reward": 678.242391,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85240,
+        "reward": -407.194174,
+        "length": 65,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85264,
+        "reward": -442.379411,
+        "length": 70,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85280,
+        "reward": 749.554386,
+        "length": 73,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85316,
+        "reward": 787.503042,
+        "length": 66,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85512,
+        "reward": 715.139861,
+        "length": 68,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85536,
+        "reward": -572.090361,
+        "length": 64,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85536,
+        "reward": 786.294225,
+        "length": 68,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85564,
+        "reward": -608.369057,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85760,
+        "reward": 546.691412,
+        "length": 62,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85780,
+        "reward": -398.060614,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85780,
+        "reward": 642.383103,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85800,
+        "reward": -463.13957,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 85996,
+        "reward": -370.170298,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86020,
+        "reward": 541.094929,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86024,
+        "reward": -477.376629,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86048,
+        "reward": -322.706689,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86272,
+        "reward": -241.483593,
+        "length": 69,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86276,
+        "reward": 873.481827,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86288,
+        "reward": -229.347166,
+        "length": 66,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86316,
+        "reward": 515.93945,
+        "length": 67,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86540,
+        "reward": 555.983651,
+        "length": 66,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86552,
+        "reward": 560.278393,
+        "length": 70,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86560,
+        "reward": 861.446054,
+        "length": 68,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86564,
+        "reward": -437.441837,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86572,
+        "reward": -317.834827,
+        "length": 5,
+        "outcome": "crash_speed",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86788,
+        "reward": -494.264397,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86820,
+        "reward": -527.363805,
+        "length": 65,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86828,
+        "reward": 782.418615,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86852,
+        "reward": -429.473083,
+        "length": 72,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 86896,
+        "reward": -336.860955,
+        "length": 11,
+        "outcome": "crash_speed",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87040,
+        "reward": 812.50457,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87072,
+        "reward": 730.249582,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87072,
+        "reward": -476.313862,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87140,
+        "reward": 747.326266,
+        "length": 61,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87312,
+        "reward": -488.476321,
+        "length": 60,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87320,
+        "reward": -303.600641,
+        "length": 70,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87324,
+        "reward": 736.607337,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87340,
+        "reward": -316.730258,
+        "length": 5,
+        "outcome": "crash_speed",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87432,
+        "reward": -221.838815,
+        "length": 73,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87560,
+        "reward": 569.114581,
+        "length": 59,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87560,
+        "reward": -348.172662,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87608,
+        "reward": -427.922694,
+        "length": 67,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87680,
+        "reward": 726.386255,
+        "length": 62,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87828,
+        "reward": 731.550028,
+        "length": 67,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87832,
+        "reward": -318.724495,
+        "length": 68,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87872,
+        "reward": 795.98584,
+        "length": 66,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 87928,
+        "reward": -418.869032,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88092,
+        "reward": 677.574558,
+        "length": 65,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88096,
+        "reward": 783.941586,
+        "length": 67,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88124,
+        "reward": -415.245834,
+        "length": 63,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88176,
+        "reward": -718.825868,
+        "length": 62,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88328,
+        "reward": -327.495225,
+        "length": 58,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88344,
+        "reward": 678.134263,
+        "length": 63,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88368,
+        "reward": -420.027353,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88456,
+        "reward": -332.064987,
+        "length": 70,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88584,
+        "reward": 685.394779,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88604,
+        "reward": -493.875095,
+        "length": 69,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88652,
+        "reward": 752.314117,
+        "length": 71,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88712,
+        "reward": -428.679133,
+        "length": 64,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88808,
+        "reward": -378.55261,
+        "length": 56,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88840,
+        "reward": -816.392022,
+        "length": 59,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 88912,
+        "reward": -558.504748,
+        "length": 65,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89008,
+        "reward": -332.304149,
+        "length": 74,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89076,
+        "reward": -510.250521,
+        "length": 67,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89080,
+        "reward": 651.354992,
+        "length": 60,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89180,
+        "reward": 736.757192,
+        "length": 67,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89276,
+        "reward": -463.653156,
+        "length": 67,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89312,
+        "reward": 627.413701,
+        "length": 59,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89336,
+        "reward": -599.008667,
+        "length": 64,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89424,
+        "reward": -483.836255,
+        "length": 61,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89540,
+        "reward": 553.815924,
+        "length": 57,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89560,
+        "reward": 782.073802,
+        "length": 71,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89612,
+        "reward": 527.870155,
+        "length": 69,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89672,
+        "reward": 796.580808,
+        "length": 62,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89808,
+        "reward": 833.842239,
+        "length": 67,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89816,
+        "reward": 742.411426,
+        "length": 64,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89880,
+        "reward": 754.221886,
+        "length": 67,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 89932,
+        "reward": 746.923603,
+        "length": 65,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 90056,
+        "reward": 470.356478,
+        "length": 62,
+        "outcome": "success",
+        "difficulty": 0.07500000000000001
+      },
+      {
+        "steps": 90080,
+        "reward": -439.032848,
+        "length": 66,
+        "outcome": "crash_tilt",
+        "difficulty": 0.07500000000000001
+      }
+    ],
+    "error": null,
+    "pid": 10056,
+    "config_hash": "ef30b921da6fdf2e"
+  },
+  "memory_headroom": {
+    "physical_available": 16549306368,
+    "commit_available": 11815231488
+  },
+  "services": {
+    "pid": 36388,
+    "mode": "production preview",
+    "updated_at": 1792596456.8112435,
+    "services": {
+      "backend": {
+        "pid": 8552,
+        "returncode": null
+      },
+      "frontend": {
+        "pid": 8868,
+        "returncode": null
+      }
+    }
+  },
+  "browser_final_verification": "Unavailable: local browser use disabled in Work settings",
+  "qualification": "Unqualified research campaign; classical pilot evidence is separate"
+}

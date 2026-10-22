@@ -40,17 +40,23 @@ def test_tilted_thrust_and_engine_torque_follow_newton_euler(angles):
     cfg=vacuum();cfg["world"]["timestep"]=.0005;cfg["world"]["control_substeps"]=1
     p=RocketPhysics(cfg);rotation=Rotation.from_euler("xyz",angles);q=rotation.as_quat()
     initial=p.reset(42,position=[0,0,1020],velocity=[0,0,0],quaternion=[q[3],*q[:3]])
-    state=p.step([1,.4,-.3]);dt=state["t"]
+    p.throttle=.6
+    state=p.step([.2,.4,-.3]);dt=state["t"]
     direction=np.array([np.tan(p.gimbal[0]),np.tan(p.gimbal[1]),1.]);force=direction/np.linalg.norm(direction)*p.thrust
     expected_acceleration=rotation.as_matrix()@force/initial["mass"]+np.array([0,0,-cfg["world"]["gravity"]])
-    expected_rate=np.cross([0,0,-p.half],force)/(np.asarray(p.v["inertia"])*initial["mass"]/p.v["dry_mass"])*dt
+    expected_rate=np.cross([0,0,-p.engine_lever],force)/(np.asarray(p.v["inertia"])*initial["mass"]/p.v["dry_mass"])*dt
     np.testing.assert_allclose(state["velocity"]/dt,expected_acceleration,atol=1e-8)
     np.testing.assert_allclose(state["angular_velocity"],expected_rate,atol=1e-9)
 
 def test_fuel_and_limits():
-    p=RocketPhysics(vacuum()); initial=p.fuel; s=p.step([-.9,1,1])
+    p=RocketPhysics(vacuum()); initial=p.fuel
+    # The turbopump spools from zero at a bounded rate, so the first control
+    # interval cannot jump straight to the minimum-thrust floor. Let it settle,
+    # then verify the steady floor and the Isp fuel relation over one interval.
+    for _ in range(10): p.step([-.9,1,1])
+    before=p.fuel; s=p.step([-.9,1,1]); interval=p.w["timestep"]*p.w["control_substeps"]
     assert s["throttle"]==pytest.approx(p.v["min_throttle"])
-    assert initial-s["fuel_mass"]==pytest.approx(p.thrust*s["t"]/(p.v["isp"]*p.w["gravity"]))
+    assert initial-s["fuel_mass"]==pytest.approx((initial-before)+p.thrust*interval/(p.v["isp"]*p.w["gravity"]))
     assert np.max(np.abs(s["gimbal"]))<=np.deg2rad(p.v["gimbal_limit_deg"])
     p.fuel=0; s=p.step([1,0,0]); assert s["throttle"]==0
 
@@ -140,7 +146,7 @@ def test_takeoff_goal_curriculum_exposes_the_actual_goal_and_keeps_evaluation_fu
     easy=TakeoffEnv(config=cfg,difficulty=0,training=True);obs,_=easy.reset(seed=42)
     assert easy.takeoff_altitude==5 and easy.takeoff_velocity==3
     assert easy._target()[2]==easy.physics.half+5
-    assert obs[17]==pytest.approx((5-.05)/cfg['training']['observation_position_scale'][2])
+    assert obs[17]==pytest.approx(5/cfg['training']['observation_position_scale'][2])
     assert obs[18]==pytest.approx(3/50)
     evaluation=TakeoffEnv(config=cfg,difficulty=0);evaluation.reset(seed=42)
     assert evaluation.takeoff_altitude==400 and evaluation.takeoff_velocity==25

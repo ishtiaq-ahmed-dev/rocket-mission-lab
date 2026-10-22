@@ -2,6 +2,8 @@
 
 This record covers the white-plane renderer, camera/dashboard redesign, configurable mission geometry, stage event, revised classical descent, and supervised training workers. Earlier qualification batches remain historical evidence.
 
+**Revision note.** The executed counts and browser observations below belong to the revision that was checked on this date. A later pass added the light mission-control workspace, in-flight retargeting UI and tests, and surface-clipped plume rendering. Those changes require a fresh run of the backend, frontend unit, build/lint, and browser checks; this document does not claim their results.
+
 ## Executed checks
 
 | Check | Result | Scope |

@@ -4,6 +4,7 @@ import {OrbitControls} from '@react-three/drei';
 import {Vector3,TOUCH} from 'three';
 import {useLab} from './store';
 import {sample} from './telemetry';
+import {sceneSurfaceHeight} from './surface';
 import {rocketFrameDistance,translateFollowFrame,mouseButtonsForTool,keepCameraAboveGround,CAMERA_MAX_DISTANCE} from './camera';
 
 /** Orbit presets initialize once; follow translates without erasing manual framing. */
@@ -30,14 +31,17 @@ export default function CameraRig(){
       if(mode==='Ground')position.set(x+100,2,-y+130);
       else if(mode==='Top-down')position.set(x+.01,h+d,-y+.01);
       else if(mode==='Mission'){
-        const plan=telemetry.run.flight_plan,a=plan?.launch||[x,y],b=plan?.landing||[x,y],height=plan?.separation_altitude||400;
+        const plan=telemetry.run.flight_plan,a=plan?.launch||[x,y],b=plan?.landing||[x,y],height=Math.max(plan?.separation_altitude||400,...telemetry.frames.map(frame=>frame.position[2]));
         controls.target.set((a[0]+b[0])/2,height*.4,-(a[1]+b[1])/2);
         const wide=Math.max(height,Math.hypot(a[0]-b[0],a[1]-b[1]),120)*1.7;
         position.copy(controls.target).add(new Vector3(wide,wide*.5,wide));
       }else if(mode==='Chase')position.set(x+d*.5,h+d*.3,-y+d*.87);
       else position.set(x+d*.71,h+d*.16,-y+d*.71);
       camera.position.copy(position);previous.current.copy(anchor);controls.update();
-    }else if(follow)translateFollowFrame(camera.position,controls.target,previous.current,anchor);
+    }else if(follow){
+      if(mode==='Ground'){controls.target.add(anchor.clone().sub(previous.current));previous.current.copy(anchor);controls.update();}
+      else translateFollowFrame(camera.position,controls.target,previous.current,anchor);
+    }
     else previous.current.copy(anchor);
     if(command.current!==commandRevision){
       command.current=commandRevision;
@@ -51,7 +55,7 @@ export default function CameraRig(){
       position.y+=(Number(k.has('KeyE'))-Number(k.has('KeyQ')))*step;
       camera.position.add(position);controls.target.add(position);controls.update();invalidate();
     }
-    keepCameraAboveGround(camera.position,controls.target,-1.25);
+    keepCameraAboveGround(camera.position,controls.target,sceneSurfaceHeight(camera.position.x,camera.position.z,telemetry.run.flight_plan,useLab.getState().pad));
     const distance=Math.round(camera.position.distanceTo(controls.target));
     if(useLab.getState().cameraDistance!==distance)useLab.getState().set({cameraDistance:distance});
   });

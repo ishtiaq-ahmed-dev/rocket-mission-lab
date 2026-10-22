@@ -13,32 +13,47 @@ import re
 from .config import DATA,load_config
 from .schemas import FlightPlan
 from .missions import configure_flight
-from .storage import atomic_json,read_json,checkpoints
+from .storage import atomic_json,read_json,checkpoints,dynamics_hash
 
 
 def campaign_config(mission,plan):
     cfg,_=configure_flight(load_config(),plan,mission)
-    cfg['training'].update(profile='mission-curriculum-v18',target_curriculum=True,
+    cfg['training'].update(profile='flight-fidelity-v19',target_curriculum=True,
         takeoff_goal_curriculum=True,takeoff_curriculum_altitude=5.,takeoff_curriculum_velocity=3.,
         ppo_n_steps=1024,ppo_batch_size=512,ppo_epochs=10,ppo_gamma=.999,ppo_gae_lambda=.995,
-        ppo_entropy=.0002,ppo_target_kl=.02,learning_rate=.00015,checkpoint_interval=1000000)
+        ppo_entropy=.0005,ppo_target_kl=.02,learning_rate=.00015,checkpoint_interval=1000000,
+        policy_architecture=[256,256,128],bounded_action_mean=True,policy_log_std=-1.5)
     cfg['reward'].update(success=1000.,terminal_speed=10.,terminal_position=12.,
                          potential_horizontal_speed=12.,time_cost=.5)
     return cfg
 
 
-def run_campaign(identifier,steps=100000000,block_steps=1000000,plan=None,max_rounds_without_improvement=4,resume=False):
+def run_campaign(identifier,steps=100000000,block_steps=1000000,plan=None,max_rounds_without_improvement=12,resume=False):
     from .train import train
     from .evaluate import evaluate,save_result
     plan=FlightPlan.model_validate(plan or {}).model_dump(mode='json')
     folder=DATA/'campaigns'/identifier;folder.mkdir(parents=True,exist_ok=True)
     state=dict(id=identifier,status='running',budget=steps,steps=0,started_at=time.time(),updated_at=time.time(),
-               active_job=None,flight_plan=plan,pid=os.getpid(),missions={m:dict(steps=0,best_successes=-1,plateau=0,qualified=False,checkpoint_id=None) for m in ('landing','takeoff','combined')})
+               active_job=None,flight_plan=plan,pid=os.getpid(),dynamics_hash=dynamics_hash(),missions={m:dict(steps=0,best_successes=-1,plateau=0,qualified=False,checkpoint_id=None) for m in ('landing','takeoff','combined')})
     previous=read_json(folder/'status.json')
-    if previous:
+    dispatched=bool(previous and previous.get('status')=='starting' and previous.get('missions')=={} and previous.get('steps')==0)
+    if dispatched and (previous.get('budget')!=steps or read_json(folder/'plan.json')!=plan):
+        raise ValueError('Dispatched campaign plan or budget changed before worker startup')
+    if previous and not dispatched:
         if not resume:raise ValueError('Campaign already exists; use --resume after it has stopped')
-        if previous['status'] not in ('stopped','plateau','budget_exhausted'):raise ValueError('Stop the campaign before resuming')
-        state=previous;state.update(status='running',pid=os.getpid(),budget=steps,active_job=None)
+        if previous['status'] not in ('stopped','plateau','budget_exhausted','failed'):raise ValueError('Stop the campaign before resuming')
+        if previous.get('dynamics_hash')!=dynamics_hash():raise ValueError('Dynamics changed; start a new campaign instead of resuming an obsolete optimizer')
+        failed_job=previous.get('active_job') if previous['status']=='failed' else None
+        if failed_job:
+            candidates=[value for value in checkpoints() if value['job_id']==failed_job and value.get('dynamics_hash')==dynamics_hash()]
+            if not candidates:raise ValueError('Failed campaign has no compatible checkpoint to recover')
+            latest=max(candidates,key=lambda value:value['steps'])
+            task=previous['missions'][latest['mission']]
+            previous['steps']+=max(0,latest['steps']-task['steps'])
+            task.update(steps=latest['steps'],latest_checkpoint_id=latest['id'])
+            previous['recovery']=dict(failed_job=failed_job,checkpoint=latest['id'],restored_steps=latest['steps'],
+                                      note='Optimizer/normalization recovered; environment and RNG restart from the recorded seed policy')
+        state=previous;state.update(status='running',pid=os.getpid(),budget=steps,active_job=None,error=None)
         plan=state['flight_plan'];(folder/'stop').unlink(missing_ok=True)
         for task in state['missions'].values():
             match=re.search(r'-r(\d+)__',task.get('latest_checkpoint_id') or '')
@@ -54,6 +69,7 @@ def run_campaign(identifier,steps=100000000,block_steps=1000000,plan=None,max_ro
             eligible=[task for task in state['missions'].values() if not task['qualified'] and task['plateau']<max_rounds_without_improvement]
             if eligible and all(task.get('last_round',-1)>=round_index for task in eligible):round_index+=1
             for mission,task in state['missions'].items():
+                if dynamics_hash()!=state['dynamics_hash']:raise ValueError('Dynamics changed during campaign; stop and start a newly identified study')
                 if (folder/'stop').exists():state['status']='stopped';write();return
                 if task['qualified'] or task['plateau']>=max_rounds_without_improvement:continue
                 if task.get('last_round',-1)>=round_index:continue

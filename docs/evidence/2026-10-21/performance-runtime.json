@@ -1,0 +1,36 @@
+{
+  "observed_at": "2026-10-21T16:18:39.8370463Z",
+  "sample_seconds": 5.0059192,
+  "logical_processors": 24,
+  "cpu_percent_whole_machine": 0.0,
+  "working_set_mib": 158.9296875,
+  "private_memory_mib": 250.046875,
+  "node_preview_processes": 0,
+  "training_worker_processes": 0,
+  "processes": [
+    {
+      "Id": 31364,
+      "ProcessName": "python",
+      "CPU": 0.0,
+      "WorkingSet64": 4091904
+    },
+    {
+      "Id": 21604,
+      "ProcessName": "python",
+      "CPU": 0.09375,
+      "WorkingSet64": 19992576
+    },
+    {
+      "Id": 2148,
+      "ProcessName": "python",
+      "CPU": 0.015625,
+      "WorkingSet64": 4100096
+    },
+    {
+      "Id": 2956,
+      "ProcessName": "python",
+      "CPU": 4.3125,
+      "WorkingSet64": 138465280
+    }
+  ]
+}

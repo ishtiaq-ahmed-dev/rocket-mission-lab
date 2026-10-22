@@ -5,16 +5,20 @@ from pathlib import Path
 import threading
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from typing import Literal
 from .config import DATA, ROOT, load_config
 from .schemas import SimRequest, TrainRequest, RunMeta, Telemetry
-from .storage import runs, read_json, training_jobs, checkpoints, atomic_json, config_hash,dynamics_hash
+from .storage import runs, read_json, training_jobs, checkpoints, atomic_json, config_hash,dynamics_hash,select_checkpoint
 from .simulation import simulate
 from .missions import configure_flight
 from .jobs import launch_job
 
 app=FastAPI(title="Rocket Mission Lab",version="1.0.0")
+app.add_middleware(GZipMiddleware,minimum_size=2048,compresslevel=3)
 app.add_middleware(CORSMiddleware,allow_origins=["http://localhost:5180","http://127.0.0.1:5180"],allow_methods=["GET","POST"],allow_headers=["Content-Type"])
 job_lock=threading.Lock()
+LOADED_DYNAMICS_HASH=dynamics_hash()
 
 def campaign_list():
     values=[value for path in (DATA/'campaigns').glob('*/status.json') if (value:=read_json(path))]
@@ -29,14 +33,28 @@ def campaign_list():
 
 def ensure_idle():
     for campaign in campaign_list():
-        if campaign['status']=='running':
+        if campaign['status'] in ('running','starting'):
             raise HTTPException(409,'A three-mission campaign is active. Stop it before starting another job.')
     for job in training_jobs():
-        if job['status'] in ('running','starting') and time.time()-job['updated_at']<120:
+        if job['status'] in ('running','starting','waiting_for_memory') and time.time()-job['updated_at']<120:
             raise HTTPException(409,'A training job is already active. Stop it or wait for completion.')
 
 @app.get("/health")
 def health(): return {"status":"ok","physics":"MuJoCo","schema_version":"1.1"}
+
+@app.get('/dashboard')
+def dashboard_snapshot(view:Literal['flight','training','results']='flight'):
+    from .dashboard import dashboard
+    return dashboard(view)
+
+@app.get('/training/{job_id}')
+def training_detail(job_id:str):
+    if not job_id.replace('-','').replace('_','').isalnum():raise HTTPException(404,'Unknown job')
+    value=read_json(DATA/'jobs'/job_id/'status.json')
+    if not value:raise HTTPException(404,'Unknown job')
+    config=read_json(DATA/'jobs'/job_id/'config.json')
+    if config:value['config']=config
+    return value
 
 @app.get("/missions")
 def missions():
@@ -55,7 +73,17 @@ def telemetry(run_id:str):
 
 @app.post("/simulate",response_model=Telemetry)
 def new_simulation(request:SimRequest):
-    try: return simulate(**request.model_dump())
+    if dynamics_hash()!=LOADED_DYNAMICS_HASH:
+        raise HTTPException(409,'Flight dynamics changed on disk. Restart the local engine before simulating the new revision.')
+    try:
+        values=request.model_dump()
+        if request.method=='rl' and not request.checkpoint_id:
+            cfg,_=configure_flight(load_config(),request.flight_plan,request.mission)
+            selected=select_checkpoint(request.mission,request.level,config=cfg)
+            if selected.get('dynamics_hash')!=LOADED_DYNAMICS_HASH:
+                raise ValueError('No measured checkpoint for the loaded dynamics and flight plan. Train this revision or explicitly select an archived experimental model.')
+            values['checkpoint_id']=selected['id']
+        return simulate(**values)
     except ValueError as ex: raise HTTPException(409,str(ex)) from ex
 
 @app.get("/results/summary")
@@ -102,7 +130,7 @@ def start_campaign(request:TrainRequest):
         folder=DATA/'campaigns'/identifier;folder.mkdir(parents=True)
         from .schemas import FlightPlan
         atomic_json(folder/'plan.json',(request.flight_plan or FlightPlan()).model_dump(mode='json'))
-        atomic_json(folder/'status.json',dict(id=identifier,status='running',budget=request.steps,steps=0,missions={},active_job=None,started_at=time.time(),updated_at=time.time()))
+        atomic_json(folder/'status.json',dict(id=identifier,status='starting',budget=request.steps,steps=0,missions={},active_job=None,started_at=time.time(),updated_at=time.time()))
         block=min(1000000,max(4096,request.steps//3//4096*4096))
         pid=launch_job([sys.executable,'-m','rocket_lab.campaign','--id',identifier,'--steps',str(request.steps),'--block-steps',str(block),'--plan',str(folder/'plan.json')],folder)
         return dict(id=identifier,pid=pid,status='running')
@@ -125,4 +153,4 @@ def stop_training(job_id:str):
 
 @app.get("/system")
 def system():
-    return {"runtime":read_json(DATA/"runtime.json",{}),"config":load_config(),"config_hash":config_hash(),"dynamics_hash":dynamics_hash(),"research":read_json(DATA/"research.json",[])}
+    return {"runtime":read_json(DATA/"runtime.json",{}),"config":load_config(),"config_hash":config_hash(),"dynamics_hash":LOADED_DYNAMICS_HASH,"source_is_current":dynamics_hash()==LOADED_DYNAMICS_HASH,"research":read_json(DATA/"research.json",[])}

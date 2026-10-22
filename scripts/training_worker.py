@@ -23,6 +23,8 @@ if __name__=="__main__":
     folder=DATA/"jobs"/job_id;folder.mkdir(parents=True,exist_ok=True)
     log=(folder/"output.log").open("a",buffering=1);sys.stdout=sys.stderr=log
     try:
+        from rocket_lab.resources import configure_background_worker
+        configure_background_worker()
         from rocket_lab.train import train
         train("landing","PPO",args.steps,42,"cpu",job_id,args.eval_episodes,resume=args.resume,warm_start=args.warm_start,config_path=args.config,adapt_optimizer_from=args.adapt_optimizer_from)
     except BaseException:

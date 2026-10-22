@@ -100,7 +100,7 @@ def test_campaign_dispatch_uses_saved_plan_and_conflict_guard(monkeypatch,tmp_pa
     assert commands[0][1:3]==['-m','rocket_lab.campaign'] and '100000000' in commands[0]
     assert client.post('/training',json={'steps':1000}).status_code==409
     identifier=response.json()['id']
-    assert client.get('/campaigns').json()[0]['status']=='running'
+    assert client.get('/campaigns').json()[0]['status']=='starting'
     assert client.post(f'/campaigns/{identifier}/stop').status_code==200
     assert (tmp_path/'campaigns'/identifier/'stop').exists()
 
@@ -120,3 +120,52 @@ def test_automatic_combined_replay_uses_the_matching_trained_combined_policy(mon
     replay=module.simulate('combined','rl',save=False,flight_plan=dict(launch=[10,20],landing=[40,50],separation_altitude=400))
     assert selections==[('combined',[40.,50.,0.])]
     assert replay.run.checkpoint_id=='combined-test__step-000001000'
+
+
+def test_midair_retarget_replans_and_lands_on_the_new_site():
+    plan=dict(launch=[0,0],landing=[80,40],separation_altitude=400)
+    replay=simulate('landing','classical',save=False,flight_plan=plan,
+                    retarget=dict(time=3.,landing=[95,55]))
+    assert replay.run.outcome=='success',replay.run.model_dump()
+    assert len(replay.run.retargets)==1
+    event=replay.run.retargets[0]
+    assert event.t>=3. and event.t<3.6
+    assert event.previous_landing==(80.,40.) and event.landing==(95.,55.)
+    assert replay.run.flight_plan.landing==(95.,55.)
+    assert np.linalg.norm(np.array(replay.frames[-1].position[:2])-[95,55])<=5.
+    # The flight is a distinct, reproducible branch of the same seed.
+    again=simulate('landing','classical',save=False,flight_plan=plan,
+                   retarget=dict(time=3.,landing=[95,55]))
+    assert again.run.id==replay.run.id
+    np.testing.assert_allclose([frame.t for frame in again.frames],[frame.t for frame in replay.frames])
+
+
+def test_retarget_rejects_takeoff_and_a_command_after_the_flight_ends():
+    with pytest.raises(ValueError,match='takeoff'):
+        simulate('takeoff','classical',save=False,retarget=dict(time=2.,landing=[10,10]))
+    baseline=simulate('landing','classical',save=False)
+    late=baseline.run.duration+1.
+    with pytest.raises(ValueError,match='flight ends before'):
+        simulate('landing','classical',save=False,retarget=dict(time=late,landing=[10,10]))
+    with pytest.raises(ValueError,match='within'):
+        simulate('landing','classical',save=False,retarget=dict(time=2.,landing=[10001,0]))
+
+
+def test_training_retargets_are_seeded_and_absent_from_evaluation():
+    cfg=load_config()
+    cfg['training']['retarget_probability']=1.
+    cfg['training']['retarget_min_altitude']=45.
+    # A high start keeps every sampled delay (2-6 s) above the altitude gate,
+    # so the test asserts the scheduling contract rather than seed luck.
+    cfg['mission']['landing_altitude']=[600.,600.]
+    def rollout(training):
+        env=RocketEnv('landing',config=cfg,training=training,difficulty=1.)
+        env.reset(seed=7)
+        for _ in range(400):
+            _,_,terminated,truncated,_=env.step(np.zeros(3,dtype=np.float32))
+            if terminated or truncated:break
+        events=list(env.retargets);env.close();return events
+    first=rollout(True);second=rollout(True)
+    assert len(first)==1 and first==second
+    assert first[0]['landing']!=tuple(first[0]['previous_landing'])
+    assert rollout(False)==[]

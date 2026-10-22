@@ -16,9 +16,10 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.utils import FloatSchedule
 from .config import DATA, ROOT, load_config
 from .envs import RocketEnv
-from .storage import atomic_json, config_hash, read_json
+from .storage import atomic_json, config_hash, read_json, dynamics_hash
 from .evaluate import evaluate, save_result
 from .missions import configure_flight
+from .resources import memory_headroom,memory_is_low,configure_background_worker,yield_background_work
 
 class TrainingCallback(BaseCallback):
     def __init__(self, job_id, mission, algorithm, total, eval_episodes=12, config=None, initial_steps=0, initial_difficulty=None):
@@ -32,6 +33,7 @@ class TrainingCallback(BaseCallback):
         self.recent=deque(maxlen=cfg["training"].get("curriculum_window",40))
         self.config=cfg
         self.training_hash=config_hash(cfg)
+        self.dynamics_identity=dynamics_hash()
         # Add quartiles to short runs so the UI can show a real checkpoint progression.
         # Bounded checkpoint cadence for long (up to 100M step) experiments.
         interval=cfg['training'].get('checkpoint_interval',1000000)
@@ -64,7 +66,7 @@ class TrainingCallback(BaseCallback):
         self.training_env.save(folder/"normalize.pkl")
         meta=dict(job_id=self.job_id,mission=self.mission,algorithm=self.algorithm,steps=steps,
                   seed=self.model.seed,config_hash=self.training_hash,difficulty=self.difficulty,config=self.config,
-                  source_hash=read_json(self.folder/"source.json",{}).get("source_hash"),
+                  source_hash=read_json(self.folder/"source.json",{}).get("source_hash"),dynamics_hash=self.dynamics_identity,
                   snapshot_phase="post-update final" if final else "rollout callback",
                   created_at=datetime.now(timezone.utc).isoformat(),success_rate=0,mean_reward=-1e9,
                   evaluation_episodes=0,qualification="evaluation pending")
@@ -86,6 +88,16 @@ class TrainingCallback(BaseCallback):
         self.checkpoint(); self.completed.add(self.num_timesteps)
 
     def _on_step(self):
+        if self.num_timesteps%128==0:yield_background_work()
+        if time.time()-self.last_write>5 and dynamics_hash()!=self.dynamics_identity:
+            raise RuntimeError('Flight dynamics changed during training. Start a newly identified job; existing checkpoints are preserved.')
+        if time.time()-self.last_write>5 and memory_is_low(memory_headroom()):
+            self.status='waiting_for_memory'
+            while memory_is_low(memory_headroom()):
+                self.write_status(error='Waiting for host memory: at least 2 GiB physical and 4 GiB commit headroom are required. The optimizer remains in memory; Stop still requests a saved checkpoint.')
+                if (self.folder/'stop').exists():return False
+                time.sleep(2)
+            self.status='running'
         for done,info in zip(self.locals.get("dones",[]),self.locals.get("infos",[])):
             if done:
                 self.episode_count+=1
@@ -109,7 +121,7 @@ class TrainingCallback(BaseCallback):
             for x in self.milestones:
                 if self.num_timesteps>=x: self.completed.add(x)
             self.checkpoint()
-        if time.time()-self.last_write>2:
+        if time.time()-self.last_write>5:
             if shutil.disk_usage(self.folder).free<64*1024**2:
                 self.stop_reason='Stopped before disk exhaustion: less than 64 MiB free. Final checkpoint requested; free space before continuing.'
                 (self.folder/'stop').touch()
@@ -159,7 +171,8 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
     if sum(bool(value) for value in (resume,warm_start,adapt_optimizer_from))>1:raise ValueError("Choose exact-config continuation, actor warm start, or optimizer adaptation")
     if adapt_optimizer_from and algorithm!='PPO':raise ValueError('Optimizer adaptation requires PPO')
     if warm_start and algorithm!="PPO":raise ValueError("Actor warm start is implemented for PPO only")
-    torch.set_num_threads(2)
+    resource_policy=configure_background_worker()
+    torch.set_num_threads(1)
     np.random.seed(seed); torch.manual_seed(seed)
     cfg=load_config(config_path) if config_path else load_config()
     cfg,_=configure_flight(cfg,mission=mission)
@@ -167,9 +180,10 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
     if warm_difficulty is not None and not 0<=warm_difficulty<=1:raise ValueError("warm_start_difficulty must be within [0,1]")
     job_id=job_id or f"{mission}-{algorithm.lower()}-{int(time.time())}"
     folder=DATA/"jobs"/job_id; folder.mkdir(parents=True,exist_ok=True)
+    atomic_json(folder/'resource-policy.json',resource_policy)
     atomic_json(folder/"config.json",cfg)
     source_folder=folder/"source";source_folder.mkdir(exist_ok=True)
-    source_names=["physics.py","envs.py","train.py","simulation.py","controllers.py","storage.py","config.py","evaluate.py","schemas.py","policies.py","missions.py"]
+    source_names=["physics.py","envs.py","train.py","simulation.py","controllers.py","storage.py","config.py","evaluate.py","schemas.py","policies.py","missions.py","atmosphere.py","resources.py"]
     source_hash=hashlib.sha256()
     for name in source_names:
         source=ROOT/"rocket_lab"/name;source_hash.update(source.read_bytes());shutil.copyfile(source,source_folder/name)
@@ -211,7 +225,10 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
         if settings.get("bounded_action_mean",False):
             from .policies import BoundedMeanPolicy
             common["policy"]=BoundedMeanPolicy
-        model=PPO(**common,n_steps=settings.get("ppo_n_steps",512),batch_size=settings.get("ppo_batch_size",256),n_epochs=settings.get("ppo_epochs",8),gamma=settings.get("ppo_gamma",.995),gae_lambda=settings.get("ppo_gae_lambda",.95),ent_coef=settings.get("ppo_entropy",.0005),target_kl=settings.get("ppo_target_kl"),policy_kwargs=dict(net_arch=[128,128],log_std_init=settings.get("policy_log_std",-1.5)))
+        architecture=settings.get('policy_architecture',[128,128])
+        if not architecture or len(architecture)>6 or any(type(width) is not int or not 16<=width<=1024 for width in architecture):
+            raise ValueError('policy_architecture requires 1 to 6 integer widths between 16 and 1024')
+        model=PPO(**common,n_steps=settings.get("ppo_n_steps",512),batch_size=settings.get("ppo_batch_size",256),n_epochs=settings.get("ppo_epochs",8),gamma=settings.get("ppo_gamma",.995),gae_lambda=settings.get("ppo_gae_lambda",.95),ent_coef=settings.get("ppo_entropy",.0005),target_kl=settings.get("ppo_target_kl"),policy_kwargs=dict(net_arch=architecture,log_std_init=settings.get("policy_log_std",-1.5)))
         if warm_start:
             meta=warm_start_actor(model,warm_start,mission,cfg)
             exploration=configure_warm_start_exploration(model,cfg)

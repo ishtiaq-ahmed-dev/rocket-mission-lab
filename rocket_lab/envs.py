@@ -55,11 +55,29 @@ class RocketEnv(gym.Env):
             self.takeoff_velocity=start_velocity+d*(m["takeoff_velocity"]-start_velocity)
         self.phase = "takeoff" if self.mission in ("takeoff", "combined") else "landing"
         self.separated = False
+        self.staging_pending = False
         self.separation = None
         self.launch=np.array(m.get('launch',m['pad'][:2]),dtype=float)
         self.landing=np.array(m['pad'][:2],dtype=float)
         if self.training and settings.get('target_curriculum',False):
             self.landing=self.launch+d*(self.landing-self.launch)
+        self.retargets=[]
+        self.auto_retarget=None
+        self.retarget_applied=False
+        self.landing_elapsed=0.0
+        probability=float(settings.get('retarget_probability',0.) or 0.)
+        if not 0<=probability<=1:raise ValueError('retarget_probability must be within [0,1]')
+        # Mid-flight target changes are a training-only perturbation. A policy
+        # that only ever sees the landing pad in its reset observation cannot
+        # learn to divert, so this samples a new target once per landing.
+        # Use a separate seeded stream: consuming the shared reset RNG here
+        # would shift every later state/noise draw and break the guarantee
+        # that training and evaluation share identical seeded episodes when
+        # the perturbation is not triggered.
+        if self.training and self.randomize and self.mission in ('landing','combined') and probability>0:
+            retarget_rng=np.random.default_rng(seed) if seed is not None else self.np_random
+            if retarget_rng.random()<probability:
+                self.auto_retarget=dict(delay=float(retarget_rng.uniform(2.,6.)),offset=float(retarget_rng.uniform(15.,max(15.,settings.get('retarget_max_offset',60.)))*max(.35,d)),angle=float(retarget_rng.uniform(0.,2*np.pi)))
         if self.phase == "landing":
             # The first curriculum stage is genuinely easy: 3 m, -0.8 m/s,
             # centered and upright. d=1 preserves the complete mission ranges.
@@ -67,7 +85,7 @@ class RocketEnv(gym.Env):
             pos = [*(self.launch+rng.uniform(-m["horizontal_position"]*d, m["horizontal_position"]*d, 2)), h+self.physics.half]
             vel = [*rng.uniform(-m["horizontal_velocity"]*d, m["horizontal_velocity"]*d, 2), -.8+d*(rng.uniform(*m["landing_vertical_velocity"])+.8)]
         else:
-            pos, vel = [*self.launch, self.physics.half+0.05], [0, 0, 0]
+            pos, vel = [*self.launch, self.physics.half], [0, 0, 0]
         q = Rotation.from_euler("xy", rng.uniform(-m["initial_tilt_deg"]*d, m["initial_tilt_deg"]*d, 2), degrees=True).as_quat()
         mass_scale = rng.uniform(1-.05*d, 1+.05*d) if self.randomize else 1.0
         thrust_scale = rng.uniform(1-.03*d, 1+.03*d) if self.randomize else 1.0
@@ -85,6 +103,20 @@ class RocketEnv(gym.Env):
     def _target(self):
         xy=self.launch if self.phase=='takeoff' else self.landing
         return np.array([*xy, self.physics.half + (self.takeoff_altitude if self.phase == "takeoff" else 0.)])
+
+    def command_landing(self, landing):
+        """Move the landing target during a flight; keeps the physical state."""
+        target=np.asarray(landing,dtype=float)
+        if target.shape!=(2,) or not np.isfinite(target).all() or np.abs(target).max()>10000:
+            raise ValueError('Landing target must be two finite local coordinates within +/- 10000 meters')
+        previous=tuple(float(x) for x in self.landing)
+        self.landing=target.copy()
+        event=dict(t=float(self.physics.data.time),previous_landing=previous,landing=tuple(float(x) for x in target))
+        self.retargets.append(event)
+        # A target change is not progress and must not inject a potential spike
+        # into the optimizer; the next difference is measured from the new goal.
+        self.previous_potential=self._potential(self.last_state)
+        return event
 
     def _obs(self, s):
         # Only physical state, clock and relative goal. No controller/expert action.
@@ -106,6 +138,16 @@ class RocketEnv(gym.Env):
         if self.noise:
             obs[:3]-=noise[:3];obs[:3]+=noise[:3]*400/position_scale
             obs[3:6]-=noise[3:6];obs[3:6]+=noise[3:6]*50/velocity_scale
+            world=self.cfg['world']
+            if 'position_noise_m' in world:
+                obs[:3]-=noise[:3]*400/position_scale
+                obs[:3]+=noise[:3]*world['position_noise_m']/max(world['sensor_noise'],1e-12)/position_scale
+                # The commanded site is known; relative position shares the
+                # navigation error rather than inventing an independent GPS.
+                obs[15:18]=(self._target()-origin)/position_scale-obs[:3]
+            if 'velocity_noise_m_s' in world:
+                obs[3:6]-=noise[3:6]*50/velocity_scale
+                obs[3:6]+=noise[3:6]*world['velocity_noise_m_s']/max(world['sensor_noise'],1e-12)/velocity_scale
         self.sensed_state={**s,"position":obs[:3]*position_scale+origin,"velocity":obs[3:6]*velocity_scale,"angular_velocity":obs[10:13]*2}
         return obs.astype(np.float32)
 
@@ -122,13 +164,25 @@ class RocketEnv(gym.Env):
 
     def step(self, action):
         old = self.last_state
+        if self.staging_pending:
+            action = np.asarray(action, dtype=float).copy()
+            action[0] = -1. # interstage cannot release with the main engine firing
         s = self.physics.step(action)
+        if self.phase=='landing':
+            self.landing_elapsed+=max(0.,s['t']-old['t'])
+        if self.auto_retarget is not None and not self.retarget_applied and self.phase=='landing':
+            minimum=float(self.cfg['training'].get('retarget_min_altitude',45.))
+            if self.landing_elapsed>=self.auto_retarget['delay'] and s['altitude']>minimum:
+                self.retarget_applied=True
+                angle,radius=self.auto_retarget['angle'],self.auto_retarget['offset']
+                landing=self.landing+np.array([np.cos(angle),np.sin(angle)])*radius
+                self.command_landing(np.clip(landing,-9999.,9999.))
         m, r = self.cfg["mission"], self.cfg["reward"]
         speed = float(np.linalg.norm(s["velocity"]))
         distance = float(np.linalg.norm(s["position"][:2]-self._target()[:2]))
         reason = None
         phase_changed = False
-        if self.phase == "takeoff" and s["altitude"] >= self.takeoff_altitude:
+        if self.phase == "takeoff" and s["altitude"] >= self.takeoff_altitude and not self.staging_pending:
             if abs(s["velocity"][2]-self.takeoff_velocity) > m["takeoff_velocity_tolerance"]:
                 reason = "crash_speed"
             elif s["tilt"] >= m["touchdown_tilt_deg"]:
@@ -136,27 +190,31 @@ class RocketEnv(gym.Env):
             elif distance > m["pad_radius"]:
                 reason = "missed_pad"
             elif self.mission == "combined":
-                self.separation=self.physics.separate()
-                self.phase, self.separated, phase_changed = "landing", True, True
-                s=self.physics.state()
-                distance=float(np.linalg.norm(s['position'][:2]-self._target()[:2]))
+                self.staging_pending = True
             else:
                 reason = "success"
-        if s["altitude"] <= 0 and reason is None:
+        if self.staging_pending and (s['throttle'] <= 1e-8 or not m.get('separation_shutdown', False)):
+            self.separation=self.physics.separate()
+            self.phase, self.separated, phase_changed = "landing", True, True
+            self.staging_pending=False
+            self.landing_elapsed=0.
+            s=self.physics.state()
+            distance=float(np.linalg.norm(s['position'][:2]-self._target()[:2]))
+        if s["clearance"] <= 1e-7 and reason is None and not self.physics.on_pad:
             if self.phase == "takeoff":
                 reason = "crash_speed"
-            elif speed >= m["touchdown_speed"]:
+            elif max(speed, s['contact_speed']) >= m["touchdown_speed"]:
                 reason = "crash_speed"
             elif s["tilt"] >= m["touchdown_tilt_deg"]:
                 reason = "crash_tilt"
-            elif distance > m["pad_radius"]:
+            elif distance > m.get('landing_tolerance',m["pad_radius"]):
                 reason = "missed_pad"
             else:
                 reason = "success"
         if reason is None and s["fuel_mass"] <= 0:
             reason = "out_of_fuel"
-        corridor=max(np.linalg.norm(s['position'][:2]-self.launch),np.linalg.norm(s['position'][:2]-np.array(m['pad'][:2])))
-        allowed=m['bounds']+np.linalg.norm(self.launch-np.array(m['pad'][:2]))
+        corridor=max(np.linalg.norm(s['position'][:2]-self.launch),np.linalg.norm(s['position'][:2]-self.landing))
+        allowed=m['bounds']+np.linalg.norm(self.launch-self.landing)
         if reason is None and (corridor > allowed or s["altitude"] > m["bounds"]):
             reason = "out_of_bounds"
         timeout=m["timeout"]*(.2+.8*self.episode_difficulty) if self.mission=="landing" else m["timeout"]
@@ -185,7 +243,7 @@ class RocketEnv(gym.Env):
         info = dict(outcome=reason, failure_reason=None if reason in (None,"success") else reason,
                     touchdown_speed=speed, tilt=s["tilt"], pad_distance=distance,
                     fuel_used=self.cfg["vehicle"]["fuel_mass"]*self.physics.mass_scale-s["fuel_mass"], phase=self.phase,
-                    episode_difficulty=self.episode_difficulty)
+                    episode_difficulty=self.episode_difficulty,retargets=list(self.retargets))
         self.last_info = info
         return self._obs(s), float(reward), reason is not None and reason!="timeout", reason=="timeout", info
 

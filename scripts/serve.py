@@ -17,14 +17,14 @@ from rocket_lab.storage import atomic_json
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--development',action='store_true');args=parser.parse_args()
     logs=ROOT/"logs";logs.mkdir(exist_ok=True)
-    node=shutil.which("node")
-    if not node:raise RuntimeError("Node.js is required")
     if not args.development and not (ROOT/"frontend"/"dist"/"index.html").exists():raise RuntimeError("Build the frontend with npm run build before starting the production preview")
-    frontend=[node,str(ROOT/"frontend"/"node_modules"/"vite"/"bin"/"vite.js")]
-    if not args.development:frontend.append("preview")
-    frontend.extend(["--host","127.0.0.1","--port","5180","--strictPort"])
-    commands=[("backend",[sys.executable,"-m","uvicorn","rocket_lab.api:app","--host","127.0.0.1","--port","8010"],ROOT),
-              ("frontend",frontend,ROOT/"frontend")]
+    if args.development:
+        node=shutil.which("node")
+        if not node:raise RuntimeError("Node.js is required for development")
+        frontend=[node,str(ROOT/'frontend/node_modules/vite/bin/vite.js'),'--host','127.0.0.1','--port','5180','--strictPort']
+        commands=[('backend',[sys.executable,'-m','uvicorn','rocket_lab.api:app','--host','127.0.0.1','--port','8010'],ROOT),('frontend',frontend,ROOT/'frontend')]
+    else:
+        commands=[('preview',[sys.executable,'-m','uvicorn','rocket_lab.preview:app','--host','127.0.0.1','--port','5180'],ROOT)]
     processes=[];handles=[]
     try:
         for name,command,cwd in commands:
@@ -35,7 +35,7 @@ def main():
             state={"pid":os.getpid(),"mode":"development" if args.development else "production preview","updated_at":time.time(),"services":{name:{"pid":p.pid,"returncode":p.poll()} for name,p in processes}}
             atomic_json(logs/"services.json",state)
             if any(p.poll() is not None for _,p in processes):break
-            time.sleep(2)
+            time.sleep(5)
     except KeyboardInterrupt:pass
     finally:
         for _,process in processes:

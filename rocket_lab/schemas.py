@@ -1,12 +1,21 @@
 from typing import Literal
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 
 class FlightPlan(BaseModel):
     """Local meters on the flat z=0 surface, x east and y north."""
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
     launch: tuple[float, float] = (0., 0.)
     landing: tuple[float, float] = (0., 0.)
-    separation_altitude: float = Field(default=400., ge=80, le=1500)
+    separation_altitude: float = Field(default=400., ge=80, le=150000)
+    profile: Literal['research','suborbital'] = 'research'
+
+    @model_validator(mode='after')
+    def profile_envelope(self):
+        if self.profile=='research' and self.separation_altitude>1500:
+            raise ValueError('Low-altitude research separation must be within 80 to 1500 meters')
+        if self.profile=='suborbital' and self.separation_altitude<10000:
+            raise ValueError('Suborbital research separation must be within 10000 to 150000 meters')
+        return self
 
     @field_validator('launch', 'landing')
     @classmethod
@@ -14,6 +23,25 @@ class FlightPlan(BaseModel):
         if any(abs(x)>10000 for x in value):
             raise ValueError('Coordinates must be within +/- 10000 meters')
         return value
+
+class TargetUpdate(BaseModel):
+    """A landing target issued during flight, in local surface meters."""
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    time: float = Field(ge=0)
+    landing: tuple[float, float]
+
+    @field_validator('landing')
+    @classmethod
+    def bounded_target(cls, value):
+        if any(abs(x)>10000 for x in value):
+            raise ValueError('Coordinates must be within +/- 10000 meters')
+        return value
+
+class RetargetEvent(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    t: float
+    previous_landing: tuple[float, float]
+    landing: tuple[float, float]
 
 class Separation(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
@@ -40,6 +68,18 @@ class Frame(BaseModel):
     wind: tuple[float,float,float]
     phase: Literal["landing","takeoff"]
     reward: float | None = None
+    clearance: float | None = None
+    contact_speed: float | None = None
+    hold_down: bool | None = None
+    release_time: float | None = None
+    upper_stage: 'StageState | None' = None
+
+class StageState(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    position: tuple[float,float,float]
+    velocity: tuple[float,float,float]
+    quaternion: tuple[float,float,float,float]
+    impacted: bool = False
 
 class RunMeta(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
@@ -66,7 +106,11 @@ class RunMeta(BaseModel):
     source: str = "MuJoCo simulation"
     controller_status: str | None = None
     flight_plan: FlightPlan | None = None
+    initial_flight_plan: FlightPlan | None = None
+    landing_tolerance: float | None = None
+    launch_release_time: float | None = None
     separation: Separation | None = None
+    retargets: list[RetargetEvent] = Field(default_factory=list)
     dynamics_hash: str | None = None
 
 class Telemetry(BaseModel):
@@ -76,6 +120,9 @@ class Telemetry(BaseModel):
     config_hash: str
     rocket_length: float
     initial_fuel: float
+    min_throttle: float | None = None
+    max_thrust: float | None = None
+    gravity_model: str | None = None
     run: RunMeta
     frames: list[Frame]
 
@@ -87,6 +134,8 @@ class SimRequest(BaseModel):
     seed: int = Field(default=42,ge=0,le=2147483647)
     checkpoint_id: str | None = None
     flight_plan: FlightPlan | None = None
+    retarget: TargetUpdate | None = None
+    retargets: list[TargetUpdate] = Field(default_factory=list,max_length=32)
 
 class TrainRequest(BaseModel):
     model_config=ConfigDict(extra="forbid")

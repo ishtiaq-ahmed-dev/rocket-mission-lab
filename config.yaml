@@ -6,9 +6,16 @@ vehicle:
   isp: 300.0 # approximate seconds
   max_thrust: 760000.0 # approximate N, one generic engine
   min_throttle: 0.35 # approximate engine-on floor; engine can switch fully off
+  throttle_rate: 2.0 # approximate fraction of max thrust per second while spooling up or throttling
+  shutdown_rate: 5.0 # approximate fraction of max thrust per second during engine cutoff
   gimbal_limit_deg: 8.0 # approximate degrees
   gimbal_rate_deg_s: 30.0 # approximate degrees/s
   length: 40.0 # approximate m
+  engine_lever: 17.9 # m from booster center to rendered gimbal pivot
+  landing_foot_radius: 6.2 # m; four deployed feet, matches rendered gear
+  contact_model: feet # first tilted sole contact; impact state is retained
+  hold_down_release_margin: 1.05 # vertical thrust/weight before support release
+  hold_down_release_time: 0.2 # seconds of sustained positive launch margin
   radius: 1.8 # approximate m
   inertia: [5100000.0, 5100000.0, 61000.0] # approximate kg m2 at dry mass, scaled with mass
   drag_coefficient: 0.5 # approximate
@@ -20,10 +27,12 @@ world:
   wind_mean: [2.0, -1.0, 0.0] # approximate m/s
   gust_std: 0.8 # approximate m/s, mean-reverting process
   sensor_noise: 0.005 # approximate relative to observation scale
+  position_noise_m: 0.12 # generic precision-navigation position standard deviation
+  velocity_noise_m_s: 0.04 # generic velocity standard deviation; not vendor sensor data
   timestep: 0.02 # approximate integration seconds
   control_substeps: 5 # approximate 10 Hz control; 50 Hz integration
 mission:
-  landing_altitude: [180.0, 240.0] # approximate feet altitude m
+  landing_altitude: [180.0, 240.0] # approximate descent-start altitude range, m AGL
   landing_vertical_velocity: [-24.0, -16.0] # approximate m/s
   horizontal_position: 12.0 # approximate +/- m
   horizontal_velocity: 1.5 # approximate +/- m/s
@@ -32,6 +41,8 @@ mission:
   touchdown_speed: 2.0 # approximate strict total speed threshold m/s
   touchdown_tilt_deg: 5.0 # approximate strict tilt threshold
   pad_radius: 5.0 # approximate m
+  landing_tolerance: 1.0 # maximum center-coordinate error at first contact, m
+  separation_shutdown: true # command cutoff, finish valve ramp, then release stage
   takeoff_altitude: 400.0 # approximate separation, NOT orbit
   takeoff_velocity: 25.0 # approximate m/s
   takeoff_velocity_tolerance: 8.0 # approximate m/s
@@ -72,3 +83,6 @@ training:
   reward_normalization: true
   policy_log_std: -2.3 # exploration remains a learned stochastic policy
   learning_rate: 0.0003
+  retarget_probability: 0.35 # training-only mid-flight landing-target changes
+  retarget_max_offset: 70.0 # approximate m, sampled divert distance
+  retarget_min_altitude: 45.0 # approximate m AGL, keeps the divert solvable

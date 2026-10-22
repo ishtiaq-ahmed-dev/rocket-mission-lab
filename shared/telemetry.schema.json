@@ -42,10 +42,19 @@
         },
         "separation_altitude": {
           "default": 400.0,
-          "maximum": 1500,
+          "maximum": 150000,
           "minimum": 80,
           "title": "Separation Altitude",
           "type": "number"
+        },
+        "profile": {
+          "default": "research",
+          "enum": [
+            "research",
+            "suborbital"
+          ],
+          "title": "Profile",
+          "type": "string"
         }
       },
       "title": "FlightPlan",
@@ -195,6 +204,65 @@
           ],
           "default": null,
           "title": "Reward"
+        },
+        "clearance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Clearance"
+        },
+        "contact_speed": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contact Speed"
+        },
+        "hold_down": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hold Down"
+        },
+        "release_time": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Release Time"
+        },
+        "upper_stage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StageState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -211,6 +279,50 @@
         "phase"
       ],
       "title": "Frame",
+      "type": "object"
+    },
+    "RetargetEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "t": {
+          "title": "T",
+          "type": "number"
+        },
+        "previous_landing": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Previous Landing",
+          "type": "array"
+        },
+        "landing": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Landing",
+          "type": "array"
+        }
+      },
+      "required": [
+        "t",
+        "previous_landing",
+        "landing"
+      ],
+      "title": "RetargetEvent",
       "type": "object"
     },
     "RunMeta": {
@@ -404,6 +516,41 @@
           ],
           "default": null
         },
+        "initial_flight_plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FlightPlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "landing_tolerance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Landing Tolerance"
+        },
+        "launch_release_time": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Launch Release Time"
+        },
         "separation": {
           "anyOf": [
             {
@@ -414,6 +561,13 @@
             }
           ],
           "default": null
+        },
+        "retargets": {
+          "items": {
+            "$ref": "#/$defs/RetargetEvent"
+          },
+          "title": "Retargets",
+          "type": "array"
         },
         "dynamics_hash": {
           "anyOf": [
@@ -521,6 +675,77 @@
       ],
       "title": "Separation",
       "type": "object"
+    },
+    "StageState": {
+      "additionalProperties": false,
+      "properties": {
+        "position": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Position",
+          "type": "array"
+        },
+        "velocity": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Velocity",
+          "type": "array"
+        },
+        "quaternion": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Quaternion",
+          "type": "array"
+        },
+        "impacted": {
+          "default": false,
+          "title": "Impacted",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "position",
+        "velocity",
+        "quaternion"
+      ],
+      "title": "StageState",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -545,6 +770,42 @@
     "initial_fuel": {
       "title": "Initial Fuel",
       "type": "number"
+    },
+    "min_throttle": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Min Throttle"
+    },
+    "max_thrust": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Max Thrust"
+    },
+    "gravity_model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Gravity Model"
     },
     "run": {
       "$ref": "#/$defs/RunMeta"

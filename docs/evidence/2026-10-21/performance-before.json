@@ -1,0 +1,29 @@
+{
+  "/api/training": {
+    "bytes": 4116730,
+    "seconds": 0.36556190000010247,
+    "records": 105
+  },
+  "/api/checkpoints": {
+    "bytes": 1599564,
+    "seconds": 0.20785750000004555,
+    "records": 635
+  },
+  "/api/results/summary": {
+    "bytes": 567440,
+    "seconds": 0.09412290000000212,
+    "records": 707
+  },
+  "/api/runs": {
+    "bytes": 412228,
+    "seconds": 0.06494500000007974,
+    "records": 444
+  },
+  "/api/system": {
+    "bytes": 8288,
+    "seconds": 0.013899099999889586,
+    "records": 6
+  },
+  "total_bytes": 6704250,
+  "elapsed_seconds": 0.7811074000001099
+}

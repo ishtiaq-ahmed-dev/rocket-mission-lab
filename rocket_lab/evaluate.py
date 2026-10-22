@@ -16,6 +16,7 @@ from .simulation import LearnedPolicy
 from .storage import atomic_json, config_hash, read_json,dynamics_hash
 from .config import DATA, ROOT, load_config
 from .missions import configure_flight
+from .resources import yield_background_work
 
 def wilson(k,n):
     if n==0: return [0.,1.]
@@ -28,7 +29,10 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
     if episodes<1:raise ValueError("episodes must be positive")
     cfg,_=configure_flight(config or load_config(),mission=mission)
     if scenario=="gusts": cfg["world"]["gust_std"]*=4; cfg["world"]["wind_mean"]=[12,-8,0]
-    elif scenario=="noise": cfg["world"]["sensor_noise"]*=4
+    elif scenario=="noise":
+        cfg["world"]["sensor_noise"]*=4
+        for key in ('position_noise_m','velocity_noise_m_s'):
+            if key in cfg['world']:cfg['world'][key]*=4
     elif scenario=="thrust_loss": cfg["vehicle"]["max_thrust"]*=.8
     elif scenario=="extreme_starts": cfg["mission"]["horizontal_position"]*=4; cfg["mission"]["initial_tilt_deg"]*=4
     env=RocketEnv(mission,config=cfg)
@@ -55,6 +59,7 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
         obs,_=env.reset(seed=seed)
         controller=ClassicalController(level)
         while True:
+            yield_background_work()
             action=policy.action(obs) if policy else controller.action(env)
             obs,_,term,trunc,info=env.step(action)
             if term or trunc: break

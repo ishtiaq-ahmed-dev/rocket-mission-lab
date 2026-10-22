@@ -35,24 +35,27 @@ def config_hash(config=None):
     return hashlib.sha256(json.dumps(config,sort_keys=True,separators=(',',':')).encode()).hexdigest()[:16]
 
 def dynamics_hash():
-    names=('physics.py','envs.py','controllers.py','simulation.py','missions.py')
+    names=('physics.py','envs.py','controllers.py','simulation.py','missions.py','atmosphere.py')
     return hashlib.sha256(b''.join((ROOT/'rocket_lab'/name).read_bytes() for name in names)).hexdigest()
 
 def runs():
-    return sorted([v for p in (DATA/"runs").glob("*.meta.json") if (v:=read_json(p))],key=lambda x:(x["mission"],x["method"],x["level"]))
+    from .index_cache import cached_record
+    return sorted([v for p in (DATA/"runs").glob("*.meta.json") if (v:=cached_record(p))],key=lambda x:(x["mission"],x["method"],x["level"]))
 
 def training_jobs():
-    jobs=[v for p in (DATA/"jobs").glob("*/status.json") if (v:=read_json(p))]
+    from .index_cache import cached_record
+    jobs=[v for p in (DATA/"jobs").glob("*/status.json") if (v:=cached_record(p))]
     for job in jobs:
-        if job.get("status") in ("running","starting") and time.time()-job.get("updated_at",0)>120:
+        if job.get("status") in ("running","starting","waiting_for_memory") and time.time()-job.get("updated_at",0)>120:
             job["status"]="stale"
             job["error"]=job.get("error") or "Heartbeat is older than two minutes. Inspect output.log before restarting."
     return sorted(jobs,key=lambda x:x.get("started_at",0),reverse=True)
 
 def checkpoints(mission=None):
+    from .index_cache import cached_record
     entries=[]
     for p in (DATA/"checkpoints").glob("*/*/checkpoint.json"):
-        value=read_json(p)
+        value=cached_record(p)
         if value and (mission is None or value["mission"]==mission) and (p.parent/"model.zip").exists():
             value["id"]=p.parent.parent.name+"__"+p.parent.name
             entries.append(value)

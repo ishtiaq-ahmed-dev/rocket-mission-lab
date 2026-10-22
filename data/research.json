@@ -103,5 +103,30 @@
     "title": "MuJoCo: native quaternion math",
     "url": "https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mju-quat2mat",
     "application": "Normalize a copied quaternion and use native matrix conversion; measured numerical regression and headless throughput checks."
+  },
+  {
+    "title": "SpaceX Falcon Payload User Guide (May 2025)",
+    "url": "https://www.spacex.com/assets/media/falcon-users-guide-2025-05-09.pdf",
+    "application": "Sections 2.3\u20132.5: tank structure, engine arrangement, interstage and separation. Informs exterior inspection; the simulator remains a generic single-thrust vehicle, not a Falcon 9 replica."
+  },
+  {
+    "title": "NASA Commercial Crew: Falcon 9 structure",
+    "url": "https://www.nasa.gov/commercial-crew-program-press-kit/",
+    "application": "Recovery legs, stowage during ascent, propulsion and interstage context. Four hinged lower supports replace the shrinking visual legs; upper grid fins are omitted by user preference."
+  },
+  {
+    "title": "NASA Falcon 9 launch and landing sequence",
+    "url": "https://www.nasa.gov/wp-content/uploads/2020/08/falcon9_launch_and_landing.pdf",
+    "application": "Distinguishes ascent, separation, boostback, entry and landing burns. Event controls replay recorded simulator events; the low-altitude study does not reproduce an orbital flight."
+  },
+  {
+    "title": "NASA rocket control",
+    "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/rocket-control/",
+    "application": "Physical thrust vectoring and torque about the vehicle center of gravity."
+  },
+  {
+    "title": "U.S. Standard Atmosphere, 1976",
+    "url": "https://ntrs.nasa.gov/citations/19770009539",
+    "application": "Suborbital dry-air hydrostatic layers; an explicitly approximate tail is used above 84.852 km geopotential altitude."
   }
 ]

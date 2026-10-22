@@ -20,6 +20,7 @@ interface State {
   trail:'Off'|'Flown'|'Full';
   sound:boolean;
   volume:number;
+  audioPerspective:'Exterior'|'Onboard';
   pad:string;
   recording:boolean;
   load:(telemetry:Telemetry)=>void;
@@ -30,8 +31,8 @@ interface State {
 export const useLab=create<State>((set,get)=>({
   telemetry:null,ghost:null,time:0,playing:false,speed:1,
   camera:'Rocket',cameraRevision:0,cameraTool:'Rotate',followRocket:true,cameraCommand:null,commandRevision:0,cameraDistance:0,
-  flightPlan:{launch:[0,0],landing:[80,40],separation_altitude:400},frameLimit:60,quality:'Balanced',renderInfo:'',
-  trail:'Off',sound:false,volume:.35,pad:'White plane',recording:false,
+  flightPlan:{launch:[0,0],landing:[80,40],separation_altitude:400},frameLimit:30,quality:'Performance',renderInfo:'',
+  trail:'Off',sound:false,volume:.35,audioPerspective:'Exterior',pad:'Coastal',recording:false,
   load:telemetry=>set({telemetry,time:0,playing:true}),
   set:state=>set(state),
   advance:dt=>{
@@ -42,3 +43,6 @@ export const useLab=create<State>((set,get)=>({
     set({time,playing:time<end});
   },
 }));
+
+/** Instruments update at 10 Hz; rendering and paused scrubbing retain exact time. */
+export const useInstrumentTime=()=>useLab(s=>s.playing?Math.floor(s.time*10)/10:s.time);

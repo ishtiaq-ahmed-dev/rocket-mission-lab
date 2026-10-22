@@ -1,0 +1,68 @@
+{
+  "observed_at_unix": 1792599626.9987526,
+  "scope": "Loopback HTTP payloads and request latency; no browser FPS measurement",
+  "views": {
+    "flight": {
+      "wire_bytes": 25224,
+      "decoded_bytes": 224558,
+      "seconds": 0.04418320000013409,
+      "encoding": "gzip",
+      "median_seconds": 0.06214689999978873,
+      "keys": [
+        "checkpoints"
+      ]
+    },
+    "training": {
+      "wire_bytes": 36917,
+      "decoded_bytes": 283201,
+      "seconds": 0.1423626000000695,
+      "encoding": "gzip",
+      "median_seconds": 0.1419460999995863,
+      "keys": [
+        "checkpoints",
+        "jobs"
+      ]
+    },
+    "results": {
+      "wire_bytes": 141373,
+      "decoded_bytes": 916133,
+      "seconds": 0.09379100000023755,
+      "encoding": "gzip",
+      "median_seconds": 0.09006929999986824,
+      "keys": [
+        "runs",
+        "results"
+      ]
+    }
+  },
+  "selected_job": {
+    "id": "mission-campaign-1792595301877641600-combined-r0",
+    "history_preserved": true,
+    "wire_bytes": 8200,
+    "decoded_bytes": 41338,
+    "seconds": 0.02874100000008184,
+    "encoding": "gzip"
+  },
+  "dynamics_hash": "05d6ce3a455c4bbc0d0cb5df846fae29a755c6e21dd4684a0d7e5479bf6c22dd",
+  "campaigns_stopped": true,
+  "services": {
+    "pid": 9524,
+    "mode": "production preview",
+    "updated_at": 1792599625.8389523,
+    "services": {
+      "preview": {
+        "pid": 3136,
+        "returncode": null
+      }
+    }
+  },
+  "flight_polling": {
+    "before_bytes_per_minute": 133919240,
+    "after_bytes_per_minute": 25224,
+    "reduction_percent": 99.98116476766147
+  },
+  "terrain_textures": {
+    "before_bytes": 8971337,
+    "after_bytes": 519395
+  }
+}

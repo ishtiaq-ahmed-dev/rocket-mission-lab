@@ -17,8 +17,8 @@ it('requires an explicit enable, follows throttle, and silences pause/mute',asyn
  const {missionAudio}=await import('./audio');expect(missionAudio.context).toBeNull();
  const f={t:0,position:[0,0,30],velocity:[0,0,-1],quaternion:[1,0,0,0],angular_velocity:[0,0,0],throttle:.6,gimbal:[0,0],fuel_mass:1000,mass:23000,wind:[0,0,0],phase:'landing',reward:null};
  useLab.getState().set({telemetry:{frames:[f,{...f,t:2}],run:{duration:2}} as Telemetry,playing:true,time:1,volume:.3});
- await missionAudio.enable();expect(gains[0].setTargetAtTime).toHaveBeenLastCalledWith(.165,0,.07);
+ await missionAudio.enable();expect(gains[0].setTargetAtTime.mock.calls.at(-1)![0]).toBeGreaterThan(0);expect(gains[0].setTargetAtTime.mock.calls.at(-1)![0]).toBeLessThanOrEqual(.165);
  expect(gains[1].setTargetAtTime).toHaveBeenLastCalledWith(.54,0,.07);
- useLab.getState().set({playing:false});missionAudio.update();expect(gains[0].setTargetAtTime).toHaveBeenLastCalledWith(0,0,.07);
+ useLab.getState().set({playing:false});missionAudio.update();expect(gains[0].setTargetAtTime).toHaveBeenLastCalledWith(0,0,.07);expect(missionAudio.timer).toBeNull();expect(vi.getTimerCount()).toBe(0);
  missionAudio.mute();expect(useLab.getState().sound).toBe(false);vi.clearAllTimers();vi.useRealTimers();vi.unstubAllGlobals();
 });

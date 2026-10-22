@@ -6,7 +6,7 @@ import time
 import urllib.request
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from rocket_lab.config import DATA,ROOT
-from rocket_lab.schemas import Telemetry
+from rocket_lab.schemas import Telemetry,FlightPlan
 from rocket_lab.storage import atomic_json,dynamics_hash
 
 
@@ -28,7 +28,7 @@ def main():
     with urllib.request.urlopen(request,timeout=60) as response:replay=Telemetry.model_validate_json(response.read())
     assert replay.run.outcome=='success' and replay.run.separation
     assert replay.run.dynamics_hash==dynamics_hash()
-    assert replay.run.flight_plan.model_dump(mode='json')==plan
+    assert replay.run.flight_plan==FlightPlan.model_validate(plan)
     saved=Telemetry.model_validate_json(get(f'/api/runs/{replay.run.id}/telemetry'))
     assert saved==replay
     checks['configured_flight']=replay.run.model_dump(mode='json')

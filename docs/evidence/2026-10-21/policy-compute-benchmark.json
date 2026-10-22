@@ -1,0 +1,23 @@
+{
+  "scope": "4096-step easy-start throughput pilot; no policy qualification",
+  "architecture": [
+    256,
+    256,
+    128
+  ],
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "results": [
+    {
+      "device": "cpu",
+      "steps": 4096,
+      "seconds": 3.558538300014334,
+      "steps_per_second": 1151.034400833483
+    },
+    {
+      "device": "cuda",
+      "steps": 4096,
+      "seconds": 20.83636449999176,
+      "steps_per_second": 196.57939848391595
+    }
+  ]
+}

@@ -17,6 +17,8 @@ if __name__=='__main__':
     specification=json.loads(path.read_text(encoding='utf-8'))
     module=specification['module']
     if module not in ('rocket_lab.train','rocket_lab.campaign'):raise ValueError('Unsupported worker')
+    from rocket_lab.resources import configure_background_worker
+    configure_background_worker()
     with (path.parent/'output.log').open('a',buffering=1,encoding='utf-8') as output:
         sys.stdout=sys.stderr=output
         print(f'INDEPENDENT WORKER pid={os.getpid()} module={module} started={time.time()}',flush=True)

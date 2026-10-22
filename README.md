@@ -2,6 +2,10 @@
 
 A local rocket flight simulator, mission dashboard, and reinforcement learning workbench. MuJoCo integrates the booster dynamics; React and Three.js render recorded telemetry. Vehicle parameters are generic approximations.
 
+See the [21 October flight fidelity revision and executed evidence](docs/24-flight-fidelity-validation.md) for the latest dashboard, first-foot contact, staging, repeated retargeting and suborbital study. The older sections below describe the preceding baseline where they differ.
+
+The [PC performance revision](docs/25-performance-optimization.md) adds a lighter default graphics mode, page-specific polling and one production HTTP server. Long training is currently stopped with checkpoints retained; starting it remains an explicit action.
+
 ## Run locally
 
 ```powershell
@@ -14,7 +18,7 @@ cd ..
 .venv\Scripts\python.exe scripts/serve.py
 ```
 
-Open [Mission Control](http://127.0.0.1:5180/) and [API documentation](http://127.0.0.1:8010/docs). For development use `.venv\Scripts\python.exe scripts/dev.py`. Close the launcher with Ctrl+C to stop its web servers. Training uses an independent hidden Windows worker (separate session on Unix). Node.js 22+ and Python 3.11 are the recorded development environment. Linux/macOS use `.venv/bin/python`.
+Open [Mission Control](http://127.0.0.1:5180/) and [API documentation](http://127.0.0.1:5180/api/docs). The production preview serves the built dashboard and API from one Python server; Node is only needed for building or development. For development use `.venv\Scripts\python.exe scripts/dev.py`. Close the launcher with Ctrl+C to stop its web servers. Training uses an independent hidden Windows worker (separate session on Unix). Node.js 22+ and Python 3.11 are the recorded development environment. Linux/macOS use `.venv/bin/python`.
 
 ## Mission controls
 
@@ -22,8 +26,9 @@ Open [Mission Control](http://127.0.0.1:5180/) and [API documentation](http://12
 - Landing starts in the air above the launch coordinates. Takeoff targets the vertical line above launch. Combined launches there, releases a generic 2.5 t unpowered upper stage, and returns the booster to the landing coordinates.
 - Separation altitude is configurable from 80 to 1,500 m; site coordinates accept +/-10,000 m. These input limits are not a reachable flight envelope. Fuel, minimum thrust, sensor noise, and control limits can cause a requested mission to fail. Inspect its recorded outcome.
 - The default plan transfers from [0, 0] to [80, 40] with separation at 400 m. **Return to launch** and **Separate site** provide quick presets.
+- To divert during a flight, open **Mission plan** or the setup panel, enter a new landing X/Y, and choose **Retarget at T+…**. The applied target is the last confirmed one; takeoff has no landing pad to move, and a command after the flight ends is rejected. This feature requires the local engine and is never faked in offline replay.
 
-The 3D scene uses a white plane and two small site markers. Coastline, grass, roads, water, rocks, facilities, terrain texture downloads, HDR lighting, and shadow passes are removed from the active renderer. Earlier scenery assets are retained for research and are not loaded by the scene.
+The interface uses a light mission-control workspace with Overview, Flight deck, Telemetry, and Mission plan tabs, recorded-value KPI cards, charts, event log, and a compact retarget card. Terrain, vegetation, roads, facilities, ocean, HDR lighting, and shadows remain active; Balanced is the default quality. Launch and landing pads follow the applied coordinates, with prepared flat sites at Z = 0. The offshore environment remains available. Upper grid fins are removed. Four articulated landing legs replace the shrinking supports, with body hinges, telescopic braces, footpads, and 0.6 m nominal nozzle clearance. The launch pad adds a flame trench, hold-down clamps, propellant lines, and a lattice service tower; the engine adds a bell, cooling tubes, stiffener rings, and actuator housings. See [rocket structure research and rendering limits](docs/22-rocket-structure.md).
 
 ## Camera and playback
 
@@ -33,7 +38,7 @@ The event buttons jump to actual recorded separation, engine cutoff, relight, an
 
 ## Training
 
-The Training page supports individual PPO/SAC jobs and **Train all three missions**. Budgets are environment steps, not optimizer iterations. A three-mission campaign shares a total ceiling up to 100 million steps across alternating landing, takeoff, and combined blocks. It saves model/normalization snapshots, uses a curriculum for altitude and target displacement, and measures fixed development seeds. It stops on exhausted budget or a measured plateau. Small MLP PPO runs on CPU; the renderer uses the GPU. SAC/CUDA remains a selectable single-job option.
+The Training page supports individual PPO/SAC jobs and **Train all three missions**. Budgets are environment steps, not optimizer iterations. A three-mission campaign shares a total ceiling up to 100 million steps across alternating landing, takeoff, and combined blocks. It saves model/normalization snapshots, uses a curriculum for altitude and target displacement, and measures fixed development seeds. Landing and combined episodes also receive seeded mid-flight landing-target changes from `training.retarget_probability`, so the learned policy sees a moving goal during training rather than only in evaluation. It stops on exhausted budget or a measured plateau. Small MLP PPO runs on CPU; the renderer uses the GPU. SAC/CUDA remains a selectable single-job option.
 
 A candidate with at least 254/256 development successes receives a separate 10,000-seed nominal evaluation, using a fresh seed range for each candidate. The nominal gate requires a 95% Wilson lower bound of at least 99%. This does not establish stress robustness or real-world safety. Training never substitutes a classical controller for a learned policy.
 
@@ -48,7 +53,7 @@ Use **Stop campaign & save** to stop the whole sequence. Stop flags also work at
 
 ## Validation and limits
 
-The October 21 redesign has executed backend, frontend, production build, local API, browser interaction, and fixed-seed mission pilot checks. See [the dated validation record](docs/VALIDATION-2026-10-21.md) for exact results and limits. Existing 10,000-flight results belong to earlier source/configuration snapshots and are presented as archived experiments. They do not qualify the new controller or custom targets. The new RL campaign is experimental and has not established reliable complete flight.
+The [October 21 validation record](docs/VALIDATION-2026-10-21.md) documents an earlier feature revision. The later light mission-control theme, surface-clipped plume, and mid-flight retarget polish were not part of those executed counts, so this README does not present them as already validated. Re-run the commands below for the current tree. The subsequent appearance restoration has its own [revision checks](docs/22-rocket-structure.md#revision-checks). Existing 10,000-flight results belong to earlier source/configuration snapshots and are presented as archived experiments. They do not qualify the new controller or custom targets. The new RL campaign is experimental and has not established reliable complete flight.
 
 ```powershell
 .venv\Scripts\python.exe -m pytest tests -q
