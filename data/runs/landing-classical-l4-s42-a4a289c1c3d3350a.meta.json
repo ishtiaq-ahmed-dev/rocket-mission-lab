@@ -1,0 +1,36 @@
+{
+  "id": "landing-classical-l4-s42-a4a289c1c3d3350a",
+  "mission": "landing",
+  "method": "classical",
+  "level": 4,
+  "checkpoint_steps": null,
+  "checkpoint_id": null,
+  "difficulty": 1.0,
+  "training_mode": false,
+  "target_altitude": null,
+  "target_velocity": null,
+  "algorithm": null,
+  "seed": 42,
+  "outcome": "success",
+  "failure_reason": null,
+  "touchdown_speed": 0.584052006171066,
+  "tilt": 0.9144268696817931,
+  "pad_distance": 1.9136039106657716,
+  "fuel_used": 7163.472102602082,
+  "duration": 63.56000000000434,
+  "total_reward": 492.13806255312875,
+  "source": "MuJoCo simulation",
+  "controller_status": "not_requested",
+  "flight_plan": {
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "landing": [
+      80.0,
+      40.0
+    ],
+    "separation_altitude": 400.0
+  },
+  "separation": null
+}

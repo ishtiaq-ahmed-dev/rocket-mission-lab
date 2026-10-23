@@ -11,7 +11,7 @@ def configure_flight(config, flight_plan=None, mission='landing'):
     # Preserve baseline identities for archived, unmodified single-stage tasks.
     if flight_plan is not None:
         m.update(launch=list(plan.launch),pad=[*plan.landing,0.],takeoff_altitude=plan.separation_altitude,profile=plan.profile)
-        m['timeout']=max(m['timeout'],240.)
+        m['timeout']=max(m['timeout'],240.,float(plan.separation_altitude)*0.25)
     if mission=='combined':
         cfg['vehicle']['upper_stage_mass']=2500. # generic unpowered payload; not an orbital stage model
     if plan.profile=='suborbital':

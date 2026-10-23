@@ -1,0 +1,19 @@
+{
+  "status": "failed",
+  "started_at": 1792740065.0380044,
+  "headless": true,
+  "renderer": "real-time",
+  "gpu_physics": false,
+  "isaac_version": [
+    "6.2.0",
+    "rc.14",
+    "6",
+    "2",
+    "0",
+    "rc",
+    "14",
+    "release.52805.02189a84.gl"
+  ],
+  "error": "Traceback (most recent call last):\n  File \"D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\scripts\\isaac_runner.py\", line 60, in main\n    env=RocketEnv(args.mission,config=cfg,randomize=False,noise=False,physics_factory=factory,training=bool(args.train_steps))\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\rocket_lab\\envs.py\", line 32, in __init__\n    self.physics = physics_factory(self.cfg)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\scripts\\isaac_runner.py\", line 59, in <lambda>\n    factory=lambda config:IsaacRocketPhysics(config,args.headless,args.gpu_physics,visuals)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\rocket_lab\\isaac\\physics.py\", line 42, in __init__\n    self.reset(0)\n  File \"D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\rocket_lab\\isaac\\physics.py\", line 110, in reset\n    self.hold_joint.CreateLocalPos0Attr().Set(xyz(p));self.hold_joint.CreateJointEnabledAttr().Set(self.on_pad)\n                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\npxr.Tf.ErrorException: \n\tError in 'pxrInternal_v0_25_11__pxrReserved__::UsdStage::_SetValueImpl' at line 7061 in file C:\\g\\372897073\\conan\\src\\0.25.11.kit.5\\pxr\\usd\\usd\\stage.cpp : 'Type mismatch for </World/LaunchHoldDown.physics:jointEnabled>: expected 'bool', got 'TfPyObjWrapper''\n",
+  "finished_at": 1792740155.442511
+}

@@ -1,0 +1,28 @@
+[package]
+title = "Rocket Mission Lab headless physics"
+version = "1.0.0"
+description = "Native PhysX and Core API without robot planners, sensor suites or editor panels"
+
+[dependencies]
+"isaacsim.core.api" = {}
+"isaacsim.core.prims" = {}
+"isaacsim.core.version" = {}
+"omni.kit.loop-isaac" = {}
+"omni.kit.renderer.core" = {}
+"omni.hydra.rtx" = {}
+"omni.isaac.ml_archive" = { order = -100 }
+"omni.pip.compute" = {}
+
+[settings.app]
+name = "Rocket Mission Lab headless"
+version = "1.0.0"
+settings.persistent = false
+enableDeveloperWarnings = false
+asyncRendering = false
+
+[settings]
+"/app/extensions/registryEnabled" = false
+"/app/player/useFixedTimeStepping" = false
+"/app/file/ignoreUnsavedOnExit" = true
+"/physics/updateToUsd" = true
+"/physics/updateVelocitiesToUsd" = false

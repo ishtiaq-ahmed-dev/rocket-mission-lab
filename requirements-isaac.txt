@@ -1,0 +1,9 @@
+# Install with the GLOBAL Isaac python.bat; do not upgrade bundled CUDA/Kit packages.
+torch==2.11.0
+gymnasium>=1.1,<2
+stable-baselines3>=2.7,<3
+PyYAML>=6
+scipy>=1.12
+pydantic>=2.10,<3
+cvxpy>=1.6
+tensorboard>=2.19

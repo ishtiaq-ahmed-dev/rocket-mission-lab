@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "cases": [
+    {
+      "case": "cpu-50",
+      "angular_momentum_error": 3.930932188037319E-06,
+      "report": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\matrix-cpu-50.json",
+      "height_error": 0.09765156250000473,
+      "status": "passed"
+    },
+    {
+      "case": "cpu-120",
+      "angular_momentum_error": 1.5664923188993582E-05,
+      "report": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\matrix-cpu-120.json",
+      "height_error": 0.03917988281250473,
+      "status": "passed"
+    },
+    {
+      "case": "cpu-240",
+      "angular_momentum_error": 3.316572728497979E-05,
+      "report": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\matrix-cpu-240.json",
+      "height_error": 0.02105244140625473,
+      "status": "passed"
+    },
+    {
+      "case": "cuda-120",
+      "angular_momentum_error": 1.0492319430537495E-06,
+      "report": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\matrix-cuda-120.json",
+      "height_error": 0.04094990234375473,
+      "status": "passed"
+    }
+  ]
+}

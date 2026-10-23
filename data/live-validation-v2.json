@@ -1,0 +1,91 @@
+{
+  "verified_at_unix": 1792753042.3663068,
+  "scope": "production localhost HTTP, schema, configured mission and replay identity",
+  "dynamics_hash": "f4eef03fb4e1122a5c0372ceee871216599b03c732e7a706ebd821dc01bd83d0",
+  "production_bundle": true,
+  "health": 200,
+  "missions": 200,
+  "runs": 200,
+  "training": 200,
+  "campaigns": 200,
+  "checkpoints": 200,
+  "results/summary": 200,
+  "results/failures": 200,
+  "system": 200,
+  "schema/telemetry": 200,
+  "configured_flight": {
+    "id": "combined-classical-l4-s42-srcf4eef03fb4e1-adc1779173ef23af",
+    "mission": "combined",
+    "method": "classical",
+    "level": 4,
+    "checkpoint_steps": null,
+    "checkpoint_id": null,
+    "difficulty": 1.0,
+    "training_mode": false,
+    "target_altitude": 300.0,
+    "target_velocity": null,
+    "algorithm": null,
+    "seed": 42,
+    "outcome": "success",
+    "failure_reason": null,
+    "touchdown_speed": 0.18766064077387445,
+    "tilt": 0.05293975049169879,
+    "pad_distance": 0.05725002121374066,
+    "fuel_used": 7097.163916538309,
+    "duration": 57.54959447861057,
+    "total_reward": 710.1707002420385,
+    "source": "MuJoCo simulation",
+    "controller_status": "not_requested",
+    "flight_plan": {
+      "launch": [
+        200.0,
+        -100.0
+      ],
+      "landing": [
+        240.0,
+        -80.0
+      ],
+      "separation_altitude": 300.0,
+      "profile": "research"
+    },
+    "initial_flight_plan": {
+      "launch": [
+        200.0,
+        -100.0
+      ],
+      "landing": [
+        240.0,
+        -80.0
+      ],
+      "separation_altitude": 300.0,
+      "profile": "research"
+    },
+    "landing_tolerance": 1.0,
+    "launch_release_time": 0.46000000000000013,
+    "separation": {
+      "t": 21.299999999999635,
+      "position": [
+        199.97211101865977,
+        -100.0211323154401,
+        324.05927653361096
+      ],
+      "velocity": [
+        0.013224039963355876,
+        0.006230808947961662,
+        24.5305457474778
+      ],
+      "quaternion": [
+        0.9999999985638455,
+        -2.850513878159288e-05,
+        4.537970039401169e-05,
+        6.69612098306651e-07
+      ],
+      "mass": 2589.6494799778457
+    },
+    "retargets": [],
+    "dynamics_hash": "f4eef03fb4e1122a5c0372ceee871216599b03c732e7a706ebd821dc01bd83d0"
+  },
+  "demo.json": 200,
+  "demo-runs.json": 200,
+  "browser_scope": "Separate manual browser record; this script does not measure FPS or inspect WebGL."
+}

@@ -3,13 +3,12 @@ import copy
 from gymnasium import spaces
 import numpy as np
 from scipy.spatial.transform import Rotation
-from .physics import RocketPhysics
 from .config import load_config
 
 class RocketEnv(gym.Env):
     metadata = {"render_modes": []}
 
-    def __init__(self, mission="landing", config=None, difficulty=1.0, randomize=True, noise=True, training=False):
+    def __init__(self, mission="landing", config=None, difficulty=1.0, randomize=True, noise=True, training=False,physics_factory=None):
         super().__init__()
         self.cfg = copy.deepcopy(config or load_config())
         if mission=='combined':self.cfg['vehicle'].setdefault('upper_stage_mass',2500.)
@@ -27,7 +26,10 @@ class RocketEnv(gym.Env):
         height=reward.get('ground_speed_height',50.)
         if not np.isfinite(cost) or cost<0 or (cost>0 and (not np.isfinite(height) or height<=0)):
             raise ValueError('Ground speed cost must be nonnegative and its height positive and finite')
-        self.physics = RocketPhysics(self.cfg)
+        if physics_factory is None:
+            from .physics import RocketPhysics
+            physics_factory=RocketPhysics
+        self.physics = physics_factory(self.cfg)
         self.action_space = spaces.Box(-1., 1., (3,), dtype=np.float32)
         self.observation_space = spaces.Box(-np.inf, np.inf, (21,), dtype=np.float32)
         self.phase = mission
@@ -95,6 +97,7 @@ class RocketEnv(gym.Env):
                 p = self.physics
                 p.reset(seed or 0, **options["state"])
         self.last_state = self.physics.state()
+        if hasattr(self.physics,'set_landing_target'):self.physics.set_landing_target(self.landing)
         self.previous_potential = self._potential(self.last_state)
         self.total_reward = 0.
         self.last_info = {}
@@ -111,6 +114,7 @@ class RocketEnv(gym.Env):
             raise ValueError('Landing target must be two finite local coordinates within +/- 10000 meters')
         previous=tuple(float(x) for x in self.landing)
         self.landing=target.copy()
+        if hasattr(self.physics,'set_landing_target'):self.physics.set_landing_target(target)
         event=dict(t=float(self.physics.data.time),previous_landing=previous,landing=tuple(float(x) for x in target))
         self.retargets.append(event)
         # A target change is not progress and must not inject a potential spike

@@ -21,14 +21,67 @@ function canvasTexture(size:number,draw:(ctx:CanvasRenderingContext2D)=>void,log
 export function useVehicleTexture(enabled=true){
   const quality=useLab(s=>s.quality);
   const texture=useMemo(()=>enabled?canvasTexture(quality==='Performance'?1024:2048,ctx=>{
-    ctx.fillStyle='#e9e8df';ctx.fillRect(0,0,2048,2048);
-    // Seeded panel grain, soot and rivets; generated locally, no external font.
+    ctx.fillStyle='#f2f1ea';ctx.fillRect(0,0,2048,2048);
+    // Seeded aerospace composite grain and micro-noise
     let seed=919;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-    for(let i=0;i<55000;i++){const y=random()*2048;ctx.fillStyle=`rgba(63,67,62,${.015+random()*.035+(y>1500?(y-1500)/548*.1:0)})`;ctx.fillRect(random()*2048,y,1+random()*3,random()*5+1);}
-    const soot=ctx.createLinearGradient(0,1350,0,2048);soot.addColorStop(0,'#342f2500');soot.addColorStop(.55,'#37362f0d');soot.addColorStop(1,'#2f2b2560');ctx.fillStyle=soot;ctx.fillRect(0,1350,2048,698);
-    for(let y=165;y<2000;y+=183){ctx.fillStyle='#71796f49';ctx.fillRect(0,y,2048,2);ctx.fillStyle='#fffef164';ctx.fillRect(0,y+3,2048,2);for(let x=20;x<2048;x+=42){ctx.fillStyle='#5c685c70';ctx.beginPath();ctx.arc(x,y-5,1.3,0,Math.PI*2);ctx.fill();}}
-    for(let x=0;x<2048;x+=256){ctx.fillStyle='#727c7018';ctx.fillRect(x,0,1,2048);}
-    for(const x of [450,1474]){ctx.save();ctx.translate(x,890);ctx.rotate(-Math.PI/2);ctx.fillStyle='#1c303b';ctx.font='600 53px Arial';ctx.textAlign='center';ctx.fillText('MISSION LAB',0,0);ctx.font='24px Arial';ctx.fillStyle='#65716d';ctx.fillText('REUSABLE FLIGHT RESEARCH',0,46);ctx.restore();ctx.fillStyle='#c65f33';ctx.fillRect(x-45,460,90,75);ctx.fillStyle='#f2eee0';ctx.font='bold 35px Arial';ctx.textAlign='center';ctx.fillText('01',x,510);}
+    for(let i=0;i<65000;i++){const y=random()*2048;ctx.fillStyle=`rgba(40,44,42,${.012+random()*.025+(y>1450?(y-1450)/598*.12:0)})`;ctx.fillRect(random()*2048,y,1+random()*3,random()*4+1);}
+    
+    // Cryogenic LOX tank frost band (subtle cold white frost gradient)
+    const frost=ctx.createLinearGradient(0,350,0,950);
+    frost.addColorStop(0,'rgba(255,255,255,0)');frost.addColorStop(.3,'rgba(255,255,255,.16)');frost.addColorStop(.7,'rgba(255,255,255,.18)');frost.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=frost;ctx.fillRect(0,350,2048,600);
+
+    // Reentry aerothermal soot gradient near aft skirt
+    const soot=ctx.createLinearGradient(0,1200,0,2048);
+    soot.addColorStop(0,'rgba(28,24,20,0)');soot.addColorStop(.4,'rgba(35,30,24,.15)');soot.addColorStop(.75,'rgba(26,22,18,.5)');soot.addColorStop(1,'rgba(16,14,12,.82)');
+    ctx.fillStyle=soot;ctx.fillRect(0,1200,2048,848);
+
+    // Circumferential stringers, panel seams and rivet rows
+    for(let y=120;y<2040;y+=140){
+      ctx.fillStyle='#5a635a38';ctx.fillRect(0,y,2048,2);
+      ctx.fillStyle='#ffffff60';ctx.fillRect(0,y+2,2048,2);
+      for(let x=15;x<2048;x+=36){
+        ctx.fillStyle='#4c544c65';ctx.beginPath();ctx.arc(x,y-4,1.4,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#ffffff40';ctx.beginPath();ctx.arc(x+1,y-3,0.7,0,Math.PI*2);ctx.fill();
+      }
+    }
+    // Vertical panel segments
+    for(let x=0;x<2048;x+=256){
+      ctx.fillStyle='#5a635a22';ctx.fillRect(x,0,2,2048);
+      ctx.fillStyle='#ffffff35';ctx.fillRect(x+2,0,1,2048);
+    }
+
+    // Top interstage dark carbon composite band
+    ctx.fillStyle='#1e2022';ctx.fillRect(0,0,2048,160);
+    ctx.fillStyle='#363a3d';ctx.fillRect(0,156,2048,8);
+    // Optical tracking roll patterns (black and white checkered blocks)
+    for(let x=0;x<2048;x+=256){
+      if((x/256)%2===0){ctx.fillStyle='#181a1c';ctx.fillRect(x,164,128,64);ctx.fillRect(x+128,228,128,64);}
+      else {ctx.fillStyle='#ffffff';ctx.fillRect(x,164,128,64);ctx.fillRect(x+128,228,128,64);}
+    }
+
+    // Aerospace livery markings
+    for(const x of [480,1504]){
+      ctx.save();ctx.translate(x,980);ctx.rotate(-Math.PI/2);
+      // Vertical UNITED STATES
+      ctx.fillStyle='#0f1c24';ctx.font='bold 58px Arial, sans-serif';ctx.textAlign='center';ctx.fillText('UNITED STATES',0,0);
+      ctx.font='600 24px Arial, sans-serif';ctx.fillStyle='#4b5956';ctx.fillText('ISS ORBITAL SYSTEMS · OMNIVERSE',0,42);
+      ctx.restore();
+
+      // American Flag graphic
+      ctx.save();ctx.translate(x-40,430);
+      ctx.fillStyle='#b22234';ctx.fillRect(0,0,80,48);
+      for(let i=1;i<7;i+=2){ctx.fillStyle='#ffffff';ctx.fillRect(0,i*(48/7),80,48/7);}
+      ctx.fillStyle='#3c3b6e';ctx.fillRect(0,0,36,26);
+      ctx.fillStyle='#ffffff';ctx.fillRect(6,6,4,4);ctx.fillRect(16,6,4,4);ctx.fillRect(26,6,4,4);
+      ctx.fillRect(11,14,4,4);ctx.fillRect(21,14,4,4);
+      ctx.restore();
+
+      // Booster identification tag
+      ctx.fillStyle='#2c363f';ctx.fillRect(x-55,510,110,65);
+      ctx.fillStyle='#f0ede1';ctx.font='bold 32px Arial, sans-serif';ctx.textAlign='center';ctx.fillText('ISS-01',x,555);
+      ctx.fillStyle='#d46536';ctx.fillRect(x-55,575,110,8);
+    }
   },2048):null,[quality,enabled]);
   useEffect(()=>()=>texture?.dispose(),[texture]);
   return texture;
@@ -40,8 +93,6 @@ function Ocean(){
   },[]);
   useEffect(()=>()=>water.dispose(),[water]);
   useFrame(()=>{const t=useLab.getState().time;water.offset.set(t*.0015,t*.0007);});
-  // HDR/environment reflection in one scene pass. Planar Water redrew every
-  // object for a reflection on every frame, including the dense terrain.
   return <mesh rotation={[-Math.PI/2,0,0]} position={[0,-1.3,0]}><planeGeometry args={[18000,18000]}/><meshPhysicalMaterial color="#315c63" roughness={.2} metalness={0} ior={1.33} normalMap={water} normalScale={[.35,.35]} envMapIntensity={1.4}/></mesh>;
 }
 function Landscape({sites}:{sites:Site[]}){
@@ -86,20 +137,110 @@ function PadLights({radius}:{radius:number}){
   },[radius]);
   return <><instancedMesh ref={bases} args={[undefined,undefined,24]}><boxGeometry args={[.5,.4,.5]}/><meshStandardMaterial color="#545c57"/></instancedMesh><instancedMesh ref={bulbs} args={[undefined,undefined,24]}><sphereGeometry args={[.14,8,6]}/><meshBasicMaterial color="#bfebce"/></instancedMesh></>;
 }
-export function LandingPad({xy=[0,0],launch=false,label='LANDING ZONE 01',radius=25}:{xy?:Site;launch?:boolean;label?:string;radius?:number}){
+export function LandingPad({xy=[0,0],launch=false,label,radius=25}:{xy?:Site;launch?:boolean;label?:string;radius?:number}){
+  const padLabel=label||(launch?'TAKEOFF PAD 01':'LANDING PAD 01');
   const ship=useLab(s=>s.pad)==='Ship'&&!launch;
   const quality=useLab(s=>s.quality);
   const texture=useMemo(()=>canvasTexture(quality==='Performance'?1024:2048,ctx=>{
-    ctx.fillStyle='#4b5150';ctx.fillRect(0,0,2048,2048);let seed=23;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-    for(let i=0;i<100000;i++){ctx.fillStyle=i%2?'#ffffff12':'#101c1820';ctx.fillRect(random()*2048,random()*2048,random()*3+1,random()*3+1);}
-    ctx.strokeStyle='#242e2a90';ctx.lineWidth=2;for(let i=1;i<8;i++){ctx.beginPath();ctx.moveTo(i*256,0);ctx.lineTo(i*256,2048);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*256);ctx.lineTo(2048,i*256);ctx.stroke();}
-    ctx.strokeStyle='#e5e1cb';ctx.lineWidth=17;ctx.beginPath();ctx.arc(1024,1024,880,0,Math.PI*2);ctx.stroke();ctx.lineWidth=9;ctx.beginPath();ctx.arc(1024,1024,225,0,Math.PI*2);ctx.stroke();
-    ctx.fillStyle='#dedecb';ctx.fillRect(1008,800,32,448);ctx.fillRect(800,1008,448,32);ctx.font='bold 74px Arial';ctx.textAlign='center';ctx.fillText(label,1024,1715);
-    const scorch=ctx.createRadialGradient(1024,1024,0,1024,1024,540);scorch.addColorStop(0,'#101714b0');scorch.addColorStop(.35,'#151c1940');scorch.addColorStop(1,'#151c1900');ctx.fillStyle=scorch;ctx.fillRect(0,0,2048,2048);
-    for(let i=0;i<1900;i++){ctx.fillStyle='#323c3650';ctx.fillRect(random()*2048,random()*2048,random()*7,random()*5);}
-    // Repaint the target above the scorch layer so its coordinate remains legible.
-    ctx.strokeStyle='#eee9d1';ctx.lineWidth=5;ctx.beginPath();ctx.arc(1024,1024,1024/radius,0,Math.PI*2);ctx.stroke();
-  },2048),[label,radius,quality]);
+    // Base concrete slab
+    ctx.fillStyle=launch?'#373c3b':'#404645';ctx.fillRect(0,0,2048,2048);
+    let seed=launch?77:23;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+    for(let i=0;i<85000;i++){ctx.fillStyle=i%2?'#ffffff12':'#101c1822';ctx.fillRect(random()*2048,random()*2048,random()*3+1,random()*3+1);}
+    // Structural concrete expansion joints
+    ctx.strokeStyle='#242e2a90';ctx.lineWidth=3;
+    for(let i=1;i<8;i++){ctx.beginPath();ctx.moveTo(i*256,0);ctx.lineTo(i*256,2048);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*256);ctx.lineTo(2048,i*256);ctx.stroke();}
+
+    if(launch){
+      // ====== TAKEOFF PAD MARKINGS (ISS & NVIDIA ISAAC SIM) ======
+      // Outer safety perimeter with alternating yellow & black hazard stripes
+      ctx.save();
+      ctx.lineWidth=48;
+      for(let a=0;a<Math.PI*2;a+=Math.PI/32){
+        ctx.strokeStyle=(Math.floor(a/(Math.PI/32))%2===0)?'#ffd200':'#1c1c1c';
+        ctx.beginPath();ctx.arc(1024,1024,930,a,a+Math.PI/32+.01);ctx.stroke();
+      }
+      ctx.restore();
+
+      // Launch mount ring & blast trench perimeter
+      ctx.strokeStyle='#e2ded0';ctx.lineWidth=14;ctx.beginPath();ctx.arc(1024,1024,800,0,Math.PI*2);ctx.stroke();
+      ctx.lineWidth=8;ctx.beginPath();ctx.arc(1024,1024,400,0,Math.PI*2);ctx.stroke();
+
+      // North orientation indicator
+      ctx.fillStyle='#ffd200';ctx.beginPath();ctx.moveTo(1024,65);ctx.lineTo(990,125);ctx.lineTo(1058,125);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#ffffff';ctx.font='bold 42px Arial, sans-serif';ctx.textAlign='center';ctx.fillText('▲ NORTH',1024,175);
+
+      // Top label — Explicit TAKEOFF PAD branding
+      ctx.fillStyle='#ffffff';ctx.font='900 76px Arial, sans-serif';ctx.textAlign='center';
+      ctx.fillText(padLabel,1024,270);
+      ctx.fillStyle='#ffd200';ctx.font='bold 34px Arial, sans-serif';
+      ctx.fillText('ISS ORBITAL SYSTEMS · NVIDIA SIMULATOR',1024,320);
+
+      // Prominent Upper TAKEOFF wording (positioned cleanly above center trench)
+      ctx.fillStyle='#ffd200';ctx.font='900 135px Arial, sans-serif';ctx.textAlign='center';
+      ctx.fillText('TAKEOFF',1024,670);
+
+      // Prominent Lower LAUNCH COMPLEX wording (positioned cleanly below center trench)
+      ctx.fillStyle='#ffffff';ctx.font='900 85px Arial, sans-serif';ctx.textAlign='center';
+      ctx.fillText('LAUNCH PAD',1024,1420);
+
+      // Complex coordinate details & separation requirements
+      ctx.fillStyle='#c8d1cf';ctx.font='bold 36px Consolas, monospace';
+      ctx.fillText('TAKEOFF COMPLEX 01 · PAD A',1024,1660);
+      ctx.font='30px Consolas, monospace';
+      ctx.fillText('ISS ORBITAL SYSTEMS · NVIDIA ISAAC SIMULATOR',1024,1710);
+      ctx.fillText(`COORD [${xy[0].toFixed(0)}, ${xy[1].toFixed(0)}] · DOWNRANGE SEPARATION > 1,000 M`,1024,1760);
+
+      // Blast flame deflector boundary
+      ctx.strokeStyle='#f0b34270';ctx.lineWidth=6;ctx.strokeRect(690,690,668,668);
+    }else{
+      // ====== LANDING PAD MARKINGS (ISS & NVIDIA ISAAC SIM) ======
+      // Outer reflective boundary ring
+      ctx.strokeStyle='#f5f3e9';ctx.lineWidth=22;ctx.beginPath();ctx.arc(1024,1024,920,0,Math.PI*2);ctx.stroke();
+      ctx.strokeStyle='#79dfb5';ctx.lineWidth=8;ctx.beginPath();ctx.arc(1024,1024,885,0,Math.PI*2);ctx.stroke();
+
+      // Concentric distance rings: 20m, 15m, 10m, 5m
+      ctx.strokeStyle='#dedbc8';ctx.lineWidth=6;ctx.beginPath();ctx.arc(1024,1024,720,0,Math.PI*2);ctx.stroke();
+      ctx.lineWidth=6;ctx.beginPath();ctx.arc(1024,1024,480,0,Math.PI*2);ctx.stroke();
+      ctx.strokeStyle='#79dfb5';ctx.lineWidth=8;ctx.beginPath();ctx.arc(1024,1024,240,0,Math.PI*2);ctx.stroke();
+
+      // Central Bullseye Target Cross
+      ctx.fillStyle='#dedecb';ctx.fillRect(1008,760,32,528);ctx.fillRect(760,1008,528,32);
+
+      // Top label — Explicit LANDING PAD branding
+      ctx.fillStyle='#ffffff';ctx.font='900 76px Arial, sans-serif';ctx.textAlign='center';
+      ctx.fillText(padLabel,1024,270);
+      ctx.fillStyle='#79dfb5';ctx.font='bold 34px Arial, sans-serif';
+      ctx.fillText('ISS ORBITAL SYSTEMS · NVIDIA SIMULATOR',1024,320);
+
+      // Prominent Upper LANDING wording (positioned cleanly above center cross)
+      ctx.fillStyle='#79dfb5';ctx.font='900 135px Arial, sans-serif';ctx.textAlign='center';
+      ctx.fillText('LANDING',1024,670);
+
+      // Prominent Lower TOUCHDOWN ZONE wording (positioned cleanly below center cross)
+      ctx.fillStyle='#ffffff';ctx.font='900 85px Arial, sans-serif';ctx.textAlign='center';
+      ctx.fillText('LANDING ZONE',1024,1420);
+
+      // Realistic hoverslam rocket exhaust scorch marks
+      const scorch=ctx.createRadialGradient(1024,1024,0,1024,1024,560);
+      scorch.addColorStop(0,'rgba(16,22,19,0.85)');scorch.addColorStop(.4,'rgba(24,30,26,0.45)');scorch.addColorStop(1,'rgba(20,26,22,0)');
+      ctx.fillStyle=scorch;ctx.fillRect(0,0,2048,2048);
+
+      // Landing Zone details & separation telemetry
+      ctx.fillStyle='#c8d1cf';ctx.font='bold 36px Consolas, monospace';
+      ctx.fillText('LANDING ZONE 01 · TOUCHDOWN TARGET',1024,1660);
+      ctx.font='30px Consolas, monospace';
+      ctx.fillText('ISS ORBITAL SYSTEMS · NVIDIA ISAAC SIMULATOR',1024,1710);
+      ctx.fillText(`COORD [${xy[0].toFixed(0)}, ${xy[1].toFixed(0)}] · DOWNRANGE RECOVERY > 1,000 M`,1024,1760);
+
+      // Approach alignment corner chevrons
+      ctx.strokeStyle='#ffd200';ctx.lineWidth=10;
+      for(let a=0;a<Math.PI*2;a+=Math.PI/2){
+        ctx.save();ctx.translate(1024,1024);ctx.rotate(a+Math.PI/4);
+        ctx.beginPath();ctx.moveTo(760,-40);ctx.lineTo(800,0);ctx.lineTo(760,40);ctx.stroke();
+        ctx.restore();
+      }
+    }
+  },2048),[padLabel,quality,launch,xy]);
   useEffect(()=>()=>texture.dispose(),[texture]);
   return <group position={[xy[0],0,-xy[1]]}>
     {ship&&<><mesh position={[0,-2.6,0]} receiveShadow><boxGeometry args={[65,5,95]}/><meshStandardMaterial color="#263a40" roughness={.7}/></mesh><mesh position={[23,5,32]} castShadow><boxGeometry args={[10,10,15]}/><meshStandardMaterial color="#c6cec7"/></mesh></>}
@@ -140,8 +281,6 @@ export default function World(){
   const plan=run?.initial_flight_plan||run?.flight_plan,mission=run?.mission;
   const suborbital=plan?.profile==='suborbital';
   const launch=plan?.launch||ORIGIN,landing=plan?.landing||ORIGIN,distinct=Math.hypot(launch[0]-landing[0],launch[1]-landing[1])>=22;
-  // Concrete sites never move with the vehicle or the playback clock. Commands
-  // select a coordinate; only the thin active-target marker changes selection.
   const pads=useMemo(()=>{const values:Site[]=[distinct?landing:launch];for(const event of run?.retargets||[])if(![...values,launch].some(p=>Math.hypot(p[0]-event.landing[0],p[1]-event.landing[1])<62))values.push(event.landing);return values;},[landing,launch,run,distinct]);
   const padRadius=distinct?Math.max(7,Math.min(25,Math.hypot(launch[0]-landing[0],launch[1]-landing[1])*.5-3.5)):25;
   const sites=useMemo(()=>[...terrainSites(plan,pad),...pads.map(([x,y]):Site=>[x-sceneryOffset(pad),-y])],[plan,pad,pads]);
@@ -155,8 +294,8 @@ export default function World(){
     <group position={[sceneryOffset(pad),0,0]}><Landscape sites={sites}/><Nature sites={sites}/><Facilities/></group>
     <Ocean/>
     {suborbital&&<SuborbitalWorld/>}
-    {distinct&&<LandingPad xy={launch} launch radius={padRadius} label="LAUNCH COMPLEX 01"/>}
-    {pads.map((xy,i)=><LandingPad key={`${xy[0]},${xy[1]}`} xy={xy} radius={i===0?padRadius:25} launch={!distinct&&i===0&&(mission==='takeoff'||mission==='combined')} label={!distinct&&i===0&&(mission==='takeoff'||mission==='combined')?'LAUNCH / RECOVERY 01':`LANDING ZONE ${String(i+1).padStart(2,'0')}`}/>)}
+    {distinct&&<LandingPad xy={launch} launch radius={padRadius} label="TAKEOFF PAD 01"/>}
+    {pads.map((xy,i)=><LandingPad key={`${xy[0]},${xy[1]}`} xy={xy} radius={i===0?padRadius:25} launch={!distinct&&i===0&&(mission==='takeoff')} label={!distinct&&i===0&&(mission==='takeoff')?'TAKEOFF PAD 01':`LANDING PAD ${String(i+1).padStart(2,'0')}`}/>)}
     <TargetMarker/>
   </>;
 }

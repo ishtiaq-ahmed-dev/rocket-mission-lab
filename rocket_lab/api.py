@@ -13,8 +13,10 @@ from .storage import runs, read_json, training_jobs, checkpoints, atomic_json, c
 from .simulation import simulate
 from .missions import configure_flight
 from .jobs import launch_job
+from .isaac.api import router as native_router
 
 app=FastAPI(title="Rocket Mission Lab",version="1.0.0")
+app.include_router(native_router)
 app.add_middleware(GZipMiddleware,minimum_size=2048,compresslevel=3)
 app.add_middleware(CORSMiddleware,allow_origins=["http://localhost:5180","http://127.0.0.1:5180"],allow_methods=["GET","POST"],allow_headers=["Content-Type"])
 job_lock=threading.Lock()
@@ -40,7 +42,7 @@ def ensure_idle():
             raise HTTPException(409,'A training job is already active. Stop it or wait for completion.')
 
 @app.get("/health")
-def health(): return {"status":"ok","physics":"MuJoCo","schema_version":"1.1"}
+def health(): return {"status":"ok","physics":"MuJoCo","native_physics":"Isaac Sim PhysX (separate runner)","default_workspace":"native","schema_version":"1.1"}
 
 @app.get('/dashboard')
 def dashboard_snapshot(view:Literal['flight','training','results']='flight'):

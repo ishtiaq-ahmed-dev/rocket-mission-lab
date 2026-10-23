@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "started_at": 1792740436.408738,
+  "headless": true,
+  "renderer": "real-time",
+  "gpu_physics": false,
+  "isaac_version": [
+    "6.2.0",
+    "rc.14",
+    "6",
+    "2",
+    "0",
+    "rc",
+    "14",
+    "release.52805.02189a84.gl"
+  ],
+  "socket_port": 8766,
+  "engine": "Isaac Sim PhysX",
+  "plan": {
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "landing": [
+      80.0,
+      40.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+  },
+  "physics_seconds": 3.1583333333333248,
+  "fuel_burned": 332.18483073935204,
+  "payload_joint_disabled": true,
+  "payload_moved_after_release": true,
+  "telemetry_packets": 30,
+  "socket_received": true,
+  "dashboard_backend_received": true,
+  "retarget_applied": true,
+  "note": "Native runtime diagnostic; visual quality and mission reliability require separate validation",
+  "finished_at": 1792740515.700086
+}

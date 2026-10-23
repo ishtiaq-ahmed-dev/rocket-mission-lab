@@ -16,7 +16,7 @@ import NumberField from './NumberField';
 import {compact,decimatedFrames,frameMetrics,sample,landingAt} from './telemetry';
 import type {Checkpoint,Mission,Method,Retarget,Telemetry} from './types';
 
-const missionBlurbs:Record<Mission,string>={landing:'Fly a precision powered descent to the selected landing coordinates.',takeoff:'Lift off, climb to the separation altitude and hit the target ascent speed.',combined:'Launch, release an unpowered upper stage and return the booster to a separate site.'};
+const missionBlurbs:Record<Mission,string>={landing:'Fly a precision powered descent to the recovery pad coordinates.',takeoff:'Launch from the pad, climb to the separation altitude and hit the target ascent speed.',combined:'Launch, release an unpowered upper stage and return the booster to the recovery site.'};
 const levels=['Untuned','PID feedback','Convex guidance','LQR guidance'];
 const rlLevels=['Early checkpoint','Intermediate','Later checkpoint','Best measured'];
 const captions=['An untuned controller reveals the failure modes.','Feedback gains improve the trajectory.','Constrained guidance plans a powered descent.','LQR stabilizes translation and attitude with descent feedforward.'];
@@ -276,10 +276,10 @@ function LiveView({telemetry,metrics,duration,ended,plan,story,level,busy,onErro
         <div className="transport">
           <button aria-label="Restart playback" onClick={()=>useLab.getState().set({time:0,playing:true})}><RotateCcw size={16}/></button>
           <button className="play-button" aria-label={playing?'Pause playback':'Play playback'} onClick={()=>useLab.getState().set({playing:!playing,time:ended?0:time})}>{playing?<Pause size={15} fill="currentColor"/>:<Play size={15} fill="currentColor"/>}</button>
-          <span className="timecode">{formatTime(time)}<span> / {formatTime(duration)}</span></span>
+          <span className="timecode">{formatTime(time)}<span> / {formatTime(duration)}</span> <span className="timecode-badge">1:1 REAL TIME</span></span>
         </div>
         <input aria-label="Playback position" className="scrubber" type="range" min={0} max={duration} step={.02} value={time} onInput={e=>useLab.getState().set({time:+e.currentTarget.value,playing:false})} onChange={e=>useLab.getState().set({time:+e.target.value,playing:false})}/>
-        <select aria-label="Playback speed" value={speed} onChange={e=>useLab.getState().set({speed:+e.target.value})}>{[.25,.5,1,2,4].map(value=><option key={value} value={value}>{value}×</option>)}</select>
+        <select aria-label="Playback speed" value={speed} onChange={e=>useLab.getState().set({speed:+e.target.value})}>{[.25,.5,1,2,4].map(value=><option key={value} value={value}>{value===1?'1.0× (Real Time)':`${value}×`}</option>)}</select>
       </div>}
       {story&&<div className="story-caption"><span>CHAPTER 0{level} / 04</span><strong>{captions[Math.max(0,Math.min(3,level-1))]}</strong></div>}
       {ghost&&<div className="ghost-legend"><span/>CURRENT RUN<i/>COMPARISON · L{ghost.run.level}<button aria-label="Remove comparison" onClick={()=>useLab.getState().set({ghost:null})}><X size={12}/></button></div>}
@@ -390,15 +390,15 @@ function SitePanel({plan,transfer,retargets,onEdit}:{plan?:Telemetry['run']['fli
         <path d="M40 70 C 170 20, 330 20, 470 64" fill="none" stroke="url(#routeGrad)" strokeWidth="2.4" strokeDasharray="5 6" strokeLinecap="round"/>
         <circle cx="40" cy="70" r="11" fill="#efeaff" stroke="#7a5cf6" strokeWidth="2"/><circle cx="40" cy="70" r="3.4" fill="#7a5cf6"/>
         <circle cx="470" cy="64" r="11" fill="#fff0e8" stroke="#ef7f6f" strokeWidth="2"/><circle cx="470" cy="64" r="3.4" fill="#ef7f6f"/>
-        <text x="40" y="92" textAnchor="middle" fontSize="10" fill="#8d879f">LAUNCH</text><text x="470" y="88" textAnchor="middle" fontSize="10" fill="#8d879f">LANDING</text>
+        <text x="40" y="92" textAnchor="middle" fontSize="10" fill="#8d879f">TAKEOFF</text><text x="470" y="88" textAnchor="middle" fontSize="10" fill="#8d879f">LANDING</text>
         {retargets.length>0&&<text x="470" y="30" textAnchor="middle" fontSize="10" fill="#ef7f6f">TARGET MOVED ×{retargets.length}</text>}
       </svg>
     </div>
     <div className="site-pair">
-      <div className="site-tile"><span className="site-icon launch"><Rocket size={15}/></span><div><span>LAUNCH SITE</span><strong>{plan?plan.launch.map(v=>v.toFixed(0)).join(', '):'—'}<small>m</small></strong><small>X east · Y north</small></div></div>
-      <div className="site-tile"><span className="site-icon landing"><Target size={15}/></span><div><span>LANDING SITE</span><strong>{plan?plan.landing.map(v=>v.toFixed(0)).join(', '):'—'}<small>m</small></strong><small>{retargets.length?`Retargeted ${retargets.length}×`:'Selected pad'}</small></div></div>
+      <div className="site-tile"><span className="site-icon launch"><Rocket size={15}/></span><div><span>TAKEOFF SITE</span><strong>{plan?plan.launch.map(v=>v.toFixed(0)).join(', '):'—'}<small>m</small></strong><small>X east · Y north (Pad 01)</small></div></div>
+      <div className="site-tile"><span className="site-icon landing"><Target size={15}/></span><div><span>LANDING SITE</span><strong>{plan?plan.landing.map(v=>v.toFixed(0)).join(', '):'—'}<small>m</small></strong><small>{retargets.length?`Retargeted ${retargets.length}×`:'Selected Pad 01'}</small></div></div>
     </div>
-    <div className="site-facts"><span><ArrowRight size={13}/>{transfer.toFixed(0)} m surface transfer</span><span><ArrowUp size={13}/>{plan?`${plan.separation_altitude} m separation`:'—'}</span>{retargets.at(-1)&&<span className="retarget-pill"><Crosshair size={13}/>Target moved at T+{retargets.at(-1)!.t.toFixed(1)} s</span>}</div>
+    <div className="site-facts"><span><ArrowRight size={13}/>{(transfer/1000).toFixed(2)} km surface transfer {transfer>=1000?'(> 1 km nominal)':'(< 1 km error)'}</span><span><ArrowUp size={13}/>{plan?`${plan.separation_altitude} m separation`:'—'}</span>{retargets.at(-1)&&<span className="retarget-pill"><Crosshair size={13}/>Target moved at T+{retargets.at(-1)!.t.toFixed(1)} s</span>}</div>
   </section>;
 }
 

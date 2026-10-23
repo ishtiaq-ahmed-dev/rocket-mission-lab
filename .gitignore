@@ -1,4 +1,8 @@
 .venv/
+.isaac-venv/
+.isaac-runtime/
+data/isaac-*.json
+data/isaac/
 node_modules/
 frontend/node_modules/
 frontend/dist/

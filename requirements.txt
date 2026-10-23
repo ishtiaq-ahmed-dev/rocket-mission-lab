@@ -13,3 +13,4 @@ cvxpy>=1.6
 pytest>=8
 httpx>=0.28
 matplotlib>=3.9
+psutil>=7,<8

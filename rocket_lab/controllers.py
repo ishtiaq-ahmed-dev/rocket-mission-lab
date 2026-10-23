@@ -104,6 +104,11 @@ class ClassicalController:
         velocity, position=s["velocity"], s["position"]
         h=float(position[2]-ph.half)
         lateral_error=position[:2]-env._target()[:2]
+        transfer_dist=float(np.linalg.norm(env.launch-env.landing)) if hasattr(env,'launch') and hasattr(env,'landing') else 0.
+        if transfer_dist>100.:
+            self.max_shelf=max(120.,min(3000.,transfer_dist*0.95))
+            self.cruise_speed=45.
+            self.brake_decel=2.0
         # Approach cone: the vehicle stays above a glide slope toward the target, so lateral
         # transfers use descent time instead of hovering, and it never aims below the capture cone.
         shelf=min(self.max_shelf,self.glide_slope*max(float(np.linalg.norm(lateral_error))-12.,0.)) if env.phase=='landing' else 0.
@@ -232,6 +237,16 @@ class ClassicalController:
             reference=np.zeros(2)
             if distance>capture:
                 reference=-lateral_error/distance*min(self.cruise_speed,np.sqrt(2*self.brake_decel*(distance-capture)))
+            if getattr(self,'reference_acceleration',None) is not None:
+                # Optional native command governor: a new site must not step
+                # the velocity reference faster than the gimbal/body can track.
+                if self.reference_velocity is None:self.reference_velocity=velocity[:2].copy()
+                delta=reference-self.reference_velocity
+                braking=float(np.dot(delta,self.reference_velocity))<0
+                rate=self.reference_braking if braking else self.reference_acceleration
+                dt=cfg['world']['timestep']*cfg['world']['control_substeps']
+                self.reference_velocity+=delta*min(1.,rate*dt/max(np.linalg.norm(delta),1e-12))
+                reference=self.reference_velocity.copy()
             # The position term fades out beyond the capture radius, so it cannot fight the braking profile.
             error_command=lateral_error*float(np.clip((self.fade_radius-distance)/(self.fade_radius-capture),0.,1.))
             desired_gimbal=[]

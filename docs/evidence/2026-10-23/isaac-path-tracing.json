@@ -1,0 +1,59 @@
+{
+  "status": "passed",
+  "started_at": 1792742593.1360188,
+  "headless": false,
+  "renderer": "path-tracing",
+  "gpu_physics": false,
+  "isaac_version": [
+    "6.2.0",
+    "rc.14",
+    "6",
+    "2",
+    "0",
+    "rc",
+    "14",
+    "release.52805.02189a84.gl"
+  ],
+  "torch_version": "2.11.0+cpu",
+  "torch_cuda_available": false,
+  "rendering_enabled": true,
+  "physx_gpu_dynamics_enabled": false,
+  "socket_port": 8766,
+  "engine": "Isaac Sim PhysX",
+  "plan": {
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "landing": [
+      80.0,
+      40.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+  },
+  "engine_render_artifact": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\isaac-path-tracing-engine.png",
+  "physics_seconds": 3.799999999999989,
+  "fuel_burned": 201.40622642490598,
+  "final_position": [
+    0.7798464298248291,
+    -0.5223191976547241,
+    222.5184326171875
+  ],
+  "payload_joint_disabled": true,
+  "payload_moved_after_release": true,
+  "telemetry_packets": 30,
+  "socket_received": true,
+  "dashboard_backend_received": true,
+  "retarget_applied": true,
+  "render_artifact": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\isaac-path-tracing.png",
+  "note": "Native runtime diagnostic; visual quality and mission reliability require separate validation",
+  "vacuum_drop_velocity_error": 1.637420654354571e-05,
+  "vacuum_drop_height_error": 0.03917988281250473,
+  "analytic_free_fall_passed": true,
+  "hold_down_and_release_passed": true,
+  "launch_render_artifact": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\isaac-path-tracing-launch.png",
+  "flow_asset": "d:\\appinstalled\\nvidia\\isaacsim\\6.2.0\\extscache\\omni.flowusd-110.0.4+110.0.0.wx64.r.cp312.u7f4\\data\\presets\\Fire\\Fire.usda",
+  "flow_active_blocks": 32,
+  "finished_at": 1792742619.967606
+}

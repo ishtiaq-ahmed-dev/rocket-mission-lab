@@ -1,0 +1,37 @@
+{
+  "status": "failed",
+  "started_at": 1792740749.6743631,
+  "headless": false,
+  "renderer": "real-time",
+  "gpu_physics": false,
+  "isaac_version": [
+    "6.2.0",
+    "rc.14",
+    "6",
+    "2",
+    "0",
+    "rc",
+    "14",
+    "release.52805.02189a84.gl"
+  ],
+  "torch_version": "2.11.0+cpu",
+  "torch_cuda_available": false,
+  "rendering_enabled": true,
+  "physx_gpu_dynamics_enabled": false,
+  "socket_port": 8766,
+  "engine": "Isaac Sim PhysX",
+  "plan": {
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "landing": [
+      80.0,
+      40.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+  },
+  "error": "Traceback (most recent call last):\n  File \"D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\scripts\\isaac_runner.py\", line 90, in main\n    report.update(_diagnostic(env,server,publish,exchange));report['status']='passed'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\scripts\\isaac_runner.py\", line 153, in _diagnostic\n    for _ in range(15):env.physics.step([.1,.15,-.1]);publish();packets+=1\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\rocket_lab\\isaac\\physics.py\", line 183, in step\n    if self.visuals:self.visuals.update(self)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\rocket_lab\\isaac\\visuals.py\", line 122, in update\n    if enabled:enabled.Set(physics.throttle>.02)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\npxr.Tf.ErrorException: \n\tError in 'pxrInternal_v0_25_11__pxrReserved__::UsdStage::_SetValueImpl' at line 7061 in file C:\\g\\372897073\\conan\\src\\0.25.11.kit.5\\pxr\\usd\\usd\\stage.cpp : 'Type mismatch for </World/ExhaustVolume/flowEmitterSphere.enabled>: expected 'bool', got 'TfPyObjWrapper''\n",
+  "finished_at": 1792740776.5750582
+}

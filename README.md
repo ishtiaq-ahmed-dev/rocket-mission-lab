@@ -1,6 +1,10 @@
 # Rocket Mission Lab
 
+Native Isaac Sim migration is in progress. See [native runtime, controls and validation boundaries](docs/26-native-isaac-migration.md). The shared Isaac installation is outside this checkout; the default dashboard page receives native telemetry without browser 3D rendering.
+
 A local rocket flight simulator, mission dashboard, and reinforcement learning workbench. MuJoCo integrates the booster dynamics; React and Three.js render recorded telemetry. Vehicle parameters are generic approximations.
+
+See the [23 October real-time fidelity, pad separation and markings revision](docs/28-realtime-separation-and-pad-fidelity.md) for 1:1 real-time playback synchronization, mandatory > 1 km pad separation, explicit TAKEOFF and LANDING circle stencils, and ISS Orbital Systems / NVIDIA Isaac Sim branding.
 
 See the [21 October flight fidelity revision and executed evidence](docs/24-flight-fidelity-validation.md) for the latest dashboard, first-foot contact, staging, repeated retargeting and suborbital study. The older sections below describe the preceding baseline where they differ.
 

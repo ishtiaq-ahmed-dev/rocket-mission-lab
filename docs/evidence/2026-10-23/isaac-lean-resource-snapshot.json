@@ -1,0 +1,14 @@
+{
+  "experience": "reduced headless",
+  "native_processes": [
+    {
+      "cpu_seconds": 109.015625,
+      "pid": 25756,
+      "working_set_bytes": 1863688192,
+      "private_bytes": 2713874432
+    }
+  ],
+  "note": "GPU values are system totals; process samples are not peak measurements.",
+  "timestamp": "2026-10-23T08:40:25.9971766Z",
+  "gpu_system_total": "NVIDIA GeForce RTX 5070 Ti, 617.42, 16303, 2208, 2"
+}

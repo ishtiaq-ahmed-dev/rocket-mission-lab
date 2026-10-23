@@ -1,0 +1,13 @@
+{
+  "gpu_system_total": "NVIDIA GeForce RTX 5070 Ti, 617.42, 16303, 2237, 0",
+  "timestamp": "2026-10-23T08:25:22.6594706Z",
+  "native_processes": [
+    {
+      "private_bytes": 5964984320,
+      "working_set_bytes": 4425560064,
+      "pid": 45912,
+      "cpu_seconds": 149.265625
+    }
+  ],
+  "note": "GPU memory and utilization are system totals shared with other applications, not attribution to Isaac alone."
+}

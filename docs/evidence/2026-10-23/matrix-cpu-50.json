@@ -1,0 +1,252 @@
+{
+  "status": "passed",
+  "started_at": 1792750131.7388198,
+  "headless": true,
+  "renderer": "real-time",
+  "gpu_physics": false,
+  "arguments": {
+    "headless": true,
+    "diagnostic": true,
+    "renderer": "real-time",
+    "flow": false,
+    "follow_camera": false,
+    "gpu_physics": false,
+    "mission": "combined",
+    "profile": "research",
+    "separation_altitude": 400.0,
+    "landing": [
+      80.0,
+      40.0
+    ],
+    "seed": 42,
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "retarget_at": null,
+    "checkpoint": null,
+    "train_steps": 0,
+    "controller": "native",
+    "qualification_runs": 0,
+    "max_seconds": 180.0,
+    "port": 8766,
+    "time_scale": 1.0,
+    "start_paused": false,
+    "lean_headless": false,
+    "lean_visual": false,
+    "full_experience": false,
+    "randomized": false,
+    "sensor_noise": false,
+    "physics_hz": 50,
+    "output": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\matrix-cpu-50.json"
+  },
+  "source_manifest": {
+    "scripts\\isaac_runner.py": "906b2195001976d0f1e5af4c05860792f10e5967925014e9e3805480ce3dd3c5",
+    "rocket_lab\\isaac\\__init__.py": "d3bf9d611755b8177826459a336812f3234e5315c94aac8de5c0c4fe9df5cb88",
+    "rocket_lab\\isaac\\actuators.py": "db5a0b641d66c7076b06bc380ee2370e8b9f3890a476ff7159101e2a591115f7",
+    "rocket_lab\\isaac\\api.py": "648035496ca2e4984ba9357955fb71f9b98b94df01b921e754628c4dbb209635",
+    "rocket_lab\\isaac\\guidance.py": "d53df807087f97d8e161c88f7bfa021d6d25e968b0e4a0cc4ba9715f593d1203",
+    "rocket_lab\\isaac\\launcher.py": "e7355864ae27080ffae3505092d4d02ea7726163aa2f947eb6c56fa63fdcbb48",
+    "rocket_lab\\isaac\\physics.py": "54aa149abfbae886b77d2b31fc904fc14969531e1e94d02c4dc2166a0b56cc91",
+    "rocket_lab\\isaac\\policy.py": "41273ffcd77a21fd4c2d232d528bd7b476556bbf316d265b5e098acecbc9172c",
+    "rocket_lab\\isaac\\stream.py": "b719378d37c9cbaa9e5c5d8bbf0de92e1e82962103fd2c4446491577b357436e",
+    "rocket_lab\\isaac\\visuals.py": "d1f46ba3893f842e801fc2d5c2dc2aada440e38c98c8c3f406d551d4b9bc4ed0",
+    "config\\isaac-headless.kit": "8ac0bd79772e7ab2bfc5193d2f94de5b2c6250ccba0f42b9f791f7a9b611eb0f",
+    "config\\isaac-visual.kit": "fd8e1c7af6904c675ab14922696d3ae39c768104a6d3893917048fce50f2dca3",
+    "rocket_lab\\envs.py": "31d015bade840f96f62c1ef81b7fcc29f22c9bdd026522cd15e27eb02da89f2c",
+    "rocket_lab\\controllers.py": "4a070523f3f928b5035cd93583c3b9ef33db38285e3cb4a90a865cbbf882aa64",
+    "rocket_lab\\missions.py": "f5d9f121576621db8b029004bbc2ebe0e1ecf6ff8474c907ccbcb76353caa241",
+    "rocket_lab\\atmosphere.py": "a63555888d945a4f77f1d44908b9fd02cf8320c82a3cc167aae2e4115b705d30",
+    "rocket_lab\\schemas.py": "fcbdc55376e35b27ca7321c21727690d6a3e35fcc1a32b8b4fcb2ec7da6fec2f"
+  },
+  "experience": "isaac-headless",
+  "isaac_version": [
+    "6.2.0",
+    "rc.14",
+    "6",
+    "2",
+    "0",
+    "rc",
+    "14",
+    "release.52805.02189a84.gl"
+  ],
+  "torch_version": "2.11.0+cpu",
+  "torch_cuda_available": false,
+  "rendering_enabled": false,
+  "configuration": {
+    "vehicle": {
+      "dry_mass": 22000.0,
+      "fuel_mass": 16000.0,
+      "isp": 300.0,
+      "max_thrust": 760000.0,
+      "min_throttle": 0.35,
+      "throttle_rate": 2.0,
+      "shutdown_rate": 5.0,
+      "gimbal_limit_deg": 8.0,
+      "gimbal_rate_deg_s": 30.0,
+      "length": 40.0,
+      "engine_lever": 17.9,
+      "landing_foot_radius": 6.2,
+      "contact_model": "feet",
+      "hold_down_release_margin": 1.05,
+      "hold_down_release_time": 0.2,
+      "radius": 1.8,
+      "inertia": [
+        5100000.0,
+        5100000.0,
+        61000.0
+      ],
+      "drag_coefficient": 0.5,
+      "area": 10.18,
+      "upper_stage_mass": 2500.0,
+      "separation_pusher_force": 12000.0,
+      "separation_pusher_seconds": 0.2
+    },
+    "world": {
+      "gravity": 9.80665,
+      "density_sea_level": 1.225,
+      "scale_height": 8500.0,
+      "wind_mean": [
+        2.0,
+        -1.0,
+        0.0
+      ],
+      "gust_std": 0.8,
+      "sensor_noise": 0.005,
+      "position_noise_m": 0.12,
+      "velocity_noise_m_s": 0.04,
+      "timestep": 0.02,
+      "control_substeps": 5
+    },
+    "mission": {
+      "landing_altitude": [
+        180.0,
+        240.0
+      ],
+      "landing_vertical_velocity": [
+        -24.0,
+        -16.0
+      ],
+      "horizontal_position": 12.0,
+      "horizontal_velocity": 1.5,
+      "initial_tilt_deg": 2.0,
+      "pad": [
+        80.0,
+        40.0,
+        0.0
+      ],
+      "touchdown_speed": 2.0,
+      "touchdown_tilt_deg": 5.0,
+      "pad_radius": 5.0,
+      "landing_tolerance": 1.0,
+      "separation_shutdown": true,
+      "takeoff_altitude": 400.0,
+      "takeoff_velocity": 25.0,
+      "takeoff_velocity_tolerance": 8.0,
+      "timeout": 180.0,
+      "bounds": 2500.0,
+      "launch": [
+        0.0,
+        0.0
+      ],
+      "profile": "research"
+    },
+    "reward": {
+      "profile": "state-potential-v3",
+      "potential_height": 0.25,
+      "potential_speed": 6.0,
+      "potential_tilt": 80.0,
+      "potential_rate": 3.0,
+      "potential_lateral": 2.0,
+      "action_cost": 0.01,
+      "progress": 0.15,
+      "velocity": 0.08,
+      "tilt": 2.0,
+      "angular_velocity": 0.2,
+      "position": 0.01,
+      "fuel": 0.001,
+      "alive": 0.05,
+      "success": 200.0,
+      "failure": -100.0,
+      "terminal_speed": 2.0,
+      "terminal_tilt": 0.2,
+      "terminal_position": 1.0
+    },
+    "training": {
+      "seed": 42,
+      "n_envs": 4,
+      "checkpoints": [
+        10000,
+        100000,
+        500000,
+        1000000,
+        5000000,
+        10000000
+      ],
+      "evaluation_episodes": 10000,
+      "curriculum_threshold": 0.75,
+      "curriculum_window": 40,
+      "initial_difficulty": 0.0,
+      "curriculum_increment": 0.025,
+      "observation_normalization": false,
+      "observation_position_scale": [
+        40.0,
+        40.0,
+        250.0
+      ],
+      "observation_velocity_scale": [
+        10.0,
+        10.0,
+        30.0
+      ],
+      "reward_normalization": true,
+      "policy_log_std": -2.3,
+      "learning_rate": 0.0003,
+      "retarget_probability": 0.35,
+      "retarget_max_offset": 70.0,
+      "retarget_min_altitude": 45.0
+    }
+  },
+  "configuration_sha256": "01162a52fef93733efd741a284b4fae2cfabe59541851b82fe2dbdc28aa32db4",
+  "physx_gpu_dynamics_enabled": false,
+  "socket_port": 8766,
+  "engine": "Isaac Sim PhysX",
+  "plan": {
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "landing": [
+      80.0,
+      40.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+  },
+  "physics_seconds": 3.800000000000003,
+  "fuel_burned": 201.44425806294566,
+  "final_position": [
+    0.7865147590637207,
+    -0.5262798070907593,
+    222.38412475585938
+  ],
+  "payload_joint_disabled": true,
+  "payload_moved_after_release": true,
+  "telemetry_packets": 30,
+  "socket_received": true,
+  "dashboard_backend_received": true,
+  "retarget_applied": true,
+  "retarget_preserved_state": true,
+  "render_artifact": null,
+  "note": "Native runtime diagnostic; visual quality and mission reliability require separate validation",
+  "vacuum_drop_velocity_error": 2.0690917974519607e-06,
+  "vacuum_drop_height_error": 0.09765156250000473,
+  "analytic_free_fall_passed": true,
+  "hold_down_and_release_passed": true,
+  "separation_pusher_verified": true,
+  "pusher_momentum_error_kg_m_s": 0.016078338609077036,
+  "pusher_relative_speed": 1.0231573581695557,
+  "pusher_relative_angular_momentum_error": 3.930932188037319e-06,
+  "source_changed_during_run": false,
+  "finished_at": 1792750137.6089902
+}

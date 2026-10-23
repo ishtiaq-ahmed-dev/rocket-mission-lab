@@ -1,0 +1,424 @@
+{
+  "status": "qualification_finished",
+  "started_at": 1792745488.615143,
+  "headless": true,
+  "renderer": "real-time",
+  "gpu_physics": false,
+  "arguments": {
+    "headless": true,
+    "diagnostic": false,
+    "renderer": "real-time",
+    "flow": false,
+    "follow_camera": false,
+    "gpu_physics": false,
+    "mission": "combined",
+    "profile": "research",
+    "separation_altitude": 400.0,
+    "landing": [
+      80.0,
+      40.0
+    ],
+    "seed": 42,
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "retarget_at": null,
+    "checkpoint": null,
+    "train_steps": 0,
+    "qualification_runs": 8,
+    "max_seconds": 180.0,
+    "port": 8766,
+    "time_scale": 1.0,
+    "start_paused": false,
+    "lean_headless": false,
+    "lean_visual": false,
+    "full_experience": false,
+    "randomized": true,
+    "sensor_noise": true,
+    "physics_hz": 120,
+    "output": "docs\\evidence\\2026-10-23\\isaac-randomized-flight-sample.json"
+  },
+  "source_manifest": {
+    "scripts\\isaac_runner.py": "26c5f7fd6434a8566095a85af2d142ef05e9e9352801fa6ffab16a94028deae4",
+    "rocket_lab\\isaac\\__init__.py": "d3bf9d611755b8177826459a336812f3234e5315c94aac8de5c0c4fe9df5cb88",
+    "rocket_lab\\isaac\\actuators.py": "db5a0b641d66c7076b06bc380ee2370e8b9f3890a476ff7159101e2a591115f7",
+    "rocket_lab\\isaac\\api.py": "74084724113348ac8af355a74e83ad0eb7e23aaab87c47229c3d2fa269ca1d0a",
+    "rocket_lab\\isaac\\launcher.py": "c91d2707a764847eda676aabd6c89f642c0fa8878708c3628d2ea5f86bd6244d",
+    "rocket_lab\\isaac\\physics.py": "02b95a21d877b6ba35af1e808500eec8040f39eea569fe11d3b4f294ccfeb391",
+    "rocket_lab\\isaac\\policy.py": "41273ffcd77a21fd4c2d232d528bd7b476556bbf316d265b5e098acecbc9172c",
+    "rocket_lab\\isaac\\stream.py": "aad6765942e9efa21eb7f606764c7f4578e2806e5367afae7c2e8295d3bd1b39",
+    "rocket_lab\\isaac\\visuals.py": "5333b9a4fea61ab9183b9b2f14ad35a9c19f6d8bdfea6cac8fc896c545d17588",
+    "config\\isaac-headless.kit": "8ac0bd79772e7ab2bfc5193d2f94de5b2c6250ccba0f42b9f791f7a9b611eb0f",
+    "config\\isaac-visual.kit": "fd8e1c7af6904c675ab14922696d3ae39c768104a6d3893917048fce50f2dca3",
+    "rocket_lab\\envs.py": "2a0402435d0bd64d8dd1a9eddbd7d63ac9ef77efa1df74faeacd2774abd3bece",
+    "rocket_lab\\controllers.py": "168b60b0182ffd3688bafc17a7b9f00e4d9d60287700de7ba16001e77dde24d6",
+    "rocket_lab\\missions.py": "f5d9f121576621db8b029004bbc2ebe0e1ecf6ff8474c907ccbcb76353caa241",
+    "rocket_lab\\atmosphere.py": "a63555888d945a4f77f1d44908b9fd02cf8320c82a3cc167aae2e4115b705d30",
+    "rocket_lab\\schemas.py": "fcbdc55376e35b27ca7321c21727690d6a3e35fcc1a32b8b4fcb2ec7da6fec2f"
+  },
+  "experience": "isaac-headless",
+  "isaac_version": [
+    "6.2.0",
+    "rc.14",
+    "6",
+    "2",
+    "0",
+    "rc",
+    "14",
+    "release.52805.02189a84.gl"
+  ],
+  "torch_version": "2.11.0+cpu",
+  "torch_cuda_available": false,
+  "rendering_enabled": false,
+  "configuration": {
+    "vehicle": {
+      "dry_mass": 22000.0,
+      "fuel_mass": 16000.0,
+      "isp": 300.0,
+      "max_thrust": 760000.0,
+      "min_throttle": 0.35,
+      "throttle_rate": 2.0,
+      "shutdown_rate": 5.0,
+      "gimbal_limit_deg": 8.0,
+      "gimbal_rate_deg_s": 30.0,
+      "length": 40.0,
+      "engine_lever": 17.9,
+      "landing_foot_radius": 6.2,
+      "contact_model": "feet",
+      "hold_down_release_margin": 1.05,
+      "hold_down_release_time": 0.2,
+      "radius": 1.8,
+      "inertia": [
+        5100000.0,
+        5100000.0,
+        61000.0
+      ],
+      "drag_coefficient": 0.5,
+      "area": 10.18,
+      "upper_stage_mass": 2500.0
+    },
+    "world": {
+      "gravity": 9.80665,
+      "density_sea_level": 1.225,
+      "scale_height": 8500.0,
+      "wind_mean": [
+        2.0,
+        -1.0,
+        0.0
+      ],
+      "gust_std": 0.8,
+      "sensor_noise": 0.005,
+      "position_noise_m": 0.12,
+      "velocity_noise_m_s": 0.04,
+      "timestep": 0.008333333333333333,
+      "control_substeps": 12
+    },
+    "mission": {
+      "landing_altitude": [
+        180.0,
+        240.0
+      ],
+      "landing_vertical_velocity": [
+        -24.0,
+        -16.0
+      ],
+      "horizontal_position": 12.0,
+      "horizontal_velocity": 1.5,
+      "initial_tilt_deg": 2.0,
+      "pad": [
+        80.0,
+        40.0,
+        0.0
+      ],
+      "touchdown_speed": 2.0,
+      "touchdown_tilt_deg": 5.0,
+      "pad_radius": 5.0,
+      "landing_tolerance": 1.0,
+      "separation_shutdown": true,
+      "takeoff_altitude": 400.0,
+      "takeoff_velocity": 25.0,
+      "takeoff_velocity_tolerance": 8.0,
+      "timeout": 180.0,
+      "bounds": 2500.0,
+      "launch": [
+        0.0,
+        0.0
+      ],
+      "profile": "research"
+    },
+    "reward": {
+      "profile": "state-potential-v3",
+      "potential_height": 0.25,
+      "potential_speed": 6.0,
+      "potential_tilt": 80.0,
+      "potential_rate": 3.0,
+      "potential_lateral": 2.0,
+      "action_cost": 0.01,
+      "progress": 0.15,
+      "velocity": 0.08,
+      "tilt": 2.0,
+      "angular_velocity": 0.2,
+      "position": 0.01,
+      "fuel": 0.001,
+      "alive": 0.05,
+      "success": 200.0,
+      "failure": -100.0,
+      "terminal_speed": 2.0,
+      "terminal_tilt": 0.2,
+      "terminal_position": 1.0
+    },
+    "training": {
+      "seed": 42,
+      "n_envs": 4,
+      "checkpoints": [
+        10000,
+        100000,
+        500000,
+        1000000,
+        5000000,
+        10000000
+      ],
+      "evaluation_episodes": 10000,
+      "curriculum_threshold": 0.75,
+      "curriculum_window": 40,
+      "initial_difficulty": 0.0,
+      "curriculum_increment": 0.025,
+      "observation_normalization": false,
+      "observation_position_scale": [
+        40.0,
+        40.0,
+        250.0
+      ],
+      "observation_velocity_scale": [
+        10.0,
+        10.0,
+        30.0
+      ],
+      "reward_normalization": true,
+      "policy_log_std": -2.3,
+      "learning_rate": 0.0003,
+      "retarget_probability": 0.35,
+      "retarget_max_offset": 70.0,
+      "retarget_min_altitude": 45.0
+    }
+  },
+  "configuration_sha256": "9b567af056abcb9f68fda64e5b462e940f9465556abf03f7a9bf8a0cd9bb20eb",
+  "physx_gpu_dynamics_enabled": false,
+  "socket_port": 8766,
+  "engine": "Isaac Sim PhysX",
+  "plan": {
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "landing": [
+      80.0,
+      40.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+  },
+  "successes": 5,
+  "episodes": 8,
+  "samples": [
+    {
+      "seed": 42,
+      "retargeted": false,
+      "seconds": 67.15833333333285,
+      "outcome": "success",
+      "failure_reason": null,
+      "touchdown_speed": 1.2024550663848168,
+      "tilt": 0.09169547194416251,
+      "pad_distance": 0.31832155378913946,
+      "fuel_used": 8004.616233286482,
+      "phase": "landing",
+      "episode_difficulty": 1.0,
+      "retargets": [],
+      "settled": true,
+      "settle_seconds": 4.0000000000024585,
+      "settled_speed": 0.005537799898182218,
+      "settled_tilt": 1.319902026398418e-05,
+      "settled_pad_distance": 0.34923752830515514,
+      "engine_off": true
+    },
+    {
+      "seed": 43,
+      "retargeted": true,
+      "seconds": 78.09166666667488,
+      "outcome": "crash_speed",
+      "failure_reason": "crash_speed",
+      "touchdown_speed": 2.6901307005190653,
+      "tilt": 10.370790721560374,
+      "pad_distance": 1.7155751526200036,
+      "fuel_used": 8895.982284310623,
+      "phase": "landing",
+      "episode_difficulty": 1.0,
+      "retargets": [
+        {
+          "t": 30.099999999998932,
+          "previous_landing": [
+            80.0,
+            40.0
+          ],
+          "landing": [
+            120.0,
+            -30.0
+          ]
+        }
+      ]
+    },
+    {
+      "seed": 44,
+      "retargeted": false,
+      "seconds": 68.7750000000008,
+      "outcome": "success",
+      "failure_reason": null,
+      "touchdown_speed": 1.0648662465430503,
+      "tilt": 0.050890209961889685,
+      "pad_distance": 0.2561949355890181,
+      "fuel_used": 7840.349283582865,
+      "phase": "landing",
+      "episode_difficulty": 1.0,
+      "retargets": [],
+      "settled": true,
+      "settle_seconds": 4.000000000003183,
+      "settled_speed": 0.007369873541337483,
+      "settled_tilt": 1.9692396034153755e-05,
+      "settled_pad_distance": 0.2748430791491161,
+      "engine_off": true
+    },
+    {
+      "seed": 45,
+      "retargeted": true,
+      "seconds": 104.80000000002947,
+      "outcome": "crash_speed",
+      "failure_reason": "crash_speed",
+      "touchdown_speed": 2.12831363611275,
+      "tilt": 2.5188884298236975,
+      "pad_distance": 4.266986158242968,
+      "fuel_used": 12533.272968339594,
+      "phase": "landing",
+      "episode_difficulty": 1.0,
+      "retargets": [
+        {
+          "t": 30.099999999998932,
+          "previous_landing": [
+            80.0,
+            40.0
+          ],
+          "landing": [
+            120.0,
+            -30.0
+          ]
+        }
+      ]
+    },
+    {
+      "seed": 46,
+      "retargeted": false,
+      "seconds": 72.85000000000404,
+      "outcome": "success",
+      "failure_reason": null,
+      "touchdown_speed": 1.239159189125901,
+      "tilt": 0.1353774748487327,
+      "pad_distance": 0.3775495502286684,
+      "fuel_used": 8196.740497490624,
+      "phase": "landing",
+      "episode_difficulty": 1.0,
+      "retargets": [],
+      "settled": true,
+      "settle_seconds": 4.000000000003183,
+      "settled_speed": 0.009308920012336446,
+      "settled_tilt": 1.571963993965638e-05,
+      "settled_pad_distance": 0.41921684662187403,
+      "engine_off": true
+    },
+    {
+      "seed": 47,
+      "retargeted": true,
+      "seconds": 89.98333333335101,
+      "outcome": "crash_speed",
+      "failure_reason": "crash_speed",
+      "touchdown_speed": 7.844839524592928,
+      "tilt": 17.152960985641307,
+      "pad_distance": 12.807687484762099,
+      "fuel_used": 10703.205042245208,
+      "phase": "landing",
+      "episode_difficulty": 1.0,
+      "retargets": [
+        {
+          "t": 30.099999999998932,
+          "previous_landing": [
+            80.0,
+            40.0
+          ],
+          "landing": [
+            120.0,
+            -30.0
+          ]
+        }
+      ]
+    },
+    {
+      "seed": 48,
+      "retargeted": false,
+      "seconds": 67.74166666666665,
+      "outcome": "success",
+      "failure_reason": null,
+      "touchdown_speed": 1.1945929911540631,
+      "tilt": 0.09802657107098359,
+      "pad_distance": 0.2893126421971865,
+      "fuel_used": 7801.890483901414,
+      "phase": "landing",
+      "episode_difficulty": 1.0,
+      "retargets": [],
+      "settled": true,
+      "settle_seconds": 4.000000000002956,
+      "settled_speed": 0.006134758316919036,
+      "settled_tilt": 9.35262170110869e-06,
+      "settled_pad_distance": 0.3255893007435402,
+      "engine_off": true
+    },
+    {
+      "seed": 49,
+      "retargeted": true,
+      "seconds": 78.19166666667496,
+      "outcome": "success",
+      "failure_reason": null,
+      "touchdown_speed": 0.06323315248338432,
+      "tilt": 0.03770580795308671,
+      "pad_distance": 0.07307560277503548,
+      "fuel_used": 8744.628909531108,
+      "phase": "landing",
+      "episode_difficulty": 1.0,
+      "retargets": [
+        {
+          "t": 30.099999999998932,
+          "previous_landing": [
+            80.0,
+            40.0
+          ],
+          "landing": [
+            120.0,
+            -30.0
+          ]
+        }
+      ],
+      "settled": true,
+      "settle_seconds": 4.000000000003183,
+      "settled_speed": 0.0013912287865071476,
+      "settled_tilt": 1.6086328072527303e-05,
+      "settled_pad_distance": 0.07698818392398815,
+      "engine_off": true
+    }
+  ],
+  "wilson_95": [
+    0.30573785458380187,
+    0.863158240538479
+  ],
+  "suite_wall_seconds": 95.34400000001187,
+  "qualification": "Development sample using a generic vehicle; not hardware validation or flight certification",
+  "source_changed_during_run": false,
+  "finished_at": 1792745588.6278303
+}

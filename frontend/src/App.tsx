@@ -9,6 +9,7 @@ import FullTaskChecks from './FullTaskChecks';
 import FlightPlanEditor from './FlightPlanEditor';
 import CampaignPanel from './CampaignPanel';
 import MissionControl from './MissionControl';
+import NativeMonitor from './NativeMonitor';
 import {largestClassicalSamples,resultSampleId} from './resultSamples';
 import {compact,parseTelemetry} from './telemetry';
 import type {Checkpoint,Job,Method,Mission,Result,Run,SystemInfo,Telemetry} from './types';
@@ -16,9 +17,9 @@ const pageSuggestions=[{label:'Powered landing',hint:'Landing flight, retargetin
 const formatTime=(t:number)=>`${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toFixed(1).padStart(4,'0')}`;
 async function api<T>(path:string,body?:unknown):Promise<T>{const r=await fetch(`/api${path}`,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:undefined);if(!r.ok){const e=await r.json().catch(()=>({detail:`HTTP ${r.status}`}));throw new Error(typeof e.detail==='string'?e.detail:Array.isArray(e.detail)?e.detail.map((x:{msg:string})=>x.msg).join('; '):'Request failed');}return r.json();}
 
-export default function App(){
-  const [page,setPage]=useState('Flight lab');
-  const [mission,setMission]=useState<Mission>('landing');const [method,setMethod]=useState<Method>('classical');const [level,setLevel]=useState(4);
+export default function App({initialPage='Flight lab'}:{initialPage?:string}){
+  const [page,setPage]=useState(initialPage);
+  const [mission,setMission]=useState<Mission>('combined');const [method,setMethod]=useState<Method>('classical');const [level,setLevel]=useState(4);
   const [seed,setSeed]=useState(42),[checkpoint,setCheckpoint]=useState('');
   const [online,setOnline]=useState(false),[busy,setBusy]=useState(true),[error,setError]=useState(''),[story,setStory]=useState(false);
   const [runs,setRuns]=useState<Run[]>([]),[jobs,setJobs]=useState<Job[]>([]),[checkpoints,setCheckpoints]=useState<Checkpoint[]>([]),[results,setResults]=useState<Result[]>([]),[system,setSystem]=useState<SystemInfo|null>(null);
@@ -26,7 +27,7 @@ export default function App(){
   const [query,setQuery]=useState('');
   const lab=useLab(useShallow(state=>({recording:state.recording,telemetry:state.telemetry,playing:state.playing})));
   const refresh=useCallback(async()=>{try{const view=page==='Training'?'training':page==='Results'?'results':'flight';const snapshot=await api<{runs?:Run[];jobs?:Job[];checkpoints?:Checkpoint[];results?:Result[]}>(`/dashboard?view=${view}`);if(snapshot.runs)setRuns(snapshot.runs);if(snapshot.jobs)setJobs(snapshot.jobs);if(snapshot.checkpoints)setCheckpoints(snapshot.checkpoints);if(snapshot.results)setResults(snapshot.results);setOnline(true);}catch{setOnline(false);}},[page]);
-  useVisiblePoll(refresh,page==='Training'?10000:60000,page!=='Field notes');
+  useVisiblePoll(refresh,page==='Training'?10000:60000,page!=='Field notes'&&page!=='Isaac Sim');
   const loadRun=useCallback(async(m:Mission,me:Method,l:number,cp='',runSeed=42,options?:{retarget?:{time:number;landing:[number,number]};seek?:number})=>{
     setBusy(true);setError('');
     try{
@@ -38,7 +39,8 @@ export default function App(){
       const playback=useLab.getState();playback.load(parseTelemetry(t));playback.set({ghost:null,...(options?.seek!==undefined?{time:options.seek,playing:true}:{})});setCheckpoint(me==='rl'?(t.run.checkpoint_id||''):'');
     }catch(e){setError((e as Error).message);const shown=useLab.getState().telemetry?.run;if(shown){setMission(shown.mission);setMethod(shown.method);setLevel(shown.level);}}finally{setBusy(false);}
   },[online]);
-  useEffect(()=>{let active=true;async function boot(){try{const t=await fetch('/demo.json').then(r=>r.json());if(active){useLab.getState().load(parseTelemetry(t));useLab.getState().set({playing:false});}await api('/health');if(!active)return;setOnline(true);const s=await api<SystemInfo>('/system');if(active)setSystem(s);}catch{if(active)setOnline(false);}finally{if(active)setBusy(false);}}void boot();return()=>{active=false;};},[]);
+  useEffect(()=>{let active=true;async function boot(){try{await api('/health');if(!active)return;setOnline(true);const s=await api<SystemInfo>('/system');if(active)setSystem(s);}catch{if(active)setOnline(false);}finally{if(active)setBusy(false);}}void boot();return()=>{active=false;};},[]);
+  useEffect(()=>{if(page!=='Flight lab'||useLab.getState().telemetry)return;let active=true;setBusy(true);void fetch('/demo.json').then(response=>response.json()).then(value=>{if(active){useLab.getState().load(parseTelemetry(value));useLab.getState().set({playing:false});}}).catch(problem=>{if(active)setError((problem as Error).message);}).finally(()=>{if(active)setBusy(false);});return()=>{active=false;};},[page]);
   useEffect(()=>{if(!story||lab.playing||!lab.telemetry)return;const next=lab.telemetry.run.level+1;if(next>4){setStory(false);return;}const timer=setTimeout(()=>{setLevel(next);void loadRun(mission,method,next,'',seed);},1800);return()=>clearTimeout(timer);},[story,lab.playing,lab.telemetry,loadRun,mission,method,seed]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if((e.target as HTMLElement).matches('input,select,textarea'))return;if(e.code==='Space'){e.preventDefault();const s=useLab.getState();s.set({playing:!s.playing});}if(e.key==='Escape')useLab.getState().set({recording:false});};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[]);
   useEffect(()=>{if(page!=='Flight lab'){useLab.getState().set({playing:false});}},[page]);
@@ -66,10 +68,10 @@ export default function App(){
     <header className="topnav">
       <a className="brand" href="#" onClick={e=>{e.preventDefault();setPage('Flight lab');}}>
         <span className="brand-mark"><Rocket size={20}/></span>
-        <span className="brand-copy">Rocket Mission Lab<small>Flight dynamics &amp; control</small></span>
+        <span className="brand-copy">ISS Orbital Systems<small>Omniverse Rocket Simulator</small></span>
       </a>
       <nav className="main-nav" aria-label="Primary navigation">
-        {['Flight lab','Training','Results','Field notes'].map(item=><button key={item} className={page===item?'active':''} onClick={()=>setPage(item)}>{item}</button>)}
+        {['Flight lab','Isaac Sim','Training','Results','Field notes'].map(item=><button key={item} className={page===item?'active':''} onClick={()=>setPage(item)}>{item==='Flight lab'?'3D Flight Lab':item}</button>)}
       </nav>
       <div className="nav-tools">
         <div className={`nav-search ${query?'open':''}`}>
@@ -77,7 +79,7 @@ export default function App(){
           <input aria-label="Search mission controls" placeholder="Search missions, training, results…" value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&query){const match=pageSuggestions.find(value=>value.label.toLowerCase().includes(query.toLowerCase()));if(match){setPage(match.page);setQuery('');}}if(e.key==='Escape')setQuery('');}}/>
           {query&&<div className="search-results">{pageSuggestions.filter(value=>value.label.toLowerCase().includes(query.toLowerCase())||value.hint.toLowerCase().includes(query.toLowerCase())).map(value=><button key={value.label} onClick={()=>{setPage(value.page);setQuery('');}}><span><strong>{value.label}</strong><small>{value.hint}</small></span><ArrowUpRight size={13}/></button>)}</div>}
         </div>
-        <span className={`engine-pill ${online?'online':''}`} title={online?'The local MuJoCo API is reachable':'Playing bundled recordings'}><span className="status-dot on"/>{online?'Engine online':'Offline replay'}</span>
+        <span className={`engine-pill ${online?'online':''}`} title={online?'Dashboard backend reachable; native engine connection is shown in Isaac Sim controls':'Dashboard backend offline'}><span className="status-dot on"/>{online?'Backend online':'Backend offline'}</span>
         <button className="icon-button" aria-label="Read the flight manual" title="Flight manual" onClick={()=>setPage('Field notes')}><BookOpen size={17}/></button>
         <span className="avatar" aria-hidden="true">IA</span>
       </div>
@@ -85,7 +87,8 @@ export default function App(){
     <main className="shell-main">
       {error&&<div role="alert" className="error-banner"><span>{error}</span><button aria-label="Dismiss error" onClick={()=>setError('')}><X size={16}/></button></div>}
       {page==='Flight lab'&&<MissionControl mission={mission} method={method} level={level} seed={seed} checkpoint={checkpoint} checkpoints={checkpoints} busy={busy} online={online} story={story} compare={compare} onMission={choice} onLevel={value=>choice(mission,method,value)} onCheckpoint={setCheckpoint} onSeed={setSeed} onRun={()=>{setStory(false);void loadRun(mission,method,level,checkpoint,seed);}} onRetarget={commandRetarget} onGhost={()=>void ghostRun()} onStory={startStory} onCompare={setCompare} onExport={exportData} onError={setError} onOpenNotes={()=>setPage('Field notes')}/>}
-      {page!=='Flight lab'&&<div className="content-page">
+      {page==='Isaac Sim'&&<NativeMonitor/>}
+      {page!=='Flight lab'&&page!=='Isaac Sim'&&<div className="content-page">
         <div className="page-head">
           <div><div className="breadcrumb"><span className="live-dot"/>{page==='Training'?'HEADLESS REINFORCEMENT LEARNING':page==='Results'?'MEASURED PERFORMANCE':'ENGINEERING REFERENCE'}</div><h1>{page==='Training'?'Watch a policy learn to fly.':page==='Results'?'Every flight leaves evidence.':'Understand what makes it fly.'}</h1><p className="page-sub">{page==='Training'?'Real PPO and SAC jobs run locally. Curves and checkpoints are measured on fixed evaluation seeds.':page==='Results'?'Failure modes, confidence intervals and fixed-seed evaluations from the recorded evidence register.':'The physics, controllers, hardware and evidence model behind every flight.'}</p></div>
           <button className="btn subtle" onClick={()=>setPage('Flight lab')}><Rocket size={15}/>Open flight lab<ArrowUpRight size={14}/></button>

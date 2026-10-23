@@ -31,7 +31,7 @@ interface State {
 export const useLab=create<State>((set,get)=>({
   telemetry:null,ghost:null,time:0,playing:false,speed:1,
   camera:'Rocket',cameraRevision:0,cameraTool:'Rotate',followRocket:true,cameraCommand:null,commandRevision:0,cameraDistance:0,
-  flightPlan:{launch:[0,0],landing:[80,40],separation_altitude:400},frameLimit:30,quality:'Performance',renderInfo:'',
+  flightPlan:{launch:[0,0],landing:[1200,400],separation_altitude:1500},frameLimit:30,quality:'Performance',renderInfo:'',
   trail:'Off',sound:false,volume:.35,audioPerspective:'Exterior',pad:'Coastal',recording:false,
   load:telemetry=>set({telemetry,time:0,playing:true}),
   set:state=>set(state),
