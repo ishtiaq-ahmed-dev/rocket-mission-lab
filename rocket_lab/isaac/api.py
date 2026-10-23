@@ -44,6 +44,84 @@ def native_command(command:dict):
     return result
 
 
+from pathlib import Path
+from fastapi.responses import FileResponse
+from ..config import ROOT
+
+PREVIEW_MAP = {
+    'launch': ROOT / 'data/isaac/diagnostic-launch.png',
+    'ascent': ROOT / 'data/isaac/diagnostic.png',
+    'engine': ROOT / 'data/isaac/diagnostic-engine.png',
+    'landing': ROOT / 'data/isaac/diagnostic-landing.png',
+}
+
+@router.get('/previews')
+def list_previews():
+    items = []
+    descriptions = {
+        'launch': {
+            'title': 'Takeoff Pad 01 & Launch Umbilical Tower',
+            'desc': '10-level steel lattice gantry with structural X-trusses, swing arm, hold-down clamps, and upright pad markings.',
+            'badge': 'TAKEOFF PAD 01'
+        },
+        'ascent': {
+            'title': 'Supersonic Ascent & Mach Shock Diamonds',
+            'desc': 'PhysX supersonic thrust plume with 4 shock diamond discs, titanium lattice grid fins, and carbon interstage.',
+            'badge': 'SUPERSONIC PLUME'
+        },
+        'engine': {
+            'title': 'Octaweb 9-Engine Cluster & Nozzle Bells',
+            'desc': 'Center gimbaled bell with 8 outer auxiliary nozzles, Inconel alloy bells, and chrome landing leg pistons.',
+            'badge': 'OCTAWEB CLUSTER'
+        },
+        'landing': {
+            'title': 'Landing Pad 01 Downrange Target (>1km)',
+            'desc': 'Recovery site at [1050, 250] with reflective green perimeter ring, concentric guide circles, and touchdown cross.',
+            'badge': 'LANDING PAD 01'
+        }
+    }
+    for key, path in PREVIEW_MAP.items():
+        if path.is_file():
+            meta = descriptions.get(key, {'title': key, 'desc': '', 'badge': 'RTX'})
+            items.append({
+                'id': key,
+                'title': meta['title'],
+                'description': meta['desc'],
+                'badge': meta['badge'],
+                'url': f'/api/native/preview/{key}',
+                'size': path.stat().st_size,
+                'modified': path.stat().st_mtime
+            })
+    video_path = ROOT / 'videos/rocket_mission_takeoff_detach_landing.mp4'
+    has_video = video_path.is_file()
+    return {
+        'images': items,
+        'video': {
+            'available': has_video,
+            'url': '/api/native/video',
+            'title': 'Full Isaac Sim Mission: Liftoff -> Staging (600m) -> Landing',
+            'description': 'Continuous high-definition render of full mission flight with real-time PhysX physics and precision touchdown on Landing Pad 01 (>1 km separation).',
+            'duration': 57.6
+        } if has_video else None
+    }
+
+
+@router.get('/preview/{name}')
+def get_preview(name: str):
+    path = PREVIEW_MAP.get(name)
+    if not path or not path.is_file():
+        raise HTTPException(404, f'Preview image "{name}" not found')
+    return FileResponse(path, media_type='image/png')
+
+
+@router.get('/video')
+def get_video():
+    video_path = ROOT / 'videos/rocket_mission_takeoff_detach_landing.mp4'
+    if not video_path.is_file():
+        raise HTTPException(404, 'Video recording not found')
+    return FileResponse(video_path, media_type='video/mp4')
+
+
 @router.websocket('/stream')
 async def native_stream(websocket:WebSocket):
     # Read-only, same-origin local visualization. Commands use validated POST.
@@ -60,3 +138,4 @@ async def native_stream(websocket:WebSocket):
                 await websocket.send_json(value);previous=marker;last_send=time.monotonic()
             await asyncio.sleep(.2)
     except (WebSocketDisconnect,RuntimeError,OSError):return
+

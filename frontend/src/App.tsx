@@ -8,70 +8,32 @@ import CurriculumProbes from './CurriculumProbes';
 import FullTaskChecks from './FullTaskChecks';
 import FlightPlanEditor from './FlightPlanEditor';
 import CampaignPanel from './CampaignPanel';
-import MissionControl from './MissionControl';
 import NativeMonitor from './NativeMonitor';
 import {largestClassicalSamples,resultSampleId} from './resultSamples';
-import {compact,parseTelemetry} from './telemetry';
-import type {Checkpoint,Job,Method,Mission,Result,Run,SystemInfo,Telemetry} from './types';
-const pageSuggestions=[{label:'Powered landing',hint:'Landing flight, retargeting and mission setup',page:'Flight lab'},{label:'Launch and ascent',hint:'Takeoff profile and separation target',page:'Flight lab'},{label:'Training observatory',hint:'PPO and SAC jobs, checkpoints and curves',page:'Training'},{label:'Evaluation results',hint:'Fixed-seed evidence and failure modes',page:'Results'},{label:'Field notes',hint:'Physics, guidance and hardware reference',page:'Field notes'}];
+import {compact} from './telemetry';
+import type {Checkpoint,Job,Mission,Result,Run,SystemInfo} from './types';
+const pageSuggestions=[{label:'Isaac Sim real-time flight',hint:'PhysX 6-DOF simulation, guidance and RTX views',page:'Isaac Sim'},{label:'Training observatory',hint:'PPO and SAC jobs, checkpoints and curves',page:'Training'},{label:'Evaluation results',hint:'Fixed-seed evidence and failure modes',page:'Results'},{label:'Field notes',hint:'Physics, guidance and hardware reference',page:'Field notes'}];
 const formatTime=(t:number)=>`${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toFixed(1).padStart(4,'0')}`;
 async function api<T>(path:string,body?:unknown):Promise<T>{const r=await fetch(`/api${path}`,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:undefined);if(!r.ok){const e=await r.json().catch(()=>({detail:`HTTP ${r.status}`}));throw new Error(typeof e.detail==='string'?e.detail:Array.isArray(e.detail)?e.detail.map((x:{msg:string})=>x.msg).join('; '):'Request failed');}return r.json();}
 
-export default function App({initialPage='Flight lab'}:{initialPage?:string}){
+export default function App({initialPage='Isaac Sim'}:{initialPage?:string}){
   const [page,setPage]=useState(initialPage);
-  const [mission,setMission]=useState<Mission>('combined');const [method,setMethod]=useState<Method>('classical');const [level,setLevel]=useState(4);
-  const [seed,setSeed]=useState(42),[checkpoint,setCheckpoint]=useState('');
-  const [online,setOnline]=useState(false),[busy,setBusy]=useState(true),[error,setError]=useState(''),[story,setStory]=useState(false);
+  const [online,setOnline]=useState(false),[error,setError]=useState('');
   const [runs,setRuns]=useState<Run[]>([]),[jobs,setJobs]=useState<Job[]>([]),[checkpoints,setCheckpoints]=useState<Checkpoint[]>([]),[results,setResults]=useState<Result[]>([]),[system,setSystem]=useState<SystemInfo|null>(null);
-  const [compare,setCompare]=useState('Level 1 vs current');
   const [query,setQuery]=useState('');
   const lab=useLab(useShallow(state=>({recording:state.recording,telemetry:state.telemetry,playing:state.playing})));
   const refresh=useCallback(async()=>{try{const view=page==='Training'?'training':page==='Results'?'results':'flight';const snapshot=await api<{runs?:Run[];jobs?:Job[];checkpoints?:Checkpoint[];results?:Result[]}>(`/dashboard?view=${view}`);if(snapshot.runs)setRuns(snapshot.runs);if(snapshot.jobs)setJobs(snapshot.jobs);if(snapshot.checkpoints)setCheckpoints(snapshot.checkpoints);if(snapshot.results)setResults(snapshot.results);setOnline(true);}catch{setOnline(false);}},[page]);
-  useVisiblePoll(refresh,page==='Training'?10000:60000,page!=='Field notes'&&page!=='Isaac Sim');
-  const loadRun=useCallback(async(m:Mission,me:Method,l:number,cp='',runSeed=42,options?:{retarget?:{time:number;landing:[number,number]};seek?:number})=>{
-    setBusy(true);setError('');
-    try{
-      if(options?.retarget&&!online)throw new Error('Start the local engine to command an in-flight retarget.');
-      let t:Telemetry;
-      const plan=useLab.getState().flightPlan;
-      if(online){const body:Record<string,unknown>={mission:m,method:me,level:l,seed:runSeed,checkpoint_id:cp||null,flight_plan:plan};if(options?.retarget)body.retarget=options.retarget;t=await api<Telemetry>('/simulate',body);}
-      else {const demos=await fetch('/demo-runs.json').then(r=>r.json()) as Telemetry[];const match=demos.find(x=>x.run.mission===m&&x.run.method===me&&x.run.level===l);if(!match)throw new Error('Offline replay includes the four recorded classical landing runs. Start the backend for other missions and training.');if(match.run.seed!==runSeed||JSON.stringify(match.run.flight_plan)!==JSON.stringify(plan))throw new Error('Start the local engine to apply edited coordinates or a different seed. Offline mode plays the recorded flight plan.');t=match;}
-      const playback=useLab.getState();playback.load(parseTelemetry(t));playback.set({ghost:null,...(options?.seek!==undefined?{time:options.seek,playing:true}:{})});setCheckpoint(me==='rl'?(t.run.checkpoint_id||''):'');
-    }catch(e){setError((e as Error).message);const shown=useLab.getState().telemetry?.run;if(shown){setMission(shown.mission);setMethod(shown.method);setLevel(shown.level);}}finally{setBusy(false);}
-  },[online]);
-  useEffect(()=>{let active=true;async function boot(){try{await api('/health');if(!active)return;setOnline(true);const s=await api<SystemInfo>('/system');if(active)setSystem(s);}catch{if(active)setOnline(false);}finally{if(active)setBusy(false);}}void boot();return()=>{active=false;};},[]);
-  useEffect(()=>{if(page!=='Flight lab'||useLab.getState().telemetry)return;let active=true;setBusy(true);void fetch('/demo.json').then(response=>response.json()).then(value=>{if(active){useLab.getState().load(parseTelemetry(value));useLab.getState().set({playing:false});}}).catch(problem=>{if(active)setError((problem as Error).message);}).finally(()=>{if(active)setBusy(false);});return()=>{active=false;};},[page]);
-  useEffect(()=>{if(!story||lab.playing||!lab.telemetry)return;const next=lab.telemetry.run.level+1;if(next>4){setStory(false);return;}const timer=setTimeout(()=>{setLevel(next);void loadRun(mission,method,next,'',seed);},1800);return()=>clearTimeout(timer);},[story,lab.playing,lab.telemetry,loadRun,mission,method,seed]);
-  useEffect(()=>{const key=(e:KeyboardEvent)=>{if((e.target as HTMLElement).matches('input,select,textarea'))return;if(e.code==='Space'){e.preventDefault();const s=useLab.getState();s.set({playing:!s.playing});}if(e.key==='Escape')useLab.getState().set({recording:false});};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[]);
-  useEffect(()=>{if(page!=='Flight lab'){useLab.getState().set({playing:false});}},[page]);
-  const choice=(m:Mission,me:Method,l:number)=>{setMission(m);setMethod(me);setLevel(l);setCheckpoint('');setStory(false);};
-  const ghostRun=async()=>{setBusy(true);setError('');try{let t:Telemetry;if(!online){const demos=await fetch('/demo-runs.json').then(r=>r.json()) as Telemetry[];t=demos[0];}else {const compareMethod=compare==='RL vs classical'?(method==='rl'?'classical':'rl'):method;const compareLevel=compare==='Level 1 vs current'?1:level;t=await api<Telemetry>('/simulate',{mission,method:compareMethod,level:compareLevel,seed,checkpoint_id:null,flight_plan:useLab.getState().telemetry?.run.flight_plan||useLab.getState().flightPlan});}useLab.getState().set({ghost:parseTelemetry(t),time:0,playing:true});}catch(e){setError((e as Error).message);}finally{setBusy(false);}};
-  const loadRecordedRun=async(url:string)=>{setBusy(true);setError('');try{const response=await fetch(url);if(!response.ok)throw new Error('Recorded development flight is unavailable');const telemetry=parseTelemetry(await response.json());setStory(false);setPage('Flight lab');setMission(telemetry.run.mission);setMethod(telemetry.run.method);setLevel(telemetry.run.level);setSeed(telemetry.run.seed);setCheckpoint(telemetry.run.checkpoint_id||'');if(telemetry.run.flight_plan)useLab.getState().set({flightPlan:telemetry.run.flight_plan});useLab.getState().load(telemetry);useLab.getState().set({ghost:null});}catch(e){setError((e as Error).message);}finally{setBusy(false);}};
-  const startStory=()=>{setStory(true);setLevel(1);void loadRun(mission,method,1,'',seed);};
-  const exportData=()=>{if(!lab.telemetry)return;const url=URL.createObjectURL(new Blob([JSON.stringify(lab.telemetry)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${lab.telemetry.run.id}.json`;a.click();URL.revokeObjectURL(url);};
-  const commandRetarget=async(t:number,landing:[number,number])=>{
-    setBusy(true);setError('');
-    const applied=useLab.getState().telemetry?.run;
-    try{
-      if(!online)throw new Error('Start the local engine to command an in-flight retarget.');
-      if(!applied)throw new Error('Run a flight before commanding a new landing site.');
-      const plan=applied.initial_flight_plan||applied.flight_plan||useLab.getState().flightPlan;
-      const retargets=(applied.retargets||[]).filter(event=>event.t<t-1e-6).map(event=>({time:event.t,landing:event.landing}));
-      retargets.push({time:t,landing});
-      const body={mission:applied.mission,method:applied.method,level:applied.level,seed:applied.seed,checkpoint_id:applied.checkpoint_id||null,flight_plan:plan,retargets};
-      const result=parseTelemetry(await api<Telemetry>('/simulate',body));
-      setMission(applied.mission);setMethod(applied.method);setLevel(applied.level);setSeed(applied.seed);setCheckpoint(applied.checkpoint_id||'');
-      const playback=useLab.getState();playback.load(result);playback.set({time:t,playing:true,ghost:null,flightPlan:{...plan,landing}});
-    }catch(e){setError((e as Error).message);}finally{setBusy(false);}
-  };
+  useVisiblePoll(refresh,page==='Training'?10000:60000,page!=='Field notes');
+  useEffect(()=>{let active=true;async function boot(){try{await api('/health');if(!active)return;setOnline(true);const s=await api<SystemInfo>('/system');if(active)setSystem(s);}catch{if(active)setOnline(false);}}void boot();return()=>{active=false;};},[]);
+  useEffect(()=>{const key=(e:KeyboardEvent)=>{if((e.target as HTMLElement).matches('input,select,textarea'))return;if(e.key==='Escape')useLab.getState().set({recording:false});};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[]);
   return <div className={`shell ${lab.recording?'recording':''}`}>
     <header className="topnav">
-      <a className="brand" href="#" onClick={e=>{e.preventDefault();setPage('Flight lab');}}>
+      <a className="brand" href="#" onClick={e=>{e.preventDefault();setPage('Isaac Sim');}}>
         <span className="brand-mark"><Rocket size={20}/></span>
-        <span className="brand-copy">ISS Orbital Systems<small>Omniverse Rocket Simulator</small></span>
+        <span className="brand-copy">ISS Orbital Systems<small>Omniverse Isaac Sim Laboratory</small></span>
       </a>
       <nav className="main-nav" aria-label="Primary navigation">
-        {['Flight lab','Isaac Sim','Training','Results','Field notes'].map(item=><button key={item} className={page===item?'active':''} onClick={()=>setPage(item)}>{item==='Flight lab'?'3D Flight Lab':item}</button>)}
+        {['Isaac Sim','Training','Results','Field notes'].map(item=><button key={item} className={page===item?'active':''} onClick={()=>setPage(item)}>{item==='Isaac Sim'?'Isaac Sim Real-Time':item}</button>)}
       </nav>
       <div className="nav-tools">
         <div className={`nav-search ${query?'open':''}`}>
@@ -79,21 +41,20 @@ export default function App({initialPage='Flight lab'}:{initialPage?:string}){
           <input aria-label="Search mission controls" placeholder="Search missions, training, results…" value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&query){const match=pageSuggestions.find(value=>value.label.toLowerCase().includes(query.toLowerCase()));if(match){setPage(match.page);setQuery('');}}if(e.key==='Escape')setQuery('');}}/>
           {query&&<div className="search-results">{pageSuggestions.filter(value=>value.label.toLowerCase().includes(query.toLowerCase())||value.hint.toLowerCase().includes(query.toLowerCase())).map(value=><button key={value.label} onClick={()=>{setPage(value.page);setQuery('');}}><span><strong>{value.label}</strong><small>{value.hint}</small></span><ArrowUpRight size={13}/></button>)}</div>}
         </div>
-        <span className={`engine-pill ${online?'online':''}`} title={online?'Dashboard backend reachable; native engine connection is shown in Isaac Sim controls':'Dashboard backend offline'}><span className="status-dot on"/>{online?'Backend online':'Backend offline'}</span>
+        <span className={`engine-pill ${online?'online':''}`} title={online?'Dashboard backend reachable; native engine connection is active':'Dashboard backend offline'}><span className="status-dot on"/>{online?'Backend online':'Backend offline'}</span>
         <button className="icon-button" aria-label="Read the flight manual" title="Flight manual" onClick={()=>setPage('Field notes')}><BookOpen size={17}/></button>
         <span className="avatar" aria-hidden="true">IA</span>
       </div>
     </header>
     <main className="shell-main">
       {error&&<div role="alert" className="error-banner"><span>{error}</span><button aria-label="Dismiss error" onClick={()=>setError('')}><X size={16}/></button></div>}
-      {page==='Flight lab'&&<MissionControl mission={mission} method={method} level={level} seed={seed} checkpoint={checkpoint} checkpoints={checkpoints} busy={busy} online={online} story={story} compare={compare} onMission={choice} onLevel={value=>choice(mission,method,value)} onCheckpoint={setCheckpoint} onSeed={setSeed} onRun={()=>{setStory(false);void loadRun(mission,method,level,checkpoint,seed);}} onRetarget={commandRetarget} onGhost={()=>void ghostRun()} onStory={startStory} onCompare={setCompare} onExport={exportData} onError={setError} onOpenNotes={()=>setPage('Field notes')}/>}
-      {page==='Isaac Sim'&&<NativeMonitor/>}
+      {(page==='Isaac Sim'||page==='Flight lab')&&<NativeMonitor/>}
       {page!=='Flight lab'&&page!=='Isaac Sim'&&<div className="content-page">
         <div className="page-head">
           <div><div className="breadcrumb"><span className="live-dot"/>{page==='Training'?'HEADLESS REINFORCEMENT LEARNING':page==='Results'?'MEASURED PERFORMANCE':'ENGINEERING REFERENCE'}</div><h1>{page==='Training'?'Watch a policy learn to fly.':page==='Results'?'Every flight leaves evidence.':'Understand what makes it fly.'}</h1><p className="page-sub">{page==='Training'?'Real PPO and SAC jobs run locally. Curves and checkpoints are measured on fixed evaluation seeds.':page==='Results'?'Failure modes, confidence intervals and fixed-seed evaluations from the recorded evidence register.':'The physics, controllers, hardware and evidence model behind every flight.'}</p></div>
-          <button className="btn subtle" onClick={()=>setPage('Flight lab')}><Rocket size={15}/>Open flight lab<ArrowUpRight size={14}/></button>
+          <button className="btn subtle" onClick={()=>setPage('Isaac Sim')}><Rocket size={15}/>Open Isaac Sim<ArrowUpRight size={14}/></button>
         </div>
-        {page==='Training'&&<TrainingView jobs={jobs} checkpoints={checkpoints} online={online} onRefresh={refresh} onError={setError} onWatchReplay={url=>void loadRecordedRun(url)} onWatch={async(c)=>{setPage('Flight lab');setMethod('rl');setMission(c.mission);setCheckpoint(c.id);await loadRun(c.mission,'rl',4,c.id,42);}}/>}
+        {page==='Training'&&<TrainingView jobs={jobs} checkpoints={checkpoints} online={online} onRefresh={refresh} onError={setError} onWatchReplay={()=>setPage('Isaac Sim')} onWatch={()=>setPage('Isaac Sim')}/>}
         {page==='Results'&&<ResultsView results={results} runs={runs} currentConfigHash={lab.telemetry?.config_hash||system?.config_hash} currentDynamicsHash={system?.dynamics_hash} currentMission={lab.telemetry?.run.mission}/>}
         {page==='Field notes'&&<NotesView system={system}/>}
         <footer className="page-footer"><span><FlaskConical size={13}/>Educational flight research · approximate vehicle parameters</span><span>z-up physics · quaternion attitude · SI units <b>/</b> v1.1</span></footer>

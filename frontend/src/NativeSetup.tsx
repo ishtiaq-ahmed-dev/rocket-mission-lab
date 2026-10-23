@@ -6,7 +6,7 @@ export interface NativeRuntime {installed:boolean;license_accepted:boolean;state
 
 export default function NativeSetup({runtime,connected,onStarted,onError}:{runtime?:NativeRuntime;connected:boolean;onStarted:()=>void;onError:(message:string)=>void}){
  const [mission,setMission]=useState('combined'),[profile,setProfile]=useState('research'),[renderer,setRenderer]=useState('real-time'),[flow,setFlow]=useState(false),[busy,setBusy]=useState(false);
- const [height,setHeight]=useState(400),[launchX,setLaunchX]=useState(0),[launchY,setLaunchY]=useState(0),[landingX,setLandingX]=useState(80),[landingY,setLandingY]=useState(40);
+ const [height,setHeight]=useState(600),[launchX,setLaunchX]=useState(0),[launchY,setLaunchY]=useState(0),[landingX,setLandingX]=useState(1050),[landingY,setLandingY]=useState(250);
  const [seed,setSeed]=useState(42),[physicsHz,setPhysicsHz]=useState(120),[randomized,setRandomized]=useState(false),[sensorNoise,setSensorNoise]=useState(false),[gpuPhysics,setGpuPhysics]=useState(false);
  const stopping=runtime?.state==='stopping';
  const starting=runtime?.state==='starting_or_running'&&!connected;

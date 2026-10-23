@@ -4,6 +4,8 @@ Native Isaac Sim migration is in progress. See [native runtime, controls and val
 
 A local rocket flight simulator, mission dashboard, and reinforcement learning workbench. MuJoCo integrates the booster dynamics; React and Three.js render recorded telemetry. Vehicle parameters are generic approximations.
 
+See the [23 October Isaac Sim browser experience & visual center](docs/29-isaac-sim-browser-experience.md) for the removal of the in-browser WebGL canvas, the real-time Isaac Sim Flight Deck, native RTX camera previews, 2D range radar, and full mission video player.
+
 See the [23 October real-time fidelity, pad separation and markings revision](docs/28-realtime-separation-and-pad-fidelity.md) for 1:1 real-time playback synchronization, mandatory > 1 km pad separation, explicit TAKEOFF and LANDING circle stencils, and ISS Orbital Systems / NVIDIA Isaac Sim branding.
 
 See the [21 October flight fidelity revision and executed evidence](docs/24-flight-fidelity-validation.md) for the latest dashboard, first-foot contact, staging, repeated retargeting and suborbital study. The older sections below describe the preceding baseline where they differ.

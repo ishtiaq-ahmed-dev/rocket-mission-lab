@@ -278,10 +278,16 @@ function TargetMarker(){
 }
 export default function World(){
   const quality=useLab(s=>s.quality),pad=useLab(s=>s.pad),run=useLab(s=>s.telemetry?.run);
-  const plan=run?.initial_flight_plan||run?.flight_plan,mission=run?.mission;
+  const storePlan=useLab(s=>s.flightPlan);
+  const plan=run?.initial_flight_plan||run?.flight_plan||storePlan;
   const suborbital=plan?.profile==='suborbital';
-  const launch=plan?.launch||ORIGIN,landing=plan?.landing||ORIGIN,distinct=Math.hypot(launch[0]-landing[0],launch[1]-landing[1])>=22;
-  const pads=useMemo(()=>{const values:Site[]=[distinct?landing:launch];for(const event of run?.retargets||[])if(![...values,launch].some(p=>Math.hypot(p[0]-event.landing[0],p[1]-event.landing[1])<62))values.push(event.landing);return values;},[landing,launch,run,distinct]);
+  const launch=plan?.launch||ORIGIN,landing=plan?.landing||[1050,250];
+  const distinct=Math.hypot(launch[0]-landing[0],launch[1]-landing[1])>=22;
+  const pads=useMemo(()=>{
+    const values:Site[]=[landing];
+    for(const event of run?.retargets||[])if(![...values,launch].some(p=>Math.hypot(p[0]-event.landing[0],p[1]-event.landing[1])<62))values.push(event.landing);
+    return values;
+  },[landing,launch,run]);
   const padRadius=distinct?Math.max(7,Math.min(25,Math.hypot(launch[0]-landing[0],launch[1]-landing[1])*.5-3.5)):25;
   const sites=useMemo(()=>[...terrainSites(plan,pad),...pads.map(([x,y]):Site=>[x-sceneryOffset(pad),-y])],[plan,pad,pads]);
   const lightTarget=useMemo(()=>{const target=new THREE.Object3D();target.position.set((launch[0]+landing[0])/2,0,-(launch[1]+landing[1])/2);return target;},[launch,landing]);
@@ -294,8 +300,10 @@ export default function World(){
     <group position={[sceneryOffset(pad),0,0]}><Landscape sites={sites}/><Nature sites={sites}/><Facilities/></group>
     <Ocean/>
     {suborbital&&<SuborbitalWorld/>}
-    {distinct&&<LandingPad xy={launch} launch radius={padRadius} label="TAKEOFF PAD 01"/>}
-    {pads.map((xy,i)=><LandingPad key={`${xy[0]},${xy[1]}`} xy={xy} radius={i===0?padRadius:25} launch={!distinct&&i===0&&(mission==='takeoff')} label={!distinct&&i===0&&(mission==='takeoff')?'TAKEOFF PAD 01':`LANDING PAD ${String(i+1).padStart(2,'0')}`}/>)}
+    {/* Takeoff pad at launch coordinates — always configured with launch=true and TAKEOFF branding */}
+    <LandingPad xy={launch} launch radius={padRadius} label="TAKEOFF PAD 01"/>
+    {/* Landing pad(s) downrange at landing coordinates — separated by > 1 km */}
+    {distinct&&pads.map((xy,i)=><LandingPad key={`${xy[0]},${xy[1]}`} xy={xy} radius={i===0?padRadius:25} launch={false} label={`LANDING PAD ${String(i+1).padStart(2,'0')}`}/>)}
     <TargetMarker/>
   </>;
 }

@@ -25,8 +25,8 @@ def arguments():
     parser.add_argument('--renderer',choices=['real-time','path-tracing'],default='real-time')
     parser.add_argument('--flow',action='store_true');parser.add_argument('--follow-camera',action='store_true')
     parser.add_argument('--gpu-physics',action='store_true');parser.add_argument('--mission',choices=['landing','takeoff','combined'],default='combined')
-    parser.add_argument('--profile',choices=['research','suborbital'],default='research');parser.add_argument('--separation-altitude',type=float,default=400.)
-    parser.add_argument('--landing',type=float,nargs=2,default=[80.,40.]);parser.add_argument('--seed',type=int,default=42)
+    parser.add_argument('--profile',choices=['research','suborbital'],default='research');parser.add_argument('--separation-altitude',type=float,default=600.)
+    parser.add_argument('--landing',type=float,nargs=2,default=[1050.,250.]);parser.add_argument('--seed',type=int,default=42)
     parser.add_argument('--launch',type=float,nargs=2,default=[0.,0.])
     parser.add_argument('--retarget-at',type=float,nargs=3,metavar=('SECONDS','EAST','NORTH'),help='One reproducible target change at simulation time')
     parser.add_argument('--checkpoint');parser.add_argument('--train-steps',type=int,default=0)
@@ -209,6 +209,7 @@ def main():
             if visuals:
                 env.reset(seed=args.seed)
                 report['launch_render_artifact']=visuals.capture(app,args.output.with_name(args.output.stem+'-launch.png'),view='launch')
+                report['landing_render_artifact']=visuals.capture(app,args.output.with_name(args.output.stem+'-landing.png'),view='landing')
         elif args.train_steps:
             if not 1<=args.train_steps<=100000000:raise ValueError('Training steps must be between 1 and 100000000')
             from stable_baselines3 import PPO
