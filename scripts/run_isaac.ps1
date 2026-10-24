@@ -26,5 +26,8 @@ if ($Diagnostic) { $nativeArguments += '--diagnostic' }
 if ($PathTracing) { $nativeArguments += @('--renderer','path-tracing') }
 if ($Flow) { $nativeArguments += '--flow' }
 $nativeArguments += $RunnerArguments
+# Kit loads emit harmless version/cache warnings on stderr; the nested python.bat
+# owns success via exit code, so stderr noise must not terminate the session here.
+$ErrorActionPreference = 'Continue'
 & $pythonWrapper @nativeArguments
 exit $LASTEXITCODE

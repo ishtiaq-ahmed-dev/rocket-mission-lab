@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "started_at": 1792751040.052192,
+  "started_at": 1792813322.3243394,
   "headless": false,
   "renderer": "real-time",
   "gpu_physics": false,
@@ -8,15 +8,15 @@
     "headless": false,
     "diagnostic": true,
     "renderer": "real-time",
-    "flow": true,
+    "flow": false,
     "follow_camera": false,
     "gpu_physics": false,
     "mission": "combined",
     "profile": "research",
-    "separation_altitude": 400.0,
+    "separation_altitude": 600.0,
     "landing": [
-      80.0,
-      40.0
+      1050.0,
+      250.0
     ],
     "seed": 42,
     "launch": [
@@ -41,21 +41,21 @@
     "output": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\isaac-visual.json"
   },
   "source_manifest": {
-    "scripts\\isaac_runner.py": "6630be72ebf36cb447d779515319305b588226444bad3abcd2033359491cf8f6",
+    "scripts\\isaac_runner.py": "00b7723bd11287f6c323193d89f73e92dc9ce53b49d6932e0f22e4efe7d407e2",
     "rocket_lab\\isaac\\__init__.py": "d3bf9d611755b8177826459a336812f3234e5315c94aac8de5c0c4fe9df5cb88",
-    "rocket_lab\\isaac\\actuators.py": "db5a0b641d66c7076b06bc380ee2370e8b9f3890a476ff7159101e2a591115f7",
-    "rocket_lab\\isaac\\api.py": "648035496ca2e4984ba9357955fb71f9b98b94df01b921e754628c4dbb209635",
-    "rocket_lab\\isaac\\guidance.py": "d53df807087f97d8e161c88f7bfa021d6d25e968b0e4a0cc4ba9715f593d1203",
+    "rocket_lab\\isaac\\actuators.py": "5a76a9cb3ecc845847c4c0a6074b15fabb3ecc83b031c7f54f2846cffd195bfd",
+    "rocket_lab\\isaac\\api.py": "d41315289ceb0f6bee37f06c959e8c2cf95de3332a589499260e8e600c70ff76",
+    "rocket_lab\\isaac\\guidance.py": "b0d34192e54e898c499d407d8dad75147d2efa8be05e54ef27ba7500950c13d1",
     "rocket_lab\\isaac\\launcher.py": "e7355864ae27080ffae3505092d4d02ea7726163aa2f947eb6c56fa63fdcbb48",
-    "rocket_lab\\isaac\\physics.py": "54aa149abfbae886b77d2b31fc904fc14969531e1e94d02c4dc2166a0b56cc91",
+    "rocket_lab\\isaac\\physics.py": "fc2521ede2a40c58023eb5f2387e0f6f567df96087a93dbe5e667d7e84fc1d0b",
     "rocket_lab\\isaac\\policy.py": "41273ffcd77a21fd4c2d232d528bd7b476556bbf316d265b5e098acecbc9172c",
-    "rocket_lab\\isaac\\stream.py": "b719378d37c9cbaa9e5c5d8bbf0de92e1e82962103fd2c4446491577b357436e",
-    "rocket_lab\\isaac\\visuals.py": "aacfee3a125e3a7245119501f1ba604a0cb7f01eef91549bea652b822ec5f013",
+    "rocket_lab\\isaac\\stream.py": "362c464a82e63f7392b730c69316a85e1b2f6990f29a3e0e615d0c8dceb39fb3",
+    "rocket_lab\\isaac\\visuals.py": "a344d0002649428d8253b3e9f6c8edbf1c9e38f8317e95f0328abdf3448987d9",
     "config\\isaac-headless.kit": "8ac0bd79772e7ab2bfc5193d2f94de5b2c6250ccba0f42b9f791f7a9b611eb0f",
-    "config\\isaac-visual.kit": "fd8e1c7af6904c675ab14922696d3ae39c768104a6d3893917048fce50f2dca3",
+    "config\\isaac-visual.kit": "752afce9b7951356cd6104919027c9e64824cfc9896ed93550996d3011af26be",
     "rocket_lab\\envs.py": "31d015bade840f96f62c1ef81b7fcc29f22c9bdd026522cd15e27eb02da89f2c",
-    "rocket_lab\\controllers.py": "4a070523f3f928b5035cd93583c3b9ef33db38285e3cb4a90a865cbbf882aa64",
-    "rocket_lab\\missions.py": "f5d9f121576621db8b029004bbc2ebe0e1ecf6ff8474c907ccbcb76353caa241",
+    "rocket_lab\\controllers.py": "5c0f3ec1e5dc4430c8c1f615c2008633044509a2398221a461215f5c90a8c603",
+    "rocket_lab\\missions.py": "8defadc025c5859c10036528fd887edda3dcda6caadc7e97d2423784e7f3e936",
     "rocket_lab\\atmosphere.py": "a63555888d945a4f77f1d44908b9fd02cf8320c82a3cc167aae2e4115b705d30",
     "rocket_lab\\schemas.py": "fcbdc55376e35b27ca7321c21727690d6a3e35fcc1a32b8b4fcb2ec7da6fec2f"
   },
@@ -100,7 +100,11 @@
       "area": 10.18,
       "upper_stage_mass": 2500.0,
       "separation_pusher_force": 12000.0,
-      "separation_pusher_seconds": 0.2
+      "separation_pusher_seconds": 0.2,
+      "rcs_fuel_mass": 40.0,
+      "rcs_jet_force": 500.0,
+      "rcs_lever": 1.8,
+      "rcs_isp": 60.0
     },
     "world": {
       "gravity": 9.80665,
@@ -131,8 +135,8 @@
       "horizontal_velocity": 1.5,
       "initial_tilt_deg": 2.0,
       "pad": [
-        80.0,
-        40.0,
+        1050.0,
+        250.0,
         0.0
       ],
       "touchdown_speed": 2.0,
@@ -140,7 +144,7 @@
       "pad_radius": 5.0,
       "landing_tolerance": 1.0,
       "separation_shutdown": true,
-      "takeoff_altitude": 400.0,
+      "takeoff_altitude": 600.0,
       "takeoff_velocity": 25.0,
       "takeoff_velocity_tolerance": 8.0,
       "timeout": 180.0,
@@ -207,7 +211,7 @@
       "retarget_min_altitude": 45.0
     }
   },
-  "configuration_sha256": "d3ec45365ab75f24050cad14dbbbebeb853d3344d090bc0fe638177e1b271be3",
+  "configuration_sha256": "6dda726caa5f55b0003e7e23043b85123be2fab26d9d03001a45461d48953b6a",
   "physx_gpu_dynamics_enabled": false,
   "socket_port": 8766,
   "engine": "Isaac Sim PhysX",
@@ -217,19 +221,19 @@
       0.0
     ],
     "landing": [
-      80.0,
-      40.0
+      1050.0,
+      250.0
     ],
-    "separation_altitude": 400.0,
+    "separation_altitude": 600.0,
     "profile": "research"
   },
   "engine_render_artifact": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\isaac-visual-engine.png",
   "physics_seconds": 3.799999999999989,
   "fuel_burned": 201.40622642490598,
   "final_position": [
-    0.7830660343170166,
-    -0.5244722962379456,
-    222.4294891357422
+    0.7823975682258606,
+    -0.5240322947502136,
+    222.386474609375
   ],
   "payload_joint_disabled": true,
   "payload_moved_after_release": true,
@@ -240,18 +244,23 @@
   "retarget_preserved_state": true,
   "render_artifact": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\isaac-visual.png",
   "note": "Native runtime diagnostic; visual quality and mission reliability require separate validation",
-  "vacuum_drop_velocity_error": 1.637420654354571e-05,
+  "vacuum_drop_velocity_error": 8.74481201229571e-06,
   "vacuum_drop_height_error": 0.03917988281250473,
   "analytic_free_fall_passed": true,
   "hold_down_and_release_passed": true,
   "separation_pusher_verified": true,
-  "pusher_momentum_error_kg_m_s": 0.015101776152732782,
-  "pusher_relative_speed": 1.0231568813323975,
-  "pusher_relative_angular_momentum_error": 1.5664923188993582e-05,
+  "pusher_momentum_error_kg_m_s": 0.010108303860761225,
+  "pusher_relative_speed": 1.0230906009674072,
+  "pusher_relative_angular_momentum_error": 1.6517078033020835e-05,
+  "rcs_impulse_verified": true,
+  "rcs_roll_rate": 0.008217551745474337,
+  "rcs_expected_roll_rate": 0.008217336089046054,
+  "rcs_gas_used_kg": 0.8497635108149382,
   "launch_render_artifact": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\isaac-visual-launch.png",
-  "flow_asset": "d:\\appinstalled\\nvidia\\isaacsim\\6.2.0\\extscache\\omni.flowusd-110.0.4+110.0.0.wx64.r.cp312.u7f4\\data\\presets\\Fire\\Fire.usda",
-  "flow_active_blocks": 32,
+  "landing_render_artifact": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\docs\\evidence\\2026-10-23\\isaac-visual-landing.png",
+  "flow_asset": null,
+  "flow_active_blocks": null,
   "sky_asset": "D:/AppInstalled/NVIDIA/IsaacSim/assets/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
   "source_changed_during_run": false,
-  "finished_at": 1792751067.3924677
+  "finished_at": 1792813363.9223073
 }
