@@ -24,9 +24,14 @@ class IsaacRocketPhysics:
         self.cfg=config;self.v=config['vehicle'];self.w=config['world'];self.half=self.v['length']/2
         self.engine_lever=self.v.get('engine_lever',self.half);self.headless=headless;self.visuals=visuals
         self.engine=Engine(self.v,self.w['gravity']);self.rcs=RollThrusters(self.v);self.roll_command=0.;self.data=SimpleNamespace(time=0.)
+        # Optional flight-history sink (rocket_lab.isaac.cinematic.FlightTrack);
+        # called every physical substep with the physics object itself.
+        self.track_hook=None
+        self._render_step=0;self._render_gate=60.;self._gate_probe=0
         # Read-only compatibility values for existing inertia-aware guidance.
         self.model=SimpleNamespace(body_inertia=np.zeros((2,3)))
-        self.world=World(stage_units_in_meters=1.,physics_dt=self.w['timestep'],rendering_dt=1/30,backend='numpy',device='cpu')
+        # 60 Hz render clock: keeps the eased cameras fluid instead of 30 fps stutter.
+        self.world=World(stage_units_in_meters=1.,physics_dt=self.w['timestep'],rendering_dt=1/60,backend='numpy',device='cpu')
         context=self.world.get_physics_context();context.set_solver_type('TGS')
         context.enable_gpu_dynamics(gpu_dynamics)
         if gpu_dynamics:context.set_broadphase_type('GPU')
@@ -276,6 +281,7 @@ class IsaacRocketPhysics:
                 stage_drag=-.5*air_density(self.w,p[0,2])*self.v['drag_coefficient']*np.pi*1.8**2*np.linalg.norm(velocity)*velocity
                 self.payload.apply_forces_and_torques_at_pos(forces=(stage_drag+pusher)[None,:].astype(np.float32),torques=payload_pusher_torque[None,:].astype(np.float32),is_global=True)
             before=self.state(include_payload=False);self.world.step(render=False);self.data.time+=dt;self.fuel=max(0.,self.fuel-burn);self._sync()
+            if self.track_hook is not None:self.track_hook(self)
             state=self.state(include_payload=False)
             contact=state['clearance']<.1 and np.linalg.norm(self.booster.get_net_contact_forces(dt=dt)[0])>1e-3
             if state['clearance']>.1:self._contact_armed=True
@@ -285,9 +291,19 @@ class IsaacRocketPhysics:
                         angular_velocity=before['angular_velocity'].tolist(),center_speed=float(np.linalg.norm(before['velocity'])),contact_speed=before['contact_speed'])
                 self._impacted=True;self._impact_speed=max(before['contact_speed'],state['contact_speed'])
             self._render_step+=1
-            if not self.headless and self._render_step%max(1,round(1/(30*dt)))==0:
+            # Adaptive render gate: try 60 Hz; fall back to 30 Hz whenever an
+            # RTX frame costs more than its slot, and re-probe 60 Hz every
+            # ~2 s so faster scenes recover the higher rate automatically.
+            if not self.headless and self._render_step%max(1,round(1/(self._render_gate*dt)))==0:
+                import time as _time
+                _render_start=_time.monotonic()
                 if self.visuals:self.visuals.update(self)
                 self.world.render()
+                if _time.monotonic()-_render_start>0.018:
+                    self._render_gate=30.
+                elif self._render_gate==30.:
+                    self._gate_probe+=1
+                    if self._gate_probe>=60:self._render_gate=60.;self._gate_probe=0
             if self._impacted and stop_on_impact:break
         return self.state()
 

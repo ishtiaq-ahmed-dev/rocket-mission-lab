@@ -94,6 +94,15 @@ def list_previews():
             })
     video_path = ROOT / 'videos/rocket_mission_takeoff_detach_landing.mp4'
     has_video = video_path.is_file()
+    duration = None
+    if has_video:
+        try:
+            import cv2
+            probe = cv2.VideoCapture(str(video_path))
+            duration = probe.get(cv2.CAP_PROP_FRAME_COUNT) / max(probe.get(cv2.CAP_PROP_FPS), 1.)
+            probe.release()
+        except Exception:
+            duration = None
     return {
         'images': items,
         'video': {
@@ -101,7 +110,7 @@ def list_previews():
             'url': '/api/native/video',
             'title': 'Full Isaac Sim Mission: Liftoff -> Staging (600m) -> Landing',
             'description': 'Continuous high-definition render of full mission flight with real-time PhysX physics and precision touchdown on Landing Pad 01 (>1 km separation).',
-            'duration': 57.6
+            'duration': round(duration, 2) if duration else None
         } if has_video else None
     }
 

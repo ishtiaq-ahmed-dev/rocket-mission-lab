@@ -41,6 +41,13 @@ def arguments():
     parser.add_argument('--randomized',action='store_true',help='Use seeded mass, thrust, wind and initial-state variation')
     parser.add_argument('--sensor-noise',action='store_true',help='Use the project navigation noise model')
     parser.add_argument('--physics-hz',type=int,choices=[50,100,120,240],default=120)
+    parser.add_argument('--record',action='store_true',help='Encode the native viewport flight into an MP4 (visual mode)')
+    parser.add_argument('--cinematic',action='store_true',help='After the flight, replay the recorded pose track into a frame-exact cinematic MP4 (visual mode)')
+    parser.add_argument('--cine-fps',type=float,default=60.,help='Cinematic replay frame rate')
+    parser.add_argument('--cine-preset',choices=['balanced','cinematic','pathtraced'],default='cinematic')
+    parser.add_argument('--cine-size',type=int,choices=[720,1080],default=1080)
+    parser.add_argument('--cine-output',type=Path,default=ROOT/'videos/rocket_mission_takeoff_detach_landing.mp4')
+    parser.add_argument('--track-out',type=Path,default=None,help='Save the 120 Hz flight pose track as .npz')
     parser.add_argument('--output',type=Path,default=ROOT/'data/isaac/diagnostic.json')
     return parser.parse_args()
 
@@ -135,6 +142,11 @@ def main():
         cfg['world'].update(timestep=1/args.physics_hz,control_substeps=round(args.physics_hz/10))
         cfg['vehicle'].update(separation_pusher_force=12000.,separation_pusher_seconds=.2,
             rcs_fuel_mass=40.,rcs_jet_force=500.,rcs_lever=1.8,rcs_isp=60.)
+        if args.cinematic:
+            # The film flies the full 600 m staging profile end to end; the
+            # stock 16 t propellant load runs dry ~2 m above the pad on this
+            # conservative classical descent, so the demo carries margin.
+            cfg['vehicle']['fuel_mass']=24000.
         report['configuration']=cfg
         report['configuration_sha256']=hashlib.sha256(json.dumps(cfg,sort_keys=True).encode()).hexdigest()
         visuals=None
@@ -235,7 +247,16 @@ def main():
                 (folder/'config.json').write_text(json.dumps(cfg,indent=2));report.update(requested_training_steps=args.train_steps,training_steps=model.num_timesteps,checkpoint=str(folder),qualification='Unqualified native PhysX study')
             report['status']='training_finished'
         else:
+            recording=None
+            if visuals and args.record:
+                recording=visuals.start_record(args.output.with_name(args.output.stem+'-flight.mp4'))
+                report['video_encoding']=str(recording)
             flight_started=time.monotonic();trace=[];scheduled_retarget=False;pause_wall=0.
+            track=None
+            if args.cinematic or args.track_out:
+                from rocket_lab.isaac.cinematic import FlightTrack
+                track=FlightTrack();env.physics.track_hook=track.capture
+                print('CINEMATIC: recording the flight pose track at',round(1/cfg['world']['timestep']),'Hz',flush=True)
             while app.is_running() and env.physics.data.time<args.max_seconds and not stop:
                 iteration_start=time.monotonic();single_step=False
                 if args.retarget_at and not scheduled_retarget and env.physics.data.time>=args.retarget_at[0]:
@@ -278,11 +299,26 @@ def main():
                     if info['outcome']=='success' and env.phase=='landing':settle_landing(env,publish,server,args.time_scale)
                     if env.last_info.get('outcome')=='stopped':stop=True
                     break
+            if recording:
+                report['video_artifact']=str(visuals.stop_record())
             elapsed=time.monotonic()-flight_started
             report.update(status='stopped' if stop else 'finished',steps=count,outcome=env.last_info.get('outcome'),
                 physical_seconds=env.physics.data.time,flight_wall_seconds=elapsed,real_time_factor=env.physics.data.time/max(elapsed,1e-6),
                 final_info=env.last_info,trace=trace,impact=env.physics.impact_state,release_time=env.physics.release_time,payload_released=env.physics.detached)
             report['engine_scale_estimate']=getattr(controller,'engine_scale',None)
+            if track is not None:
+                track.finalize(env.last_info.get('outcome'))
+                report['track_samples']=int(len(track.t));report['track_seconds']=round(track.duration,3)
+                if args.track_out:report['track_artifact']=str(track.save(args.track_out))
+                if args.cinematic and visuals:
+                    from rocket_lab.isaac.cinematic import OfflineRenderer
+                    env.physics.world.pause()
+                    size=(1280,720) if args.cine_size==720 else (1920,1080)
+                    renderer=OfflineRenderer(visuals,env.physics.stage,preset=args.cine_preset,
+                        fps=args.cine_fps,size=size)
+                    print(f'CINEMATIC: offline replay of {track.duration:.1f} s flight at {args.cine_fps:.0f} fps {size[0]}x{size[1]}',flush=True)
+                    report['cinematic']=renderer.render(track,args.cine_output,
+                        (cfg,env.physics.half,env.physics.engine_lever),on_frame=150)
         if visuals:
             report['flow_asset']=getattr(visuals,'flow_asset',None)
             report['flow_active_blocks']=getattr(visuals,'flow_active_blocks',None)
