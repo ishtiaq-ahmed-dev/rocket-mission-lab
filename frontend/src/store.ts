@@ -43,7 +43,7 @@ export const useLab=create<State>((set,get)=>({
     set({time,playing:time<end});
   },
 }));
-if(typeof window!=='undefined')(window as any).useLab=useLab;
+if(typeof window!=='undefined')(window as unknown as {useLab:typeof useLab}).useLab=useLab;
 
 /** Instruments update at 10 Hz; rendering and paused scrubbing retain exact time. */
 export const useInstrumentTime=()=>useLab(s=>s.playing?Math.floor(s.time*10)/10:s.time);

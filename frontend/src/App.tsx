@@ -9,31 +9,232 @@ import FullTaskChecks from './FullTaskChecks';
 import FlightPlanEditor from './FlightPlanEditor';
 import CampaignPanel from './CampaignPanel';
 import NativeMonitor from './NativeMonitor';
+import MissionControl from './MissionControl';
 import {largestClassicalSamples,resultSampleId} from './resultSamples';
-import {compact} from './telemetry';
-import type {Checkpoint,Job,Mission,Result,Run,SystemInfo} from './types';
-const pageSuggestions=[{label:'Isaac Sim real-time flight',hint:'PhysX 6-DOF simulation, guidance and RTX views',page:'Isaac Sim'},{label:'Training observatory',hint:'PPO and SAC jobs, checkpoints and curves',page:'Training'},{label:'Evaluation results',hint:'Fixed-seed evidence and failure modes',page:'Results'},{label:'Field notes',hint:'Physics, guidance and hardware reference',page:'Field notes'}];
+import {compact,parseTelemetry} from './telemetry';
+import type {Checkpoint,Job,Mission,Method,Result,Run,SystemInfo,Telemetry} from './types';
+
+const pageSuggestions=[
+  {label:'3D Aerospace Flight Simulator',hint:'Real-time 6-DOF WebGL rocket physics and camera controls',page:'Flight lab'},
+  {label:'Isaac Sim real-time flight',hint:'PhysX 6-DOF simulation, guidance and RTX views',page:'Isaac Sim'},
+  {label:'Training observatory',hint:'PPO and SAC jobs, checkpoints and curves',page:'Training'},
+  {label:'Evaluation results',hint:'Fixed-seed evidence and failure modes',page:'Results'},
+  {label:'Field notes',hint:'Physics, guidance and hardware reference',page:'Field notes'}
+];
 const formatTime=(t:number)=>`${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toFixed(1).padStart(4,'0')}`;
 async function api<T>(path:string,body?:unknown):Promise<T>{const r=await fetch(`/api${path}`,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:undefined);if(!r.ok){const e=await r.json().catch(()=>({detail:`HTTP ${r.status}`}));throw new Error(typeof e.detail==='string'?e.detail:Array.isArray(e.detail)?e.detail.map((x:{msg:string})=>x.msg).join('; '):'Request failed');}return r.json();}
 
-export default function App({initialPage='Isaac Sim'}:{initialPage?:string}){
+export default function App({initialPage='Flight lab'}:{initialPage?:string}){
   const [page,setPage]=useState(initialPage);
   const [online,setOnline]=useState(false),[error,setError]=useState('');
   const [runs,setRuns]=useState<Run[]>([]),[jobs,setJobs]=useState<Job[]>([]),[checkpoints,setCheckpoints]=useState<Checkpoint[]>([]),[results,setResults]=useState<Result[]>([]),[system,setSystem]=useState<SystemInfo|null>(null);
   const [query,setQuery]=useState('');
+  const [mission,setMission]=useState<Mission>('landing');
+  const [method,setMethod]=useState<Method>('classical');
+  const [level,setLevel]=useState(4);
+  const [seed,setSeed]=useState(42);
+  const [checkpoint,setCheckpoint]=useState('');
+  const [story,setStory]=useState(false);
+  const [compare,setCompare]=useState('RL vs classical');
+  const [busy,setBusy]=useState(false);
+
   const lab=useLab(useShallow(state=>({recording:state.recording,telemetry:state.telemetry,playing:state.playing})));
-  const refresh=useCallback(async()=>{try{const view=page==='Training'?'training':page==='Results'?'results':'flight';const snapshot=await api<{runs?:Run[];jobs?:Job[];checkpoints?:Checkpoint[];results?:Result[]}>(`/dashboard?view=${view}`);if(snapshot.runs)setRuns(snapshot.runs);if(snapshot.jobs)setJobs(snapshot.jobs);if(snapshot.checkpoints)setCheckpoints(snapshot.checkpoints);if(snapshot.results)setResults(snapshot.results);setOnline(true);}catch{setOnline(false);}},[page]);
+
+  const refresh=useCallback(async()=>{
+    try{
+      const view=page==='Training'?'training':page==='Results'?'results':'flight';
+      const snapshot=await api<{runs?:Run[];jobs?:Job[];checkpoints?:Checkpoint[];results?:Result[]}>(`/dashboard?view=${view}`);
+      if(snapshot.runs)setRuns(snapshot.runs);
+      if(snapshot.jobs)setJobs(snapshot.jobs);
+      if(snapshot.checkpoints)setCheckpoints(snapshot.checkpoints);
+      if(snapshot.results)setResults(snapshot.results);
+      setOnline(true);
+    }catch{
+      setOnline(false);
+    }
+  },[page]);
+
   useVisiblePoll(refresh,page==='Training'?10000:60000,page!=='Field notes');
-  useEffect(()=>{let active=true;async function boot(){try{await api('/health');if(!active)return;setOnline(true);const s=await api<SystemInfo>('/system');if(active)setSystem(s);}catch{if(active)setOnline(false);}}void boot();return()=>{active=false;};},[]);
-  useEffect(()=>{const key=(e:KeyboardEvent)=>{if((e.target as HTMLElement).matches('input,select,textarea'))return;if(e.key==='Escape')useLab.getState().set({recording:false});};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[]);
+
+  useEffect(()=>{
+    let active=true;
+    async function boot(){
+      try{
+        await api('/health');
+        if(!active)return;
+        setOnline(true);
+        const s=await api<SystemInfo>('/system');
+        if(active)setSystem(s);
+      }catch{
+        if(active)setOnline(false);
+      }finally{
+        if(active)setBusy(false);
+      }
+    }
+    void boot();
+    return()=>{active=false;};
+  },[]);
+
+  const loadRun=useCallback(async(m:Mission,me:Method,l:number,cp?:string,s=42,options?:{seek?:number})=>{
+    setBusy(true);setError('');
+    try{
+      let t:Telemetry;
+      if(!online){
+        const response=await fetch('/demo.json');
+        t=await response.json() as Telemetry;
+      }else{
+        const plan=useLab.getState().flightPlan;
+        const body={mission:m,method:me,level:l,seed:s,checkpoint_id:cp||null,flight_plan:plan};
+        t=await api<Telemetry>('/simulate',body);
+      }
+      const playback=useLab.getState();
+      playback.load(parseTelemetry(t));
+      playback.set({ghost:null,...(options?.seek!==undefined?{time:options.seek,playing:true}:{})});
+      setCheckpoint(me==='rl'?(t.run.checkpoint_id||''):'');
+    }catch(e){
+      setError((e as Error).message);
+      const shown=useLab.getState().telemetry?.run;
+      if(shown){setMission(shown.mission);setMethod(shown.method);setLevel(shown.level);}
+    }finally{
+      setBusy(false);
+    }
+  },[online]);
+
+  useEffect(()=>{
+    if(page!=='Flight lab'||useLab.getState().telemetry)return;
+    let active=true;
+    if(online){
+      void loadRun(mission,method,level,checkpoint,seed);
+    }else{
+      setBusy(true);
+      void fetch('/demo.json').then(response=>response.json()).then(value=>{
+        if(active){
+          useLab.getState().load(parseTelemetry(value));
+          useLab.getState().set({playing:false});
+        }
+      }).catch(problem=>{
+        if(active)setError((problem as Error).message);
+      }).finally(()=>{
+        if(active)setBusy(false);
+      });
+    }
+    return()=>{active=false;};
+  },[page,online,loadRun,mission,method,level,checkpoint,seed]);
+
+  useEffect(()=>{
+    if(!story||lab.playing||!lab.telemetry)return;
+    const next=lab.telemetry.run.level+1;
+    if(next>4){setStory(false);return;}
+    const timer=setTimeout(()=>{
+      setLevel(next);
+      void loadRun(mission,method,next,'',seed);
+    },1800);
+    return()=>clearTimeout(timer);
+  },[story,lab.playing,lab.telemetry,loadRun,mission,method,seed]);
+
+  useEffect(()=>{
+    const key=(e:KeyboardEvent)=>{
+      if((e.target as HTMLElement).matches('input,select,textarea'))return;
+      if(e.code==='Space'){
+        e.preventDefault();
+        const s=useLab.getState();
+        s.set({playing:!s.playing});
+      }
+      if(e.key==='Escape')useLab.getState().set({recording:false});
+    };
+    window.addEventListener('keydown',key);
+    return()=>window.removeEventListener('keydown',key);
+  },[]);
+
+  useEffect(()=>{
+    if(page!=='Flight lab'){
+      useLab.getState().set({playing:false});
+    }
+  },[page]);
+
+  const choice=(m:Mission,me:Method,l:number)=>{setMission(m);setMethod(me);setLevel(l);setCheckpoint('');setStory(false);};
+
+  const ghostRun=async()=>{
+    setBusy(true);setError('');
+    try{
+      let t:Telemetry;
+      if(!online){
+        const demos=await fetch('/demo-runs.json').then(r=>r.json()) as Telemetry[];
+        t=demos[0];
+      }else{
+        const compareMethod=compare==='RL vs classical'?(method==='rl'?'classical':'rl'):method;
+        const compareLevel=compare==='Level 1 vs current'?1:level;
+        t=await api<Telemetry>('/simulate',{mission,method:compareMethod,level:compareLevel,seed,checkpoint_id:null,flight_plan:useLab.getState().telemetry?.run.flight_plan||useLab.getState().flightPlan});
+      }
+      useLab.getState().set({ghost:parseTelemetry(t),time:0,playing:true});
+    }catch(e){
+      setError((e as Error).message);
+    }finally{
+      setBusy(false);
+    }
+  };
+
+  const loadRecordedRun=async(url:string)=>{
+    setBusy(true);setError('');
+    try{
+      const response=await fetch(url);
+      if(!response.ok)throw new Error('Recorded development flight is unavailable');
+      const telemetry=parseTelemetry(await response.json());
+      setStory(false);setPage('Flight lab');setMission(telemetry.run.mission);setMethod(telemetry.run.method);setLevel(telemetry.run.level);setSeed(telemetry.run.seed);setCheckpoint(telemetry.run.checkpoint_id||'');
+      if(telemetry.run.flight_plan)useLab.getState().set({flightPlan:telemetry.run.flight_plan});
+      useLab.getState().load(telemetry);
+      useLab.getState().set({ghost:null});
+    }catch(e){setError((e as Error).message);}finally{setBusy(false);}
+  };
+
+  const startStory=()=>{setStory(true);setLevel(1);void loadRun(mission,method,1,'',seed);};
+
+  const exportData=()=>{
+    if(!lab.telemetry)return;
+    const url=URL.createObjectURL(new Blob([JSON.stringify(lab.telemetry,null,2)],{type:'application/json'}));
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`${lab.telemetry.run.id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const commandRetarget=async(t:number,landing:[number,number])=>{
+    setBusy(true);setError('');
+    const applied=useLab.getState().telemetry?.run;
+    try{
+      if(!online)throw new Error('Start the local engine to command an in-flight retarget.');
+      if(!applied)throw new Error('Run a flight before commanding a new landing site.');
+      const plan=applied.initial_flight_plan||applied.flight_plan||useLab.getState().flightPlan;
+      const retargets=(applied.retargets||[]).filter(event=>event.t<t-1e-6).map(event=>({time:event.t,landing:event.landing}));
+      retargets.push({time:t,landing});
+      const body={mission:applied.mission,method:applied.method,level:applied.level,seed:applied.seed,checkpoint_id:applied.checkpoint_id||null,flight_plan:plan,retargets};
+      const result=parseTelemetry(await api<Telemetry>('/simulate',body));
+      setMission(applied.mission);setMethod(applied.method);setLevel(applied.level);setSeed(applied.seed);setCheckpoint(applied.checkpoint_id||'');
+      const playback=useLab.getState();
+      playback.load(result);
+      playback.set({time:t,playing:true,ghost:null,flightPlan:{...plan,landing}});
+    }catch(e){setError((e as Error).message);}finally{setBusy(false);}
+  };
+
   return <div className={`shell ${lab.recording?'recording':''}`}>
     <header className="topnav">
-      <a className="brand" href="#" onClick={e=>{e.preventDefault();setPage('Isaac Sim');}}>
+      <a className="brand" href="#" onClick={e=>{e.preventDefault();setPage('Flight lab');}}>
         <span className="brand-mark"><Rocket size={20}/></span>
-        <span className="brand-copy">ISS Orbital Systems<small>Omniverse Isaac Sim Laboratory</small></span>
+        <span className="brand-copy">ISS Orbital Systems<small>Omniverse Rocket Simulator</small></span>
       </a>
       <nav className="main-nav" aria-label="Primary navigation">
-        {['Isaac Sim','Training','Results','Field notes'].map(item=><button key={item} className={page===item?'active':''} onClick={()=>setPage(item)}>{item==='Isaac Sim'?'Isaac Sim Real-Time':item}</button>)}
+        {[
+          {id:'Flight lab',label:'3D Flight Lab'},
+          {id:'Isaac Sim',label:'Isaac Sim RTX'},
+          {id:'Training',label:'Training'},
+          {id:'Results',label:'Results'},
+          {id:'Field notes',label:'Field notes'}
+        ].map(item=>(
+          <button key={item.id} className={page===item.id?'active':''} onClick={()=>setPage(item.id)}>
+            {item.label}
+          </button>
+        ))}
       </nav>
       <div className="nav-tools">
         <div className={`nav-search ${query?'open':''}`}>
@@ -48,13 +249,14 @@ export default function App({initialPage='Isaac Sim'}:{initialPage?:string}){
     </header>
     <main className="shell-main">
       {error&&<div role="alert" className="error-banner"><span>{error}</span><button aria-label="Dismiss error" onClick={()=>setError('')}><X size={16}/></button></div>}
-      {(page==='Isaac Sim'||page==='Flight lab')&&<NativeMonitor/>}
+      {page==='Flight lab'&&<MissionControl mission={mission} method={method} level={level} seed={seed} checkpoint={checkpoint} checkpoints={checkpoints} busy={busy} online={online} story={story} compare={compare} onMission={choice} onLevel={value=>choice(mission,method,value)} onCheckpoint={setCheckpoint} onSeed={setSeed} onRun={()=>{setStory(false);void loadRun(mission,method,level,checkpoint,seed);}} onRetarget={commandRetarget} onGhost={()=>void ghostRun()} onStory={startStory} onCompare={setCompare} onExport={exportData} onError={setError} onOpenNotes={()=>setPage('Field notes')}/>}
+      {page==='Isaac Sim'&&<NativeMonitor/>}
       {page!=='Flight lab'&&page!=='Isaac Sim'&&<div className="content-page">
         <div className="page-head">
           <div><div className="breadcrumb"><span className="live-dot"/>{page==='Training'?'HEADLESS REINFORCEMENT LEARNING':page==='Results'?'MEASURED PERFORMANCE':'ENGINEERING REFERENCE'}</div><h1>{page==='Training'?'Watch a policy learn to fly.':page==='Results'?'Every flight leaves evidence.':'Understand what makes it fly.'}</h1><p className="page-sub">{page==='Training'?'Real PPO and SAC jobs run locally. Curves and checkpoints are measured on fixed evaluation seeds.':page==='Results'?'Failure modes, confidence intervals and fixed-seed evaluations from the recorded evidence register.':'The physics, controllers, hardware and evidence model behind every flight.'}</p></div>
-          <button className="btn subtle" onClick={()=>setPage('Isaac Sim')}><Rocket size={15}/>Open Isaac Sim<ArrowUpRight size={14}/></button>
+          <button className="btn subtle" onClick={()=>setPage('Flight lab')}><Rocket size={15}/>Open 3D Flight Lab<ArrowUpRight size={14}/></button>
         </div>
-        {page==='Training'&&<TrainingView jobs={jobs} checkpoints={checkpoints} online={online} onRefresh={refresh} onError={setError} onWatchReplay={()=>setPage('Isaac Sim')} onWatch={()=>setPage('Isaac Sim')}/>}
+        {page==='Training'&&<TrainingView jobs={jobs} checkpoints={checkpoints} online={online} onRefresh={refresh} onError={setError} onWatchReplay={url=>void loadRecordedRun(url)} onWatch={async(c)=>{setPage('Flight lab');setMethod('rl');setMission(c.mission as Mission);setCheckpoint(c.id);await loadRun(c.mission as Mission,'rl',4,c.id,42);}}/>}
         {page==='Results'&&<ResultsView results={results} runs={runs} currentConfigHash={lab.telemetry?.config_hash||system?.config_hash} currentDynamicsHash={system?.dynamics_hash} currentMission={lab.telemetry?.run.mission}/>}
         {page==='Field notes'&&<NotesView system={system}/>}
         <footer className="page-footer"><span><FlaskConical size={13}/>Educational flight research · approximate vehicle parameters</span><span>z-up physics · quaternion attitude · SI units <b>/</b> v1.1</span></footer>

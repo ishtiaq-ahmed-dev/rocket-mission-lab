@@ -216,6 +216,12 @@ main.shell-main{width:min(1480px,calc(100% - 52px));margin:0 auto;padding:26px 0
 .camera-bar button{padding:5px 9px;border-radius:999px;font-size:9.5px;font-weight:650;color:#77708c;white-space:nowrap;background:transparent;border:0}
 .camera-bar button:hover{background:#f7f3ff!important;color:#5342b6}
 .camera-bar button.selected{background:#241f36;color:#fff}
+.cam-key{font-family:Consolas,monospace;font-size:8px;opacity:.65;margin-left:3px;font-weight:700}
+.hud-sub-metric{display:block;font-size:9.5px;font-family:Consolas,monospace;color:#7a728e;margin-top:2px;letter-spacing:.02em;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.aerospace-hud>div{background:rgba(18,24,32,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:6px 10px;box-shadow:0 8px 24px -12px rgba(0,0,0,.5);text-align:right}
+.aerospace-hud>div>span{font:8.5px Consolas,monospace;letter-spacing:1.3px;color:#a4b8c4}
+.aerospace-hud strong{color:#ffffff;font-family:Consolas,monospace}
+.aerospace-hud .hud-phase{background:rgba(15,22,28,.88);border-color:rgba(132,197,172,.4)}
 .story-caption{position:absolute;left:50%;right:auto;top:74px;bottom:auto;transform:translateX(-50%);z-index:7;display:flex;flex-direction:column;gap:2px;width:auto;max-width:min(520px,80%);padding:9px 13px;border-radius:11px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border:1px solid #fff;box-shadow:var(--shadow-float);text-align:center}
 .story-caption span{font-size:8px;font-weight:750;letter-spacing:.1em;color:#9a93ac}
 .story-caption strong{font-size:11px;font-weight:600;color:#413a55;line-height:1.45}

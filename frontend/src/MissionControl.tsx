@@ -242,29 +242,104 @@ function LiveView({telemetry,metrics,duration,ended,plan,story,level,busy,onErro
   const cameraDistance=useLab(s=>s.cameraDistance),renderInfo=useLab(s=>s.renderInfo),recording=useLab(s=>s.recording);
   const ghost=useLab(s=>s.ghost);
   const retarget=telemetry?.run.retargets?.filter(event=>event.t<=time+1e-8).at(-1);
+  const [showHud,setShowHud]=useState(true);
+
+  // Keyboard shortcut to toggle HUD
+  useEffect(()=>{
+    const onKey=(e:KeyboardEvent)=>{
+      if((e.target as HTMLElement).matches('input,select,textarea')||e.ctrlKey||e.metaKey) return;
+      if(e.code==='KeyH') setShowHud(prev=>!prev);
+    };
+    window.addEventListener('keydown',onKey);
+    return()=>window.removeEventListener('keydown',onKey);
+  },[]);
+
+  // Export telemetry as RFC-4180 CSV for scientific analysis
+  const exportCSV=()=>{
+    if(!telemetry) return;
+    const headers=['time_s','pos_x_m','pos_y_m','altitude_agl_m','vel_x_mps','vel_y_mps','vel_z_mps','speed_mps','tilt_deg','throttle_pct','fuel_kg','gimbal_x_rad','gimbal_y_rad'];
+    const rows=telemetry.frames.map(f=>{
+      const m=frameMetrics(f,telemetry.rocket_length);
+      return [
+        f.t.toFixed(3),f.position[0].toFixed(3),f.position[1].toFixed(3),m.altitude.toFixed(3),
+        f.velocity[0].toFixed(3),f.velocity[1].toFixed(3),f.velocity[2].toFixed(3),m.speed.toFixed(3),
+        m.tilt.toFixed(2),(f.throttle*100).toFixed(1),f.fuel_mass.toFixed(1),f.gimbal[0].toFixed(4),f.gimbal[1].toFixed(4)
+      ].join(',');
+    });
+    const blob=new Blob([[headers.join(','),...rows].join('\n')],{type:'text/csv'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=`flight_telemetry_${telemetry.run.id}.csv`;a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const fSample=telemetry?sample(telemetry.frames,time):null;
+  const currentThrottle=fSample?.throttle||0;
+  const currentFuel=fSample?.fuel_mass||0;
+  const targetErr=telemetry&&plan&&telemetry.run.mission!=='takeoff'
+    ? Math.hypot(fSample?fSample.position[0]-plan.landing[0]:0,fSample?fSample.position[1]-plan.landing[1]:0)
+    : 0;
+  const mach=((metrics?.speed||0)/340.3).toFixed(2);
+
   return <section className="live-card" aria-label="3D rocket world">
     <div className="live-head">
-      <div className="live-title"><span className="live-dot"/>Flight playback <span className="chip">{pad==='Ship'?'Offshore':'Coastal'} range</span><span className="chip accent">Recorded</span></div>
+      <div className="live-title"><span className="live-dot"/>Flight playback <span className="chip">{pad==='Ship'?'Offshore':'Coastal'} range</span><span className="chip accent">6-DOF PhysX</span></div>
       <div className="live-tools">
         <button aria-label={sound?'Mute mission sound':'Enable mission sound'} title="Engine and wind sound" className={sound?'tool active':''} onClick={()=>{if(sound)missionAudio.mute();else void missionAudio.enable().catch(e=>onError(String(e)));}}>{sound?<Volume2 size={15}/>:<VolumeX size={15}/>}</button>
         <select aria-label="Environment" value={pad} onChange={e=>useLab.getState().set({pad:e.target.value})}><option>Coastal</option><option>Ship</option></select>
         <select aria-label="Trajectory display" value={trail} onChange={e=>useLab.getState().set({trail:e.target.value as 'Off'|'Flown'|'Full'})}><option value="Off">No trail</option><option value="Flown">Flown trail</option><option value="Full">Full path</option></select>
-        <select aria-label="Graphics quality" value={quality} onChange={e=>useLab.getState().set({quality:e.target.value,frameLimit:e.target.value==='Performance'?30:60})}><option>Performance</option><option>Balanced</option><option>High</option><option>Ultra</option><option>4K</option></select>
-        <button aria-label="Export 4K still" title="Export 3840 × 2160 PNG" onClick={()=>{try{capture4k();}catch(e){onError(String(e));}}}><Download size={15}/></button>
+        <select aria-label="Graphics quality" value={quality} onChange={e=>useLab.getState().set({quality:e.target.value,frameLimit:e.target.value==='Performance'?30:60})}>
+          <option value="Performance">Eco (30 FPS · Low GPU)</option>
+          <option value="Balanced">Balanced (60 FPS)</option>
+          <option value="High">High Detail (60 FPS)</option>
+          <option value="Ultra">Research Ultra (High-DPI)</option>
+        </select>
+        <button aria-label="Toggle HUD" title="Toggle Avionics HUD (Key H)" className={showHud?'tool active':''} onClick={()=>setShowHud(!showHud)}><Gauge size={15}/></button>
+        <button aria-label="Export CSV" title="Export CSV for Research (Pandas/MATLAB)" onClick={exportCSV}><Download size={15}/></button>
+        <button aria-label="Export 4K still" title="Export 3840 × 2160 PNG" onClick={()=>{try{capture4k();}catch(e){onError(String(e));}}}><Clapperboard size={15}/></button>
         <button title="Recording mode · Escape to exit" aria-label="Recording mode" className={recording?'tool active':''} onClick={()=>useLab.getState().set({recording:!recording})}><Expand size={15}/></button>
-        <button title="Reset camera" aria-label="Reset camera" onClick={()=>useLab.getState().set({camera:'Rocket',cameraRevision:useLab.getState().cameraRevision+1,followRocket:true})}><Focus size={15}/></button>
+        <button title="Reset camera (Key R)" aria-label="Reset camera" onClick={()=>useLab.getState().set({camera:'Rocket',cameraRevision:useLab.getState().cameraRevision+1,followRocket:true})}><Focus size={15}/></button>
       </div>
     </div>
     <div className="viewport">
       <SceneBoundary><Suspense fallback={<div className="scene-fallback"><LoaderCircle className="spin"/>Preparing the flight world…</div>}><Scene/></Suspense></SceneBoundary>
-      <div className="scene-label"><span className="status-dot on"/>FLIGHT RANGE <span>/</span> {pad==='Ship'?'OFFSHORE PLATFORM':'COASTAL RANGE'}<small>{telemetry?'RECORDED SIMULATION':'OFFLINE REPLAY'}</small></div>
-      <div className="floating-hud">
-        <div><span>ALTITUDE AGL</span><strong data-testid="altitude">{fixed(metrics?.altitude||0,1)}<small>m</small></strong></div>
-        <div><span>SPEED</span><strong>{fixed(metrics?.speed||0,1)}<small>m/s</small></strong></div>
-        {telemetry&&plan&&telemetry.run.mission!=='takeoff'&&<div><span>TARGET ERROR</span><strong data-testid="target-offset">{Math.hypot(sample(telemetry.frames,time).position[0]-plan.landing[0],sample(telemetry.frames,time).position[1]-plan.landing[1]).toFixed(2)}<small>m</small></strong></div>}
-        <div className="hud-phase"><span className="status-dot on"/>{ended?'FLIGHT ENDED':framePhase(time,telemetry)}</div>
+      <div className="scene-label"><span className="status-dot on"/>FLIGHT RANGE <span>/</span> {pad==='Ship'?'OFFSHORE PLATFORM':'COASTAL RANGE'}<small>{telemetry?'6-DOF MUJOCO ACCELERATED':'OFFLINE REPLAY'}</small></div>
+      
+      {showHud&&(
+        <div className="floating-hud aerospace-hud">
+          <div>
+            <span>ALTITUDE AGL</span>
+            <strong data-testid="altitude">{fixed(metrics?.altitude||0,1)}<small>m</small></strong>
+            <span className="hud-sub-metric">{metrics?.verticalSpeed!=null&&metrics.verticalSpeed>=0?'▲ +':'▼ '}{fixed(metrics?.verticalSpeed||0,1)} m/s vert</span>
+          </div>
+          <div>
+            <span>TOTAL VELOCITY</span>
+            <strong>{fixed(metrics?.speed||0,1)}<small>m/s</small></strong>
+            <span className="hud-sub-metric">M {mach} · Horiz {fixed(metrics?.horizontalSpeed||0,1)} m/s</span>
+          </div>
+          <div>
+            <span>ATTITUDE & TWR</span>
+            <strong>{fixed(metrics?.tilt||0,1)}<small>° tilt</small></strong>
+            <span className="hud-sub-metric">Throttle {fixed(currentThrottle*100,0)}% · {(currentFuel/1000).toFixed(2)} t fuel</span>
+          </div>
+          {telemetry&&plan&&telemetry.run.mission!=='takeoff'&&(
+            <div>
+              <span>LANDING TARGET OFFSET</span>
+              <strong data-testid="target-offset">{targetErr.toFixed(2)}<small>m</small></strong>
+              <span className="hud-sub-metric">Pad [{(plan?.landing||[1050,250])[0]}, {(plan?.landing||[1050,250])[1]}]</span>
+            </div>
+          )}
+          <div className="hud-phase"><span className="status-dot on"/>{ended?'FLIGHT COMPLETED':framePhase(time,telemetry)}</div>
+        </div>
+      )}
+
+      <div className="scene-coordinate">
+        <span>LOCAL METERS · Z UP · QUATERNION ATTITUDE</span>
+        {plan&&<span className="applied-plan">LAUNCH {plan.launch.join(', ')} → LAND {plan.landing.join(', ')}<br/>SEPARATION {plan.separation_altitude} m</span>}
+        {retarget&&<span className="retarget-flag">RETARGET T+{retarget.t.toFixed(1)} s → {retarget.landing.map(v=>v.toFixed(0)).join(', ')}</span>}
+        <span>CAM {cameraDistance>=1000?`${(cameraDistance/1000).toFixed(1)} km`:`${cameraDistance} m`} · {camera.toUpperCase()}</span>
+        <span>{renderInfo}</span>
       </div>
-      <div className="scene-coordinate"><span>LOCAL METERS · Z UP</span>{plan&&<span className="applied-plan">LAUNCH {plan.launch.join(', ')} → LAND {plan.landing.join(', ')}<br/>SEPARATION {plan.separation_altitude} m</span>}{retarget&&<span className="retarget-flag">RETARGET T+{retarget.t.toFixed(1)} s → {retarget.landing.map(v=>v.toFixed(0)).join(', ')}</span>}<span>CAMERA {cameraDistance>=1000?`${(cameraDistance/1000).toFixed(1)} km`:`${cameraDistance} m`}</span><span>{renderInfo}</span></div>
       <div className="navigation-tools" role="group" aria-label="3D mouse controls">
         {(['Rotate','Pan'] as const).map(tool=><button key={tool} aria-pressed={cameraTool===tool} className={cameraTool===tool?'selected':''} onClick={()=>useLab.getState().set({cameraTool:tool})}>{tool}</button>)}
         <button aria-label="Zoom in" onClick={()=>useLab.getState().set({cameraCommand:'In',commandRevision:useLab.getState().commandRevision+1})}>+</button>
@@ -284,7 +359,29 @@ function LiveView({telemetry,metrics,duration,ended,plan,story,level,busy,onErro
       {story&&<div className="story-caption"><span>CHAPTER 0{level} / 04</span><strong>{captions[Math.max(0,Math.min(3,level-1))]}</strong></div>}
       {ghost&&<div className="ghost-legend"><span/>CURRENT RUN<i/>COMPARISON · L{ghost.run.level}<button aria-label="Remove comparison" onClick={()=>useLab.getState().set({ghost:null})}><X size={12}/></button></div>}
       {busy&&<div className="loading-overlay"><LoaderCircle className="spin"/>Computing flight…</div>}
-      <div className="camera-bar"><span><Focus size={13}/>CAMERA</span>{['Rocket','Mission','Chase','Ground','Top-down','Free orbit'].map(item=><button key={item} onClick={()=>useLab.getState().set({camera:item,cameraRevision:useLab.getState().cameraRevision+1,followRocket:!['Free orbit','Mission'].includes(item)})} className={camera===item?'selected':''}>{item}</button>)}</div>
+      
+      {/* 6 Dedicated Aerospace Camera Views with Hotkey Badges */}
+      <div className="camera-bar">
+        <span><Focus size={13}/>CAMERA</span>
+        {[
+          {id:'Rocket',label:'Orbit',hotkey:'1',title:'Free 360° inspection orbit (Key 1)'},
+          {id:'Chase',label:'Chase',hotkey:'2',title:'Aerodynamic trajectory chase (Key 2)'},
+          {id:'Tower',label:'Tower',hotkey:'3',title:'Launch service tower optical tracking (Key 3)'},
+          {id:'Onboard',label:'Engine',hotkey:'4',title:'Onboard nozzle & grid fins view (Key 4)'},
+          {id:'Pad',label:'Pad LZ-1',hotkey:'5',title:'Touchdown landing zone telephoto (Key 5)'},
+          {id:'Mission',label:'Corridor',hotkey:'6',title:'Wide mission corridor overview (Key 6)'},
+          {id:'Top-down',label:'Top-down',hotkey:'T',title:'Direct overhead nadir view'}
+        ].map(item=>(
+          <button
+            key={item.id}
+            title={item.title}
+            onClick={()=>useLab.getState().set({camera:item.id,cameraRevision:useLab.getState().cameraRevision+1,followRocket:item.id!=='Mission'})}
+            className={camera===item.id?'selected':''}
+          >
+            {item.label} <span className="cam-key">[{item.hotkey}]</span>
+          </button>
+        ))}
+      </div>
     </div>
   </section>;
 }

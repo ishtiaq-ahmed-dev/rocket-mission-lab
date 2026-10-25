@@ -1,22 +1,29 @@
 const { chromium } = require('@playwright/test');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const { execSync } = require('child_process');
 
 async function recordFlight() {
   const videoDir = path.resolve(__dirname, '../videos');
   if (!fs.existsSync(videoDir)) fs.mkdirSync(videoDir, { recursive: true });
 
-  console.log('1. Launching Chromium with WebGL GPU acceleration...');
+  const tempProfileDir = path.join(os.tmpdir(), 'chromium-test-profile-' + Date.now());
+
+  console.log('1. Launching Chromium with WebGL GPU acceleration & isolated profile...');
   const browser = await chromium.launch({
     headless: true,
     args: [
+      `--user-data-dir=${tempProfileDir}`,
+      '--no-first-run',
+      '--no-default-browser-check',
       '--enable-webgl',
       '--ignore-gpu-blocklist',
       '--use-gl=angle',
       '--use-angle=d3d11',
       '--enable-gpu-rasterization',
       '--no-sandbox',
+      '--disable-gpu-sandbox',
       '--disable-setuid-sandbox'
     ]
   });

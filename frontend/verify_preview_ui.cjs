@@ -1,9 +1,25 @@
 const { chromium } = require('@playwright/test');
 const path = require('path');
+const os = require('os');
 
 async function main() {
   console.log('1. Launching headless Chromium to test Isaac Sim Web UI...');
-  const browser = await chromium.launch({ headless: true });
+  const tempProfileDir = path.join(os.tmpdir(), 'chromium-isaac-profile-' + Date.now());
+  const browser = await chromium.launch({
+    headless: true,
+    args: [
+      `--user-data-dir=${tempProfileDir}`,
+      '--no-first-run',
+      '--no-default-browser-check',
+      '--no-sandbox',
+      '--disable-gpu-sandbox',
+      '--disable-setuid-sandbox',
+      '--ignore-gpu-blocklist',
+      '--enable-webgl',
+      '--use-gl=angle',
+      '--use-angle=d3d11'
+    ]
+  });
   const context = await browser.newContext({ viewport: { width: 1480, height: 960 } });
   const page = await context.newPage();
 

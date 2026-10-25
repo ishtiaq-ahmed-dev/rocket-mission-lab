@@ -188,5 +188,35 @@ function Exhaust({telemetry}:{telemetry:Telemetry}){
   });
   return <points geometry={geometry} material={material} frustumCulled={false}/>;
 }
-function FlightScene(){const telemetry=useLab(s=>s.telemetry),ghost=useLab(s=>s.ghost);return <><FrameDriver/><World/>{telemetry&&<><Rocket telemetry={telemetry}/><Exhaust telemetry={telemetry}/><Trajectory telemetry={telemetry}/></>}{ghost&&<><Rocket telemetry={ghost} ghost/><Trajectory telemetry={ghost} ghost/></>}<CameraRig/><RenderOutput/></>;}
-export default function Scene(){const quality=useLab(s=>s.quality);return <Canvas frameloop="demand" shadows={quality!=='Performance'} camera={{position:[75,245,80],fov:40,near:.15,far:3000000}} dpr={1} gl={{antialias:true,logarithmicDepthBuffer:true,powerPreference:'default',toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:1.05,outputColorSpace:THREE.SRGBColorSpace}}><FlightScene/></Canvas>;}
+
+function FlightScene(){
+  const telemetry=useLab(s=>s.telemetry),ghost=useLab(s=>s.ghost);
+  return <>
+    <FrameDriver/>
+    <World/>
+    {telemetry&&<><Rocket telemetry={telemetry}/><Exhaust telemetry={telemetry}/><Trajectory telemetry={telemetry}/></>}
+    {ghost&&<><Rocket telemetry={ghost} ghost/><Trajectory telemetry={ghost} ghost/></>}
+    <CameraRig/>
+    <RenderOutput/>
+  </>;
+}
+
+export default function Scene(){
+  const quality=useLab(s=>s.quality);
+  const dpr=quality==='Performance'||quality==='Balanced'?1:Math.min(typeof window!=='undefined'?window.devicePixelRatio:1, 1.5);
+  return <Canvas
+    frameloop="demand"
+    shadows={quality!=='Performance'}
+    camera={{position:[75,245,80],fov:40,near:0.5,far:250000}}
+    dpr={dpr}
+    gl={{
+      antialias:quality!=='Performance',
+      powerPreference:quality==='Performance'?'low-power':'high-performance',
+      toneMapping:THREE.ACESFilmicToneMapping,
+      toneMappingExposure:1.05,
+      outputColorSpace:THREE.SRGBColorSpace
+    }}
+  >
+    <FlightScene/>
+  </Canvas>;
+}

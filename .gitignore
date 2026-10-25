@@ -29,3 +29,5 @@ data/results/*-src*.md
 test-results/
 playwright-report/
 *.tsbuildinfo
+*.log
+videos/analysis_*.png
