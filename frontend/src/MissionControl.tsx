@@ -326,7 +326,7 @@ function LiveView({telemetry,metrics,duration,ended,plan,story,level,busy,onErro
             <div>
               <span>LANDING TARGET OFFSET</span>
               <strong data-testid="target-offset">{targetErr.toFixed(2)}<small>m</small></strong>
-              <span className="hud-sub-metric">Pad [{(plan?.landing||[1050,250])[0]}, {(plan?.landing||[1050,250])[1]}]</span>
+              <span className="hud-sub-metric">Pad [{(plan?.landing||[1200,400])[0]}, {(plan?.landing||[1200,400])[1]}]</span>
             </div>
           )}
           <div className="hud-phase"><span className="status-dot on"/>{ended?'FLIGHT COMPLETED':framePhase(time,telemetry)}</div>

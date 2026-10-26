@@ -281,7 +281,7 @@ export default function World(){
   const storePlan=useLab(s=>s.flightPlan);
   const plan=run?.initial_flight_plan||run?.flight_plan||storePlan;
   const suborbital=plan?.profile==='suborbital';
-  const defaultLanding = useMemo<Site>(()=>[1050,250],[]);
+  const defaultLanding = useMemo<Site>(()=>[1200,400],[]);
   const launch=plan?.launch||ORIGIN,landing=plan?.landing||defaultLanding;
   const distinct=Math.hypot(launch[0]-landing[0],launch[1]-landing[1])>=22;
   const pads=useMemo(()=>{

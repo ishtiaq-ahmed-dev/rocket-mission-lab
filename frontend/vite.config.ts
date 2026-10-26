@@ -23,5 +23,17 @@ export default defineConfig({
     port: 5180,
     strictPort: true,
     proxy
+  },
+  build: {
+    chunkSizeWarningLimit: 1400,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
+          'vendor-charts': ['recharts'],
+          'vendor-react': ['react', 'react-dom', 'zustand', 'lucide-react']
+        }
+      }
+    }
   }
 });

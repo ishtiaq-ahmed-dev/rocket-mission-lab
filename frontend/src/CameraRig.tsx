@@ -67,6 +67,10 @@ export default function CameraRig(){
         e.preventDefault();
         useLab.getState().set({camera:'Mission',cameraRevision:useLab.getState().cameraRevision+1,followRocket:false});
         invalidate();
+      }else if(e.code==='KeyT'){
+        e.preventDefault();
+        useLab.getState().set({camera:'Top-down',cameraRevision:useLab.getState().cameraRevision+1,followRocket:true});
+        invalidate();
       }else if(e.code==='KeyF'){
         e.preventDefault();
         useLab.getState().set({cameraRevision:useLab.getState().cameraRevision+1,followRocket:true});
@@ -115,7 +119,7 @@ export default function CameraRig(){
     const d=rocketFrameDistance(size.width/size.height,40,telemetry.run.mission==='combined'?32:25);
     const plan=telemetry.run.flight_plan;
     const launchPos=plan?.launch||[0,0];
-    const landingPos=plan?.landing||[1050,250];
+    const landingPos=plan?.landing||[1200,400];
 
     if(fresh){
       initialized.current=key;
