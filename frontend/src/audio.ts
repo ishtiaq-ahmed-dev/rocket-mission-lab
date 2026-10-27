@@ -1,5 +1,5 @@
 import {useLab} from './store';
-import {sample} from './telemetry';
+import {sample,restHeight} from './telemetry';
 
 export function exteriorSoundGain(altitude:number,distance:number){
   return Math.exp(-Math.max(0,altitude)/17000)*Math.min(1,100/Math.max(100,distance));
@@ -65,7 +65,7 @@ class MissionAudio{
     const ctx=this.context,s=useLab.getState();if(!ctx||!this.master)return;
     const audible=s.sound&&s.playing&&!document.hidden&&s.telemetry!==null;
     const current=s.telemetry?sample(s.telemetry.frames,s.time):null;
-    const attenuation=s.audioPerspective==='Exterior'&&current?exteriorSoundGain(current.position[2]-(s.telemetry?.rocket_length??40)/2,s.cameraDistance):1;
+    const attenuation=s.audioPerspective==='Exterior'&&current?exteriorSoundGain(current.position[2]-(s.telemetry?restHeight(s.telemetry):40/2),s.cameraDistance):1;
     this.master.gain.setTargetAtTime(audible?s.volume*.55*attenuation:0,ctx.currentTime,.07);
     if(!s.telemetry){this.lastActive=false;this.lastPlaying=s.playing;return;}
     const heardTime=s.time-(s.audioPerspective==='Exterior'?s.cameraDistance/343:0);

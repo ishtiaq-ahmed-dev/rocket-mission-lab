@@ -30,7 +30,7 @@ class NativeGuidance(ClassicalController):
         ph=env.physics;gimbal=.5*(np.asarray(s['gimbal'])+previous['gimbal'])
         direction=np.array([np.tan(gimbal[0]),np.tan(gimbal[1]),1.]);direction/=np.linalg.norm(direction);axis=ph.rotation()@direction
         velocity=.5*(np.asarray(s['velocity'])+previous['velocity']);relative=velocity-s['wind']
-        drag=-.5*air_density(ph.w,s['position'][2]-ph.half)*ph.v['drag_coefficient']*ph.v['area']*np.linalg.norm(relative)*relative
+        drag=-.5*air_density(ph.w,s['position'][2]-ph.rest)*ph.v['drag_coefficient']*ph.v['area']*np.linalg.norm(relative)*relative
         observed=(np.asarray(s['velocity'])-previous['velocity'])/dt+np.array([0.,0.,ph.gravity()])-drag/s['mass']
         estimate=float(np.dot(observed,axis)/(throttle*ph.v['max_thrust']/s['mass']))
         if .8<estimate<1.2:self.engine_scale+=(1-np.exp(-dt/3.))*(estimate-self.engine_scale)

@@ -84,10 +84,10 @@ class RocketEnv(gym.Env):
             # The first curriculum stage is genuinely easy: 3 m, -0.8 m/s,
             # centered and upright. d=1 preserves the complete mission ranges.
             h = 3. + d*(rng.uniform(*m["landing_altitude"])-3.)
-            pos = [*(self.launch+rng.uniform(-m["horizontal_position"]*d, m["horizontal_position"]*d, 2)), h+self.physics.half]
+            pos = [*(self.launch+rng.uniform(-m["horizontal_position"]*d, m["horizontal_position"]*d, 2)), h+self.physics.rest]
             vel = [*rng.uniform(-m["horizontal_velocity"]*d, m["horizontal_velocity"]*d, 2), -.8+d*(rng.uniform(*m["landing_vertical_velocity"])+.8)]
         else:
-            pos, vel = [*self.launch, self.physics.half], [0, 0, 0]
+            pos, vel = [*self.launch, self.physics.rest], [0, 0, 0]
         q = Rotation.from_euler("xy", rng.uniform(-m["initial_tilt_deg"]*d, m["initial_tilt_deg"]*d, 2), degrees=True).as_quat()
         mass_scale = rng.uniform(1-.05*d, 1+.05*d) if self.randomize else 1.0
         thrust_scale = rng.uniform(1-.03*d, 1+.03*d) if self.randomize else 1.0
@@ -105,7 +105,7 @@ class RocketEnv(gym.Env):
 
     def _target(self):
         xy=self.launch if self.phase=='takeoff' else self.landing
-        return np.array([*xy, self.physics.half + (self.takeoff_altitude if self.phase == "takeoff" else 0.)])
+        return np.array([*xy, self.physics.rest + (self.takeoff_altitude if self.phase == "takeoff" else 0.)])
 
     def command_landing(self, landing):
         """Move the landing target during a flight; keeps the physical state."""
@@ -127,7 +127,7 @@ class RocketEnv(gym.Env):
         train=self.cfg["training"]
         position_scale=np.asarray(train.get("observation_position_scale",[400,400,400]))
         velocity_scale=np.asarray(train.get("observation_velocity_scale",[50,50,50]))
-        origin=np.array([*self.launch,0.])
+        origin=np.array([*self.launch,self.physics.stand])
         obs = np.concatenate([(np.asarray(s["position"])-origin)/position_scale, np.asarray(s["velocity"])/velocity_scale,
                               s["quaternion"], np.asarray(s["angular_velocity"])/2,
                               [s["fuel_mass"] / (self.cfg["vehicle"]["fuel_mass"]*self.physics.mass_scale), s["t"]/90],

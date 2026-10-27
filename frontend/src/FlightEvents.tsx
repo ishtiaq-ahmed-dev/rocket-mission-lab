@@ -23,5 +23,5 @@ export default function FlightEvents({telemetry}:{telemetry:Telemetry|null}){
     return values.sort((a,b)=>a.t-b.t);
   },[telemetry]);
   if(!telemetry)return null;
-  return <div className="flight-events" aria-label="Recorded flight events"><span>FLIGHT EVENTS</span>{events.map(event=><button key={`${event.label}-${event.t}`} onClick={()=>useLab.getState().set({time:event.t,playing:false})}>{event.label}<small>{event.t.toFixed(1)} s</small></button>)}{telemetry.run.separation&&<p>Released stage: {telemetry.frames.some(f=>f.upper_stage)?'independently integrated unpowered body.':'archived ideal ballistic preview.'}</p>}</div>;
+  return <div className="flight-events" aria-label="Recorded flight events"><span>FLIGHT EVENTS</span>{events.map(event=><button key={`${event.label}-${event.t}`} onClick={()=>useLab.getState().set({time:event.t,playing:false})}>{event.label}<small>{event.t.toFixed(1)} s</small></button>)}{telemetry.run.separation&&<p>Released stage: {telemetry.frames.some(f=>f.upper_stage)?'independently integrated unpowered body.':'no integrated stage state recorded.'}</p>}</div>;
 }

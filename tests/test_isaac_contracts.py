@@ -100,7 +100,7 @@ def test_native_guidance_uses_compound_inertia_without_changing_physical_engine(
     state=dict(t=0.,mass=40500.,altitude=400.,position=np.array([0.,0.,420.]),velocity=np.zeros(3))
     inertia=np.array([[0.,0.,0.],[5100000.,5100000.,61000.]])
     physics=SimpleNamespace(v=dict(max_thrust=760000.),model=SimpleNamespace(body_inertia=inertia),
-        engine_lever=17.9,attached=True,payload_mass=2500.,half=20.,state=lambda:state)
+        engine_lever=17.9,attached=True,payload_mass=2500.,half=20.,rest=23.,state=lambda:state)
     controller=NativeGuidance();controller.action(SimpleNamespace(physics=physics,sensed_state=state))
     assert captured[0].model.body_inertia[1,0]>inertia[1,0]
     assert captured[0].engine_lever>physics.engine_lever
@@ -112,7 +112,7 @@ def test_native_engine_identifier_learns_from_motion_without_reading_true_thrust
     from types import SimpleNamespace
     from rocket_lab.isaac.guidance import NativeGuidance
     config=load_config();vehicle={**config['vehicle'],'drag_coefficient':0.}
-    physics=SimpleNamespace(v=vehicle,w=config['world'],half=20.,rotation=lambda:np.eye(3),gravity=lambda:9.80665)
+    physics=SimpleNamespace(v=vehicle,w=config['world'],half=20.,rest=23.,rotation=lambda:np.eye(3),gravity=lambda:9.80665)
     controller=NativeGuidance();acceleration=.97*.6*vehicle['max_thrust']/40000.-9.80665
     for index in range(101):
         t=index*.1

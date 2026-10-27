@@ -140,10 +140,11 @@ function PadLights({radius}:{radius:number}){
 export function LandingPad({xy=[0,0],launch=false,label,radius=25}:{xy?:Site;launch?:boolean;label?:string;radius?:number}){
   const padLabel=label||(launch?'TAKEOFF PAD 01':'LANDING PAD 01');
   const ship=useLab(s=>s.pad)==='Ship'&&!launch;
+  const stand=useLab(s=>s.telemetry?.launch_stand_height??0);
   const quality=useLab(s=>s.quality);
   const texture=useMemo(()=>canvasTexture(quality==='Performance'?1024:2048,ctx=>{
     // Base concrete slab
-    ctx.fillStyle=launch?'#373c3b':'#404645';ctx.fillRect(0,0,2048,2048);
+    ctx.fillStyle=launch?'#d2d5ce':'#404645';ctx.fillRect(0,0,2048,2048);
     let seed=launch?77:23;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
     for(let i=0;i<85000;i++){ctx.fillStyle=i%2?'#ffffff12':'#101c1822';ctx.fillRect(random()*2048,random()*2048,random()*3+1,random()*3+1);}
     // Structural concrete expansion joints
@@ -247,10 +248,14 @@ export function LandingPad({xy=[0,0],launch=false,label,radius=25}:{xy?:Site;lau
     <mesh position={[0,-.375,0]} receiveShadow><cylinderGeometry args={[radius+2,radius+3,.7,128]}/><meshStandardMaterial color="#a5a68f" roughness={.95}/></mesh>
     <mesh rotation={[-Math.PI/2,0,0]} position={[0,.045,0]} receiveShadow><circleGeometry args={[radius,128]}/><meshStandardMaterial map={texture} roughness={.9} metalness={.05} polygonOffset polygonOffsetFactor={-4} polygonOffsetUnits={-4}/></mesh>
     {launch&&<>
-      {/* flame trench and hold-down ring */}
-      <mesh rotation={[-Math.PI/2,0,0]} position={[0,.06,0]}><circleGeometry args={[4.2,64]}/><meshStandardMaterial color="#252724" roughness={.98} polygonOffset polygonOffsetFactor={-5} polygonOffsetUnits={-5}/></mesh>
+      {/* launch stand: the booster rests on its top, altitude is measured from there */}
+      {stand>0&&<mesh position={[0,stand/2,0]} castShadow receiveShadow><cylinderGeometry args={[4.2,4.8,stand,48]}/><meshStandardMaterial color="#6f746c" metalness={.5} roughness={.6}/></mesh>}
+      <group position={[0,stand,0]}>
+      {/* flame deflector plate and hold-down ring */}
+      <mesh rotation={[-Math.PI/2,0,0]} position={[0,.06,0]}><circleGeometry args={[4.2,64]}/><meshStandardMaterial color="#9ca3a6" metalness={.6} roughness={.45} polygonOffset polygonOffsetFactor={-5} polygonOffsetUnits={-5}/></mesh>
       <mesh position={[0,.04,0]} rotation={[Math.PI/2,0,0]}><torusGeometry args={[6.7,.55,8,64]}/><meshStandardMaterial color="#5d6057" metalness={.55} roughness={.55}/></mesh>
       {[0,1,2,3].map(i=><LaunchClamp key={i} angle={i*Math.PI/2+Math.PI/4}/>)}
+      </group>
       {/* fixed service tower with work platforms and swing arms */}
       <group position={[14,0,0]}>
         {[[-2.6,-2.6],[2.6,-2.6],[-2.6,2.6],[2.6,2.6]].map(([x,z],i)=><mesh key={i} position={[x,27,z]} castShadow><boxGeometry args={[.34,54,.34]}/><meshStandardMaterial color="#6e7468" metalness={.6} roughness={.48}/></mesh>)}

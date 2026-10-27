@@ -20,7 +20,7 @@ def test_launch_support_is_a_one_way_physical_release():
 def test_tilted_feet_contact_above_the_old_center_height_plane():
     from scipy.spatial.transform import Rotation
     p=RocketPhysics();q=Rotation.from_euler('x',4,degrees=True).as_quat()
-    p.reset(7,position=[2,3,21],velocity=[0,0,-1],quaternion=[q[3],*q[:3]])
+    p.reset(7,position=[2,3,21+p.stand],velocity=[0,0,-1],quaternion=[q[3],*q[:3]])
     for _ in range(30):
         s=p.step([-1,0,0])
         if s['clearance']<1e-7:break

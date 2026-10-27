@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { fileURLToPath } from 'node:url';
 
 const proxy = {
   '/api': {
@@ -27,6 +28,10 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1400,
     rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        replay: fileURLToPath(new URL('./replay/index.html', import.meta.url))
+      },
       output: {
         manualChunks: {
           'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],

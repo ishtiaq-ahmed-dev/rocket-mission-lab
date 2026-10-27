@@ -2,7 +2,7 @@ import {useEffect,useMemo,useRef} from 'react';
 import {useFrame} from '@react-three/fiber';
 import * as THREE from 'three';
 import {useLab} from './store';
-import {sample} from './telemetry';
+import {sample,restHeight} from './telemetry';
 import {gearDeployment,legAngle,legFoot,LEG_HINGE,LEG_LENGTH} from './gearKinematics';
 import type {Telemetry} from './types';
 
@@ -15,7 +15,7 @@ function Leg({telemetry,ghost}:{telemetry:Telemetry;ghost:boolean}){
   },[]);
   useEffect(()=>()=>shell.dispose(),[shell]);
   useFrame(()=>{
-    const f=sample(telemetry.frames,useLab.getState().time),amount=gearDeployment(f.phase,f.position[2]-telemetry.rocket_length/2);
+    const f=sample(telemetry.frames,useLab.getState().time),amount=gearDeployment(f.phase,f.position[2]-restHeight(telemetry));
     if(arm.current)arm.current.rotation.z=-legAngle(amount);
     end.set(...legFoot(amount));
     if(foot.current){foot.current.position.copy(end);foot.current.rotation.z=Math.PI/2*(1-amount);}

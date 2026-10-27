@@ -15,11 +15,14 @@ class RocketPhysics:
         self.v = self.cfg["vehicle"]
         self.w = self.cfg["world"]
         self.half = self.v["length"] / 2
+        # Top of the launch stand. Altitude is measured from it; `rest` is the body-centre height on it.
+        self.stand = float(self.cfg["mission"].get("launch_stand_height", 0.))
+        self.rest = self.half + self.stand
         self.engine_lever = self.v.get("engine_lever", self.half)
         mass = self.v["dry_mass"] + self.v["fuel_mass"]
         inertia = np.array(self.v["inertia"]) * mass / self.v["dry_mass"]
         xml = f'''<mujoco><option timestep="{self.w['timestep']}" gravity="0 0 -{self.w['gravity']}" integrator="RK4"/>
-        <worldbody><body name="rocket" pos="0 0 {self.half}"><freejoint/>
+        <worldbody><body name="rocket" pos="0 0 {self.rest}"><freejoint/>
         <inertial pos="0 0 0" mass="{mass}" diaginertia="{' '.join(map(str,inertia))}"/>
         <geom type="cylinder" size="{self.v['radius']} {self.half}" contype="0" conaffinity="0"/>
         </body></worldbody></mujoco>'''
@@ -40,13 +43,13 @@ class RocketPhysics:
         self.released_stage = None
         self.wind = np.array(self.w["wind_mean"], dtype=float) * wind_scale
         mujoco.mj_resetData(self.model, self.data)
-        self.data.qpos[:3] = position if position is not None else [0, 0, 200 + self.half]
+        self.data.qpos[:3] = position if position is not None else [0, 0, 200 + self.rest]
         self.data.qpos[3:7] = quaternion if quaternion is not None else [1, 0, 0, 0]
         self.data.qvel[:3] = velocity if velocity is not None else [0, 0, -20]
         # A vehicle standing on its pad is held by the legs/hold-downs until thrust exceeds weight.
-        self.on_pad = bool(self.data.qpos[2] <= self.half + 0.1 and np.linalg.norm(self.data.qvel[:3]) < 1e-6)
+        self.on_pad = bool(self.data.qpos[2] <= self.rest + 0.1 and np.linalg.norm(self.data.qvel[:3]) < 1e-6)
         if self.on_pad:
-            self.data.qpos[2] = self.half
+            self.data.qpos[2] = self.rest
             self.data.qpos[3:7] = [1, 0, 0, 0]
         self.pad_pose = self.data.qpos.copy()
         self._mass_update()
@@ -58,7 +61,7 @@ class RocketPhysics:
         return self.v["dry_mass"] * self.mass_scale + self.fuel + self.attached_mass
 
     def gravity(self, altitude=None):
-        height=max(0.,float(self.data.qpos[2]-self.half) if altitude is None else altitude)
+        height=max(0.,float(self.data.qpos[2]-self.rest) if altitude is None else altitude)
         return gravity_at(self.w, height)
 
     def separate(self):
@@ -103,7 +106,7 @@ class RocketPhysics:
                     velocity=self.data.qvel[:3].copy(), angular_velocity=self.data.qvel[3:6].copy(),
                     fuel_mass=float(self.fuel), mass=float(self.mass), wind=self.wind.copy(),
                     throttle=float(self.throttle), gimbal=self.gimbal.copy(),
-                    altitude=float(self.data.qpos[2] - self.half), tilt=float(np.degrees(np.arccos(np.clip(n[2], -1, 1)))),
+                    altitude=float(self.data.qpos[2] - self.rest), tilt=float(np.degrees(np.arccos(np.clip(n[2], -1, 1)))),
                     clearance=self.contact_clearance(), contact_speed=self.contact_speed(),
                     hold_down=bool(self.on_pad), release_time=self.release_time,
                     upper_stage=self.released_stage.state() if self.released_stage else None)
@@ -115,11 +118,11 @@ class RocketPhysics:
 
     def contact_clearance(self):
         if self.v.get('contact_model') != 'feet':
-            return float(self.data.qpos[2]-self.half)
+            return float(self.data.qpos[2]-self.rest)
         rotation = self.rotation()
         # Lowest point of each circular sole, including its radius and thickness.
         sole = .82*np.hypot(rotation[2, 0], rotation[2, 1]) + .15*abs(rotation[2, 2])
-        return float(self.data.qpos[2] + np.min(self.feet() @ rotation[2]) - sole)
+        return float(self.data.qpos[2] + np.min(self.feet() @ rotation[2]) - sole - self.stand)
 
     def contact_speed(self):
         rotation = self.rotation()
@@ -161,7 +164,7 @@ class RocketPhysics:
             self.wind += 0.3 * (np.array(self.w["wind_mean"])*self.wind_scale - self.wind)*dt + self.rng.normal(0, self.w["gust_std"]*self.wind_scale*np.sqrt(dt), 3)
             self.wind[2] = 0
             relative = self.data.qvel[:3] - self.wind
-            rho = air_density(self.w,self.data.qpos[2]-self.half)
+            rho = air_density(self.w,self.data.qpos[2]-self.rest)
             drag = -0.5*rho*self.v["drag_coefficient"]*self.v["area"]*np.linalg.norm(relative)*relative
             self.data.qfrc_applied[:3] = force_world + drag
             # Free-joint rotational generalized forces use the local tangent

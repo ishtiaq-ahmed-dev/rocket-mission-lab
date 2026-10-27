@@ -815,7 +815,7 @@ class NativeVisuals:
         # Flicker is correlated smooth noise (1-13 Hz band from flame studies):
         # slow envelope + fast chop, never strobing.
         throttle=float(physics.throttle)
-        alt_agl=max(0.,physics.position[2]-physics.half)
+        alt_agl=max(0.,physics.position[2]-physics.rest)
         t=physics.data.time
         slow=1.+.09*np.sin(2.1*t)+.05*np.sin(3.7*t+2.1)          # breathing envelope
         fast=1.+.06*np.sin(21.*t)+.04*np.sin(47.*t+1.3)+.03*np.sin(83.*t+.6)  # fine chop

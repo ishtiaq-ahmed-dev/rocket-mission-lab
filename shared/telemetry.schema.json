@@ -767,6 +767,11 @@
       "title": "Rocket Length",
       "type": "number"
     },
+    "launch_stand_height": {
+      "default": 0.0,
+      "title": "Launch Stand Height",
+      "type": "number"
+    },
     "initial_fuel": {
       "title": "Initial Fuel",
       "type": "number"

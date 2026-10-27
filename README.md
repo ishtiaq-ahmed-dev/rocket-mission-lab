@@ -49,7 +49,7 @@ The interface uses a light mission-control workspace with Overview, Flight deck,
 - **Controls & Navigation**: Drag to orbit, right-drag to pan, and scroll/pinch to zoom. Rotate/Pan switches the left-drag tool. Use WASD to fly through the scene, Q/E for down/up, and Shift to accelerate. Press `H` to toggle the telemetry HUD overlay, `Space` for play/pause, `F` to focus, and `R` to reset framing.
 - **1:1 Real-Time Synchronization**: Playback clock operates in exact 1:1 physical wall-clock time at 1.0× speed, with 0.25×, 0.5×, 2×, and 4× rate multipliers.
 
-The event buttons jump to actual recorded separation, engine cutoff, relight, and outcome. Scrubbing pauses playback. Throttle and gimbal drive the nozzle, colored plume, and exhaust history; engine-off segments do not show an active flame. These are illustrative rendering effects, not a combustion/CFD model. The released stage follows an explicitly labelled ideal ballistic preview; upper-stage propulsion is not simulated.
+The event buttons jump to actual recorded separation, engine cutoff, relight, and outcome. Scrubbing pauses playback. Throttle and gimbal drive the nozzle, colored plume, and exhaust history; engine-off segments do not show an active flame. These are illustrative rendering effects, not a combustion/CFD model. The released stage is drawn only from the integrated `upper_stage` state (gravity and drag, no thrust); runs without that state show no released stage. Upper-stage propulsion is not simulated.
 
 ## Training
 

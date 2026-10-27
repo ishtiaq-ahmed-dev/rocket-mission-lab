@@ -103,20 +103,14 @@ function Rocket({telemetry,ghost=false}:{telemetry:Telemetry;ghost?:boolean}){
     const separation=telemetry.run.separation;
     if(attached.current)attached.current.visible=!separation||time<separation.t;
     if(released.current&&separation){
+      // Only the integrated upper_stage state from the simulator is drawn; no analytic fallback.
       const stage=f.upper_stage;
+      released.current.visible=time>=separation.t&&!!stage&&!stage.impacted;
       if(stage){
         physicsRotation(stage.quaternion,released.current.quaternion);
         stageOffset.set(0,-4.5,0).applyQuaternion(released.current.quaternion);
         released.current.position.set(...physicsPosition(stage.position)).add(stageOffset);
-        released.current.visible=time>=separation.t&&!stage.impacted;
-        return;
       }
-      const dt=Math.max(0,time-separation.t),p=separation.position,v=separation.velocity;
-      physicsRotation(separation.quaternion,released.current.quaternion);
-      stageOffset.set(0,20,0).applyQuaternion(released.current.quaternion);
-      const height=p[2]+stageOffset.y+v[2]*dt-4.903325*dt*dt;
-      released.current.visible=time>=separation.t&&height>0;
-      released.current.position.set(p[0]+stageOffset.x+v[0]*dt,height,-p[1]+stageOffset.z-v[1]*dt);
     }
   });
   return <>

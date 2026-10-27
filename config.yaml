@@ -38,6 +38,7 @@ mission:
   horizontal_velocity: 1.5 # approximate +/- m/s
   initial_tilt_deg: 2.0 # approximate
   pad: [0.0, 0.0, 0.0] # approximate static pad, ship appearance is visual only
+  launch_stand_height: 3.0 # approximate m; booster rests on this stand, altitude is measured from its top
   touchdown_speed: 2.0 # approximate strict total speed threshold m/s
   touchdown_tilt_deg: 5.0 # approximate strict tilt threshold
   pad_radius: 5.0 # approximate m

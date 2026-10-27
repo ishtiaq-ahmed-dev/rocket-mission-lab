@@ -173,7 +173,7 @@ def main():
             nonlocal count,last_heartbeat
             if time.monotonic()-last_heartbeat>15:
                 last_heartbeat=time.monotonic();faulthandler.dump_traceback_later(90,repeat=True)
-                print(f'NATIVE: t={env.physics.data.time:.2f} s, altitude={env.physics.position[2]-env.physics.half:.1f} m, phase={env.phase}',flush=True)
+                print(f'NATIVE: t={env.physics.data.time:.2f} s, altitude={env.physics.position[2]-env.physics.rest:.1f} m, phase={env.phase}',flush=True)
             state=env.physics.state();values={key:(value.tolist() if isinstance(value,np.ndarray) else value) for key,value in state.items() if key in Frame.model_fields}
             frame=Frame(**values,phase=env.phase)
             server.publish(dict(protocol='rocket-native-v1',engine='Isaac Sim PhysX',frame=frame.model_dump(mode='json'),
@@ -383,11 +383,11 @@ def _diagnostic(env,server,publish,exchange,capture=None):
         assert abs(physics.position[2]-expected_discrete_height)<.01,'Vacuum drop height does not match the native semi-implicit integrator'
         result['vacuum_drop_velocity_error']=float(abs(physics.velocity[2]+g))
         result['vacuum_drop_height_error']=float(abs(physics.position[2]-(1000.-.5*g)))
-        physics.reset(11,position=[0.,0.,physics.half],velocity=[0.,0.,0.],wind_scale=0.)
+        physics.reset(11,position=[0.,0.,physics.rest],velocity=[0.,0.,0.],wind_scale=0.)
         for _ in range(3):physics.step([-1.,0.,0.])
-        assert physics.on_pad and abs(physics.position[2]-physics.half)<.01,'Launch restraints failed under gravity'
+        assert physics.on_pad and abs(physics.position[2]-physics.rest)<.01,'Launch restraints failed under gravity'
         for _ in range(10):physics.step([1.,0.,0.])
-        assert not physics.on_pad and physics.position[2]>physics.half+.1,'Launch restraints did not release after positive thrust margin'
+        assert not physics.on_pad and physics.position[2]>physics.rest+.1,'Launch restraints did not release after positive thrust margin'
         result.update(analytic_free_fall_passed=True,hold_down_and_release_passed=True)
         physics.reset(11,position=[0.,0.,500.],velocity=[0.,0.,0.],wind_scale=0.)
         physics.separate();booster_mass=physics.mass;payload_mass=physics.payload_mass

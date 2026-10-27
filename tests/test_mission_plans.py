@@ -27,9 +27,10 @@ def test_target_is_phase_specific_and_translation_invariant():
     env=RocketEnv('combined',config=cfg,noise=False,randomize=False)
     obs,_=env.reset(seed=42)
     np.testing.assert_allclose(env.physics.state()['position'][:2],plan.launch)
-    np.testing.assert_allclose(env._target(),[600,-300,370])
+    rest=env.physics.rest
+    np.testing.assert_allclose(env._target(),[600,-300,rest+350])
     np.testing.assert_allclose(obs[:2],[0,0])
-    env.phase='landing';np.testing.assert_allclose(env._target(),[680,-260,20])
+    env.phase='landing';np.testing.assert_allclose(env._target(),[680,-260,rest])
     env.close()
 
 

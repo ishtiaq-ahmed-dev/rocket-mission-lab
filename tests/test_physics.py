@@ -101,8 +101,8 @@ def test_recorded_difficulty_changes_start_and_has_a_distinct_identity():
     from rocket_lab.simulation import simulate
     full=simulate(level=1,seed=21000,save=False)
     stage=simulate(level=1,seed=21000,save=False,difficulty=.4)
-    half=load_config()["vehicle"]["length"]/2
-    assert stage.frames[0].position[2]-half==pytest.approx(3+.4*(full.frames[0].position[2]-half-3))
+    cfg=load_config();rest=cfg["vehicle"]["length"]/2+cfg["mission"]["launch_stand_height"]
+    assert stage.frames[0].position[2]-rest==pytest.approx(3+.4*(full.frames[0].position[2]-rest-3))
     assert stage.run.difficulty==.4 and full.run.difficulty==1
     assert stage.run.id!=full.run.id and '-d0.400000-' in stage.run.id
     assert full.run.id.startswith('landing-classical-l1-s21000-')
@@ -145,7 +145,7 @@ def test_takeoff_goal_curriculum_exposes_the_actual_goal_and_keeps_evaluation_fu
     cfg=load_config();cfg['training'].update(takeoff_goal_curriculum=True,takeoff_curriculum_altitude=5.,takeoff_curriculum_velocity=3.)
     easy=TakeoffEnv(config=cfg,difficulty=0,training=True);obs,_=easy.reset(seed=42)
     assert easy.takeoff_altitude==5 and easy.takeoff_velocity==3
-    assert easy._target()[2]==easy.physics.half+5
+    assert easy._target()[2]==easy.physics.rest+5
     assert obs[17]==pytest.approx(5/cfg['training']['observation_position_scale'][2])
     assert obs[18]==pytest.approx(3/50)
     evaluation=TakeoffEnv(config=cfg,difficulty=0);evaluation.reset(seed=42)

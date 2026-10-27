@@ -13,7 +13,7 @@ import {capture4k} from './capture';
 import FlightEvents from './FlightEvents';
 import FlightPlanEditor from './FlightPlanEditor';
 import NumberField from './NumberField';
-import {compact,decimatedFrames,frameMetrics,sample,landingAt} from './telemetry';
+import {compact,decimatedFrames,frameMetrics,sample,landingAt,restHeight} from './telemetry';
 import type {Checkpoint,Mission,Method,Retarget,Telemetry} from './types';
 
 const missionBlurbs:Record<Mission,string>={landing:'Fly a precision powered descent to the recovery pad coordinates.',takeoff:'Launch from the pad, climb to the separation altitude and hit the target ascent speed.',combined:'Launch, release an unpowered upper stage and return the booster to the recovery site.'};
@@ -54,9 +54,9 @@ export default function MissionControl(props:MissionControlProps){
   const duration=telemetry?.frames.at(-1)?.t||1;
   const ended=time>=duration;
   const frame=telemetry?sample(telemetry.frames,time):null;
-  const metrics=frame&&telemetry?frameMetrics(frame,telemetry.rocket_length):null;
+  const metrics=frame&&telemetry?frameMetrics(frame,restHeight(telemetry)):null;
   const earlier=telemetry&&time>1?sample(telemetry.frames,Math.max(0,time-5)):null;
-  const earlierMetrics=earlier&&telemetry?frameMetrics(earlier,telemetry.rocket_length):null;
+  const earlierMetrics=earlier&&telemetry?frameMetrics(earlier,restHeight(telemetry)):null;
   const speedTrend=metrics&&earlierMetrics?metrics.speed-earlierMetrics.speed:0;
   const fuelPercent=frame&&telemetry?frame.fuel_mass/telemetry.initial_fuel*100:0;
   const appliedPlan=telemetry?.run.flight_plan?{...telemetry.run.flight_plan,landing:landingAt(telemetry.run,time)}:undefined;
@@ -70,7 +70,7 @@ export default function MissionControl(props:MissionControlProps){
   const chartData=useMemo(()=>{
     if(!telemetry)return [];
     return decimatedFrames(telemetry.frames,240).map(value=>{
-      const m=frameMetrics(value,telemetry.rocket_length);
+      const m=frameMetrics(value,restHeight(telemetry));
       return {t:+value.t.toFixed(1),altitude:+m.altitude.toFixed(1),speed:+m.speed.toFixed(2),throttle:+(value.throttle*100).toFixed(1),fuel:+(value.fuel_mass/1000).toFixed(2)};
     });
   },[telemetry]);
@@ -92,7 +92,7 @@ export default function MissionControl(props:MissionControlProps){
     const ignition=frames.find(value=>value.throttle>.05);if(ignition)values.push({t:ignition.t,label:'Engine ignition',detail:`${(ignition.throttle*100).toFixed(0)}% throttle`,icon:'engine'});
     for(const retarget of telemetry.run.retargets||[])values.push({t:retarget.t,label:'Landing target moved',detail:`${retarget.previous_landing.map(v=>v.toFixed(0)).join(', ')} → ${retarget.landing.map(v=>v.toFixed(0)).join(', ')} m`,icon:'target'});
     if(telemetry.run.launch_release_time!=null)values.push({t:telemetry.run.launch_release_time,label:'Hold-down release',detail:'Sustained thrust margin achieved · supports opening',icon:'stage'});
-    if(telemetry.run.separation)values.push({t:telemetry.run.separation.t,label:'Stage separation',detail:`${(telemetry.run.separation.mass/1000).toFixed(1)} t released · ${frames.some(f=>f.upper_stage)?'independent unpowered dynamics':'archived ballistic preview'}`,icon:'stage'});
+    if(telemetry.run.separation)values.push({t:telemetry.run.separation.t,label:'Stage separation',detail:`${(telemetry.run.separation.mass/1000).toFixed(1)} t released · ${frames.some(f=>f.upper_stage)?'independent unpowered dynamics':'no integrated stage state recorded'}`,icon:'stage'});
     const cutoff=frames.find((value,index)=>index>0&&value.throttle===0&&frames[index-1].throttle>0);
     if(cutoff)values.push({t:cutoff.t,label:'Main engine cutoff',detail:`${(cutoff.fuel_mass/1000).toFixed(2)} t propellant remaining`,icon:'engine'});
     const relight=cutoff?frames.find(value=>value.t>cutoff.t&&value.throttle>0):undefined;
@@ -259,7 +259,7 @@ function LiveView({telemetry,metrics,duration,ended,plan,story,level,busy,onErro
     if(!telemetry) return;
     const headers=['time_s','pos_x_m','pos_y_m','altitude_agl_m','vel_x_mps','vel_y_mps','vel_z_mps','speed_mps','tilt_deg','throttle_pct','fuel_kg','gimbal_x_rad','gimbal_y_rad'];
     const rows=telemetry.frames.map(f=>{
-      const m=frameMetrics(f,telemetry.rocket_length);
+      const m=frameMetrics(f,restHeight(telemetry));
       return [
         f.t.toFixed(3),f.position[0].toFixed(3),f.position[1].toFixed(3),m.altitude.toFixed(3),
         f.velocity[0].toFixed(3),f.velocity[1].toFixed(3),f.velocity[2].toFixed(3),m.speed.toFixed(3),
@@ -388,7 +388,7 @@ function LiveView({telemetry,metrics,duration,ended,plan,story,level,busy,onErro
 
 function framePhase(time:number,telemetry:Telemetry|null){
   if(!telemetry)return 'AWAITING FLIGHT';
-  const f=sample(telemetry.frames,time),agl=f.position[2]-telemetry.rocket_length/2;
+  const f=sample(telemetry.frames,time),agl=f.position[2]-restHeight(telemetry);
   if(f.phase==='takeoff'&&f.hold_down)return f.throttle>.02?'IGNITION · HOLD-DOWNS ENGAGED':'ON PAD · PRE-IGNITION';
   if(f.throttle<.02)return f.phase==='takeoff'&&agl<1.5?'ON PAD · PRE-IGNITION':'ENGINE OFF · COAST';
   return f.phase==='takeoff'?'ASCENT BURN':'LANDING BURN';

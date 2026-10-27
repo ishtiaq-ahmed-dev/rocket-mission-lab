@@ -119,6 +119,7 @@ class Telemetry(BaseModel):
     schema_version: Literal["1.0","1.1"] = "1.1"
     config_hash: str
     rocket_length: float
+    launch_stand_height: float = 0.0
     initial_fuel: float
     min_throttle: float | None = None
     max_thrust: float | None = None

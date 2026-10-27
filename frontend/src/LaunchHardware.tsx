@@ -3,10 +3,11 @@ import {useFrame} from '@react-three/fiber';
 import type {Group} from 'three';
 import {useLab} from './store';
 import type {Telemetry} from './types';
+import {restHeight} from './telemetry';
 
 export function supportRelease(telemetry:Telemetry|null,time:number){
   if(!telemetry||telemetry.run.mission==='landing')return 1;
-  const release=telemetry.run.launch_release_time??telemetry.frames.find(f=>f.position[2]>telemetry.rocket_length/2+.05)?.t;
+  const release=telemetry.run.launch_release_time??telemetry.frames.find(f=>f.position[2]>restHeight(telemetry)+.05)?.t;
   if(release==null||time<release)return 0;
   return Math.min(1,(time-release)/.28);
 }

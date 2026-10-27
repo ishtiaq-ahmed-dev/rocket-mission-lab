@@ -69,7 +69,7 @@ class ClassicalController:
         direction=np.array([np.tan(s['gimbal'][0]),np.tan(s['gimbal'][1]),1.]);direction/=np.linalg.norm(direction)
         force=ph.rotation()@(direction*s['throttle']*ph.v['max_thrust'])
         relative=velocity-s['wind']
-        rho=air_density(cfg['world'],s['position'][2]-ph.half)
+        rho=air_density(cfg['world'],s['position'][2]-ph.rest)
         drag=-.5*rho*ph.v['drag_coefficient']*ph.v['area']*np.linalg.norm(relative)*relative
         return (force+drag)/s['mass']-np.array([0.,0.,ph.gravity(s['altitude'])])
 
@@ -102,7 +102,7 @@ class ClassicalController:
             self.estimate={**measured,'position':s['position'].copy(),'velocity':s['velocity'].copy(),'n':n,'n_dot':s['n_dot'],
                            'accel':self._model_acceleration(env,measured,s['velocity'])}
         velocity, position=s["velocity"], s["position"]
-        h=float(position[2]-ph.half)
+        h=float(position[2]-ph.rest)
         lateral_error=position[:2]-env._target()[:2]
         transfer_dist=float(np.linalg.norm(env.launch-env.landing)) if hasattr(env,'launch') and hasattr(env,'landing') else 0.
         if transfer_dist>100.:

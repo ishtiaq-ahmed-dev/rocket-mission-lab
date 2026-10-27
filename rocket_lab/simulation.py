@@ -119,7 +119,7 @@ def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=
                 launch_release_time=env.physics.release_time,separation=env.separation,dynamics_hash=source_hash,
                 retargets=[RetargetEvent(**value) for value in env.retargets],
                 controller_status=controller.plan_status if method=="classical" else "measured checkpoint; maturity not certified")
-    result=Telemetry(config_hash=run_hash,rocket_length=env.cfg["vehicle"]["length"],initial_fuel=env.cfg["vehicle"]["fuel_mass"]*env.physics.mass_scale,
+    result=Telemetry(config_hash=run_hash,rocket_length=env.cfg["vehicle"]["length"],launch_stand_height=env.physics.stand,initial_fuel=env.cfg["vehicle"]["fuel_mass"]*env.physics.mass_scale,
                      min_throttle=env.cfg['vehicle']['min_throttle'],max_thrust=env.cfg['vehicle']['max_thrust'],
                      gravity_model=env.cfg['world'].get('gravity_model','constant'),run=run,frames=frames)
     if save:

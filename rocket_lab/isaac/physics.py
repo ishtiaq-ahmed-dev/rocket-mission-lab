@@ -22,6 +22,7 @@ def xyz(values):return Gf.Vec3f(*map(float,values))
 class IsaacRocketPhysics:
     def __init__(self,config,headless=False,gpu_dynamics=False,visuals=None):
         self.cfg=config;self.v=config['vehicle'];self.w=config['world'];self.half=self.v['length']/2
+        self.stand=float(config['mission'].get('launch_stand_height',0.));self.rest=self.half+self.stand
         self.engine_lever=self.v.get('engine_lever',self.half);self.headless=headless;self.visuals=visuals
         self.engine=Engine(self.v,self.w['gravity']);self.rcs=RollThrusters(self.v);self.roll_command=0.;self.data=SimpleNamespace(time=0.)
         # Optional flight-history sink (rocket_lab.isaac.cinematic.FlightTrack);
@@ -130,12 +131,12 @@ class IsaacRocketPhysics:
         self._impacted=False;self._impact_speed=0.;self._render_step=0;self.detached=False
         self.impact_state=None
         self.separation_time=None;self.separation_axis=np.zeros(3)
-        p=np.asarray(position if position is not None else [0.,0.,self.half+200.],dtype=float)
+        p=np.asarray(position if position is not None else [0.,0.,self.rest+200.],dtype=float)
         v=np.asarray(velocity if velocity is not None else [0.,0.,-20.],dtype=float)
         q=np.asarray(quaternion if quaternion is not None else [1.,0.,0.,0.],dtype=float)
-        self.on_pad=bool(p[2]<=self.half+.1 and np.linalg.norm(v)<1e-6)
+        self.on_pad=bool(p[2]<=self.rest+.1 and np.linalg.norm(v)<1e-6)
         self._contact_armed=not self.on_pad
-        if self.on_pad:q=np.array([1.,0.,0.,0.]);p[2]=self.half
+        if self.on_pad:q=np.array([1.,0.,0.,0.]);p[2]=self.rest
         if self.stage_joint:
             self.stage.RemovePrim('/World/PayloadConnector');self.stage_joint=None
         if self.hold_joint:
@@ -187,7 +188,7 @@ class IsaacRocketPhysics:
         self._rotation=Rotation.from_quat([*self.quaternion[1:],self.quaternion[0]]).as_matrix()
 
     def rotation(self):return self._rotation
-    def gravity(self,altitude=None):return gravity_at(self.w,self.position[2]-self.half if altitude is None else altitude)
+    def gravity(self,altitude=None):return gravity_at(self.w,self.position[2]-self.rest if altitude is None else altitude)
 
     def set_landing_target(self,target):
         if self.visuals:self.visuals.set_landing_target(target)
@@ -236,7 +237,7 @@ class IsaacRocketPhysics:
             stage=dict(position=p[0].tolist(),quaternion=q[0].tolist(),velocity=velocity[0,:3].tolist(),impacted=bool(p[0,2]<=extent+.02))
         return dict(t=float(self.data.time),position=self.position.copy(),quaternion=self.quaternion.copy(),velocity=self.velocity.copy(),
             angular_velocity=rotation.T@self.omega_world,throttle=self.throttle,gimbal=self.gimbal.copy(),fuel_mass=float(self.fuel),mass=float(self.mass),
-            wind=self.wind.copy(),tilt=float(np.rad2deg(np.arccos(np.clip(rotation[2,2],-1,1)))),altitude=float(self.position[2]-self.half),
+            wind=self.wind.copy(),tilt=float(np.rad2deg(np.arccos(np.clip(rotation[2,2],-1,1)))),altitude=float(self.position[2]-self.rest),
             clearance=min(clearance,0.) if self._impacted else clearance,contact_speed=float(self._impact_speed if self._impacted else contact_speed),
             hold_down=self.on_pad,release_time=self.release_time,upper_stage=stage,
             rcs_fuel_mass=self.rcs.fuel,rcs_torque=self.rcs.torque,roll_rate=float((rotation.T@self.omega_world)[2]))
@@ -248,7 +249,7 @@ class IsaacRocketPhysics:
             torque[2]+=self.rcs.step(self.roll_command if not self.on_pad and not self._impacted else 0.,dt)
             self._mass_update()
             self.wind+=.3*(np.asarray(self.w['wind_mean'])*self.wind_scale-self.wind)*dt+self.rng.normal(0,self.w['gust_std']*self.wind_scale*np.sqrt(dt),3);self.wind[2]=0.
-            relative=self.velocity-self.wind;rho=air_density(self.w,self.position[2]-self.half)
+            relative=self.velocity-self.wind;rho=air_density(self.w,self.position[2]-self.rest)
             drag=-.5*rho*self.v['drag_coefficient']*self.v['area']*np.linalg.norm(relative)*relative
             pusher=np.zeros(3);pusher_torque=np.zeros(3);payload_pusher_torque=np.zeros(3)
             if self.separation_time is not None:
