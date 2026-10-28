@@ -26,7 +26,7 @@ def arguments():
     parser.add_argument('--flow',action='store_true');parser.add_argument('--follow-camera',action='store_true')
     parser.add_argument('--gpu-physics',action='store_true');parser.add_argument('--mission',choices=['landing','takeoff','combined'],default='combined')
     parser.add_argument('--profile',choices=['research','suborbital'],default='research');parser.add_argument('--separation-altitude',type=float,default=600.)
-    parser.add_argument('--landing',type=float,nargs=2,default=[1050.,250.]);parser.add_argument('--seed',type=int,default=42)
+    parser.add_argument('--landing',type=float,nargs=2,default=[1200.,400.]);parser.add_argument('--seed',type=int,default=42)
     parser.add_argument('--launch',type=float,nargs=2,default=[0.,0.])
     parser.add_argument('--retarget-at',type=float,nargs=3,metavar=('SECONDS','EAST','NORTH'),help='One reproducible target change at simulation time')
     parser.add_argument('--checkpoint');parser.add_argument('--train-steps',type=int,default=0)
@@ -177,7 +177,7 @@ def main():
             state=env.physics.state();values={key:(value.tolist() if isinstance(value,np.ndarray) else value) for key,value in state.items() if key in Frame.model_fields}
             frame=Frame(**values,phase=env.phase)
             server.publish(dict(protocol='rocket-native-v1',engine='Isaac Sim PhysX',frame=frame.model_dump(mode='json'),
-                mission=env.mission,landing=env.landing.tolist(),outcome=outcome,headless=args.headless,renderer=args.renderer,
+                mission=env.mission,launch=env.launch.tolist(),landing=env.landing.tolist(),outcome=outcome,headless=args.headless,renderer=args.renderer,
                 rcs=dict(fuel_kg=state['rcs_fuel_mass'],torque_nm=state['rcs_torque'],roll_rate_rad_s=state['roll_rate']),
                 payload_attached=env.physics.attached,paused=not env.physics.world.is_playing(),time_scale=args.time_scale,steps=count,control_mode='training' if args.train_steps else 'qualification' if args.qualification_runs else 'manual' if manual is not None else 'guidance',qualification=policy.qualification if policy else 'Classical controller; native development evidence only'))
         if args.start_paused and not (args.diagnostic or args.qualification_runs or args.train_steps):env.physics.world.pause()
@@ -365,8 +365,9 @@ def _diagnostic(env,server,publish,exchange,capture=None):
         bridged=json.load(response)
     assert bridged['connected'] and bridged['snapshot']['frame']['t']==received['snapshot']['frame']['t']
     unchanged_position=env.physics.position.copy();unchanged_velocity=env.physics.velocity.copy()
-    exchange(dict(op='command',command=dict(type='retarget',landing=[25.,-10.])),port=server.port)
-    command=next(server.drain());env.command_landing(command['landing']);assert np.allclose(env.landing,[25.,-10.])
+    received_command=exchange(dict(op='command',command=dict(type='retarget',landing=[1300.,-30.])),port=server.port)
+    assert received_command['ok'],received_command
+    command=next(server.drain());env.command_landing(command['landing']);assert np.allclose(env.landing,[1300.,-30.])
     assert np.array_equal(env.physics.position,unchanged_position) and np.array_equal(env.physics.velocity,unchanged_velocity),'Target command changed physical state'
     result=dict(physics_seconds=env.physics.data.time,fuel_burned=initial['fuel_mass']-env.physics.fuel,final_position=env.physics.position.tolist(),
         payload_joint_disabled=True,payload_moved_after_release=True,telemetry_packets=packets,socket_received=True,dashboard_backend_received=True,retarget_applied=True,retarget_preserved_state=True,render_artifact=artifact,

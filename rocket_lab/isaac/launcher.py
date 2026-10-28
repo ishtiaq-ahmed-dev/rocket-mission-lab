@@ -10,6 +10,7 @@ import psutil
 from ..config import ROOT
 from ..storage import atomic_json,read_json
 from .stream import exchange
+from ..schemas import validate_site_separation
 
 ISAAC_ROOT=Path(os.environ.get('ROCKET_ISAAC_ROOT',r'D:\AppInstalled\NVIDIA\IsaacSim\6.2.0'))
 _process=None
@@ -31,17 +32,20 @@ class NativeStart(BaseModel):
     gpu_physics:bool=False
     physics_hz:Literal[50,100,120,240]=120
     seed:int=Field(default=42,ge=0,le=2147483647)
-    separation_altitude:float=Field(default=400.,ge=100.,le=200000.,allow_inf_nan=False)
+    separation_altitude:float=Field(default=600.,ge=100.,le=150000.,allow_inf_nan=False)
     launch:tuple[float,float]=(0.,0.)
-    landing:tuple[float,float]=(80.,40.)
+    landing:tuple[float,float]=(1200.,400.)
 
     @model_validator(mode='after')
     def geometry(self):
         import math
         if any(not math.isfinite(value) or abs(value)>10000 for value in (*self.launch,*self.landing)):
             raise ValueError('Site coordinates must be finite and within +/-10000 m')
-        if self.profile=='research' and self.separation_altitude>2000:
-            raise ValueError('Use the separately sized suborbital vehicle for targets above 2000 m')
+        validate_site_separation(self.launch,self.landing)
+        if self.profile=='research' and self.separation_altitude>1500:
+            raise ValueError('Research separation altitude must not exceed 1500 m')
+        if self.profile=='suborbital' and self.separation_altitude<10000:
+            raise ValueError('Suborbital separation altitude must be at least 10000 m')
         return self
 
 

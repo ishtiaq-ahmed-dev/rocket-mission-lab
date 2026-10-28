@@ -351,7 +351,7 @@ function LiveView({telemetry,metrics,duration,ended,plan,story,level,busy,onErro
         <div className="transport">
           <button aria-label="Restart playback" onClick={()=>useLab.getState().set({time:0,playing:true})}><RotateCcw size={16}/></button>
           <button className="play-button" aria-label={playing?'Pause playback':'Play playback'} onClick={()=>useLab.getState().set({playing:!playing,time:ended?0:time})}>{playing?<Pause size={15} fill="currentColor"/>:<Play size={15} fill="currentColor"/>}</button>
-          <span className="timecode">{formatTime(time)}<span> / {formatTime(duration)}</span> <span className="timecode-badge">1:1 REAL TIME</span></span>
+          <span className="timecode">{formatTime(time)}<span> / {formatTime(duration)}</span> <span className="timecode-badge">{!playing?'PAUSED':speed===1?'1:1 REAL TIME':`${speed}× PLAYBACK`}</span></span>
         </div>
         <input aria-label="Playback position" className="scrubber" type="range" min={0} max={duration} step={.02} value={time} onInput={e=>useLab.getState().set({time:+e.currentTarget.value,playing:false})} onChange={e=>useLab.getState().set({time:+e.target.value,playing:false})}/>
         <select aria-label="Playback speed" value={speed} onChange={e=>useLab.getState().set({speed:+e.target.value})}>{[.25,.5,1,2,4].map(value=><option key={value} value={value}>{value===1?'1.0× (Real Time)':`${value}×`}</option>)}</select>

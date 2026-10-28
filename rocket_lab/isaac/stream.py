@@ -36,6 +36,9 @@ class TelemetryServer:
                     elif message.get('op')=='command':
                         command=validate_command(message.get('command'))
                         with owner.lock:snapshot=owner.latest
+                        if command['type']=='retarget' and snapshot and 'launch' in snapshot:
+                            from ..schemas import validate_site_separation
+                            validate_site_separation(snapshot['launch'],command['landing'])
                         if command['type']=='detach' and snapshot and snapshot.get('payload_attached') is False:
                             raise ValueError('Payload is already released')
                         if snapshot and snapshot.get('control_mode') in ('training','qualification') and command['type']!='stop':

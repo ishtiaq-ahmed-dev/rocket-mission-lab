@@ -106,9 +106,9 @@ class ClassicalController:
         lateral_error=position[:2]-env._target()[:2]
         transfer_dist=float(np.linalg.norm(env.launch-env.landing)) if hasattr(env,'launch') and hasattr(env,'landing') else 0.
         if transfer_dist>100.:
-            self.max_shelf=max(120.,min(3000.,transfer_dist*0.95))
-            self.cruise_speed=45.
-            self.brake_decel=2.0
+            self.max_shelf=max(120.,min(getattr(self,'transfer_shelf_limit',3000.),transfer_dist*0.95))
+            self.cruise_speed=getattr(self,'transfer_cruise_speed',45.)
+            self.brake_decel=getattr(self,'transfer_brake_decel',2.0)
         # Approach cone: the vehicle stays above a glide slope toward the target, so lateral
         # transfers use descent time instead of hovering, and it never aims below the capture cone.
         shelf=min(self.max_shelf,self.glide_slope*max(float(np.linalg.norm(lateral_error))-12.,0.)) if env.phase=='landing' else 0.

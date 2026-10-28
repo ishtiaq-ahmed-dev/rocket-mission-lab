@@ -18,6 +18,10 @@ class NativeGuidance(ClassicalController):
     def __init__(self):
         super().__init__(4);self.engine_scale=1.;self.identification_previous=None;self.previous_attachment=None
         self.reference_acceleration=1.;self.reference_braking=1.5;self.reference_velocity=None
+        # Long-range plans must honor the native engine/body slew governor.
+        # The legacy 45 m/s reference outruns it, overshoots, then spends the
+        # landing reserve on repeated diverts. No physical actuator is scaled.
+        self.transfer_cruise_speed=25.;self.transfer_brake_decel=1.0;self.transfer_shelf_limit=400.
 
     def on_retarget(self):
         super().on_retarget();self.terminal_captured=False;self.reference_velocity=None
@@ -49,8 +53,14 @@ class NativeGuidance(ClassicalController):
             inertia[1,:2]+=ph.payload_mass*(3*1.8**2+9**2)/12+reduced_mass*distance**2
             inertia[1,2]+=ph.payload_mass*1.8**2/2
             lever+=ph.payload_mass*distance/s['mass']
-        model=View(ph,v=vehicle,engine_lever=lever,model=SimpleNamespace(body_inertia=inertia))
+        landing=getattr(env,'phase',None)=='landing'
+        # Launch supports raise the held stack, not the remote landing surface.
+        # Use the foot-contact body height for descent, retaining launch rest
+        # height for ascent. This changes the prediction model, never a pose.
+        rest=ph.half if landing else getattr(ph,'rest',ph.half)
+        sensed={**s,'altitude':s['position'][2]-rest} if landing else s
+        model=View(ph,v=vehicle,rest=rest,engine_lever=lever,model=SimpleNamespace(body_inertia=inertia))
         if hasattr(ph,'set_roll_command'):
             maximum=2*ph.v.get('rcs_lever',1.8)*ph.v.get('rcs_jet_force',500.)
             ph.set_roll_command(-s['angular_velocity'][2]*inertia[1,2]/(2.*maximum))
-        return super().action(View(env,physics=model))
+        return super().action(View(env,physics=model,sensed_state=sensed))

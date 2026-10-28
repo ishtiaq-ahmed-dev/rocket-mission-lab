@@ -584,6 +584,7 @@ main.shell-main{width:min(1480px,calc(100% - 52px));margin:0 auto;padding:26px 0
   .topnav{height:auto;flex-wrap:wrap;margin:10px 12px 0;padding:9px 10px;border-radius:16px;gap:8px;top:8px}
   .main-nav{order:3;width:100%;justify-content:space-between;gap:2px;margin:0;padding-top:7px;border-top:1px solid #f2eef9}
   .main-nav button{flex:1;text-align:center;padding:8px 4px;font-size:11px}
+  .main-nav button.deck{display:none}
   .nav-tools{margin-left:auto}
   .brand-mark{width:34px;height:34px;border-radius:10px}
   .brand-copy{font-size:12px}

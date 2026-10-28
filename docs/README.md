@@ -1,5 +1,7 @@
 # Flight manual
 
+- [28 October: pad labels, distance checks and physical timing](31-pad-labels-distance-and-timing.md)
+
 - [Six-degree-of-freedom dynamics](01-dynamics.md)
 - [Fuel flow and the rocket equation](02-rocket-equation.md)
 - [The Markov decision process](03-mdp.md)

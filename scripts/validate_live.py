@@ -18,12 +18,12 @@ def get(path):
 
 def main():
     checks=dict(verified_at_unix=time.time(),scope='production localhost HTTP, schema, configured mission and replay identity',dynamics_hash=dynamics_hash())
-    html=get('/');assert b'Rocket Mission Lab' in html and b'/assets/index-' in html
+    html=get('/');assert b'LZ-1' in html and b'/assets/main-' in html
     checks['production_bundle']=True
     for path in ('health','missions','runs','training','campaigns','checkpoints','results/summary','results/failures','system','schema/telemetry'):
         json.loads(get('/api/'+path));checks[path]=200
     system=json.loads(get('/api/system'));assert system['dynamics_hash']==dynamics_hash()
-    plan=dict(launch=[200,-100],landing=[240,-80],separation_altitude=300)
+    plan=dict(launch=[200,-100],landing=[1400,300],separation_altitude=600)
     request=urllib.request.Request('http://127.0.0.1:5180/api/simulate',data=json.dumps(dict(mission='combined',flight_plan=plan)).encode(),headers={'Content-Type':'application/json'},method='POST')
     with urllib.request.urlopen(request,timeout=60) as response:replay=Telemetry.model_validate_json(response.read())
     assert replay.run.outcome=='success' and replay.run.separation

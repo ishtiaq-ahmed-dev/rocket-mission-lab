@@ -85,6 +85,11 @@ def new_simulation(request:SimRequest):
             if selected.get('dynamics_hash')!=LOADED_DYNAMICS_HASH:
                 raise ValueError('No measured checkpoint for the loaded dynamics and flight plan. Train this revision or explicitly select an archived experimental model.')
             values['checkpoint_id']=selected['id']
+            # A policy trained on a curriculum stage is flown on that stage.
+            # Asking it for the full-envelope mission is a different, harder
+            # flight; the run records and displays the stage it actually flew.
+            stage=selected.get('difficulty')
+            if stage is not None and 0<stage<1: values['difficulty']=float(stage)
         return simulate(**values)
     except ValueError as ex: raise HTTPException(409,str(ex)) from ex
 
@@ -112,7 +117,10 @@ def start_training(request:TrainRequest):
         folder=DATA/"jobs"/job_id; folder.mkdir(parents=True,exist_ok=True)
         cfg,_=configure_flight(load_config(),request.flight_plan,request.mission)
         if request.flight_plan is not None:
-            cfg['training'].update(target_curriculum=True,takeoff_goal_curriculum=True,
+            # The difficulty ramp now moves the start along the flight path and
+            # leaves the landing site fixed, so the mission never changes
+            # meaning between practice and evaluation.
+            cfg['training'].update(takeoff_goal_curriculum=True,
                                    takeoff_curriculum_altitude=5.,takeoff_curriculum_velocity=3.)
         atomic_json(folder/'requested-config.json',cfg)
         atomic_json(folder/"status.json",dict(id=job_id,mission=request.mission,algorithm=request.algorithm,status="starting",steps=0,total_steps=request.steps,started_at=time.time(),updated_at=time.time(),curve=[],episodes=[],device=request.device))

@@ -26,7 +26,7 @@ async function api<T>(path:string,body?:unknown):Promise<T>{const r=await fetch(
 
 export default function App({initialPage='Flight lab'}:{initialPage?:string}){
   const [page,setPage]=useState(initialPage);
-  const [online,setOnline]=useState(false),[error,setError]=useState('');
+  const [online,setOnline]=useState(false),[checked,setChecked]=useState(false),[error,setError]=useState('');
   const [runs,setRuns]=useState<Run[]>([]),[jobs,setJobs]=useState<Job[]>([]),[checkpoints,setCheckpoints]=useState<Checkpoint[]>([]),[results,setResults]=useState<Result[]>([]),[system,setSystem]=useState<SystemInfo|null>(null);
   const [query,setQuery]=useState('');
   const [mission,setMission]=useState<Mission>('landing');
@@ -68,7 +68,7 @@ export default function App({initialPage='Flight lab'}:{initialPage?:string}){
       }catch{
         if(active)setOnline(false);
       }finally{
-        if(active)setBusy(false);
+        if(active){setBusy(false);setChecked(true);}
       }
     }
     void boot();
@@ -101,7 +101,7 @@ export default function App({initialPage='Flight lab'}:{initialPage?:string}){
   },[online]);
 
   useEffect(()=>{
-    if(page!=='Flight lab'||useLab.getState().telemetry)return;
+    if(page!=='Flight lab'||!checked||useLab.getState().telemetry)return;
     let active=true;
     if(online){
       void loadRun(mission,method,level,checkpoint,seed);
@@ -119,7 +119,7 @@ export default function App({initialPage='Flight lab'}:{initialPage?:string}){
       });
     }
     return()=>{active=false;};
-  },[page,online,loadRun,mission,method,level,checkpoint,seed]);
+  },[page,checked,online,loadRun,mission,method,level,checkpoint,seed]);
 
   useEffect(()=>{
     if(!story||lab.playing||!lab.telemetry)return;
@@ -235,6 +235,7 @@ export default function App({initialPage='Flight lab'}:{initialPage?:string}){
             {item.label}
           </button>
         ))}
+        <button className="deck" title="Open the model-driven flight deck with this mission, guidance, level and seed" onClick={()=>{window.location.href=`/?mission=${mission}&method=${method}&level=${level}&seed=${seed}`;}}>Flight deck</button>
       </nav>
       <div className="nav-tools">
         <div className={`nav-search ${query?'open':''}`}>

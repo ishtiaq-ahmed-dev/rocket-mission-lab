@@ -1,7 +1,7 @@
 # Real-Time Fidelity, Pad Separation, and Visual Telemetry Revision
 
 **Date:** 2026-10-23  
-**Status:** Completed and Verified  
+**Status:** Historical implementation notes; superseded by the [28 October verification](31-pad-labels-distance-and-timing.md). The earlier UI warning did not enforce the distance at every public entry point.
 **Scope:** Pad circle markings, > 1 km pad separation enforcement, 1:1 real-time playback clock, ISS Orbital Systems & NVIDIA Isaac Sim branding.
 
 ---

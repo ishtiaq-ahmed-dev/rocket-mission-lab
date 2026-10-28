@@ -23,6 +23,7 @@ class IsaacRocketPhysics:
     def __init__(self,config,headless=False,gpu_dynamics=False,visuals=None):
         self.cfg=config;self.v=config['vehicle'];self.w=config['world'];self.half=self.v['length']/2
         self.stand=float(config['mission'].get('launch_stand_height',0.));self.rest=self.half+self.stand
+        self.landing_rest=self.half  # feet touch the remote, ground-level pad
         self.engine_lever=self.v.get('engine_lever',self.half);self.headless=headless;self.visuals=visuals
         self.engine=Engine(self.v,self.w['gravity']);self.rcs=RollThrusters(self.v);self.roll_command=0.;self.data=SimpleNamespace(time=0.)
         # Optional flight-history sink (rocket_lab.isaac.cinematic.FlightTrack);

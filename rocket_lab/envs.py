@@ -84,7 +84,14 @@ class RocketEnv(gym.Env):
             # The first curriculum stage is genuinely easy: 3 m, -0.8 m/s,
             # centered and upright. d=1 preserves the complete mission ranges.
             h = 3. + d*(rng.uniform(*m["landing_altitude"])-3.)
-            pos = [*(self.launch+rng.uniform(-m["horizontal_position"]*d, m["horizontal_position"]*d, 2)), h+self.physics.rest]
+            # Curriculum: at d=0 the descent begins over the pad, and the
+            # start slides back along the flight path as difficulty rises.
+            # The quadratic keeps the first stages a near-vertical drop while
+            # the target stays the real pad, so training and evaluation agree.
+            # (Shrinking the target instead made stage-trained policies meet a
+            # landing site they had never practised on.)
+            start = self.landing+d*d*(self.launch-self.landing)
+            pos = [*(start+rng.uniform(-m["horizontal_position"]*d, m["horizontal_position"]*d, 2)), h+self.physics.rest]
             vel = [*rng.uniform(-m["horizontal_velocity"]*d, m["horizontal_velocity"]*d, 2), -.8+d*(rng.uniform(*m["landing_vertical_velocity"])+.8)]
         else:
             pos, vel = [*self.launch, self.physics.rest], [0, 0, 0]
@@ -105,7 +112,8 @@ class RocketEnv(gym.Env):
 
     def _target(self):
         xy=self.launch if self.phase=='takeoff' else self.landing
-        return np.array([*xy, self.physics.rest + (self.takeoff_altitude if self.phase == "takeoff" else 0.)])
+        height=self.physics.rest+self.takeoff_altitude if self.phase=='takeoff' else getattr(self.physics,'landing_rest',self.physics.rest)
+        return np.array([*xy,height])
 
     def command_landing(self, landing):
         """Move the landing target during a flight; keeps the physical state."""

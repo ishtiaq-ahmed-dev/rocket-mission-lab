@@ -82,7 +82,7 @@ def test_native_start_validates_geometry_and_does_not_accept_executable_fields(m
     calls=[]
     monkeypatch.setattr(module,'start',lambda settings:calls.append(settings) or dict(state='starting_or_running'))
     client=TestClient(app)
-    assert client.post('/native/start',json=dict(renderer='headless',launch=[-10,20],landing=[80,40])).status_code==200
+    assert client.post('/native/start',json=dict(renderer='headless',launch=[-10,20],landing=[1200,400])).status_code==200
     assert calls[0].launch==(-10.,20.)
     assert client.post('/native/start',json=dict(separation_altitude=100000)).status_code==422
     assert client.post('/native/start',json=dict(profile='suborbital',separation_altitude=100000)).status_code==200
@@ -106,6 +106,24 @@ def test_native_guidance_uses_compound_inertia_without_changing_physical_engine(
     assert captured[0].engine_lever>physics.engine_lever
     assert physics.v['max_thrust']==760000. and physics.engine_lever==17.9
     controller.terminal_captured=True;controller.on_retarget();assert not controller.terminal_captured
+
+
+def test_native_descent_reference_does_not_reuse_launch_stand_height(monkeypatch):
+    from types import SimpleNamespace
+    from rocket_lab.isaac.guidance import NativeGuidance
+    from rocket_lab.controllers import ClassicalController
+    from rocket_lab.envs import RocketEnv
+    captured=[]
+    monkeypatch.setattr(ClassicalController,'action',lambda self,env:captured.append(env) or np.zeros(3))
+    state=dict(t=0.,mass=38000.,altitude=0.,position=np.array([1200.,400.,23.]),velocity=np.zeros(3))
+    physics=SimpleNamespace(v=dict(max_thrust=760000.),model=SimpleNamespace(body_inertia=np.ones((2,3))),
+        engine_lever=17.9,attached=False,half=20.,rest=23.,landing_rest=20.,state=lambda:state)
+    env=SimpleNamespace(phase='landing',physics=physics,sensed_state=state,launch=np.array([0.,0.]),landing=np.array([1200.,400.]),takeoff_altitude=600.)
+    NativeGuidance().action(env)
+    assert captured[0].physics.rest==20. and captured[0].sensed_state['altitude']==3.
+    assert physics.rest==23. and state['altitude']==0.
+    assert RocketEnv._target(env)[2]==20.
+    env.phase='takeoff';assert RocketEnv._target(env)[2]==623.
 
 
 def test_native_engine_identifier_learns_from_motion_without_reading_true_thrust_scale():

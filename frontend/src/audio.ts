@@ -65,8 +65,11 @@ class MissionAudio{
     const ctx=this.context,s=useLab.getState();if(!ctx||!this.master)return;
     const audible=s.sound&&s.playing&&!document.hidden&&s.telemetry!==null;
     const current=s.telemetry?sample(s.telemetry.frames,s.time):null;
-    const attenuation=s.audioPerspective==='Exterior'&&current?exteriorSoundGain(current.position[2]-(s.telemetry?restHeight(s.telemetry):40/2),s.cameraDistance):1;
-    this.master.gain.setTargetAtTime(audible?s.volume*.55*attenuation:0,ctx.currentTime,.07);
+    const rest=s.telemetry?restHeight(s.telemetry):20;
+    const agl=current?current.position[2]-(Number.isFinite(rest)?rest:20):0;
+    const attenuation=s.audioPerspective==='Exterior'&&current?exteriorSoundGain(agl,s.cameraDistance||0):1;
+    const targetMaster=audible&&Number.isFinite(attenuation)?s.volume*.55*attenuation:0;
+    this.master.gain.setTargetAtTime(targetMaster,ctx.currentTime,.07);
     if(!s.telemetry){this.lastActive=false;this.lastPlaying=s.playing;return;}
     const heardTime=s.time-(s.audioPerspective==='Exterior'?s.cameraDistance/343:0);
     const f=sample(s.telemetry.frames,heardTime),active=heardTime>=0&&s.time<s.telemetry.run.duration;

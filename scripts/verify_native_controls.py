@@ -45,7 +45,7 @@ def main():
             command('step');stepped=wait_for(lambda value:value.get('paused') and value['frame']['t']>t)
             assert abs(stepped['frame']['t']-t-.1)<1e-6
             command('manual',action=[.4,.1,-.1]);wait_for(lambda value:value.get('control_mode')=='manual')
-            command('retarget',landing=[120.,-30.]);wait_for(lambda value:value['landing']==[120.,-30.])
+            command('retarget',landing=[1300.,-30.]);wait_for(lambda value:value['landing']==[1300.,-30.])
             command('guidance');wait_for(lambda value:value.get('control_mode')=='guidance')
             command('resume');running=wait_for(lambda value:not value.get('paused') and value['frame']['t']>stepped['frame']['t'])
             command('pause');paused=wait_for(lambda value:value.get('paused'))

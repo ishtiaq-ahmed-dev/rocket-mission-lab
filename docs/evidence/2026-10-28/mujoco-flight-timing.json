@@ -1,0 +1,47 @@
+{
+  "dynamics_hash": "1ca2dc9d8d8539836aebef12319c2da01dead4ecffbf8cb5d799194958dbe85e",
+  "plan": {
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "landing": [
+      1200.0,
+      400.0
+    ],
+    "separation_altitude": 600.0,
+    "profile": "research"
+  },
+  "flights": [
+    {
+      "mission": "takeoff",
+      "outcome": "success",
+      "duration": 33.099999999999575,
+      "release_time": 0.4400000000000001,
+      "separation_time": null,
+      "pad_distance": 0.031062987211490777,
+      "final_clearance": 601.0758049669407,
+      "fuel_remaining": 12153.563509196187
+    },
+    {
+      "mission": "landing",
+      "outcome": "success",
+      "duration": 81.94178937792861,
+      "release_time": null,
+      "separation_time": null,
+      "pad_distance": 0.18672234315997055,
+      "final_clearance": -2.7303359573238595e-10,
+      "fuel_remaining": 6297.762401879749
+    },
+    {
+      "mission": "combined",
+      "outcome": "success",
+      "duration": 105.48521058320614,
+      "release_time": 0.46000000000000013,
+      "separation_time": 33.19999999999959,
+      "pad_distance": 0.3399497168608975,
+      "final_clearance": 1.151909678753782e-09,
+      "fuel_remaining": 4509.283995310729
+    }
+  ]
+}

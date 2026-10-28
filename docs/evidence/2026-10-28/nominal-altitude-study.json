@@ -1,0 +1,34 @@
+[
+  {
+    "height": 400,
+    "outcome": "success",
+    "seconds": 104.10647982716203,
+    "error": 0.31809695966623536,
+    "fuel_used": 11911.24694080593,
+    "remaining": 4662.509731052282
+  },
+  {
+    "height": 600,
+    "outcome": "success",
+    "seconds": 105.48521058320614,
+    "error": 0.3399497168608975,
+    "fuel_used": 12064.472676547484,
+    "remaining": 4509.283995310729
+  },
+  {
+    "height": 800,
+    "outcome": "crash_speed",
+    "seconds": 134.7989679562997,
+    "error": 5.492849939229479,
+    "fuel_used": 14819.587468473232,
+    "remaining": 1754.1692033849815
+  },
+  {
+    "height": 1000,
+    "outcome": "crash_speed",
+    "seconds": 126.56552608608395,
+    "error": 7.2920091447556485,
+    "fuel_used": 14080.982848305686,
+    "remaining": 2492.773823552527
+  }
+]

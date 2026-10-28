@@ -18,7 +18,7 @@ from .storage import atomic_json,read_json,checkpoints,dynamics_hash
 
 def campaign_config(mission,plan):
     cfg,_=configure_flight(load_config(),plan,mission)
-    cfg['training'].update(profile='flight-fidelity-v19',target_curriculum=True,
+    cfg['training'].update(profile='flight-fidelity-v19',
         takeoff_goal_curriculum=True,takeoff_curriculum_altitude=5.,takeoff_curriculum_velocity=3.,
         ppo_n_steps=1024,ppo_batch_size=512,ppo_epochs=10,ppo_gamma=.999,ppo_gae_lambda=.995,
         ppo_entropy=.0005,ppo_target_kl=.02,learning_rate=.00015,checkpoint_interval=1000000,

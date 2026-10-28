@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "http_commands_verified": [
+    "pause",
+    "resume",
+    "step",
+    "manual",
+    "guidance",
+    "retarget",
+    "stop"
+  ],
+  "pause_clock_frozen": true,
+  "single_step_seconds": 0.1,
+  "run_seconds": 0.19999999999999998,
+  "final_pause_seconds": 0.7
+}

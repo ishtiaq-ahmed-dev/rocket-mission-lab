@@ -50,7 +50,7 @@ export function landingAt(run:Run,time:number):[number,number]{
 export function tilt(f:Frame){const x=f.quaternion[1],y=f.quaternion[2];return Math.acos(Math.max(-1,Math.min(1,1-2*(x*x+y*y))))*180/Math.PI;}
 export const compact=(v:number)=>v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1000?`${(v/1000).toFixed(v%1000?1:0)}k`:String(v);
 /** Body-centre height on the launch stand. Altitude is measured from the stand top. */
-export const restHeight=(t:{rocket_length:number;launch_stand_height?:number})=>t.rocket_length/2+(t.launch_stand_height??0);
+export const restHeight=(t?:{rocket_length?:number;launch_stand_height?:number}|null)=>(t?.rocket_length??40)/2+(t?.launch_stand_height??0);
 /** Physical values used by every HUD and chart, so labels cannot drift apart. */
 export function frameMetrics(f:Frame,rest:number){
   const altitude=Math.max(0,f.clearance??f.position[2]-rest);

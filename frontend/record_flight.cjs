@@ -57,7 +57,6 @@ async function recordFlight() {
     const browser = await chromium.launch({
       headless: true,
       args: [
-        `--user-data-dir=${tempProfileDir}`,
         '--no-first-run',
         '--no-default-browser-check',
         '--enable-webgl',

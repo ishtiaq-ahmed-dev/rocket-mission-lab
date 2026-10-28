@@ -11,6 +11,7 @@ import type {NativeRuntime} from './NativeSetup';
 import NativeHistory from './NativeHistory';
 import type {NativeSample} from './NativeHistory';
 import NativeAudio from './NativeAudio';
+import NativeRange from './NativeRange';
 
 interface PreviewItem {
   id: string;
@@ -43,6 +44,7 @@ interface Status {
     mission: string;
     frame: Frame;
     landing: [number,number];
+    launch?: [number,number];
     outcome: string | null;
     payload_attached: boolean;
     steps: number;
@@ -58,8 +60,8 @@ interface Status {
 export default function NativeMonitor(){
   const [status,setStatus]=useState<Status>({connected:false});
   const [error,setError]=useState('');
-  const [x,setX]=useState(1050);
-  const [y,setY]=useState(250);
+  const [x,setX]=useState(1200);
+  const [y,setY]=useState(400);
   const [socketActive,setSocketActive]=useState(false);
   const [throttle,setThrottle]=useState(0);
   const [gimbalX,setGimbalX]=useState(0);
@@ -388,68 +390,7 @@ export default function NativeMonitor(){
         {/* MODE 3: 2D Tactical Range Radar */}
         {visualMode==='radar'&&(
           <div className="radar-container">
-            <svg viewBox="-200 -200 1500 700" className="radar-svg">
-              {/* Radar Grid Lines */}
-              <defs>
-                <pattern id="radarGrid" width="100" height="100" patternUnits="userSpaceOnUse">
-                  <path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(110, 86, 232, 0.12)" strokeWidth="1"/>
-                </pattern>
-              </defs>
-              <rect x="-200" y="-200" width="1500" height="700" fill="#0c0a17"/>
-              <rect x="-200" y="-200" width="1500" height="700" fill="url(#radarGrid)"/>
-
-              {/* Pad Separation Vector Line */}
-              <line
-                x1="0" y1="0"
-                x2="1050" y2="250"
-                stroke="#6f56e8"
-                strokeWidth="2"
-                strokeDasharray="6,6"
-              />
-              <text x="525" y="105" fill="#a493f7" fontSize="18" textAnchor="middle" fontWeight="bold">
-                TRANSFER DISTANCE: 1,079.3 METERS (&gt; 1 KM SEPARATION)
-              </text>
-
-              {/* Takeoff Pad 01 */}
-              <g transform="translate(0, 0)">
-                <circle r="45" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeDasharray="8,4"/>
-                <circle r="20" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" strokeWidth="1.5"/>
-                <circle r="4" fill="#f59e0b"/>
-                <text x="0" y="-55" fill="#f59e0b" fontSize="16" textAnchor="middle" fontWeight="bold">TAKEOFF PAD 01 (0, 0)</text>
-                <text x="0" y="65" fill="#d97706" fontSize="13" textAnchor="middle">Gantry Tower &amp; Umbilicals</text>
-              </g>
-
-              {/* Landing Pad 01 */}
-              <g transform="translate(1050, 250)">
-                <circle r="45" fill="none" stroke="#10b981" strokeWidth="2.5"/>
-                <circle r="28" fill="none" stroke="#10b981" strokeWidth="1.5"/>
-                <circle r="12" fill="none" stroke="#10b981" strokeWidth="1"/>
-                <circle r="4" fill="#10b981"/>
-                <line x1="-15" y1="0" x2="15" y2="0" stroke="#10b981" strokeWidth="2"/>
-                <line x1="0" y1="-15" x2="0" y2="15" stroke="#10b981" strokeWidth="2"/>
-                <text x="0" y="-55" fill="#10b981" fontSize="16" textAnchor="middle" fontWeight="bold">LANDING PAD 01 (1050, 250)</text>
-                <text x="0" y="65" fill="#059669" fontSize="13" textAnchor="middle">Recovery Zone &amp; Bullseye</text>
-              </g>
-
-              {/* Rocket Live Marker */}
-              {frame&&(
-                <g transform={`translate(${posX}, ${posY})`}>
-                  <circle r="18" fill="rgba(239, 68, 68, 0.25)" stroke="#ef4444" strokeWidth="2"/>
-                  <circle r="6" fill="#ef4444"/>
-                  {/* Velocity Vector Arrow */}
-                  <line
-                    x1="0" y1="0"
-                    x2={frame.velocity[0]*2.5}
-                    y2={frame.velocity[1]*2.5}
-                    stroke="#ff5454"
-                    strokeWidth="3"
-                  />
-                  <text x="25" y="-10" fill="#ffffff" fontSize="14" fontWeight="bold">
-                    BOOSTER [Alt: {posZ.toFixed(1)}m, Speed: {totalSpeed.toFixed(1)}m/s]
-                  </text>
-                </g>
-              )}
-            </svg>
+            <NativeRange launch={snapshot?.launch??[0,0]} landing={[landingX,landingY]} position={frame?.position}/>
             <div className="radar-legend">
               <div><span className="dot yellow"/>TAKEOFF PAD 01 (Liftoff Origin)</div>
               <div><span className="dot green"/>LANDING PAD 01 (Downrange Target &gt; 1km)</div>

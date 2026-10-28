@@ -1,5 +1,12 @@
 from typing import Literal
 from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
+import math
+
+
+def validate_site_separation(launch,landing):
+    """New operational plans require distinct pads; archived plans remain readable."""
+    if math.dist(launch,landing)<=1000.:
+        raise ValueError('Takeoff and landing pads must be more than 1000 meters apart')
 
 class FlightPlan(BaseModel):
     """Local meters on the flat z=0 surface, x east and y north."""
@@ -138,6 +145,15 @@ class SimRequest(BaseModel):
     retarget: TargetUpdate | None = None
     retargets: list[TargetUpdate] = Field(default_factory=list,max_length=32)
 
+    @model_validator(mode='after')
+    def operational_sites(self):
+        plan=self.flight_plan or FlightPlan(landing=(1200.,400.),separation_altitude=600.)
+        validate_site_separation(plan.launch,plan.landing)
+        for command in [*self.retargets,*([self.retarget] if self.retarget else [])]:
+            validate_site_separation(plan.launch,command.landing)
+        self.flight_plan=plan
+        return self
+
 class TrainRequest(BaseModel):
     model_config=ConfigDict(extra="forbid")
     mission: Mission = "landing"
@@ -146,3 +162,8 @@ class TrainRequest(BaseModel):
     seed: int = Field(default=42,ge=0,le=2147483647)
     device: Literal["cpu","cuda","auto"] = "auto"
     flight_plan: FlightPlan | None = None
+
+    @model_validator(mode='after')
+    def operational_sites(self):
+        if self.flight_plan:validate_site_separation(self.flight_plan.launch,self.flight_plan.landing)
+        return self

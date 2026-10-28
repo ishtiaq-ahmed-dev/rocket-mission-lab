@@ -1,6 +1,6 @@
 # Rocket Mission Lab
 
-Native Isaac Sim migration is in progress. See [native runtime, controls and validation boundaries](docs/26-native-isaac-migration.md). The shared Isaac installation is outside this checkout; the default dashboard page receives native telemetry without browser 3D rendering.
+See the [28 October pad labels, spacing and physical timing revision](docs/31-pad-labels-distance-and-timing.md) for the current behavior and executed checks. The default flight deck renders recorded MuJoCo telemetry; the separate Isaac Sim workspace uses the shared native PhysX/RTX installation outside this checkout. See [native runtime and validation boundaries](docs/26-native-isaac-migration.md).
 
 A local rocket flight simulator, mission dashboard, and reinforcement learning workbench. MuJoCo integrates the booster dynamics; React and Three.js render recorded telemetry. Vehicle parameters are generic approximations.
 
@@ -24,14 +24,14 @@ cd ..
 .venv\Scripts\python.exe scripts/serve.py
 ```
 
-Open [Mission Control](http://127.0.0.1:5180/) and [API documentation](http://127.0.0.1:5180/api/docs). The production preview serves the built dashboard and API from one Python server; Node is only needed for building or development. For development use `.venv\Scripts\python.exe scripts/dev.py`. Close the launcher with Ctrl+C to stop its web servers. Training uses an independent hidden Windows worker (separate session on Unix). Node.js 22+ and Python 3.11 are the recorded development environment. Linux/macOS use `.venv/bin/python`.
+Open the [LZ-1 flight deck](http://127.0.0.1:5180/) (the default page; it runs Landing, Takeoff or Combined through the local engine and plays the recorded MuJoCo flight), the [Mission Control dashboard](http://127.0.0.1:5180/lab/), and [API documentation](http://127.0.0.1:5180/api/docs). The production preview serves the built dashboard and API from one Python server; Node is only needed for building or development. For development use `.venv\Scripts\python.exe scripts/dev.py`. Close the launcher with Ctrl+C to stop its web servers. Training uses an independent hidden Windows worker (separate session on Unix). Node.js 22+ and Python 3.11 are the recorded development environment. Linux/macOS use `.venv/bin/python`.
 
 ## Mission controls
 
 - Choose Landing, Takeoff, or Combined, set the launch X/Y, landing X/Y, and separation altitude, then select **Run flight**. Coordinates are local meters: X east, Y north, and a flat surface at Z = 0. They are not geographic coordinates.
 - Landing starts in the air above the launch coordinates. Takeoff targets the vertical line above launch. Combined launches there, releases a generic 2.5 t unpowered upper stage, and returns the booster to the landing coordinates.
 - Separation altitude is configurable from 80 to 1,500 m; site coordinates accept +/-10,000 m. These input limits are not a reachable flight envelope. Fuel, minimum thrust, sensor noise, and control limits can cause a requested mission to fail. Inspect its recorded outcome.
-- The default flight plan transfers from [0, 0] to [1200, 400] with stage separation at 1,500 m (1.26 km surface distance, strictly exceeding the mandatory > 1 km pad separation constraint). **Standard Pad (>1.2 km)**, **Downrange (2.5 km)**, and **Long-Range (5.1 km)** provide instant presets.
+- The nominal plan transfers from [0, 0] to [1200, 400], a 1,264.91 m surface distance, with separation at 600 m. New operational requests reject spacing of 1,000 m or less; old archived research runs remain readable. Longer-range presets are experiments whose outcomes depend on fuel and guidance.
 - To divert during a flight, open **Mission plan** or the setup panel, enter a new landing X/Y, and choose **Retarget at T+…**. The applied target is the last confirmed one; takeoff has no landing pad to move, and a command after the flight ends is rejected. This feature requires the local engine and is never faked in offline replay.
 
 The interface uses a light mission-control workspace with Overview, Flight deck, Telemetry, and Mission plan tabs, recorded-value KPI cards, charts, event log, and a compact retarget card. Terrain, vegetation, roads, facilities, ocean, HDR lighting, and shadows remain active; Balanced is the default quality. Launch and landing pads follow the applied coordinates, with prepared flat sites at Z = 0 separated by > 1,000 m and labelled with high-contrast TAKEOFF and LANDING stencils. The offshore environment remains available. Upper grid fins are articulated with roll/pitch/yaw aerodynamics. Four articulated landing legs feature body hinges, telescopic braces, footpads, and 0.6 m nominal nozzle clearance. The launch pad adds a flame trench, hold-down clamps, propellant lines, and a lattice service tower; the engine adds a bell, cooling tubes, stiffener rings, and actuator housings. See [rocket structure research and rendering limits](docs/22-rocket-structure.md).

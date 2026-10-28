@@ -622,6 +622,7 @@ class NativeVisuals:
 
                 # Vertical rim signs face the launch coverage camera (bearing -57.9°).
                 # Normal = azimuth+90, rim = 15 m toward the camera at azimuth+90.
+                self.painted_label(root+'/SurfaceName','TAKEOFF',hazard_yellow,y_offset=-14.,size=3.,rot_deg=0.)
                 self.painted_sign(root+'/SignName','TAKEOFF PAD 01',hazard_yellow,azimuth_deg=32.1,size=4.6,z_base=5.6)
                 self.painted_sign(root+'/SignBrand','MERIDIAN 9 - ISS ORBITAL SYSTEMS',markings,azimuth_deg=32.1,size=1.5,z_base=2.6)
                 # North compass marker
@@ -665,6 +666,7 @@ class NativeVisuals:
 
                 # Landing coverage camera bearing -52.3°: normal points at camera
                 # when azimuth = bearing+90 (empirically verified facing).
+                self.painted_label(root+'/SurfaceName','LANDING',landing_green,y_offset=-14.,size=3.,rot_deg=0.)
                 self.painted_sign(root+'/SignName','LANDING PAD 01',landing_green,azimuth_deg=37.7,size=4.6,z_base=5.6)
                 self.painted_sign(root+'/SignBrand','MERIDIAN 9 - ISS ORBITAL SYSTEMS',markings,azimuth_deg=37.7,size=1.5,z_base=2.6)
 

@@ -68,24 +68,34 @@ def test_custom_flight_is_retrievable_and_validation_runs_through_api(monkeypatc
     import rocket_lab.storage as storage
     for module in (api,simulation,storage):monkeypatch.setattr(module,'DATA',tmp_path)
     client=TestClient(api.app)
-    response=client.post('/simulate',json=dict(mission='takeoff',flight_plan=dict(launch=[500,700],landing=[550,700],separation_altitude=200)))
+    response=client.post('/simulate',json=dict(mission='takeoff',flight_plan=dict(launch=[500,700],landing=[1700,1100],separation_altitude=200)))
     assert response.status_code==200
     identifier=response.json()['run']['id']
     assert client.get(f'/runs/{identifier}/telemetry').json()['run']['flight_plan']['launch']==[500,700]
     assert client.post('/simulate',json={'flight_plan':{'launch':[20000,0]}}).status_code==422
 
 
-def test_training_only_geometry_curriculum_does_not_leak_into_evaluation():
+def test_curriculum_moves_the_start_and_never_the_landing_site():
     from rocket_lab.campaign import campaign_config
     cfg=campaign_config('combined',dict(launch=[0,0],landing=[80,40],separation_altitude=400))
-    training=RocketEnv('combined',config=cfg,training=True,difficulty=0)
-    evaluation=RocketEnv('combined',config=cfg,difficulty=0)
-    training.reset(seed=42);evaluation.reset(seed=42)
-    assert training.takeoff_altitude==5 and evaluation.takeoff_altitude==400
-    training.phase=evaluation.phase='landing'
-    np.testing.assert_array_equal(training._target()[:2],[0,0])
-    np.testing.assert_array_equal(evaluation._target()[:2],[80,40])
-    training.close();evaluation.close()
+    # The takeoff goal stays a training-only shrink.
+    takeoff=RocketEnv('combined',config=cfg,training=True,difficulty=0)
+    flight=RocketEnv('combined',config=cfg,difficulty=0)
+    takeoff.reset(seed=42);flight.reset(seed=42)
+    assert takeoff.takeoff_altitude==5 and flight.takeoff_altitude==400
+    takeoff.phase=flight.phase='landing'
+    np.testing.assert_array_equal(takeoff._target()[:2],[80,40])
+    np.testing.assert_array_equal(flight._target()[:2],[80,40])
+    # The landing curriculum ramps the start position toward the real pad, so a
+    # stage-trained policy still practises on the site it is evaluated against.
+    easy=RocketEnv('landing',config=cfg,training=True,difficulty=0);easy.reset(seed=42)
+    replay=RocketEnv('landing',config=cfg,difficulty=0);replay.reset(seed=42)
+    np.testing.assert_allclose(easy.physics.state()['position'][:2],[80,40])
+    np.testing.assert_allclose(replay.physics.state()['position'][:2],[80,40])
+    np.testing.assert_array_equal(replay._target()[:2],[80,40])
+    full=RocketEnv('landing',config=cfg,difficulty=1);full.reset(seed=42)
+    assert np.linalg.norm(full.physics.state()['position'][:2])<12.1
+    for env in (takeoff,flight,easy,replay,full):env.close()
 
 
 def test_campaign_dispatch_uses_saved_plan_and_conflict_guard(monkeypatch,tmp_path):
@@ -96,7 +106,7 @@ def test_campaign_dispatch_uses_saved_plan_and_conflict_guard(monkeypatch,tmp_pa
     def launch(command,folder):commands.append(command);return 1
     monkeypatch.setattr(module,'launch_job',launch)
     client=TestClient(module.app)
-    response=client.post('/campaigns',json={'steps':100000000,'flight_plan':{'launch':[10,20],'landing':[90,60],'separation_altitude':400}})
+    response=client.post('/campaigns',json={'steps':100000000,'flight_plan':{'launch':[10,20],'landing':[1210,420],'separation_altitude':400}})
     assert response.status_code==202
     assert commands[0][1:3]==['-m','rocket_lab.campaign'] and '100000000' in commands[0]
     assert client.post('/training',json={'steps':1000}).status_code==409
