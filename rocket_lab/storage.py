@@ -79,11 +79,33 @@ def select_checkpoint(mission,level,config=None):
         return (all(recorded.get(key)==cfg.get(key) for key in ('vehicle','world','mission')) if recorded else item.get('config_hash')==baseline_hash)
     items=[x for x in checkpoints(mission) if compatible(x) and x.get("evaluation_episodes",0)>0 and x.get("steps",0)>0]
     if not items: raise ValueError(f"No trained {mission} checkpoint available. Start training first.")
+    # Automatic selection must never rank a model trained on other physics above
+    # one trained on the revision that is loaded; explicit IDs still can.
+    current=[x for x in items if x.get("dynamics_hash")==dynamics_hash()]
+    if current: items=current
     results=[value for path in (DATA/'results').glob('*.json') if (value:=read_json(path)) and value.get('mission')==mission and value.get('scenario')=='nominal']
     def evidence(item):
         allowed_hashes={baseline_hash,item.get('config_hash')}
-        return max((value for value in results if value.get('checkpoint_id')==item['id'] and value.get('config_hash') in allowed_hashes and value.get('episodes',0)>=item['evaluation_episodes']),key=lambda value:value['episodes'],default=None)
+        # Only full-mission batches are comparable across controllers; a
+        # curriculum stage batch is recorded but never used as this evidence.
+        return max((value for value in results if value.get('checkpoint_id')==item['id'] and value.get('config_hash') in allowed_hashes and value.get('episodes',0)>=item['evaluation_episodes'] and value.get('difficulty',1.)==1.),key=lambda value:value['episodes'],default=None)
+    def stage_lower(item):
+        n=item.get('stage_evaluation_episodes') or 0; k=item.get('stage_successes')
+        if n<=0 or k is None:return None
+        if not 0<=k<=n:raise ValueError('Invalid saved checkpoint stage success count')
+        rate=k/n;z=1.95996398454;denominator=1+z*z/n
+        return rate,max(0.,(rate+z*z/(2*n)-z*math.sqrt(rate*(1-rate)/n+z*z/(4*n*n)))/denominator)
     def rank(item):
+        # Compare every checkpoint on one axis: the hardest envelope it still
+        # flies reliably. A curriculum stage reports the stage it was trained
+        # on; a full-mission policy reports difficulty 1. This keeps a collapsed
+        # late checkpoint (0/12 one stage up) behind a working early one, and a
+        # full-envelope landing ahead of any practice hop.
+        threshold=(item.get('config') or {}).get('training',{}).get('curriculum_threshold',.75)
+        stage=stage_lower(item)
+        if stage is not None:
+            rate,lower=stage
+            return (1 if rate>=threshold else 0,float(item.get('stage_difficulty') or 0.),lower,rate,0.,item['steps'])
         result=evidence(item)
         n=result['episodes'] if result else item['evaluation_episodes']
         k=result.get('successes',0) if result else item.get('successes',round(item.get('success_rate',0)*n))
@@ -92,7 +114,7 @@ def select_checkpoint(mission,level,config=None):
         lower=max(0.,(rate+z*z/(2*n)-z*math.sqrt(rate*(1-rate)/n+z*z/(4*n*n)))/denominator)
         # Ascent records contain speed magnitude, not target-speed error.
         error=(result['mean_touchdown_speed']/2+result['mean_tilt']/5+result['mean_pad_distance']/5) if result and mission=='landing' else 0.
-        return (lower,n,rate,-error,item['steps'])
+        return (1 if rate>=threshold else 0,1.,lower,rate,-error,item['steps'])
     # Raw rewards across different reward profiles are never compared.
     best=max(items,key=rank)
     sequence=sorted([x for x in items if x["job_id"]==best["job_id"] and x['steps']<=best['steps']],key=lambda x:x['steps'])

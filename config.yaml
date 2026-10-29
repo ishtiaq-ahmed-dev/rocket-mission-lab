@@ -75,14 +75,22 @@ training:
   checkpoints: [10000, 100000, 500000, 1000000, 5000000, 10000000]
   evaluation_episodes: 10000
   curriculum_threshold: 0.75
-  curriculum_window: 40
+  curriculum_window: 40 # display only; advancement uses the deterministic stage check
+  curriculum_check_interval: 25000 # steps between deterministic stage checks
+  curriculum_eval_episodes: 8
   initial_difficulty: 0.0
-  curriculum_increment: 0.025 # small distribution changes avoid a 3 m -> 35 m jump
+  curriculum_increment: 0.05 # the deterministic gate refuses a stage until it is flown
   observation_normalization: false # fixed physical scaling is stable across curriculum transitions
   observation_position_scale: [40.0, 40.0, 250.0]
   observation_velocity_scale: [10.0, 10.0, 30.0]
   reward_normalization: true
-  policy_log_std: -2.3 # exploration remains a learned stochastic policy
+  policy_log_std: -0.7 # wide initial exploration; a deterministic policy cannot adapt at a bump
+  policy_exploration_std: 0.35 # log_std floor at difficulty 0; shrinks with curriculum progress
+  policy_min_std: 0.08 # log_std floor at the full mission; never fully deterministic
+  ppo_entropy: 0.003 # entropy pressure keeps the floor reachable instead of a hard invariant
+  ppo_target_kl: 0.02 # stop an epoch early rather than let one batch wreck the policy
+  ppo_gamma: 0.999 # a 200 m descent takes far longer than the old 20 s horizon
+  ppo_gae_lambda: 0.98
   learning_rate: 0.0003
   retarget_probability: 0.35 # training-only mid-flight landing-target changes
   retarget_max_offset: 70.0 # approximate m, sampled divert distance

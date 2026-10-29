@@ -45,6 +45,9 @@
 | Training-only ascent-goal curriculum | Require the full 400 m climb at every training stage | Start at 5 m / 3 m/s and widen only after successes; evaluation still uses 400 m / 25 m/s |
 | Physical-config-aware frontend selection | Serve the old baseline by default or compare raw rewards across variants | Pass explicit compatible checkpoint IDs, use the largest sample and Wilson lower bound, then landing physical errors; retain clear unqualified labels |
 | Larger development samples before retaining a new variant | Treat 6/20 as necessarily better than 5/20 | V12's small-sample apparent improvement reversed at 256 seeds; keep the reversal visible and disclose selection effects |
+| Stage-scaled exploration floor | Rely on the entropy coefficient alone | Shrinking std is locally optimal on an easy stage. Two runs collapsed to a near-constant action (std 0.10 to 0.05) and could not correct after a bump; the floor is 0.35 at difficulty 0 and 0.08 at the full mission, so exploration is never removed outright |
+| Deterministic stage gate | Rolling window of sampled training successes | A sampled rollout measures the exploration noise as much as the pilot. The gate now flies the deterministic actor on fixed seeds, which is what the deck flies, so a correct mean can advance while std stays wide |
+| Discount 0.999 and GAE 0.98 | 0.995 gamma at 10 Hz control | The old 20 s credit horizon could not see a 200 m descent; the terminal reward is discounted to a few units from the start altitude, which kept full-start pilots near chance |
 
 ## Implementation findings
 

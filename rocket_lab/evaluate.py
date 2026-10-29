@@ -25,8 +25,9 @@ def wilson(k,n):
     margin=z*math.sqrt(p*(1-p)/n+z*z/(4*n*n))/denom
     return [max(0.,center-margin),min(1.,center+margin)]
 
-def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_seed=10000,scenario="nominal",config=None,progress_id=None):
+def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_seed=10000,scenario="nominal",config=None,progress_id=None,difficulty=1.):
     if episodes<1:raise ValueError("episodes must be positive")
+    if not 0<=difficulty<=1:raise ValueError("difficulty must be within [0,1]")
     cfg,_=configure_flight(config or load_config(),mission=mission)
     if scenario=="gusts": cfg["world"]["gust_std"]*=4; cfg["world"]["wind_mean"]=[12,-8,0]
     elif scenario=="noise":
@@ -35,7 +36,7 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
             if key in cfg['world']:cfg['world'][key]*=4
     elif scenario=="thrust_loss": cfg["vehicle"]["max_thrust"]*=.8
     elif scenario=="extreme_starts": cfg["mission"]["horizontal_position"]*=4; cfg["mission"]["initial_tilt_deg"]*=4
-    env=RocketEnv(mission,config=cfg)
+    env=RocketEnv(mission,config=cfg,difficulty=difficulty)
     policy=LearnedPolicy(checkpoint_id,observation_config=cfg) if checkpoint_id else None
     rows=[]
     progress_folder=None;progress_log=None;started=time.time()
@@ -44,7 +45,7 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
         progress_folder=DATA/"evaluations"/progress_id
         progress_folder.mkdir(parents=True,exist_ok=True)
         source=hashlib.sha256(b''.join((ROOT/"rocket_lab"/name).read_bytes() for name in ["physics.py","envs.py","controllers.py","simulation.py"])).hexdigest()
-        identity=dict(mission=mission,level=level,episodes=episodes,checkpoint_id=checkpoint_id,start_seed=start_seed,scenario=scenario,config=cfg,source_hash=source)
+        identity=dict(mission=mission,level=level,episodes=episodes,checkpoint_id=checkpoint_id,start_seed=start_seed,scenario=scenario,difficulty=difficulty,config=cfg,source_hash=source)
         previous=read_json(progress_folder/"identity.json")
         if previous and previous!=identity:raise ValueError("Evaluation source/config changed; use a new progress ID")
         atomic_json(progress_folder/"identity.json",identity)
@@ -71,7 +72,7 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
                 heartbeat("running")
                 print(f"EVALUATION {progress_id} {len(rows)}/{episodes}",flush=True)
     k=sum(x["outcome"]=="success" for x in rows)
-    result=dict(mission=mission,method="rl" if checkpoint_id else "classical",level=level,checkpoint_id=checkpoint_id,
+    result=dict(mission=mission,method="rl" if checkpoint_id else "classical",level=level,checkpoint_id=checkpoint_id,difficulty=difficulty,
                 episodes=episodes,seeds=[start_seed,start_seed+episodes-1],scenario=scenario,successes=k,success_rate=k/episodes,
                 confidence_interval=wilson(k,episodes),mean_reward=float(np.mean([x["reward"] for x in rows])),
                 failures=dict(Counter(x["outcome"] for x in rows if x["outcome"]!="success")),
@@ -86,6 +87,8 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
 
 def save_result(result,rows):
     identifier=f"{result['mission']}-{result['method']}-l{result['level']}-{result['checkpoint_id'] or 'controller'}-{result['scenario']}"
+    # A curriculum stage is a different mission; its batch is separate evidence.
+    if result.get("difficulty",1.)!=1.:identifier+=f"-d{result['difficulty']:.6f}"
     if result.get('dynamics_hash'):identifier+=f"-{result['config_hash']}-src{result['dynamics_hash'][:12]}"
     folder=DATA/"results"; folder.mkdir(parents=True,exist_ok=True)
     # Preserve a completed full batch when a smaller pilot for that controller

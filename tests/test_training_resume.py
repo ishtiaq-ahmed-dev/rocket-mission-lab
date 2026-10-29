@@ -78,7 +78,7 @@ def test_optimizer_adaptation_rejects_task_or_credit_changes():
     validate_optimizer_adaptation(cfg,new)
     new['reward']['success']+=1
     with pytest.raises(ValueError,match='unchanged'):validate_optimizer_adaptation(cfg,new)
-    new=copy.deepcopy(cfg);new['training']['ppo_gamma']=.999
+    new=copy.deepcopy(cfg);new['training']['ppo_gamma']=.98
     with pytest.raises(ValueError,match='permits only'):validate_optimizer_adaptation(cfg,new)
 
 def test_optimizer_adaptation_preserves_initial_weights_and_saves_final_update(monkeypatch,tmp_path):

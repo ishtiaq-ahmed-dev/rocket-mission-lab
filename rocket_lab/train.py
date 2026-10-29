@@ -45,6 +45,8 @@ class TrainingCallback(BaseCallback):
         self.stop_reason=None
         if initial_difficulty is not None:self.difficulty=initial_difficulty
         self.completed={x for x in self.milestones if x<initial_steps}
+        self.curriculum_checked=initial_steps
+        self.stage_probe=None
 
     def write_status(self, error=None):
         atomic_json(self.folder/"status.json",dict(id=self.job_id,mission=self.mission,algorithm=self.algorithm,
@@ -53,7 +55,19 @@ class TrainingCallback(BaseCallback):
                     steps_per_second=(self.num_timesteps-self.initial_steps)/max(1,time.time()-self.started),
                     device=str(self.model.device),seed=self.model.seed,difficulty=self.difficulty,
                     episode_count=self.episode_count,recent_successes=sum(self.recent),recent_episodes=len(self.recent),
-                    curve=self.curve,episodes=self.history[-400:],error=error or self.stop_reason,pid=os.getpid(),config_hash=self.training_hash))
+                    curve=self.curve,episodes=self.history[-400:],error=error or self.stop_reason,pid=os.getpid(),config_hash=self.training_hash,
+                    exploration_std=float(np.exp(self.model.policy.log_std.detach().mean())) if hasattr(self.model.policy,'log_std') else None,
+                    stage_probe=self.stage_probe,
+                    **self.optimizer_health()))
+
+    def optimizer_health(self):
+        values=getattr(self.model.logger,'name_to_value',{}) or {}
+        health={}
+        for name,key in (("approx_kl","train/approx_kl"),("clip_fraction","train/clip_fraction"),("explained_variance","train/explained_variance"),("entropy_loss","train/entropy_loss")):
+            value=values.get(key)
+            try: health[name]=float(value) if value is not None and np.isfinite(value) else None
+            except (TypeError,ValueError): health[name]=None
+        return health
 
     def checkpoint(self,final=False):
         if shutil.disk_usage(self.folder).free<32*1024**2:
@@ -77,15 +91,73 @@ class TrainingCallback(BaseCallback):
         meta.update(success_rate=result["success_rate"],mean_reward=result["mean_reward"],evaluation_episodes=self.eval_episodes,
                     successes=result["successes"],confidence_interval=result["confidence_interval"],failures=result["failures"],
                     qualification=result["qualification"])
+        # A curriculum policy is selected for the stage it was trained on, so
+        # measure that stage too; the full-mission batch above stays the promise.
+        if self.difficulty<1:
+            stage,stage_rows=evaluate(self.mission,episodes=self.eval_episodes,checkpoint_id=identifier,start_seed=30000,
+                                      config=self.config,difficulty=self.difficulty)
+            meta.update(stage_difficulty=self.difficulty,stage_successes=stage["successes"],
+                        stage_success_rate=stage["success_rate"],stage_evaluation_episodes=self.eval_episodes,
+                        stage_failures=stage["failures"])
+            save_result(stage,stage_rows)
         atomic_json(folder/"checkpoint.json",meta)
         save_result(result,rows)
         self.curve.append(dict(steps=steps,reward=result["mean_reward"],success_rate=result["success_rate"],successes=result["successes"],episodes=self.eval_episodes,checkpoint_id=identifier))
         print(f"CHECKPOINT {identifier} successes={result['successes']}/{self.eval_episodes} reward={result['mean_reward']:.1f}",flush=True)
         self.write_status()
 
+    def stage_flown(self):
+        """Deterministic fixed-seed check at the current curriculum stage."""
+        episodes=self.config["training"].get("curriculum_eval_episodes",8)
+        if episodes<1:return False
+        env=RocketEnv(self.mission,config=self.config,difficulty=self.difficulty,training=False)
+        wins=0
+        try:
+            for index in range(episodes):
+                observation,_=env.reset(seed=40000+index)
+                done=False
+                while not done:
+                    action=self.model.predict(self.training_env.normalize_obs(np.array([observation]))[0],deterministic=True)[0]
+                    observation,_,terminal,truncated,info=env.step(action)
+                    done=terminal or truncated
+                wins+=info.get("outcome")=="success"
+        finally:env.close()
+        threshold=self.config["training"]["curriculum_threshold"]
+        self.stage_probe=dict(steps=self.num_timesteps,difficulty=self.difficulty,successes=wins,episodes=episodes,threshold=threshold)
+        return wins/episodes>=threshold
+
+    def exploration_floor(self):
+        """Smallest action std allowed at the current curriculum stage.
+
+        Gradient descent shrinks std because less noise scores better on an
+        easy stage. That is locally optimal and globally fatal: a near
+        deterministic policy cannot sample the corrections a harder start
+        needs, so the curriculum bump used to end in a constant action that
+        could no longer land. The floor is wide on easy stages and tight at
+        the full mission, so exploration is never removed outright.
+        """
+        settings=self.config["training"]
+        easy,hard=settings.get("policy_exploration_std"),settings.get("policy_min_std")
+        if easy is None and hard is None:return None
+        if easy is None or hard is None:raise ValueError("policy_exploration_std and policy_min_std must be set together")
+        if not 0<hard<=easy:raise ValueError("policy_min_std must be positive and no larger than policy_exploration_std")
+        return hard+(easy-hard)*(1.-min(1.,max(0.,self.difficulty)))
+
+    def keep_exploration(self):
+        # SAC learns state-dependent variance in its actor and has no PPO
+        # policy.log_std parameter. Leave its exploration mechanism intact.
+        if self.algorithm!='PPO':return
+        floor=self.exploration_floor()
+        if floor is None:return
+        with torch.no_grad():self.model.policy.log_std.clamp_(np.log(floor),np.log(1.))
+
     def _on_training_start(self):
         self.training_env.env_method("set_difficulty",self.difficulty)
+        self.keep_exploration()
         self.checkpoint(); self.completed.add(self.num_timesteps)
+
+    def _on_rollout_end(self):
+        self.keep_exploration()
 
     def _on_step(self):
         if self.num_timesteps%128==0:yield_background_work()
@@ -109,14 +181,21 @@ class TrainingCallback(BaseCallback):
                 ep=info.get("episode",{})
                 self.history.append(dict(steps=self.num_timesteps,reward=float(ep.get("r",0)),length=int(ep.get("l",0)),outcome=info.get("outcome"),difficulty=episode_difficulty))
                 self.history=self.history[-400:]
-        # Advance only after the measured rolling threshold is met.
-        threshold=self.config["training"]["curriculum_threshold"]
-        if len(self.recent)==self.recent.maxlen and np.mean(self.recent)>=threshold and self.difficulty<1:
-            self.difficulty=min(1.,self.difficulty+self.config["training"].get("curriculum_increment",.15))
-            # env_method traverses Monitor wrappers; set_attr would only shadow
-            # an attribute on the wrapper and leave the real environment easy.
-            self.training_env.env_method("set_difficulty",self.difficulty)
-            self.recent.clear()
+        # Advance on what the deck actually flies: the deterministic actor on
+        # fixed seeds. Gating on stochastic training episodes punishes a policy
+        # for its own exploration noise, so a correct mean could never pass and
+        # the curriculum stalled while the floor was doing its job.
+        settings=self.config["training"]
+        interval=settings.get("curriculum_check_interval",25000)
+        if interval>0 and self.difficulty<1 and self.num_timesteps-self.curriculum_checked>=interval:
+            self.curriculum_checked=self.num_timesteps
+            if self.stage_flown():
+                self.difficulty=min(1.,self.difficulty+settings.get("curriculum_increment",.15))
+                # env_method traverses Monitor wrappers; set_attr would only shadow
+                # an attribute on the wrapper and leave the real environment easy.
+                self.training_env.env_method("set_difficulty",self.difficulty)
+                self.recent.clear()
+                self.keep_exploration()
         if any(self.num_timesteps>=x and x not in self.completed for x in self.milestones):
             for x in self.milestones:
                 if self.num_timesteps>=x: self.completed.add(x)

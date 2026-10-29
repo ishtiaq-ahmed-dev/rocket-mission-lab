@@ -24,6 +24,33 @@ def test_selection_uses_largest_sample_and_excludes_changed_physics_and_future_r
     assert storage.select_checkpoint('landing',4)['id']=='a__best'
 
 
+def test_selection_prefers_the_hardest_envelope_a_checkpoint_still_flies(tmp_path,monkeypatch):
+    cfg={'vehicle':{},'world':{},'mission':{}}
+    monkeypatch.setattr(storage,'DATA',tmp_path);monkeypatch.setattr(storage,'load_config',lambda:cfg)
+    monkeypatch.setattr(storage,'config_hash',lambda:'baseline')
+    def stage(identifier,steps,difficulty,successes):
+        return dict(id=identifier,job_id=identifier.split('__')[0],steps=steps,mission='landing',config=cfg,config_hash='baseline',
+                    evaluation_episodes=12,successes=0,stage_difficulty=difficulty,stage_successes=successes,stage_evaluation_episodes=12)
+    def full_mission(identifier,steps,successes):
+        return dict(id=identifier,job_id=identifier.split('__')[0],steps=steps,mission='landing',config=cfg,config_hash='baseline',
+                    evaluation_episodes=20,successes=successes)
+    working=stage('a__working',100,.025,10);collapsed=stage('a__collapsed',500,.05,0);advanced=stage('a__advanced',700,.5,11)
+    landed=full_mission('b__landed',900,20);crashed=full_mission('c__crashed',950,2)
+    # Both policies were trained at a curriculum stage; the later one died after
+    # the difficulty bump, so it must not outrank the stage that still flies.
+    monkeypatch.setattr(storage,'checkpoints',lambda mission=None:[working,collapsed])
+    assert storage.select_checkpoint('landing',4)['id']=='a__working'
+    # The most advanced stage that still clears the bar wins.
+    monkeypatch.setattr(storage,'checkpoints',lambda mission=None:[working,collapsed,advanced])
+    assert storage.select_checkpoint('landing',4)['id']=='a__advanced'
+    # A full-envelope landing outranks every curriculum-stage hop.
+    monkeypatch.setattr(storage,'checkpoints',lambda mission=None:[working,collapsed,advanced,landed])
+    assert storage.select_checkpoint('landing',4)['id']=='b__landed'
+    # A full-mission policy that mostly crashes does not.
+    monkeypatch.setattr(storage,'checkpoints',lambda mission=None:[working,crashed])
+    assert storage.select_checkpoint('landing',4)['id']=='a__working'
+
+
 def test_selection_does_not_treat_slow_failed_ascent_as_good_landing(tmp_path,monkeypatch):
     cfg={'vehicle':{},'world':{},'mission':{}}
     monkeypatch.setattr(storage,'DATA',tmp_path);monkeypatch.setattr(storage,'load_config',lambda:cfg)
