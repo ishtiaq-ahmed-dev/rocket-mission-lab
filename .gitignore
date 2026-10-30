@@ -32,4 +32,6 @@ playwright-report/
 *.log
 videos/analysis_*.png
 videos/*.webm
+/screenshot*.png
+/pad-*.png
 

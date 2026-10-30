@@ -21,8 +21,5 @@ def main():
         for level in range(1,5):
             run=simulate(mission,"classical",level,42)
             print(mission,level,run.run.outcome,f"speed={run.run.touchdown_speed:.2f} tilt={run.run.tilt:.2f} distance={run.run.pad_distance:.2f}",flush=True)
-    target=ROOT/"frontend"/"public"/"demo.json"
-    atomic_json(target,simulate("landing","classical",4,42,save=False).model_dump())
-    atomic_json(ROOT/"frontend"/"public"/"demo-runs.json",[simulate("landing","classical",x,42,save=False).model_dump() for x in range(1,5)])
 
 if __name__=="__main__": main()

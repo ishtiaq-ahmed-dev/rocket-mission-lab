@@ -110,7 +110,12 @@ class TrainingCallback(BaseCallback):
         """Deterministic fixed-seed check at the current curriculum stage."""
         episodes=self.config["training"].get("curriculum_eval_episodes",8)
         if episodes<1:return False
-        env=RocketEnv(self.mission,config=self.config,difficulty=self.difficulty,training=False)
+        # Takeoff and combined practise a reduced goal, so the stage check must
+        # fly that same goal; an evaluation env keeps the full one and could
+        # never pass while the policy is still learning the short ascent.
+        # Randomization and sensor noise stay off: this is a fixed, clean probe.
+        practice=self.mission in ('takeoff','combined')
+        env=RocketEnv(self.mission,config=self.config,difficulty=self.difficulty,training=practice,randomize=False,noise=False)
         wins=0
         try:
             for index in range(episodes):
@@ -151,8 +156,28 @@ class TrainingCallback(BaseCallback):
         if floor is None:return
         with torch.no_grad():self.model.policy.log_std.clamp_(np.log(floor),np.log(1.))
 
+    def practice_difficulties(self):
+        """Mix the current stage with the one below across the vector env.
+
+        Training one stage above competence lets PPO spend its whole budget
+        failing there and overwrite the landing it already flew. A share of
+        environments rehearses the previous stage, so the lower skill stays
+        measured while the new one is learned. Evaluation always flies the
+        exact requested difficulty; this only changes training envs.
+        """
+        settings=self.config["training"]
+        share=float(settings.get("previous_stage_probability",0.) or 0.)
+        if not 0<=share<=1:raise ValueError("previous_stage_probability must be within [0,1]")
+        count=self.training_env.num_envs
+        rehearsed=min(count,int(round(count*share)))
+        previous=max(0.,self.difficulty-float(settings.get("curriculum_increment",.05)))
+        values=[self.difficulty]*(count-rehearsed)+[previous]*rehearsed
+        for value in sorted(set(values)):
+            self.training_env.env_method("set_difficulty",value,indices=[i for i,v in enumerate(values) if v==value])
+        return values
+
     def _on_training_start(self):
-        self.training_env.env_method("set_difficulty",self.difficulty)
+        self.practice_difficulties()
         self.keep_exploration()
         self.checkpoint(); self.completed.add(self.num_timesteps)
 
@@ -190,10 +215,15 @@ class TrainingCallback(BaseCallback):
         if interval>0 and self.difficulty<1 and self.num_timesteps-self.curriculum_checked>=interval:
             self.curriculum_checked=self.num_timesteps
             if self.stage_flown():
+                # Save the actor the moment it passes. The gate is the only
+                # evidence that a stage is actually flown, so that exact policy
+                # must survive as a checkpoint the deck and later selection can
+                # rank; otherwise a pass exists only in the status file.
+                self.checkpoint()
                 self.difficulty=min(1.,self.difficulty+settings.get("curriculum_increment",.15))
                 # env_method traverses Monitor wrappers; set_attr would only shadow
                 # an attribute on the wrapper and leave the real environment easy.
-                self.training_env.env_method("set_difficulty",self.difficulty)
+                self.practice_difficulties()
                 self.recent.clear()
                 self.keep_exploration()
         if any(self.num_timesteps>=x and x not in self.completed for x in self.milestones):
@@ -215,8 +245,21 @@ def warm_start_actor(model,identifier,mission,cfg):
     checkpoint=checkpoint_path(identifier);meta=read_json(checkpoint/"checkpoint.json")
     if meta["mission"]!=mission or meta["algorithm"]!="PPO":raise ValueError("Warm start requires a matching PPO mission")
     old=meta.get("config") or read_json(DATA/"jobs"/meta["job_id"]/"config.json",{})
+    # A checkpoint can predate keys this revision added (throttle rate,
+    # shutdown rate, feet contact, navigation noise, pad tolerance). Transfer
+    # is allowed only when the caller declares the revision and every value the
+    # two configurations share still agrees, so no known physical quantity
+    # changes silently; the added keys are recorded with the lineage.
+    allow_revision=bool(cfg["training"].get("warm_start_allow_physics_revision",False))
+    added={}
     for section in ("vehicle","world","mission"):
-        if old.get(section)!=cfg[section]:raise ValueError("Warm start cannot change physics or mission")
+        previous,current=old.get(section) or {},cfg[section]
+        if previous==current:continue
+        changed={key:(previous.get(key),current.get(key)) for key in set(previous)&set(current) if previous.get(key)!=current.get(key)}
+        if not allow_revision or changed or set(previous)-set(current):
+            raise ValueError("Warm start cannot change physics or mission")
+        added[section]=sorted(set(current)-set(previous))
+    if added:meta=dict(meta,physics_revision=added)
     for key in ("observation_position_scale","observation_velocity_scale","observation_normalization"):
         if old.get("training",{}).get(key)!=cfg["training"].get(key):raise ValueError("Warm start requires unchanged observation scaling")
     if cfg["training"].get("observation_normalization",True):raise ValueError("Actor-only transfer requires fixed physical observation scaling")
@@ -314,7 +357,7 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
             initial_steps=int(meta["steps"]);initial_difficulty=float(warm_difficulty if warm_difficulty is not None else meta.get("difficulty",0.));model.num_timesteps=initial_steps
             parent_bounded=meta.get("config",{}).get("training",{}).get("bounded_action_mean",False)
             bounded=cfg["training"].get("bounded_action_mean",False)
-            atomic_json(folder/"warm-start.json",dict(parent_checkpoint=warm_start,parent_steps=initial_steps,parent_config_hash=meta.get("config_hash"),new_config_hash=config_hash(cfg),additional_steps=steps,transferred="learned actor weights only",critic="fresh",optimizer="fresh",reward_normalization="fresh",action_mean_transform="tanh" if bounded else "linear",actor_function_changed=parent_bounded!=bounded or exploration is not None,deterministic_action_function_changed=parent_bounded!=bounded,exploration_std_override=exploration,initial_difficulty=initial_difficulty))
+            atomic_json(folder/"warm-start.json",dict(parent_checkpoint=warm_start,parent_steps=initial_steps,parent_config_hash=meta.get("config_hash"),new_config_hash=config_hash(cfg),additional_steps=steps,transferred="learned actor weights only",critic="fresh",optimizer="fresh",reward_normalization="fresh",action_mean_transform="tanh" if bounded else "linear",actor_function_changed=parent_bounded!=bounded or exploration is not None,deterministic_action_function_changed=parent_bounded!=bounded,exploration_std_override=exploration,initial_difficulty=initial_difficulty,physics_revision=meta.get("physics_revision")))
     else:
         settings=cfg["training"]
         model=SAC(**common,batch_size=settings.get("sac_batch_size",256),buffer_size=settings.get("sac_buffer_size",250000),learning_starts=settings.get("sac_learning_starts",2000),train_freq=settings.get("sac_train_freq",4),gradient_steps=settings.get("sac_gradient_steps",1),gamma=settings.get("sac_gamma",.995),policy_kwargs=dict(net_arch=[128,128]))

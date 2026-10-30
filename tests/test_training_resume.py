@@ -53,6 +53,15 @@ def test_actor_warm_start_keeps_a_fresh_critic_and_rejects_physics_changes(monke
     assert len(child.policy.optimizer.state)==0
     invalid=copy.deepcopy(updated);invalid['vehicle']['max_thrust']+=1
     with pytest.raises(ValueError,match='physics'):module.warm_start_actor(child,'actor-parent__step-000000016','landing',invalid)
+    # A revision that only adds keys may adopt the actor, but only when the
+    # caller declares it; the added keys are recorded with the lineage.
+    revision=copy.deepcopy(updated);revision['world']['thrust_degradation']=.02
+    with pytest.raises(ValueError,match='physics'):module.warm_start_actor(child,'actor-parent__step-000000016','landing',revision)
+    revision['training']['warm_start_allow_physics_revision']=True
+    declared=module.warm_start_actor(child,'actor-parent__step-000000016','landing',revision)
+    assert declared['physics_revision']=={'world':['thrust_degradation']}
+    revision['world']['gravity']+=.1
+    with pytest.raises(ValueError,match='physics'):module.warm_start_actor(child,'actor-parent__step-000000016','landing',revision)
     parent_env.close();child_env.close()
 
 def test_mixed_full_start_outcomes_do_not_advance_the_practice_stage():

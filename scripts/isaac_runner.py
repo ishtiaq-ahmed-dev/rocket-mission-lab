@@ -41,8 +41,10 @@ def arguments():
     parser.add_argument('--randomized',action='store_true',help='Use seeded mass, thrust, wind and initial-state variation')
     parser.add_argument('--sensor-noise',action='store_true',help='Use the project navigation noise model')
     parser.add_argument('--physics-hz',type=int,choices=[50,100,120,240],default=120)
-    parser.add_argument('--record',action='store_true',help='Encode the native viewport flight into an MP4 (visual mode)')
     parser.add_argument('--cinematic',action='store_true',help='After the flight, replay the recorded pose track into a frame-exact cinematic MP4 (visual mode)')
+    parser.add_argument('--render-track',type=Path,default=None,help='Render a saved .npz pose track into the film without flying (visual mode)')
+    parser.add_argument('--cine-limit',type=float,default=None,help='Render only the first N seconds of the film (camera check)')
+    parser.add_argument('--cine-stills',default=None,help='Comma-separated film seconds to render as PNG stills (camera check)')
     parser.add_argument('--cine-fps',type=float,default=60.,help='Cinematic replay frame rate')
     parser.add_argument('--cine-preset',choices=['balanced','cinematic','pathtraced'],default='cinematic')
     parser.add_argument('--cine-size',type=int,choices=[720,1080],default=1080)
@@ -157,6 +159,23 @@ def main():
         print('NATIVE: constructing PhysX environment',flush=True)
         env=RocketEnv(args.mission,config=cfg,randomize=args.randomized,noise=args.sensor_noise,physics_factory=factory,training=bool(args.train_steps))
         observation,_=env.reset(seed=args.seed)
+        if args.render_track:
+            if visuals is None:raise ValueError('--render-track needs the visual experience; do not pass --headless')
+            from rocket_lab.isaac.cinematic import FlightTrack,OfflineRenderer
+            track=FlightTrack.load(args.render_track)
+            env.physics.world.pause()
+            size=(1280,720) if args.cine_size==720 else (1920,1080)
+            renderer=OfflineRenderer(visuals,env.physics.stage,preset=args.cine_preset,fps=args.cine_fps,size=size)
+            stills=None
+            if args.cine_stills:
+                times=[float(value) for value in args.cine_stills.split(',') if value.strip()]
+                stills=(times,args.cine_output.parent/'stills')
+            print(f'CINEMATIC: rendering {args.render_track} at {args.cine_fps:.0f} fps {size[0]}x{size[1]}',flush=True)
+            report['cinematic']=renderer.render(track,args.cine_output,
+                (cfg,env.physics.half,env.physics.engine_lever),on_frame=300,limit_seconds=args.cine_limit,stills=stills)
+            report.update(status='finished',physical_seconds=env.physics.data.time,
+                track_out=str(args.render_track))
+            return
         report['physx_gpu_dynamics_enabled']=env.physics.world.get_physics_context().is_gpu_dynamics_enabled()
         assert report['physx_gpu_dynamics_enabled']==args.gpu_physics
         print('NATIVE: environment reset complete',flush=True)
@@ -247,10 +266,6 @@ def main():
                 (folder/'config.json').write_text(json.dumps(cfg,indent=2));report.update(requested_training_steps=args.train_steps,training_steps=model.num_timesteps,checkpoint=str(folder),qualification='Unqualified native PhysX study')
             report['status']='training_finished'
         else:
-            recording=None
-            if visuals and args.record:
-                recording=visuals.start_record(args.output.with_name(args.output.stem+'-flight.mp4'))
-                report['video_encoding']=str(recording)
             flight_started=time.monotonic();trace=[];scheduled_retarget=False;pause_wall=0.
             track=None
             if args.cinematic or args.track_out:
@@ -299,8 +314,6 @@ def main():
                     if info['outcome']=='success' and env.phase=='landing':settle_landing(env,publish,server,args.time_scale)
                     if env.last_info.get('outcome')=='stopped':stop=True
                     break
-            if recording:
-                report['video_artifact']=str(visuals.stop_record())
             elapsed=time.monotonic()-flight_started
             report.update(status='stopped' if stop else 'finished',steps=count,outcome=env.last_info.get('outcome'),
                 physical_seconds=env.physics.data.time,flight_wall_seconds=elapsed,real_time_factor=env.physics.data.time/max(elapsed,1e-6),

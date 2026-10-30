@@ -36,6 +36,7 @@ class RocketPhysics:
         self.fuel = self.v["fuel_mass"] * mass_scale
         self.attached_mass = self.v.get('upper_stage_mass',0.) * mass_scale
         self.gimbal = np.zeros(2)
+        self.rcs_torque = np.zeros(3)
         self.throttle = 0.0
         self.thrust = 0.0
         self.hold_elapsed = 0.0
@@ -65,20 +66,30 @@ class RocketPhysics:
         return gravity_at(self.w, height)
 
     def separate(self):
-        """No separation impulse: both bodies retain their release velocity.
+        """Release the upper stage with a spring-pusher impulse along the booster axis.
 
-        Only the returning booster is dynamically integrated after release.
-        The UI displays the released payload with a labelled ballistic preview.
+        The upper stage gains `separation_delta_v` m/s along the axis; momentum conservation
+        gives the booster an equal and opposite kick scaled by the mass ratio. Both bodies
+        then coast independently under gravity and drag. The booster stays under controller
+        authority; the released stage is an unpowered ballistic body.
         """
         state=self.state()
         event=dict(t=state['t'],position=state['position'].tolist(),velocity=state['velocity'].tolist(),
                    quaternion=state['quaternion'].tolist(),mass=float(self.attached_mass))
         if self.attached_mass > 0:
             rotation = self.rotation()
+            axis = rotation[:, 2]
+            upper_mass = float(self.attached_mass)
+            dv_upper = float(self.v.get('separation_delta_v', 1.3))
+            impulse = upper_mass * dv_upper
+            self.attached_mass = 0.
+            self._mass_update()
+            booster_mass = self.mass
             offset = rotation @ np.array([0., 0., self.half + 4.5])
-            velocity = state['velocity'] + np.cross(rotation @ state['angular_velocity'], offset)
-            self.released_stage = BallisticStage(self.cfg, self.attached_mass,
+            velocity = state['velocity'] + np.cross(rotation @ state['angular_velocity'], offset) + axis*dv_upper
+            self.released_stage = BallisticStage(self.cfg, upper_mass,
                 state['position'] + offset, velocity, state['quaternion'], state['angular_velocity'], state['t'])
+            self.data.qvel[:3] = self.data.qvel[:3] - axis*impulse/booster_mass
         self.attached_mass=0.
         self._mass_update()
         return event
@@ -170,7 +181,10 @@ class RocketPhysics:
             # Free-joint rotational generalized forces use the local tangent
             # frame. Holding a world torque constant through RK4's stages
             # creates a spurious roll moment as the body rotates within dt.
-            self.data.qfrc_applied[3:6] = torque_body
+            # Cold-gas RCS: bounded body torque, used only by the controller during the coast.
+            limit_rcs = self.v.get('rcs_torque_max', 0.)
+            rcs = np.clip(self.rcs_torque, -limit_rcs, limit_rcs)
+            self.data.qfrc_applied[3:6] = torque_body + rcs
             self.model.opt.gravity[2] = -self.gravity()
             before_pos, before_vel, before_time = self.data.qpos.copy(), self.data.qvel.copy(), self.data.time
             before_clearance = self.contact_clearance()

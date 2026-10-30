@@ -274,4 +274,19 @@ class ClassicalController:
             elif velocity[2]>target_speed+.5:self.engine_on=False
             elif velocity[2]<target_speed-.5:self.engine_on=True
             throttle=ph.v['min_throttle'] if self.engine_on else 0.
+        # Post-separation flip: with the engine off, cold-gas RCS turns the booster to retrograde
+        # (opposing its velocity). The gimbal has no thrust to act on during this coast.
+        ph.rcs_torque=np.zeros(3)
+        if env.phase=='landing' and env.separated and throttle<=0 and h>100 and np.linalg.norm(velocity)>1.:
+            retrograde=-velocity/np.linalg.norm(velocity)
+            error=np.cross(n,retrograde)
+            if np.linalg.norm(error)<1e-3:
+                # Booster axis exactly along the velocity (180 degrees off retrograde): the cross product
+                # vanishes, so pick a fixed perpendicular axis to start the flip.
+                error=np.cross(n,[1.,0.,0.] if abs(n[0])<.9 else [0.,1.,0.])
+            # Damp only the tilt rates. Damping the roll rate about the booster axis chatters
+            # against the RCS clip and leaves a residual roll spin that breaks the touchdown.
+            omega_tilt=omega_world-n*np.dot(n,omega_world)
+            flip_torque=(3.0*error-3.3*omega_tilt)*ph.model.body_inertia[1,0]
+            ph.rcs_torque=rot.T@flip_torque
         return np.clip([2*throttle-1,gx/limit,gy/limit],-1,1).astype(np.float32)

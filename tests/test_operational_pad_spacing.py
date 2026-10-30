@@ -15,8 +15,9 @@ def test_new_operational_requests_reject_touching_one_km_boundary(model,distance
 
 
 def test_default_and_translated_valid_plan_preserve_archived_small_site_geometry():
-    for settings in (SimRequest().flight_plan,NativeStart()):
-        assert settings.landing==(1200.,400.) and settings.separation_altitude==600.
+    assert SimRequest().flight_plan is None
+    settings=NativeStart()
+    assert settings.landing==(1200.,400.) and settings.separation_altitude==600.
     assert SimRequest(flight_plan=dict(launch=[500,-300],landing=[1500.01,-300])).flight_plan.landing==(1500.01,-300.)
     assert FlightPlan(launch=[0,0],landing=[80,40]).landing==(80.,40.)
 

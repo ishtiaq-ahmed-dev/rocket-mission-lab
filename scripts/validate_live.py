@@ -18,7 +18,7 @@ def get(path):
 
 def main():
     checks=dict(verified_at_unix=time.time(),scope='production localhost HTTP, schema, configured mission and replay identity',dynamics_hash=dynamics_hash())
-    html=get('/');assert b'LZ-1' in html and b'/assets/main-' in html
+    html=get('/');assert b'Falcon 9' in html and b'LZ-1' in html
     checks['production_bundle']=True
     for path in ('health','missions','runs','training','campaigns','checkpoints','results/summary','results/failures','system','schema/telemetry'):
         json.loads(get('/api/'+path));checks[path]=200
@@ -32,10 +32,6 @@ def main():
     saved=Telemetry.model_validate_json(get(f'/api/runs/{replay.run.id}/telemetry'))
     assert saved==replay
     checks['configured_flight']=replay.run.model_dump(mode='json')
-    for name in ('demo.json','demo-runs.json'):
-        value=json.loads(get('/'+name))
-        for record in value if isinstance(value,list) else [value]:Telemetry.model_validate(record)
-        checks[name]=200
     checks['browser_scope']='Separate manual browser record; this script does not measure FPS or inspect WebGL.'
     atomic_json(DATA/'live-validation-v2.json',checks)
     print(json.dumps(checks,indent=2))

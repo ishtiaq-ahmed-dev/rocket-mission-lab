@@ -4,6 +4,13 @@ import os
 import time
 
 
+def worker_duty():
+    """Cooperative duty cycle; keep the machine responsive by default."""
+    try: value=float(os.environ.get('ROCKET_WORKER_DUTY','0.5'))
+    except ValueError: value=.5
+    return min(max(value,.05),1.)
+
+
 def configure_background_worker():
     os.environ['ROCKET_BACKGROUND_WORKER']='1'
     for name in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMEXPR_NUM_THREADS'):
@@ -15,7 +22,7 @@ def configure_background_worker():
         kernel.GetCurrentProcess.restype=wintypes.HANDLE
         kernel.SetPriorityClass.argtypes=[wintypes.HANDLE,wintypes.DWORD]
         if kernel.SetPriorityClass(kernel.GetCurrentProcess(),0x4000):priority='below normal'
-    return dict(threads=1,duty_cycle=.5,priority=priority)
+    return dict(threads=1,duty_cycle=worker_duty(),priority=priority)
 
 
 class WorkBudget:
@@ -35,7 +42,8 @@ _worker_budget=None
 def yield_background_work():
     global _worker_budget
     if os.environ.get('ROCKET_BACKGROUND_WORKER')!='1':return
-    if _worker_budget is None:_worker_budget=WorkBudget()
+    duty=worker_duty()
+    if _worker_budget is None or _worker_budget.duty!=duty:_worker_budget=WorkBudget(duty=duty)
     _worker_budget.yield_if_needed()
 
 

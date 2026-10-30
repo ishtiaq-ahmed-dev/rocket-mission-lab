@@ -43,9 +43,6 @@ def main():
     previous=sum(value['bytes'] for key,value in before.items() if key.startswith('/api/') and key!='/api/system')*20
     current=evidence['views']['flight']['wire_bytes']
     evidence['flight_polling']=dict(before_bytes_per_minute=previous,after_bytes_per_minute=current,reduction_percent=100*(1-current/previous))
-    terrain=ROOT/'frontend/public/assets/terrain'
-    evidence['terrain_textures']=dict(before_bytes=sum((terrain/f'ground-{kind}.jpg').stat().st_size for kind in ('color','normal','roughness')),
-        after_bytes=sum((terrain/f'ground-{kind}-1k.jpg').stat().st_size for kind in ('color','normal','roughness')))
     atomic_json(ROOT/'docs/evidence/2026-10-21/performance-after.json',evidence)
     print(json.dumps(evidence,indent=2))
 

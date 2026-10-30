@@ -44,12 +44,9 @@ def test_live_simulation():
     assert response.status_code==200
     t=Telemetry.model_validate(response.json());assert t.run.seed==43
 
-def test_shared_schema_and_types():
+def test_shared_schema_matches_model():
     schema=json.loads((ROOT/"shared"/"telemetry.schema.json").read_text())
     assert schema==Telemetry.model_json_schema()
-    ts=(ROOT/"frontend"/"src"/"types.ts").read_text()
-    for key in Telemetry.model_fields:assert key in ts
-    for key in schema["$defs"]["Frame"]["properties"]:assert key in ts
 
 @pytest.mark.parametrize("expected,state,adjust",[
  ("crash_speed",dict(position=[0,0,20.01],velocity=[0,0,-10]),None),

@@ -10,6 +10,7 @@ vehicle:
   shutdown_rate: 5.0 # approximate fraction of max thrust per second during engine cutoff
   gimbal_limit_deg: 8.0 # approximate degrees
   gimbal_rate_deg_s: 30.0 # approximate degrees/s
+  rcs_torque_max: 2000000.0 # approximate N m cold-gas RCS limit, used only during the post-separation coast
   length: 40.0 # approximate m
   engine_lever: 17.9 # m from booster center to rendered gimbal pivot
   landing_foot_radius: 6.2 # m; four deployed feet, matches rendered gear
@@ -77,7 +78,8 @@ training:
   curriculum_threshold: 0.75
   curriculum_window: 40 # display only; advancement uses the deterministic stage check
   curriculum_check_interval: 25000 # steps between deterministic stage checks
-  curriculum_eval_episodes: 8
+  curriculum_eval_episodes: 24 # 8 seeds let a 45% policy pass by luck; 24 keeps the gate honest
+  previous_stage_probability: 0.35 # rehearse the stage below so a bump cannot erase it
   initial_difficulty: 0.0
   curriculum_increment: 0.05 # the deterministic gate refuses a stage until it is flown
   observation_normalization: false # fixed physical scaling is stable across curriculum transitions
@@ -85,9 +87,10 @@ training:
   observation_velocity_scale: [10.0, 10.0, 30.0]
   reward_normalization: true
   policy_log_std: -0.7 # wide initial exploration; a deterministic policy cannot adapt at a bump
-  policy_exploration_std: 0.35 # log_std floor at difficulty 0; shrinks with curriculum progress
-  policy_min_std: 0.08 # log_std floor at the full mission; never fully deterministic
-  ppo_entropy: 0.003 # entropy pressure keeps the floor reachable instead of a hard invariant
+  policy_exploration_std: 0.20 # log_std floor at difficulty 0; shrinks with curriculum progress
+  policy_min_std: 0.05 # log_std floor at the full mission; never fully deterministic
+  warm_start_difficulty: 0.10 # practise the stage the champion already flies, not the one above it
+  ppo_entropy: 0.0005 # weak pressure: a wide std is what makes the actor fly bang-bang instead of precisely
   ppo_target_kl: 0.02 # stop an epoch early rather than let one batch wreck the policy
   ppo_gamma: 0.999 # a 200 m descent takes far longer than the old 20 s horizon
   ppo_gae_lambda: 0.98

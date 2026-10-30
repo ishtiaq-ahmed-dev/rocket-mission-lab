@@ -147,11 +147,9 @@ class SimRequest(BaseModel):
 
     @model_validator(mode='after')
     def operational_sites(self):
-        plan=self.flight_plan or FlightPlan(landing=(1200.,400.),separation_altitude=600.)
-        validate_site_separation(plan.launch,plan.landing)
+        if self.flight_plan: validate_site_separation(self.flight_plan.launch,self.flight_plan.landing)
         for command in [*self.retargets,*([self.retarget] if self.retarget else [])]:
-            validate_site_separation(plan.launch,command.landing)
-        self.flight_plan=plan
+            validate_site_separation((self.flight_plan or FlightPlan()).launch,command.landing)
         return self
 
 class TrainRequest(BaseModel):

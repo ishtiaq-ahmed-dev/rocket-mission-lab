@@ -38,7 +38,10 @@ def test_separation_preserves_pose_velocity_time_and_drops_only_attached_mass():
     cfg=load_config();cfg['vehicle']['upper_stage_mass']=2500.
     physics=RocketPhysics(cfg);before=physics.reset(42,position=[10,20,420],velocity=[2,3,25])
     event=physics.separate();after=physics.state()
-    for key in ('position','velocity','angular_velocity','quaternion'):np.testing.assert_array_equal(before[key],after[key])
+    for key in ('position','quaternion','angular_velocity'):np.testing.assert_array_equal(before[key],after[key])
+    # Spring-pusher impulse along the booster axis: booster gets the equal and opposite kick.
+    axis=physics.rotation()[:,2];kick=-2500.*cfg['vehicle'].get('separation_delta_v',1.3)/after['mass']
+    np.testing.assert_allclose(after['velocity']-before['velocity'],axis*kick,atol=1e-9)
     assert event['mass']==2500 and before['mass']-after['mass']==2500
     assert before['t']==after['t'] and before['fuel_mass']==after['fuel_mass']
 

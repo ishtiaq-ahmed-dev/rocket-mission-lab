@@ -118,7 +118,7 @@ class NativeVisuals:
         titanium=self.material('/World/Looks/TitaniumGrid',(.24,.25,.27),.92,.24)
         satellite=self.material('/World/Looks/GoldKapton',(.85,.65,.12),.88,.18)
         trim=self.material('/World/Looks/Trim',(.045,.055,.075),.45,.3)
-        concrete=self.material('/World/Looks/Concrete',(.14,.16,.18),.02,.88)
+        concrete=self.material('/World/Looks/Concrete',(.30,.31,.33),.02,.88)
         hazard_yellow=self.material('/World/Looks/HazardYellow',(1.0,.82,.0),.0,.35)
         hazard_black=self.material('/World/Looks/HazardBlack',(.02,.02,.02),.0,.85)
         landing_green=self.material('/World/Looks/LandingGreen',(.42,.92,.68),.0,.4)
@@ -128,7 +128,7 @@ class NativeVisuals:
         soot=self.material('/World/Looks/BoosterSoot',(.05,.05,.06),0.,.85)
 
         # Terrain, vegetation and horizon tones
-        grass=self.material('/World/Looks/TerrainGrass',(.10,.145,.085),0.,.95)
+        grass=self.material('/World/Looks/TerrainGrass',(.085,.145,.065),0.,.95)
         grass_dark=self.material('/World/Looks/TerrainGrassDark',(.075,.11,.065),0.,.95)
         grass_dry=self.material('/World/Looks/TerrainGrassDry',(.20,.17,.115),0.,.92)
         soil=self.material('/World/Looks/TerrainSoil',(.16,.13,.10),0.,.92)
@@ -137,11 +137,12 @@ class NativeVisuals:
         foliage_dark=self.material('/World/Looks/FoliageDark',(.065,.095,.055),0.,.9)
         trunk=self.material('/World/Looks/Trunk',(.16,.12,.09),0.,.9)
         rock=self.material('/World/Looks/Rock',(.22,.22,.21),.02,.85)
-        hill=self.material('/World/Looks/DistantHill',(.115,.15,.13),0.,.95)
+        hill=self.material('/World/Looks/DistantHill',(.13,.16,.15),0.,.95)
         # Aerial perspective: far ridges shift toward the sky color.
-        hill_distant=self.material('/World/Looks/DistantHillBlue',(.22,.28,.34),0.,.95)
-        sea=self.material('/World/Looks/Ocean',(.04,.09,.11),.35,.14)
-        cloud=self.material('/World/Looks/CloudPuff',(.93,.95,.98),0.,1.,opacity=.92)
+        hill_distant=self.material('/World/Looks/DistantHillBlue',(.30,.36,.42),0.,.95)
+        # Matte open water: a mirror-smooth sea reflected the bright sky and
+        # read as a pale glowing wall across the horizon in every ground shot.
+        sea=self.material('/World/Looks/Ocean',(.10,.16,.20),0.,.95)
         steam=self.material('/World/Looks/DelugeSteam',(.86,.88,.92),0.,1.,opacity=.08)
         road=self.material('/World/Looks/AsphaltRoad',(.09,.09,.095),0.,.95)
 
@@ -336,15 +337,18 @@ class NativeVisuals:
         plume_root.AddTranslateOp().Set(Gf.Vec3d(0,0,-1.65))
         self.plume_scale=plume_root.AddScaleOp();self.plume_scale.Set(Gf.Vec3f(.001,.001,.001))
 
-        # White-hot core
+        # Exhaust cones are authored in UNIT space (1 m tall, radius 1 m) and
+        # the per-frame scale turns them into metres of flame. Authoring them
+        # at real height AND scaling by length made a 100 m needle: the old
+        # plume poked out of frame as a white stick instead of a flame.
         core=UsdGeom.Cone.Define(self.stage,'/World/Booster/Nozzle/Plume/Core')
-        core.CreateAxisAttr('Z');core.CreateRadiusAttr(.52);core.CreateHeightAttr(7.5)
-        core.AddTranslateOp().Set(Gf.Vec3d(0,0,-3.75));core.AddRotateXOp().Set(180.)
+        core.CreateAxisAttr('Z');core.CreateRadiusAttr(1.0);core.CreateHeightAttr(1.0)
+        core.AddTranslateOp().Set(Gf.Vec3d(0,0,-.5))
         UsdShade.MaterialBindingAPI.Apply(core.GetPrim()).Bind(flame_core)
         # Orange sheath (layered under the core, transparent per frame)
         sheath=UsdGeom.Cone.Define(self.stage,'/World/Booster/Nozzle/Plume/Sheath')
-        sheath.CreateAxisAttr('Z');sheath.CreateRadiusAttr(1.05);sheath.CreateHeightAttr(11.)
-        sheath.AddTranslateOp().Set(Gf.Vec3d(0,0,-5.5));sheath.AddRotateXOp().Set(180.)
+        sheath.CreateAxisAttr('Z');sheath.CreateRadiusAttr(1.35);sheath.CreateHeightAttr(1.0)
+        sheath.AddTranslateOp().Set(Gf.Vec3d(0,0,-.5))
         UsdShade.MaterialBindingAPI.Apply(sheath.GetPrim()).Bind(flame_sheath)
         # Veil: altitude-dependent overexpansion envelope driven by xform scale
         # (a sibling of plume_root so it never inherits the plume scale twice)
@@ -352,8 +356,8 @@ class NativeVisuals:
         veil_root.AddTranslateOp().Set(Gf.Vec3d(0,0,-1.65))
         self.veil_scale=veil_root.AddScaleOp();self.veil_scale.Set(Gf.Vec3f(.001,.001,.001))
         veil=UsdGeom.Cone.Define(self.stage,'/World/Booster/Nozzle/PlumeVeil/Shape')
-        veil.CreateAxisAttr('Z');veil.CreateRadiusAttr(2.4);veil.CreateHeightAttr(16.)
-        veil.AddTranslateOp().Set(Gf.Vec3d(0,0,-8.));veil.AddRotateXOp().Set(180.)
+        veil.CreateAxisAttr('Z');veil.CreateRadiusAttr(2.2);veil.CreateHeightAttr(1.0)
+        veil.AddTranslateOp().Set(Gf.Vec3d(0,0,-.5))
         self.sheath_shader=UsdShade.Shader(self.stage.GetPrimAtPath('/World/Looks/PlumeSheath/Surface'))
         self.veil_shader=UsdShade.Shader(self.stage.GetPrimAtPath('/World/Looks/PlumeVeil/Surface'))
         self.diamond_shader=UsdShade.Shader(self.stage.GetPrimAtPath('/World/Looks/PlumeDiamond/Surface'))
@@ -361,9 +365,9 @@ class NativeVisuals:
 
         # Shock diamond cells with fading down-stream brightness
         self.diamonds=[]
-        for d_idx,d_z in enumerate((-1.,-2.3,-3.7,-5.2,-6.7)):
+        for d_idx,d_z in enumerate((-.08,-.2,-.34,-.5,-.66)):
             dia=UsdGeom.Cone.Define(self.stage,f'/World/Booster/Nozzle/Plume/Diamond{d_idx}')
-            dia.CreateAxisAttr('Z');dia.CreateRadiusAttr(.34-d_idx*.05);dia.CreateHeightAttr(.75)
+            dia.CreateAxisAttr('Z');dia.CreateRadiusAttr(.34-d_idx*.04);dia.CreateHeightAttr(.05)
             dia.AddTranslateOp().Set(Gf.Vec3d(0,0,d_z));dia.AddRotateXOp().Set(180.)
             UsdShade.MaterialBindingAPI.Apply(dia.GetPrim()).Bind(flame_diamond)
             self.diamonds.append((dia,1.-d_idx*.14))
@@ -378,6 +382,13 @@ class NativeVisuals:
         # is display-only. The plain is three displaced annulus meshes (inner
         # grass, midland mix, dry outland) that blend to dead flat around the
         # pads, then an ocean horizon and two ridge lines for depth.
+        #
+        # The collider's own render mesh is hidden: it sits at exactly the same
+        # z as the inner plain and the two surfaces z-fight into the pale
+        # green/white patchwork that made the whole launch site look broken.
+        collider_ground=self.stage.GetPrimAtPath('/World/Ground')
+        if collider_ground and collider_ground.IsValid():
+            UsdGeom.Imageable(collider_ground).GetVisibilityAttr().Set('invisible')
         def displaced_ring(path,inner,outer,rows,columns,mat,roughness_amplitude,flat_radius):
             ring=UsdGeom.Mesh.Define(self.stage,path)
             points=[];counts=[];indices=[]
@@ -398,42 +409,54 @@ class NativeVisuals:
                     c=(row+1)*columns+(column+1)%columns;d=(row+1)*columns+column
                     indices.extend([a,b,c,d]);counts.append(4)
             ring.CreatePointsAttr(points);ring.CreateFaceVertexIndicesAttr(indices);ring.CreateFaceVertexCountsAttr(counts)
-            ring.CreateDoubleSidedAttr(False);ring.CreateSubdivisionSchemeAttr('none')
+            # Explicit up-normals: without them the generated normals follow the
+            # (clockwise from above) winding and point at the ground, so the
+            # whole plain was lit only by bounced skylight and rendered as a
+            # flat tan sheet instead of sunlit grass.
+            ring.CreateNormalsAttr([Gf.Vec3f(0.,0.,1.)]*len(points))
+            ring.SetNormalsInterpolation(UsdGeom.Tokens.vertex)
+            ring.CreateDoubleSidedAttr(True);ring.CreateSubdivisionSchemeAttr('none')
             UsdShade.MaterialBindingAPI.Apply(ring.GetPrim()).Bind(mat)
             return ring
-        displaced_ring('/World/Terrain/PlainInner',60.,2400.,10,96,grass,2.2,260.)
+        displaced_ring('/World/Terrain/PlainInner',24.,2400.,12,128,grass,2.2,260.)
         displaced_ring('/World/Terrain/PlainMid',2400.,6200.,8,96,grass_mix[1],7.5,260.)
         displaced_ring('/World/Terrain/PlainOuter',6200.,10500.,6,96,grass_mix[2],16.,260.)
 
         # Distant ridges: two noise-profiled triangle-fan rings past the plain,
         # blue-shifted with distance so aerial perspective reads correctly.
         def ridge_ring(path,radius_start,radius_end,height_lo,height_high,mat,seed):
+            # A continuous strip with a smoothed crest. The old version jittered
+            # each base radius independently, which read as a picket fence of
+            # flat panels across the horizon instead of distant hills.
             rng=np.random.default_rng(seed)
-            points=[];counts=[];indices=[];segments=120
+            points=[];counts=[];indices=[];segments=180
             crest=rng.uniform(height_lo,height_high,segments)
-            crest=np.convolve(np.r_[crest[-6:],crest,crest[:6]],np.ones(9)/9.,mode='same')[6:-6]
+            kernel=np.ones(15)/15.
+            crest=np.convolve(np.r_[crest[-15:],crest,crest[:15]],kernel,mode='same')[15:-15]
+            peak_radius=radius_start+(radius_end-radius_start)*.45
             for segment in range(segments):
                 angle0=2*np.pi*segment/segments;angle1=2*np.pi*(segment+1)/segments
-                base0=radius_start+rng.uniform(0.,radius_end-radius_start)
-                base1=radius_start+rng.uniform(0.,radius_end-radius_start)
-                peak0=base0+520.+crest[segment];peak1=base1+520.+crest[(segment+1)%segments]
-                anchor=segment*4
-                points.extend([Gf.Vec3f(float(base0*np.cos(angle0)),float(base0*np.sin(angle0)),0.),
-                               Gf.Vec3f(float(peak0*np.cos(angle0)),float(peak0*np.sin(angle0)),float(crest[segment])),
-                               Gf.Vec3f(float(peak1*np.cos(angle1)),float(peak1*np.sin(angle1)),float(crest[(segment+1)%segments])),
-                               Gf.Vec3f(float(base1*np.cos(angle1)),float(base1*np.sin(angle1)),0.)])
+                peak0=float(crest[segment]);peak1=float(crest[(segment+1)%segments])
+                anchor=len(points)
+                points.extend([Gf.Vec3f(float(radius_start*np.cos(angle0)),float(radius_start*np.sin(angle0)),0.),
+                               Gf.Vec3f(float(peak_radius*np.cos(angle0)),float(peak_radius*np.sin(angle0)),peak0),
+                               Gf.Vec3f(float(peak_radius*np.cos(angle1)),float(peak_radius*np.sin(angle1)),peak1),
+                               Gf.Vec3f(float(radius_start*np.cos(angle1)),float(radius_start*np.sin(angle1)),0.)])
                 counts.append(4);indices.extend([anchor,anchor+1,anchor+2,anchor+3])
             ridge=UsdGeom.Mesh.Define(self.stage,path)
             ridge.CreatePointsAttr(points);ridge.CreateFaceVertexCountsAttr(counts);ridge.CreateFaceVertexIndicesAttr(indices)
+            ridge.CreateNormalsAttr([Gf.Vec3f(-float(np.cos(2*np.pi*(index//4+.5)/segments)),
+                -float(np.sin(2*np.pi*(index//4+.5)/segments)),0.) for index in range(len(points))])
+            ridge.SetNormalsInterpolation(UsdGeom.Tokens.vertex)
             ridge.CreateDoubleSidedAttr(True);ridge.CreateSubdivisionSchemeAttr('none')
             UsdShade.MaterialBindingAPI.Apply(ridge.GetPrim()).Bind(mat)
-        ridge_ring('/World/Terrain/RidgeNear',10200.,11000.,140.,380.,hill,77)
-        ridge_ring('/World/Terrain/RidgeFar',11400.,12300.,260.,620.,hill_distant,78)
+        ridge_ring('/World/Terrain/RidgeNear',10200.,11000.,80.,210.,hill,77)
+        ridge_ring('/World/Terrain/RidgeFar',11500.,12500.,150.,340.,hill_distant,78)
 
         # Ocean horizon beyond the ridges: one dark disc to the world edge.
         ocean=UsdGeom.Cylinder.Define(self.stage,'/World/Terrain/Ocean')
         ocean.CreateAxisAttr('Z');ocean.CreateRadiusAttr(38000.);ocean.CreateHeightAttr(.1)
-        ocean.AddTranslateOp().Set(Gf.Vec3d(0,0,-.45))
+        ocean.AddTranslateOp().Set(Gf.Vec3d(0,0,-1.6))
         UsdShade.MaterialBindingAPI.Apply(ocean.GetPrim()).Bind(sea)
 
         # Vegetation: layered fir, broadleaf and boulder prototypes instanced
@@ -516,31 +539,25 @@ class NativeVisuals:
         road.AddScaleOp().Set(Gf.Vec3f(length/2,4.,0.006))
         UsdShade.MaterialBindingAPI.Apply(road.GetPrim()).Bind(soil)
 
-        # ====== CLOUD DECK: flattened cumulus clumps between 1,150 and 1,900 m ======
-        puff=UsdGeom.Sphere.Define(self.stage,'/World/Clouds/PuffProto');puff.CreateRadiusAttr(1.)
-        UsdShade.MaterialBindingAPI.Apply(puff.GetPrim()).Bind(cloud)
-        cloud_positions=[];cloud_scales=[]
-        for clump in range(46):
-            clump_rng=np.random.default_rng(60+clump)
-            angle=clump_rng.uniform(0,2*np.pi);dist=clump_rng.uniform(900.,7800.)
-            cx,cy=dist*np.cos(angle),dist*np.sin(angle)
-            cz=clump_rng.uniform(1150.,1900.)
-            for puff_idx in range(int(clump_rng.integers(7,14))):
-                puff_rng=np.random.default_rng(70+clump*20+puff_idx)
-                radius=float(puff_rng.uniform(26.,58.))
-                cloud_positions.append((cx+puff_rng.uniform(-70.,70.),cy+puff_rng.uniform(-70.,70.),cz+puff_rng.uniform(-14.,10.)))
-                cloud_scales.append((radius,radius*.82,radius*.55))
-        instancer(self.stage,'/World/Clouds/Deck',[puff],cloud_positions,cloud_scales)
+        # Clouds come from the pure-sky HDRI itself. Geometric cloud puffs
+        # were tried and read as glossy balloons up close, which is worse than
+        # the photographic sky they replaced.
 
         # Sun & Sky
-        light=UsdLux.DistantLight.Define(self.stage,'/World/Sun');light.CreateIntensityAttr(2600.);light.CreateAngleAttr(.53)
+        # Exposure calibration knobs: the scene is lit for a display-referred
+        # viewport, and the offline film camera has no auto-exposure, so the
+        # sun/sky pair is scaled by these factors instead of clipping the world
+        # to white.
+        sun_scale=float(os.environ.get('ROCKET_SUN_SCALE','1'))
+        sky_scale=float(os.environ.get('ROCKET_SKY_SCALE','1'))
+        light=UsdLux.DistantLight.Define(self.stage,'/World/Sun');light.CreateIntensityAttr(2600.*sun_scale);light.CreateAngleAttr(.53)
         light.CreateColorAttr(Gf.Vec3f(1.,.95,.87))
         light.AddRotateXYZOp().Set(Gf.Vec3f(35,-30,25))
         self.sky=UsdLux.DomeLight.Define(self.stage,'/World/Sky')
         default_sky=Path(os.environ['ISAAC_PATH']).parent/'assets/kloofendal_48d_partly_cloudy_puresky_2k.hdr'
         sky_file=Path(os.environ.get('ROCKET_SKY_HDRI',str(default_sky)))
         self.sky_asset=sky_file.as_posix() if sky_file.is_file() and sky_file.stat().st_size>100000 else None
-        self.sky_intensity=1000. if self.sky_asset else 650.
+        self.sky_intensity=(1000. if self.sky_asset else 650.)*sky_scale
         self.sky.CreateIntensityAttr(self.sky_intensity)
         self.sky.CreateColorAttr(Gf.Vec3f(1.) if self.sky_asset else Gf.Vec3f(.62,.76,1.))
         if self.sky_asset:
@@ -548,10 +565,16 @@ class NativeVisuals:
         # RTX height fog is left OFF: it fogs the sky dome toward flat gray and
         # erases the HDRI. Aerial perspective comes from the blue-shifted ridge
         # materials, the ocean horizon and the dry outland tones instead.
-        # Bloom off as well: the emissive plume halo otherwise whites out any
-        # close-up shot that frames the core.
+        # Bloom ON, but thresholded high: the emissive plume is the only thing
+        # in the scene above ~2 HDR units, so the exhaust gets a fire halo while
+        # the white hull and the sky stay crisp. Bloom off entirely was why the
+        # exhaust rendered as a flat plastic stick.
         bloom_settings=carb.settings.get_settings()
-        bloom_settings.set('/rtx/post/bloom/enabled',False)
+        bloom_settings.set('/rtx/post/bloom/enabled',True)
+        bloom_settings.set('/rtx/post/bloom/quality',3)
+        bloom_settings.set('/rtx/post/bloom/size',.28)
+        bloom_settings.set('/rtx/post/bloom/intensity',.7)
+        bloom_settings.set('/rtx/post/bloom/threshold',2.1)
         bloom_settings.set('/rtx/post/glare/enabled',False)
 
         # ====== PADS: TAKEOFF PAD 01 & LANDING PAD 01 (> 1 KM SEPARATION) ======
@@ -564,7 +587,13 @@ class NativeVisuals:
             translate=site_root.AddTranslateOp();translate.Set(Gf.Vec3d(float(site[0]),float(site[1]),0))
             if name=='Landing':self.landing_marker=translate
 
-            # Heavy concrete base pad
+            # Heavy concrete base pad, sitting in a wide gravel/concrete apron
+            # like a real launch or landing complex (grass right up to the slab
+            # was one of the strongest "toy" cues in the frame).
+            apron=UsdGeom.Cylinder.Define(self.stage,root+'/Apron');apron.CreateAxisAttr('Z')
+            apron.CreateRadiusAttr(96.);apron.CreateHeightAttr(.06)
+            apron.AddTranslateOp().Set(Gf.Vec3d(0,0,-.03))
+            UsdShade.MaterialBindingAPI.Apply(apron.GetPrim()).Bind(concrete)
             pad=UsdGeom.Cylinder.Define(self.stage,root+'/Pad');pad.CreateAxisAttr('Z');pad.CreateRadiusAttr(26.);pad.CreateHeightAttr(.2)
             pad.AddTranslateOp().Set(Gf.Vec3d(0,0,-.1))
             UsdShade.MaterialBindingAPI.Apply(pad.GetPrim()).Bind(concrete)
@@ -620,11 +649,9 @@ class NativeVisuals:
                     site_puff.AddScaleOp().Set(Gf.Vec3f(float(steam_rng.uniform(6.,10.)),float(steam_rng.uniform(5.,9.)),float(steam_rng.uniform(1.2,2.2))))
                     UsdShade.MaterialBindingAPI.Apply(site_puff.GetPrim()).Bind(steam)
 
-                # Vertical rim signs face the launch coverage camera (bearing -57.9°).
-                # Normal = azimuth+90, rim = 15 m toward the camera at azimuth+90.
-                self.painted_label(root+'/SurfaceName','TAKEOFF',hazard_yellow,y_offset=-14.,size=3.,rot_deg=0.)
-                self.painted_sign(root+'/SignName','TAKEOFF PAD 01',hazard_yellow,azimuth_deg=32.1,size=4.6,z_base=5.6)
-                self.painted_sign(root+'/SignBrand','MERIDIAN 9 - ISS ORBITAL SYSTEMS',markings,azimuth_deg=32.1,size=1.5,z_base=2.6)
+                # No giant painted lettering on the ground: at low camera angles
+                # it clipped against the terrain edge and read as broken signage.
+                # Names and telemetry live in the broadcast overlay instead.
                 # North compass marker
                 north=UsdGeom.Cube.Define(self.stage,root+'/NorthMarker')
                 north.AddTranslateOp().Set(Gf.Vec3d(0,21.5,.02));north.AddScaleOp().Set(Gf.Vec3f(.4,1.8,.02))
@@ -664,11 +691,8 @@ class NativeVisuals:
                 scorch_disc.AddTranslateOp().Set(Gf.Vec3d(0,0,.012))
                 UsdShade.MaterialBindingAPI.Apply(scorch_disc.GetPrim()).Bind(scorch_mat)
 
-                # Landing coverage camera bearing -52.3°: normal points at camera
-                # when azimuth = bearing+90 (empirically verified facing).
-                self.painted_label(root+'/SurfaceName','LANDING',landing_green,y_offset=-14.,size=3.,rot_deg=0.)
-                self.painted_sign(root+'/SignName','LANDING PAD 01',landing_green,azimuth_deg=37.7,size=4.6,z_base=5.6)
-                self.painted_sign(root+'/SignBrand','MERIDIAN 9 - ISS ORBITAL SYSTEMS',markings,azimuth_deg=37.7,size=1.5,z_base=2.6)
+                # Pad naming is handled by the broadcast overlay (see
+                # scripts/broadcast.py), not by in-scene lettering.
 
         # ====== LAUNCH COMPLEX & SERVICE TOWER ======
         launch=launch_xy;self.clamps=[]
@@ -790,7 +814,6 @@ class NativeVisuals:
 
     def update(self,physics):
         self.pause_effects(False)
-        self.record_tick()
         # Real seconds between visuals updates: every eased quantity below is
         # rate-based so 60 Hz live view and offline replay animate identically.
         previous_clock=getattr(self,'_update_clock',None)
@@ -827,10 +850,12 @@ class NativeVisuals:
             # Never tunnel through the ground: at pad height the plume stops
             # just above the surface (the ground flare sells the splash).
             plume_len=min(plume_len,max(.35*alt_agl,1.2))
-            plume_width=max(.1,throttle*flicker*1.35)
+            # Ground-level kerolox exhaust is wide and turbulent; in near-vacuum
+            # it balloons out even further (no ambient pressure to contain it).
+            plume_width=max(.1,throttle*flicker*(1.9+.7*min(alt_agl/300.,1.6)))
             self.plume_scale.Set(Gf.Vec3f(plume_width,plume_width,plume_len))
-            veil_width=float(np.clip(.75*throttle*(1.+alt_agl/420.),.1,9.))
-            self.veil_scale.Set(Gf.Vec3f(veil_width,veil_width,plume_len*1.28))
+            veil_width=float(np.clip(.9*throttle*(1.+alt_agl/380.),.1,9.))
+            self.veil_scale.Set(Gf.Vec3f(veil_width,veil_width,plume_len*1.3))
             self.sheath_shader.GetInput('opacity').Set(float(np.clip(.55*throttle*slow,0.,.7)))
             self.veil_shader.GetInput('opacity').Set(float(np.clip(.16*throttle*(1.+alt_agl/900.)*fast,0.,.45)))
             # Shock cells: out-of-phase brightness noise; fade along the plume
@@ -927,49 +952,6 @@ class NativeVisuals:
         self.cam_eye+=(eye-self.cam_eye)*blend
         self.cam_target+=(target-self.cam_target)*blend
         set_camera_view(eye=tuple(map(float,self.cam_eye)),target=tuple(map(float,self.cam_target)))
-
-    def start_record(self,filename,fps=30,size=(1280,720)):
-        """Encode one frame per visuals update (the 30 sim-Hz render gate)
-        straight into an MP4 via Isaac's own video encoder.
-        Frames-per-sim-second equals the writer fps, so playback is real time."""
-        import omni.kit.app
-        import omni.replicator.core as rep
-        manager=omni.kit.app.get_app().get_extension_manager()
-        if not manager.is_extension_enabled('omni.videoencoding'):manager.set_extension_enabled_immediate('omni.videoencoding')
-        from video_encoding.impl import get_video_encoding_interface
-        self._encoder=get_video_encoding_interface()
-        path=Path(filename);path.parent.mkdir(parents=True,exist_ok=True)
-        path.unlink(missing_ok=True)
-        if not self._encoder or not self._encoder.start_encoding(str(path),float(fps),0,True):
-            raise RuntimeError('Native video encoder unavailable in this Isaac installation')
-        self._record_file=path
-        self._record_product=rep.create.render_product('/OmniverseKit_Persp',(int(size[0]),int(size[1])))
-        self._record_annotator=rep.AnnotatorRegistry.get_annotator('rgb')
-        self._record_annotator.attach(self._record_product)
-        return path
-
-    def record_tick(self):
-        """Encode the latest viewport frame; no-op while inactive."""
-        if getattr(self,'_record_annotator',None) is None:return
-        # The annotator graph only dispatches an explicit orchestrator step;
-        # without it get_data() returns an empty buffer forever (verified by
-        # scripts/probe_annotator.py on this kit experience).
-        import omni.replicator.core as rep
-        try:rep.orchestrator.step(rt_subframes=0,pause_timeline=False)
-        except Exception:
-            pass
-        data=self._record_annotator.get_data()
-        if data is None or data is False or getattr(data,'size',0)==0:return
-        if data.dtype!=np.uint8:data=np.clip(data,0,255).astype(np.uint8)
-        data=np.ascontiguousarray(data)
-        self._encoder.encode_next_frame_from_buffer(memoryview(data),int(data.shape[1]),int(data.shape[0]))
-
-    def stop_record(self):
-        if getattr(self,'_record_annotator',None) is None:return None
-        self._encoder.finalize_encoding()
-        self._record_annotator.detach();self._record_product.destroy()
-        self._record_annotator=None
-        return Path(self._record_file)
 
     def capture(self,app,path,view='vehicle'):
         """Export a native render artifact; does not capture the user's desktop."""

@@ -1,61 +1,47 @@
 # Rocket Mission Lab
 
-See the [28 October pad labels, spacing and physical timing revision](docs/31-pad-labels-distance-and-timing.md) for the current behavior and executed checks. The default flight deck renders recorded MuJoCo telemetry; the separate Isaac Sim workspace uses the shared native PhysX/RTX installation outside this checkout. See [native runtime and validation boundaries](docs/26-native-isaac-migration.md).
+A local rocket flight simulator and reinforcement-learning workbench. The browser interface is a single [Falcon 9 RTLS mission replay](frontend/index.html): one page that computes the whole flight in JavaScript and renders it with Three.js. The Python engine, training jobs and API remain available for simulation work.
 
-A local rocket flight simulator, mission dashboard, and reinforcement learning workbench. MuJoCo integrates the booster dynamics; React and Three.js render recorded telemetry. Vehicle parameters are generic approximations.
+Vehicle parameters are generic approximations of a Falcon 9 Block 5 class vehicle. Nothing here is a validated real-world flight model.
 
-See the [23 October Isaac Sim browser experience & visual center](docs/29-isaac-sim-browser-experience.md) for the removal of the in-browser WebGL canvas, the real-time Isaac Sim Flight Deck, native RTX camera previews, 2D range radar, and full mission video player.
+## Flight deck
 
-See the [23 October real-time fidelity, pad separation and markings revision](docs/28-realtime-separation-and-pad-fidelity.md) for 1:1 real-time playback synchronization, mandatory > 1 km pad separation, explicit TAKEOFF and LANDING circle stencils, and ISS Orbital Systems / NVIDIA Isaac Sim branding.
+The page integrates inertial point-mass dynamics on a spherical, rotating Earth with a 1976-standard-atmosphere density table, wind, Mach-dependent drag and an angle-of-attack normal force. It runs the ascent, MECO, stage separation, second-stage orbit insertion, fairing and payload deploy, then the booster's flip, boostback, entry burn, aerodynamic steering and powered landing on LZ-1. Integration is 0.02 s; tracks are sampled at 25 Hz.
 
-See the [21 October flight fidelity revision and executed evidence](docs/24-flight-fidelity-validation.md) for the latest dashboard, first-foot contact, staging, repeated retargeting and suborbital study. The older sections below describe the preceding baseline where they differ.
+The trajectory is computed once at load, so playback speed and frame rate never change the flight. Three.js is bundled locally; the replay does not require a CDN connection.
 
-The [PC performance revision](docs/25-performance-optimization.md) adds a lighter default graphics mode, page-specific polling and one production HTTP server. Long training is currently stopped with checkpoints retained; starting it remains an explicit action.
+**Limits:** the model is approximate. Engine, mass and aerodynamic values are generic, guidance is a simplified predictor-corrector, and the second stage uses a tuned pitch schedule. A successful replay does not establish landing reliability. Fins, legs, plume and exhaust lighting are illustrative, not a combustion or structural model. The page states this in a **MODEL NOTES** panel (button at top left, or `M`/`?`), which lists the assumptions, what is not modelled, and the achieved default-run figures.
+
+The default run reaches main engine cutoff at 70.6 km and 1.82 km/s, a booster apogee of 138 km, and a 274 × 326 km insertion at 39.9°. It touches down at 1.82 m/s vertical, 0.04 m/s horizontal and 0.2° tilt, 9.8 m from the pad centre on an 86 m pad.
+
+### Cameras and playback
+
+- `1` Orbit, `2` Chase, `3` Launch Tower, `4` Booster Top Cam, `5` Landing Pad, `6` Overview, `7` Orbital View.
+- `F` cycle focus between the stack and the booster, `Space` play/pause, `←`/`→` seek, `H` hide the HUD.
+- Drag to orbit, wheel to zoom. Speed presets run from 0.25× to 30×, and the timeline marks liftoff, max-Q, MECO, boostback, entry burn, landing burn, touchdown, SECO and payload deploy.
 
 ## Run locally
 
 ```powershell
-python -m venv .venv
-.venv\Scripts\python.exe -m pip install -r requirements.txt
 cd frontend
 npm ci
-npm run build
-cd ..
-.venv\Scripts\python.exe scripts/serve.py
+npm run dev
 ```
 
-Open the [LZ-1 flight deck](http://127.0.0.1:5180/) (the default page; it runs Landing, Takeoff or Combined through the local engine and plays the recorded MuJoCo flight), the [Mission Control dashboard](http://127.0.0.1:5180/lab/), and [API documentation](http://127.0.0.1:5180/api/docs). The production preview serves the built dashboard and API from one Python server; Node is only needed for building or development. For development use `.venv\Scripts\python.exe scripts/dev.py`. Close the launcher with Ctrl+C to stop its web servers. Training uses an independent hidden Windows worker (separate session on Unix). Node.js 22+ and Python 3.11 are the recorded development environment. Linux/macOS use `.venv/bin/python`.
+Open <http://127.0.0.1:5180/>. For a production build run `npm run build` (output in `frontend/dist`) and serve it with `.venv\Scripts\python.exe scripts/serve.py`, which also mounts the API at `/api`. Node is only needed for building or development.
 
-## Mission controls
+To work on the Python engine:
 
-- Choose Landing, Takeoff, or Combined, set the launch X/Y, landing X/Y, and separation altitude, then select **Run flight**. Coordinates are local meters: X east, Y north, and a flat surface at Z = 0. They are not geographic coordinates.
-- Landing starts in the air above the launch coordinates. Takeoff targets the vertical line above launch. Combined launches there, releases a generic 2.5 t unpowered upper stage, and returns the booster to the landing coordinates.
-- Separation altitude is configurable from 80 to 1,500 m; site coordinates accept +/-10,000 m. These input limits are not a reachable flight envelope. Fuel, minimum thrust, sensor noise, and control limits can cause a requested mission to fail. Inspect its recorded outcome.
-- The nominal plan transfers from [0, 0] to [1200, 400], a 1,264.91 m surface distance, with separation at 600 m. New operational requests reject spacing of 1,000 m or less; old archived research runs remain readable. Longer-range presets are experiments whose outcomes depend on fuel and guidance.
-- To divert during a flight, open **Mission plan** or the setup panel, enter a new landing X/Y, and choose **Retarget at T+…**. The applied target is the last confirmed one; takeoff has no landing pad to move, and a command after the flight ends is rejected. This feature requires the local engine and is never faked in offline replay.
+```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
 
-The interface uses a light mission-control workspace with Overview, Flight deck, Telemetry, and Mission plan tabs, recorded-value KPI cards, charts, event log, and a compact retarget card. Terrain, vegetation, roads, facilities, ocean, HDR lighting, and shadows remain active; Balanced is the default quality. Launch and landing pads follow the applied coordinates, with prepared flat sites at Z = 0 separated by > 1,000 m and labelled with high-contrast TAKEOFF and LANDING stencils. The offshore environment remains available. Upper grid fins are articulated with roll/pitch/yaw aerodynamics. Four articulated landing legs feature body hinges, telescopic braces, footpads, and 0.6 m nominal nozzle clearance. The launch pad adds a flame trench, hold-down clamps, propellant lines, and a lattice service tower; the engine adds a bell, cooling tubes, stiffener rings, and actuator housings. See [rocket structure research and rendering limits](docs/22-rocket-structure.md).
+## Python engine and training
 
-## Camera and playback
+`rocket_lab` integrates booster dynamics in MuJoCo and exposes missions through the FastAPI app in `rocket_lab/api.py` (`/simulate`, `/training`, `/campaigns`, `/checkpoints`, `/results`). Mission plans use local metres: X east, Y north, a flat surface at Z = 0, and pads more than 1,000 m apart. The engine's default plan lands at the origin with 400 m separation; a request without a `flight_plan` uses it.
 
-- **6 Dedicated Aerospace Camera Views**:
-  - `[1]` **Orbit**: 360° free inspection orbit around the booster.
-  - `[2]` **Chase**: Dynamic velocity-aligned chase camera with aerodynamic lag.
-  - `[3]` **Tower**: Optical tracking camera mounted on the launch service tower.
-  - `[4]` **Engine**: Onboard perspective mounted on the interstage looking down at the gimbaling engine and grid fins.
-  - `[5]` **Pad LZ-1**: Ground telephoto camera positioned at the touchdown landing pad.
-  - `[6]` **Corridor**: Wide mission framing spanning launch site, trajectory arc, and recovery zone.
-  - `[T]` **Top-down**: Overhead nadir view looking directly down onto the vehicle.
-- **Controls & Navigation**: Drag to orbit, right-drag to pan, and scroll/pinch to zoom. Rotate/Pan switches the left-drag tool. Use WASD to fly through the scene, Q/E for down/up, and Shift to accelerate. Press `H` to toggle the telemetry HUD overlay, `Space` for play/pause, `F` to focus, and `R` to reset framing.
-- **1:1 Real-Time Synchronization**: Playback clock operates in exact 1:1 physical wall-clock time at 1.0× speed, with 0.25×, 0.5×, 2×, and 4× rate multipliers.
-
-The event buttons jump to actual recorded separation, engine cutoff, relight, and outcome. Scrubbing pauses playback. Throttle and gimbal drive the nozzle, colored plume, and exhaust history; engine-off segments do not show an active flame. These are illustrative rendering effects, not a combustion/CFD model. The released stage is drawn only from the integrated `upper_stage` state (gravity and drag, no thrust); runs without that state show no released stage. Upper-stage propulsion is not simulated.
-
-## Training
-
-The Training page supports individual PPO/SAC jobs and **Train all three missions**. Budgets are environment steps, not optimizer iterations. A three-mission campaign shares a total ceiling up to 100 million steps across alternating landing, takeoff, and combined blocks. It saves model/normalization snapshots, uses a curriculum for altitude and target displacement, and measures fixed development seeds. The landing curriculum advances only when the deterministic actor lands the current stage on fixed seeds; sampled training outcomes only report progress, because they also measure exploration noise. PPO keeps a stage-scaled action-std floor (0.35 at difficulty 0, 0.08 at the full mission) so a policy cannot collapse to a constant action between stages, and uses discount 0.999 so a full-height descent remains inside the credit horizon. Landing and combined episodes also receive seeded mid-flight landing-target changes from `training.retarget_probability`, so the learned policy sees a moving goal during training rather than only in evaluation. It stops on exhausted budget or a measured plateau. Small MLP PPO runs on CPU; the renderer uses the GPU. SAC/CUDA remains a selectable single-job option.
-
-A candidate with at least 254/256 development successes receives a separate 10,000-seed nominal evaluation, using a fresh seed range for each candidate. The nominal gate requires a 95% Wilson lower bound of at least 99%. This does not establish stress robustness or real-world safety. Training never substitutes a classical controller for a learned policy.
+Training supports individual PPO/SAC jobs and a three-mission campaign. Budgets are environment steps, not optimizer iterations. A campaign shares a total ceiling up to 100 million steps across alternating landing, takeoff and combined blocks, saves model/normalization snapshots, and uses a curriculum for altitude and target displacement. Landing and combined episodes also receive seeded mid-flight landing-target changes from `training.retarget_probability`. PPO keeps a stage-scaled action-std floor so a policy cannot collapse to a constant action, and uses discount 0.999 so a full-height descent stays inside the credit horizon. It stops on exhausted budget or a measured plateau.
 
 ```powershell
 # Explicitly bounded local campaign; logs/status/checkpoints stay on this machine.
@@ -64,20 +50,40 @@ A candidate with at least 254/256 development successes receives a separate 10,0
 .venv\Scripts\python.exe -m rocket_lab.campaign --id my-flight-study --steps 100000000 --block-steps 250000 --resume
 ```
 
-Use **Stop campaign & save** to stop the whole sequence. Stop flags also work at `data/campaigns/<id>/stop`; a running block saves at a callback. Status is in `/api/campaigns` and `/api/training`. Exact environment/RNG continuation across a restart is not promised. Model binaries are local under ignored `data/checkpoints/`; source pushes do not upload them.
+Stop flags work at `data/campaigns/<id>/stop`; a running block saves at a callback. Status is in `/api/campaigns` and `/api/training`. Exact environment/RNG continuation across a restart is not promised. Model binaries live under ignored `data/checkpoints/`.
 
-## Validation and limits
+A candidate with at least 254/256 development successes receives a separate 10,000-seed nominal evaluation using a fresh seed range. The nominal gate requires a 95% Wilson lower bound of at least 99%. This does not establish stress robustness or real-world safety, and training never substitutes a classical controller for a learned policy.
 
-The [October 21 validation record](docs/VALIDATION-2026-10-21.md) documents an earlier feature revision. The later light mission-control theme, surface-clipped plume, and mid-flight retarget polish were not part of those executed counts, so this README does not present them as already validated. Re-run the commands below for the current tree. The subsequent appearance restoration has its own [revision checks](docs/22-rocket-structure.md#revision-checks). Existing 10,000-flight results belong to earlier source/configuration snapshots and are presented as archived experiments. They do not qualify the new controller or custom targets. The new RL campaign is experimental and has not established reliable complete flight.
+## Validation
 
 ```powershell
 .venv\Scripts\python.exe -m pytest tests -q
+node scripts/check_flight.js
 .venv\Scripts\python.exe scripts/validate_mission_plans.py --episodes 100
 .venv\Scripts\python.exe scripts/validate_live.py
 cd frontend
-npm run test
-npm run lint
 npm run build
 ```
 
-[Mission/physics contracts](docs/21-mission-controls.md) · [Research](docs/RESEARCH.md) · [Earlier implementation and experiment history](docs/archive/README-2026-10-20.md).
+`scripts/check_flight.js` extracts the flight model from the shipped `frontend/index.html` and asserts its invariants: chronological events, monotonic non-negative propellant, throttle bounds, vis-viva consistency at insertion, insertion elements, and touchdown speed, tilt and pad contact. `scripts/check.py` runs it together with the Python suite and the production build.
+
+`make test` runs both steps. Continuous integration runs the same Python suite and production build on Windows (`.github/workflows/ci.yml`).
+
+Existing 10,000-flight results belong to earlier source/configuration snapshots and are archived experiments; they do not qualify the current controller.
+
+## Project layout
+
+| Path | Contents |
+| --- | --- |
+| `frontend/` | The replay page (`index.html`), vendored Three.js and the ground textures |
+| `rocket_lab/` | Physics, controllers, environments, training, FastAPI service |
+| `scripts/` | Launchers, checks and validation entry points |
+| `tests/` | Python test suite |
+| `docs/` | Numbered design and validation records |
+| `config.yaml` | Vehicle, mission and reward configuration |
+
+## License
+
+MIT — see [LICENSE](LICENSE). Bundled terrain textures are CC0; see [frontend/public/assets/ATTRIBUTION.md](frontend/public/assets/ATTRIBUTION.md).
+
+[Mission/physics contracts](docs/21-mission-controls.md) · [Research](docs/RESEARCH.md) · [Pad labels, distance and timing](docs/31-pad-labels-distance-and-timing.md) · [Earlier implementation and experiment history](docs/archive/README-2026-10-20.md).

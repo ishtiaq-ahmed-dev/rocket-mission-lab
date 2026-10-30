@@ -25,20 +25,27 @@ def main():
         commands=[('backend',[sys.executable,'-m','uvicorn','rocket_lab.api:app','--host','127.0.0.1','--port','8010'],ROOT),('frontend',frontend,ROOT/'frontend')]
     else:
         commands=[('preview',[sys.executable,'-m','uvicorn','rocket_lab.preview:app','--host','127.0.0.1','--port','5180'],ROOT)]
-    processes=[];handles=[]
+    handles=[]
+    def spawn(name,command,cwd):
+        stdout=(logs/f"{name}.out.log").open("a");stderr=(logs/f"{name}.err.log").open("a");handles.extend([stdout,stderr])
+        process=subprocess.Popen(command,cwd=cwd,stdout=stdout,stderr=stderr,creationflags=subprocess.CREATE_NO_WINDOW if os.name=="nt" else 0)
+        return [name,command,cwd,process]
+    slots=[]
     try:
-        for name,command,cwd in commands:
-            stdout=(logs/f"{name}.out.log").open("w");stderr=(logs/f"{name}.err.log").open("w");handles.extend([stdout,stderr])
-            process=subprocess.Popen(command,cwd=cwd,stdout=stdout,stderr=stderr,creationflags=subprocess.CREATE_NO_WINDOW if os.name=="nt" else 0)
-            processes.append((name,process))
+        for name,command,cwd in commands:slots.append(spawn(name,command,cwd))
         while True:
-            state={"pid":os.getpid(),"mode":"development" if args.development else "production preview","updated_at":time.time(),"services":{name:{"pid":p.pid,"returncode":p.poll()} for name,p in processes}}
+            for index,(name,command,cwd,process) in enumerate(slots):
+                # Keep the service up without a terminal: restart a child that exits.
+                if process.poll() is not None:
+                    time.sleep(2)
+                    slots[index]=spawn(name,command,cwd)
+            state={"pid":os.getpid(),"mode":"development" if args.development else "production preview","updated_at":time.time(),"restarts":len(handles)//2-len(slots),
+                   "services":{slot[0]:{"pid":slot[3].pid,"returncode":slot[3].poll()} for slot in slots}}
             atomic_json(logs/"services.json",state)
-            if any(p.poll() is not None for _,p in processes):break
             time.sleep(5)
     except KeyboardInterrupt:pass
     finally:
-        for _,process in processes:
+        for _,_,_,process in slots:
             if process.poll() is None:process.terminate()
         for handle in handles:handle.close()
 
