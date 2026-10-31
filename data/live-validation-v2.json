@@ -1,7 +1,7 @@
 {
-  "verified_at_unix": 1792753042.3663068,
+  "verified_at_unix": 1793207073.859514,
   "scope": "production localhost HTTP, schema, configured mission and replay identity",
-  "dynamics_hash": "f4eef03fb4e1122a5c0372ceee871216599b03c732e7a706ebd821dc01bd83d0",
+  "dynamics_hash": "d01b65d7475bef1a9700a386b6b7cf51fe0de6d4a1c4b3136312cd2cffc0573e",
   "production_bundle": true,
   "health": 200,
   "missions": 200,
@@ -14,7 +14,7 @@
   "system": 200,
   "schema/telemetry": 200,
   "configured_flight": {
-    "id": "combined-classical-l4-s42-srcf4eef03fb4e1-adc1779173ef23af",
+    "id": "combined-classical-l4-s42-srcd01b65d7475b-b29dcb26b63a9a90",
     "mission": "combined",
     "method": "classical",
     "level": 4,
@@ -22,18 +22,18 @@
     "checkpoint_id": null,
     "difficulty": 1.0,
     "training_mode": false,
-    "target_altitude": 300.0,
+    "target_altitude": 600.0,
     "target_velocity": null,
     "algorithm": null,
     "seed": 42,
     "outcome": "success",
     "failure_reason": null,
-    "touchdown_speed": 0.18766064077387445,
-    "tilt": 0.05293975049169879,
-    "pad_distance": 0.05725002121374066,
-    "fuel_used": 7097.163916538309,
-    "duration": 57.54959447861057,
-    "total_reward": 710.1707002420385,
+    "touchdown_speed": 1.0921132646176284,
+    "tilt": 0.10475141917211275,
+    "pad_distance": 0.3399497186317129,
+    "fuel_used": 12064.472676547484,
+    "duration": 105.48521058320614,
+    "total_reward": 3269.7337165391446,
     "source": "MuJoCo simulation",
     "controller_status": "not_requested",
     "flight_plan": {
@@ -42,10 +42,10 @@
         -100.0
       ],
       "landing": [
-        240.0,
-        -80.0
+        1400.0,
+        300.0
       ],
-      "separation_altitude": 300.0,
+      "separation_altitude": 600.0,
       "profile": "research"
     },
     "initial_flight_plan": {
@@ -54,36 +54,36 @@
         -100.0
       ],
       "landing": [
-        240.0,
-        -80.0
+        1400.0,
+        300.0
       ],
-      "separation_altitude": 300.0,
+      "separation_altitude": 600.0,
       "profile": "research"
     },
     "landing_tolerance": 1.0,
     "launch_release_time": 0.46000000000000013,
     "separation": {
-      "t": 21.299999999999635,
+      "t": 33.19999999999959,
       "position": [
-        199.97211101865977,
-        -100.0211323154401,
-        324.05927653361096
+        200.00806279057323,
+        -100.02540966391803,
+        626.1073880140948
       ],
       "velocity": [
-        0.013224039963355876,
-        0.006230808947961662,
-        24.5305457474778
+        -0.002643243483177512,
+        0.029945839538568764,
+        24.526879709633814
       ],
       "quaternion": [
-        0.9999999985638455,
-        -2.850513878159288e-05,
-        4.537970039401169e-05,
-        6.69612098306651e-07
+        0.9999999704848198,
+        -0.00019013458537859781,
+        0.00015125792756018683,
+        4.882080106496336e-07
       ],
       "mass": 2589.6494799778457
     },
     "retargets": [],
-    "dynamics_hash": "f4eef03fb4e1122a5c0372ceee871216599b03c732e7a706ebd821dc01bd83d0"
+    "dynamics_hash": "d01b65d7475bef1a9700a386b6b7cf51fe0de6d4a1c4b3136312cd2cffc0573e"
   },
   "demo.json": 200,
   "demo-runs.json": 200,

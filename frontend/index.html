@@ -890,8 +890,7 @@ loadScript(['/three.min.js'])
 
 function start(){
 performance.mark('start');
-const __tm={};window.__tm=__tm;const mark=n=>{__tm[n]=+(performance.now()).toFixed(1);};
-const SIM=FlightSim.run({});mark('sim');
+const SIM=FlightSim.run({});
 const SIMT0=SIM.t0,SIMDT=SIM.dt,SIMN=SIM.n,T_END=SIMT0+(SIMN-1)*SIMDT;
 const PHC=FlightSim.PH;
 const RE=FlightSim.RE;
@@ -904,7 +903,7 @@ const lerp=(a,b,t)=>a+(b-a)*t;
 const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function mkCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
-const V3=THREE.Vector3,DEG=Math.PI/180;
+const V3=THREE.Vector3,DEG=Math.PI/180,UP=new V3(0,1,0),UPZ=new V3(0,0,1);
 const NZ=(function(){
   const G=256,grid=new Float32Array(G*G),r=mulberry32(1337);
   for(let i=0;i<grid.length;i++)grid[i]=r();
@@ -1310,9 +1309,9 @@ const land=(function(){
   for(let j=0;j<H;j++)for(let i=0;i<W;i++){
     const x=xs[i],z=zs[j],h=landH(x,z),k=j*W+i;
     hh[k]=h;pos[k*3]=x;pos[k*3+1]=h+curv(x,z);pos[k*3+2]=z;uv[k*2]=x/90;uv[k*2+1]=z/90;
-    const n=NZ.fbm((x+5000)/520,(z+5000)/520,8,4),n2=NZ.fbm((x+1000)/90,(z+4000)/90,16,3);
-    /* original flight-deck ground tint: warm sand, darker inland, damp near the water */
+    /* deep-water vertices are culled or shaded under the ocean mesh: skip their detail noise */
     const inland=clamp((coastX(z)-x-65)/100,0,1);
+    const n=h>-3?NZ.fbm((x+5000)/520,(z+5000)/520,8,4):0.5;
     const variation=(0.94+0.06*Math.sin(x*0.043+Math.cos(z*0.029)*2)*Math.cos(z*0.037))*(0.94+0.06*(n-0.5));
     const dry=clamp((h+1.2)/1.45,0,1),wet=0.68+0.32*dry*dry*(3-2*dry);
     const cr=(0.92-inland*0.17)*variation*wet,cg=(0.88-inland*0.09)*variation*wet,cb=(0.72-inland*0.18)*variation*wet;
@@ -1332,7 +1331,6 @@ const land=(function(){
   WG.add(mesh);return mesh;
 })();
 
-mark('land');
 /* ocean: curved polar mesh with log-spaced rings out to 250 km */
 const normTex=(function(){
   const N=512,H=new Float32Array(N*N);
@@ -1352,7 +1350,6 @@ const normTex=(function(){
   t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=maxAniso;t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;
   return t;
 })();
-mark('normtex');
 const oceanUniforms=Object.assign({uNorm:{value:normTex},uCam:{value:new V3()},uOrg:{value:new V3()}},ATU);
 const oceanMat=new THREE.ShaderMaterial({
   uniforms:oceanUniforms,fog:false,
@@ -1567,7 +1564,8 @@ const glowTex=(function(){
 
 /* ================= lattice launch tower ================= */
 const TOWER_POS=new V3(-30,0,22),TOWER_H=66;
-const TOWER_CAM=new V3(TOWER_POS.x+1.4,62.4,TOWER_POS.z);
+/* just outside the tower's top face, clear of the columns and the deck rails */
+const TOWER_CAM=new V3(TOWER_POS.x+3.4,63.0,TOWER_POS.z-2.5);
 const towerGroup=new THREE.Group();towerGroup.position.copy(TOWER_POS);WG.add(towerGroup);
 (function(){
   const list=[];     /* {a,b,r,c} */
@@ -1649,7 +1647,6 @@ const poolTex=(function(){
   gr.addColorStop(0,'rgba(255,240,205,.50)');gr.addColorStop(0.5,'rgba(255,230,180,.16)');gr.addColorStop(1,'rgba(255,225,170,0)');
   g.fillStyle=gr;g.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);
 })();
-const floodHeads=[];
 function floodMast(parent,x,z,tx,tz,H){
   const g=new THREE.Group();g.position.set(x,PAD_Y*0,z);
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.28,H,8),new THREE.MeshStandardMaterial({color:0x8b9097,roughness:0.5,metalness:0.6}));
@@ -1666,7 +1663,7 @@ function floodMast(parent,x,z,tx,tz,H){
   const dx=tx-x,dz=tz-z,dd=Math.hypot(dx,dz),k=Math.min(0.55,34/dd);
   const pool=new THREE.Mesh(new THREE.PlaneGeometry(64,64),new THREE.MeshBasicMaterial({map:poolTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,polygonOffset:true,polygonOffsetFactor:-6,polygonOffsetUnits:-6}));
   pool.rotation.x=-Math.PI/2;pool.position.set(dx*k,PAD_Y+0.09,dz*k);g.add(pool);
-  parent.add(g);floodHeads.push(g);
+  parent.add(g);
   return g;
 }
 (function(){
@@ -1852,7 +1849,6 @@ const bodyTex=(function(){
   const mk=(c,srgb,rep)=>{const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;t.anisotropy=maxAniso;if(srgb)t.encoding=THREE.sRGBEncoding;return t;};
   return {map:mk(A,true),normal:mk(NC,false),rough:mk(Rg,false),emis:mk(E,true)};
 })();
-mark('bodytex');
 const carbonTex=(function(){
   const S=128,c=mkCanvas(S,S),g=c.getContext('2d');g.fillStyle='#17191c';g.fillRect(0,0,S,S);
   for(let y=0;y<S;y+=8)for(let x=0;x<S;x+=8){
@@ -2543,7 +2539,6 @@ function setCam(n){
 }
 function setFocus(m){focusMode=m;document.getElementById('focusname').textContent='Focus: '+FOCUS_NAMES[m];camSnap=true;if(camMode===1){orb.dist=orb.distS=defaultDist();}}
 function localBasis(up,eOut,nOut){
-  eOut.crossVectors(new V3(0,1,0),up);if(eOut.lengthSq()<1e-8)eOut.set(1,0,0);eOut.normalize();   /* y x up -> toward +z? use fixed frame */
   eOut.set(1,0,0).addScaledVector(up,-up.x).normalize();
   nOut.crossVectors(up,eOut).normalize();        /* up x east = north-ish (-z) */
 }
@@ -2658,7 +2653,7 @@ const _ls=new V3(),_lr=new V3(),_lu=new V3(),_sn=new V3(),_lz=new V3();
 function updateShadow(){
   _ls.copy(F.pos).sub(ORG);
   _lz.copy(SUN);
-  _lr.crossVectors(new V3(0,1,0),_lz).normalize();_lu.crossVectors(_lz,_lr).normalize();
+  _lr.crossVectors(UP,_lz).normalize();_lu.crossVectors(_lz,_lr).normalize();
   const tx=2*SH/2048;
   const a=Math.round(_ls.dot(_lr)/tx)*tx,b=Math.round(_ls.dot(_lu)/tx)*tx,c=_ls.dot(_lz);
   _sn.set(0,0,0).addScaledVector(_lr,a).addScaledVector(_lu,b).addScaledVector(_lz,c);
@@ -2675,8 +2670,7 @@ const fogCol=new THREE.Color();
 function updateEnvironment(t,tr){
   tE.copy(camW).sub(EC);const rr=tE.length();const camH=rr-RE;
   ATU.uUp.value.copy(tE).divideScalar(rr);
-  ATU.uE1.value.set(0,0,1).cross(ATU.uUp.value).multiplyScalar(-1).normalize();   /* up x z -> east-ish */
-  ATU.uE1.value.crossVectors(ATU.uUp.value,new V3(0,0,1)).normalize();
+  ATU.uE1.value.crossVectors(ATU.uUp.value,UPZ).normalize();   /* up x z -> east */
   ATU.uE3.value.crossVectors(ATU.uE1.value,ATU.uUp.value).normalize();
   ATU.uCamE.value.copy(tE);ATU.uCamH.value=Math.max(camH,0.5);ATU.uTime.value=tr;
   sky.position.copy(camera.position);
@@ -2812,8 +2806,11 @@ function drawFrame(dt){
   renderer.render(scene,camera);
 }
 setCam(1);setFocus(0);setPlaying(true);
+/* draw once behind the loading overlay: the first frame pays for every texture upload
+   and shader link, and paying it here keeps the opening seconds smooth */
+drawFrame(1/60);
 MSG.style.display='none';
-mark('scene');window.__dbg={renderer,scene,camera};
+window.__dbg={renderer,scene,camera};
 performance.mark('ready');performance.measure('boot','start','ready');
 function frame(now){
   requestAnimationFrame(frame);

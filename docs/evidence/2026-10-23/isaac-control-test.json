@@ -11,6 +11,6 @@
   ],
   "pause_clock_frozen": true,
   "single_step_seconds": 0.1,
-  "run_seconds": 0.3000000000000001,
-  "final_pause_seconds": 0.6000000000000003
+  "run_seconds": 0.19999999999999998,
+  "final_pause_seconds": 0.7
 }

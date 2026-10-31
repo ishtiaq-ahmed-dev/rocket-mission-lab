@@ -31,7 +31,7 @@ class RocketEnv(gym.Env):
             physics_factory=RocketPhysics
         self.physics = physics_factory(self.cfg)
         self.action_space = spaces.Box(-1., 1., (3,), dtype=np.float32)
-        self.observation_space = spaces.Box(-np.inf, np.inf, (21,), dtype=np.float32)
+        self.observation_space = spaces.Box(-np.inf, np.inf, (22,), dtype=np.float32)
         self.phase = mission
 
     def set_difficulty(self, value):
@@ -140,10 +140,12 @@ class RocketEnv(gym.Env):
                               s["quaternion"], np.asarray(s["angular_velocity"])/2,
                               [s["fuel_mass"] / (self.cfg["vehicle"]["fuel_mass"]*self.physics.mass_scale), s["t"]/90],
                               (self._target()-s["position"])/position_scale,
-                              [self.takeoff_velocity/50 if self.phase=="takeoff" else 0, s["mass"]/40000, s["throttle"]]])
+                              [self.takeoff_velocity/50 if self.phase=="takeoff" else 0, s["mass"]/40000, s["throttle"],
+                               float(s.get("hold_down", False))]])
         if self.noise:
             noise = self.np_random.normal(0, self.cfg["world"]["sensor_noise"]*self.episode_difficulty, obs.shape)
             noise[6:10] = 0 # do not corrupt quaternion representation
+            noise[21] = 0 # hold-down is a discrete state; do not add sensor noise
             obs += noise
         # Sensor magnitudes remain identical for both methods across changes to
         # the neural-network feature scale. Noise is defined in legacy SI scale.
@@ -213,13 +215,20 @@ class RocketEnv(gym.Env):
             s=self.physics.state()
             distance=float(np.linalg.norm(s['position'][:2]-self._target()[:2]))
         if s["clearance"] <= 1e-7 and reason is None and not self.physics.on_pad:
+            # Precision is the last skill a policy learns, so the training
+            # envelope starts wide and tightens to the exact mission limits at
+            # difficulty 1: 4 m/s and the full pad at 0, 2 m/s and 1 m at 1.
+            d = self.episode_difficulty
+            speed_limit = m["touchdown_speed"] * (2. - d)
+            tolerance = m.get('landing_tolerance', m["pad_radius"])
+            tolerance += (1. - d) * (m["pad_radius"] - tolerance)
             if self.phase == "takeoff":
                 reason = "crash_speed"
-            elif max(speed, s['contact_speed']) >= m["touchdown_speed"]:
+            elif max(speed, s['contact_speed']) >= speed_limit:
                 reason = "crash_speed"
             elif s["tilt"] >= m["touchdown_tilt_deg"]:
                 reason = "crash_tilt"
-            elif distance > m.get('landing_tolerance',m["pad_radius"]):
+            elif distance > tolerance:
                 reason = "missed_pad"
             else:
                 reason = "success"
@@ -243,7 +252,16 @@ class RocketEnv(gym.Env):
             reward=progress-dt*(r.get("time_cost",.3)+r["tilt"]*(1-np.cos(np.deg2rad(s["tilt"])))+r["angular_velocity"]*np.linalg.norm(s["angular_velocity"])**2+r["action_cost"]*float(np.dot(np.asarray(action)[1:],np.asarray(action)[1:]))) - r["fuel"]*(old["fuel_mass"]-s["fuel_mass"])
         if reason:
             reward += r["success"] if reason=="success" else r["failure"]
-            terminal_speed=abs(s["velocity"][2]-self.takeoff_velocity) if self.phase=="takeoff" else speed
+            # Efficiency is paid only on a landing that happens. A per-kg cost
+            # alone rewards aborting early, so the remaining load is scored
+            # here instead of charging every attempt for the fuel it must use.
+            if reason=="success":
+                reward += r.get("success_fuel_bonus",0.)*max(0.,s["fuel_mass"])/(self.cfg["vehicle"]["fuel_mass"]*self.physics.mass_scale)
+            # A failure is scored by the motion that happened, not by distance
+            # to the ascent target: a booster idling on its mount has zero
+            # impact speed, while the target-error form charged it the maximum
+            # crash penalty and made staying put as cheap as a hard crash.
+            terminal_speed=abs(s["velocity"][2]-self.takeoff_velocity) if self.phase=="takeoff" and reason=="success" else speed
             reward-=r["terminal_speed"]*min(terminal_speed**2,400)+r["terminal_tilt"]*np.deg2rad(s["tilt"])**2+r["terminal_position"]*min(distance,100)
         if self.phase=='landing' and r.get('ground_speed_cost',0)>0:
             # Dense physical speed cost close to the surface; no reference
