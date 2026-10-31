@@ -1,0 +1,106 @@
+{
+  "checkpoint_id": "combined-ppo-efficient-v21__step-000100000",
+  "difficulty": 0.0,
+  "training_curriculum": true,
+  "scope": "Deterministic fixed-seed rollouts; deterministic actor, evaluation env settings; not a reliability result",
+  "hold_down_release_margin": 1.05,
+  "min_throttle": 0.35,
+  "dry_mass": 22000.0,
+  "fuel_mass": 16000.0,
+  "episodes": [
+    {
+      "seed": 30000,
+      "outcome": "crash_speed",
+      "phase": "takeoff",
+      "duration": 0.68,
+      "fuel_used": 76.8,
+      "released": true,
+      "release_time": 0.44,
+      "max_altitude": 0.0,
+      "max_altitude_time": 0.0,
+      "final_speed": 0.15,
+      "final_tilt": 0.01,
+      "mean_action_throttle": 0.1087,
+      "min_action_throttle": -0.4492,
+      "max_action_throttle": 0.5176,
+      "mean_throttle": 0.0,
+      "fuel_by_phase": {
+        "takeoff": 76.8
+      },
+      "end_on_pad": false,
+      "trace": [
+        {
+          "t": 0.0,
+          "altitude": 0.0,
+          "vertical_speed": 0.0,
+          "speed": 0.0,
+          "tilt": 0.0,
+          "fuel": 16000.0,
+          "throttle": 0.0,
+          "action_throttle": 0.518,
+          "on_pad": true,
+          "thrust": 0.0,
+          "weight": 397169.0,
+          "phase": "takeoff",
+          "staging_pending": false
+        }
+      ]
+    },
+    {
+      "seed": 30001,
+      "outcome": "crash_speed",
+      "phase": "takeoff",
+      "duration": 0.68,
+      "fuel_used": 76.8,
+      "released": true,
+      "release_time": 0.44,
+      "max_altitude": 0.0,
+      "max_altitude_time": 0.0,
+      "final_speed": 0.15,
+      "final_tilt": 0.01,
+      "mean_action_throttle": 0.1087,
+      "min_action_throttle": -0.4492,
+      "max_action_throttle": 0.5176,
+      "mean_throttle": 0.0,
+      "fuel_by_phase": {
+        "takeoff": 76.8
+      },
+      "end_on_pad": false,
+      "trace": [
+        {
+          "t": 0.0,
+          "altitude": 0.0,
+          "vertical_speed": 0.0,
+          "speed": 0.0,
+          "tilt": 0.0,
+          "fuel": 16000.0,
+          "throttle": 0.0,
+          "action_throttle": 0.518,
+          "on_pad": true,
+          "thrust": 0.0,
+          "weight": 397169.0,
+          "phase": "takeoff",
+          "staging_pending": false
+        }
+      ]
+    }
+  ],
+  "classical": [
+    {
+      "seed": 30000,
+      "outcome": "success",
+      "fuel_used": 7326.9,
+      "duration": 64.75,
+      "pad_distance": 0.1,
+      "max_altitude": 459.6
+    },
+    {
+      "seed": 30001,
+      "outcome": "success",
+      "fuel_used": 7692.3,
+      "duration": 65.43,
+      "pad_distance": 0.09,
+      "max_altitude": 458.5
+    }
+  ]
+}

@@ -11,7 +11,7 @@ class NativePolicy:
         path=checkpoint_path(identifier);self.meta=read_json(path/'checkpoint.json')
         if not self.meta:raise ValueError('Checkpoint metadata missing')
         class Contract(Env):
-            observation_space=spaces.Box(-np.inf,np.inf,(21,),dtype=np.float32)
+            observation_space=spaces.Box(-np.inf,np.inf,(22,),dtype=np.float32)
             action_space=spaces.Box(-1.,1.,(3,),dtype=np.float32)
         self.normalizer=VecNormalize.load(path/'normalize.pkl',DummyVecEnv([Contract]))
         self.normalizer.training=False;self.normalizer.norm_reward=False

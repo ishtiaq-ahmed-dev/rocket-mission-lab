@@ -38,6 +38,7 @@ class RocketPhysics:
         self.gimbal = np.zeros(2)
         self.rcs_torque = np.zeros(3)
         self.throttle = 0.0
+        self.command_throttle = 0.0
         self.thrust = 0.0
         self.hold_elapsed = 0.0
         self.release_time = None
@@ -152,12 +153,23 @@ class RocketPhysics:
         dt = self.w["timestep"]
         rate_up = self.v.get("throttle_rate")
         rate_down = self.v.get("shutdown_rate", rate_up)
+        target_throttle = commanded
         for _ in range(self.w["control_substeps"]):
             self.gimbal += np.clip(target_gimbal - self.gimbal, -np.deg2rad(self.v["gimbal_rate_deg_s"])*dt, np.deg2rad(self.v["gimbal_rate_deg_s"])*dt)
             if rate_up and self.fuel > 0:
+                # Command filter: a valve follows a commanded position, it does
+                # not chatter at the policy's step rate. Without it a bang-bang
+                # policy never holds the 0.2 s launch-mount release margin and
+                # burns its load on the pad.
+                tau = self.v.get('command_filter_time', 0.)
+                if tau > 0:
+                    self.command_throttle += (target_throttle - self.command_throttle) * dt / (tau + dt)
+                    effective = self.command_throttle
+                else:
+                    effective = target_throttle
                 # Turbopump/valve spool: thrust follows the command at a bounded rate, so ignition
                 # and shutdown ramp over a few tenths of a second instead of stepping instantly.
-                delta = commanded - self.throttle
+                delta = effective - self.throttle
                 self.throttle += np.clip(delta, -rate_down*dt, rate_up*dt)
                 self.thrust = self.throttle * self.v["max_thrust"] * self.thrust_scale
             else:

@@ -74,7 +74,7 @@ def test_dashboard_native_bridge_contract_and_origin(monkeypatch):
 def test_shared_env_accepts_injected_native_backend_without_constructing_mujoco():
     from rocket_lab.envs import RocketEnv
     fake=object();env=RocketEnv(physics_factory=lambda config:fake)
-    assert env.physics is fake and env.observation_space.shape==(21,)
+    assert env.physics is fake and env.observation_space.shape==(22,)
 
 
 def test_native_start_validates_geometry_and_does_not_accept_executable_fields(monkeypatch):
