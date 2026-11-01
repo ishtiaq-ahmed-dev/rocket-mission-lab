@@ -1,6 +1,7 @@
 """Classical guidance and gimbal tracking on exactly the same RocketEnv."""
 import numpy as np
-from .atmosphere import air_density
+from .atmosphere import aerodynamic_force, aerodynamic_torque
+from .propulsion import engine_performance
 
 class ClassicalController:
     def __init__(self, level=4):
@@ -67,18 +68,19 @@ class ClassicalController:
         """Acceleration implied by measured actuator state and the nominal vehicle model."""
         ph,cfg=env.physics,env.cfg
         direction=np.array([np.tan(s['gimbal'][0]),np.tan(s['gimbal'][1]),1.]);direction/=np.linalg.norm(direction)
-        force=ph.rotation()@(direction*s['throttle']*ph.v['max_thrust'])
-        relative=velocity-s['wind']
-        rho=air_density(cfg['world'],s['position'][2]-ph.rest)
-        drag=-.5*rho*ph.v['drag_coefficient']*ph.v['area']*np.linalg.norm(relative)*relative
+        force=ph.rotation()@(direction*ph.thrust)
+        drag=aerodynamic_force(cfg['world'],ph.v,ph.rotation(),velocity,s['wind'],s['position'][2]-ph.rest)
         return (force+drag)/s['mass']-np.array([0.,0.,ph.gravity(s['altitude'])])
 
     def _attitude_acceleration(self, env, s, n):
         """Second derivative of the body axis from the engine-lever torque."""
         ph=env.physics
         direction=np.array([np.tan(s['gimbal'][0]),np.tan(s['gimbal'][1]),1.]);direction/=np.linalg.norm(direction)
-        force=direction*s['throttle']*ph.v['max_thrust']
-        alpha=ph.rotation()@(np.array([ph.engine_lever*force[1],-ph.engine_lever*force[0],0.])/ph.model.body_inertia[1,0])
+        force=direction*ph.thrust
+        torque_body=np.array([ph.engine_lever*force[1],-ph.engine_lever*force[0],0.])
+        drag=aerodynamic_force(ph.w,ph.v,ph.rotation(),s['velocity'],s['wind'],s['position'][2]-ph.rest)
+        torque_body+=ph.rotation().T@aerodynamic_torque(ph.v,ph.rotation(),drag)
+        alpha=ph.rotation()@(torque_body/ph.model.body_inertia[1,0])
         return np.cross(alpha,n)
 
     def action(self, env):
@@ -112,7 +114,8 @@ class ClassicalController:
         # Approach cone: the vehicle stays above a glide slope toward the target, so lateral
         # transfers use descent time instead of hovering, and it never aims below the capture cone.
         shelf=min(self.max_shelf,self.glide_slope*max(float(np.linalg.norm(lateral_error))-12.,0.)) if env.phase=='landing' else 0.
-        can_hover=1.03*ph.v['min_throttle']*ph.v['max_thrust']<s['mass']*ph.gravity(h)
+        max_thrust=engine_performance(ph.w,ph.v,1.,h,getattr(ph,'thrust_scale',1.))[0]
+        can_hover=1.03*ph.v['min_throttle']*max_thrust<s['mass']*ph.gravity(h)
         capture_height=100 if cfg['mission'].get('high_altitude_recovery') else 50
         if self.level==4 and can_hover and env.phase=='landing' and h<capture_height:
             if np.linalg.norm(lateral_error)<.35 and np.linalg.norm(velocity[:2])<.15 and s['tilt']<1:
@@ -148,9 +151,7 @@ class ClassicalController:
                 az=float(desired[2]); lateral=desired[:2]
         if self.level==4:
             # Model-based drag feedforward. No external attitude thrusters.
-            rel=velocity-s["wind"]
-            rho=air_density(cfg['world'],h)
-            drag=-0.5*rho*cfg["vehicle"]["drag_coefficient"]*cfg["vehicle"]["area"]*np.linalg.norm(rel)*rel
+            drag=aerodynamic_force(cfg['world'],ph.v,ph.rotation(),velocity,s["wind"],h)
             lateral-=drag[:2]/s["mass"]
             az-=drag[2]/s["mass"]
             if env.phase=="landing":
@@ -159,12 +160,12 @@ class ClassicalController:
                 href=max(0.,guidance_height)
                 # The slow exponential flare needs a hover throttle at or above the engine floor. A light booster
                 # (floor thrust above weight) must instead keep braking along the 1.5 m/s^2 profile.
-                hover_ok=1.03*ph.v['min_throttle']*ph.v['max_thrust']<s['mass']*g
+                hover_ok=1.03*ph.v['min_throttle']*max_thrust<s['mass']*g
                 # Without a hover throttle the vehicle cannot shed speed gently, so it touches down at a
                 # firm 1.2 m/s with the engine still burning (cutoff at contact) rather than floating.
                 high_recovery=cfg['mission'].get('high_altitude_recovery',False)
                 descent_cap=1800. if high_recovery and h>1500 else 28.
-                braking=3. if not high_recovery or h<1500 else min(48.,max(3.,(ph.v['max_thrust']/s['mass']-g)*1.0))
+                braking=3. if not high_recovery or h<1500 else min(48.,max(3.,(max_thrust/s['mass']-g)*1.0))
                 candidates=[descent_cap,np.sqrt(braking*href+.25)] if hover_ok else [descent_cap,max(np.sqrt(braking*href+.25),1.2)]
                 if hover_ok:candidates.append(.25*href+.6)
                 which=int(np.argmin(candidates))
@@ -172,7 +173,7 @@ class ClassicalController:
                 if transfer and guidance_height<2:reference=np.clip(-guidance_height*.5,-2,8)
                 target_speed=reference
                 derivative=0. if which==0 or (which==1 and braking*href+.25<1.44 and not hover_ok) else (-braking/2/max(np.sqrt(braking*href+.25),.1) if which==1 else -.25)
-                ceiling=max(12.,ph.v['max_thrust']/s['mass']-g) if high_recovery else 12.
+                ceiling=max(12.,max_thrust/s['mass']-g) if high_recovery else 12.
                 az=np.clip(derivative*velocity[2]+2*(reference-velocity[2])-drag[2]/s["mass"],-8,ceiling)
                 if self.divert:
                     distance_now=float(np.linalg.norm(lateral_error))
@@ -202,18 +203,18 @@ class ClassicalController:
             torque_world+=.05*self.attitude_integral*ph.model.body_inertia[1,0]
         torque_body=rot.T@torque_world
         # Vertical acceleration divided by actual body-axis vertical projection.
-        thrust=np.clip(s["mass"]*(g+az)/max(n[2],0.3),0,ph.v["max_thrust"])
+        thrust=np.clip(s["mass"]*(g+az)/max(n[2],0.3),0,max_thrust)
         if env.phase=="landing" and env.separated and velocity[2]>2 and h>100:
             thrust=0 # ballistic coast after combined mission separation
         if env.phase=='landing' and cfg['mission'].get('high_altitude_recovery',False) and h>1500:
             # Coast until a stopping-distance envelope calls for an entry burn.
             # No forces, attitude corrections or coordinate changes are hidden
             # in this coast. Ignition/valve lag is included in the margin.
-            deceleration=max(1.,ph.v['max_thrust']/s['mass']-g)
+            deceleration=max(1.,max_thrust/s['mass']-g)
             stopping=velocity[2]**2/(2*deceleration*.60)+abs(velocity[2])*1.5+900.
             if velocity[2]<0 and h<=stopping:self.recovery_burn=True
             if not self.recovery_burn:thrust=0.
-        throttle=thrust/ph.v["max_thrust"]
+        throttle=thrust/max_thrust
         if self.level==1: throttle*=0.72
         denom=max(thrust*ph.engine_lever,1)
         gx,gy=-torque_body[1]/denom,torque_body[0]/denom

@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from rocket_lab.api import app
 from rocket_lab.schemas import Telemetry, RunMeta
 from rocket_lab.config import ROOT, load_config
+from rocket_lab.missions import configure_flight
 from rocket_lab.envs import RocketEnv
 from rocket_lab.evaluate import wilson
 from rocket_lab.storage import config_hash
@@ -19,7 +20,12 @@ def test_read_endpoints(path):
     if path=="/runs":
         for row in value:RunMeta.model_validate(row)
     if path=="/schema/telemetry":assert "frames" in value["properties"]
-    if path=='/system':assert value['config_hash']==config_hash()
+    if path=='/system':
+        assert value['config_hash']==config_hash()
+        # A combined checkpoint records the mission's effective configuration,
+        # which is not the raw config.yaml hash.
+        cfg,_=configure_flight(load_config(),None,'combined')
+        assert value['config_hashes']['combined']==config_hash(cfg)
 
 def test_replay_schema_and_endpoint():
     rows=client.get("/runs?mission=landing&method=classical&level=4&seed=42").json()

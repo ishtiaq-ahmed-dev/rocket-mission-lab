@@ -92,7 +92,7 @@ class RunMeta(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
     id: str
     mission: Mission
-    method: Literal["classical","rl"]
+    method: Literal["classical","rl","bc"]
     level: int = Field(ge=1,le=4)
     checkpoint_steps: int | None = None
     checkpoint_id: str | None = None
@@ -137,7 +137,7 @@ class Telemetry(BaseModel):
 class SimRequest(BaseModel):
     model_config=ConfigDict(extra="forbid")
     mission: Mission = "landing"
-    method: Literal["classical","rl"] = "classical"
+    method: Literal["classical","rl","bc"] = "classical"
     level: int = Field(default=4,ge=1,le=4)
     seed: int = Field(default=42,ge=0,le=2147483647)
     checkpoint_id: str | None = None

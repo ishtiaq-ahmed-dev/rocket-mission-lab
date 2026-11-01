@@ -117,17 +117,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
 <div id="notes" role="dialog" aria-modal="true" aria-labelledby="notesTitle">
   <div class="card">
     <button class="close" id="notesclose" type="button" aria-label="Close model notes">&times;</button>
-    <h2 id="notesTitle">MODEL NOTES &middot; APPROXIMATE SIMULATION</h2>
-    <p>Independent educational model, not affiliated with, endorsed by, or derived from SpaceX flight data. Every figure here is simulated, not a vehicle specification.</p>
-    <h3>VEHICLE</h3>
-    <ul><li>Generic Falcon 9 Block 5-class masses; Merlin 1D at 845 kN sea level / 914 kN vacuum; MVac at 934 kN.</li><li>Point-mass dynamics with Mach-dependent drag and an angle-of-attack normal force, a 1976 standard atmosphere and steady wind.</li></ul>
-    <h3>GUIDANCE</h3>
-    <ul><li>Gravity-turn ascent, main engine cutoff on propellant reserve, 3 s stage separation, predictor-corrector boostback, entry burn, grid-fin steering and a closed-loop landing burn.</li><li>The second stage follows a tuned pitch schedule to a 300 km insertion.</li></ul>
-    <h3>NOT MODELLED</h3>
-    <ul><li>6-DOF rigid-body dynamics, gimbal and RCS actuator limits, propellant slosh, aeroelasticity, sensor noise, abort modes, weather and range safety.</li><li>Plume, soot, grid-fin and leg motion are illustrative.</li></ul>
+    <h2 id="notesTitle">MODEL NOTES &middot; PUBLIC-DATA, NOT CERTIFIED</h2>
+    <p>Independent educational model, not affiliated with, endorsed by, or derived from SpaceX flight data. Every figure here is simulated, not a vehicle specification or a flight-certification claim.</p>
+    <h3>REFERENCE ANCHORS</h3>
+    <ul><li>Public Falcon 9 Block 5 figures: 549,054 kg published liftoff mass, nine Merlin 1D engines at 845 kN sea level / 914 kN vacuum, 282/311 s, and one MVac at 981 kN / 348 s. The model's no-payload mass closes to 546.6 t, 0.45% below the published figure; dry mass and drag coefficients are modeled.</li><li>WGS-84 GM and rotation, a spherical mean Earth radius, ISO 2533:1975 / U.S. Standard Atmosphere 1976 layers, and Mach-dependent drag. The reference profile is <code>data/reference/international-standard.json</code>.</li></ul>
+    <h3>VEHICLE / GUIDANCE</h3>
+    <ul><li>Point-mass dynamics, staged mass, hold-down, gravity-turn ascent, MECO, separation, closed-loop S2 insertion, boostback, entry burn, grid-fin steering and a landing burn.</li><li>Guidance is tuned for this replay, not SpaceX GNC; the S2 pitch schedule is offline-tuned.</li></ul>
+    <h3>NOT MODELLED / NOT CERTIFIED</h3>
+    <ul><li>6-DOF rigid-body dynamics, gimbal and RCS actuator limits, propellant slosh, aeroelasticity, sensor noise, abort modes, weather, FAA/range safety and structural or thermal limits.</li><li>Plume, soot, grid-fin and leg motion are illustrative. This is not a validated real-world flight model.</li></ul>
     <h3>THIS RUN</h3>
     <ul><li>Main engine cutoff at <b id="n-meco">&mdash;</b>; booster apogee <b id="n-apo">&mdash;</b>.</li><li>Insertion orbit <b id="n-orb">&mdash;</b>.</li><li>Touchdown <b id="n-td">&mdash;</b>.</li></ul>
-    <p>Values are read from the flight currently loaded in this page.</p>
+    <p>Values are read from the flight currently loaded in this page. Reference checks: <code>node scripts/check_standards.js</code>.</p>
   </div>
 </div>
 <div id="bottom">
@@ -156,9 +156,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
 'use strict';
 /* ============================================================================
    Falcon-9-class RTLS mission simulator  (plain JS, runs in Node and the browser)
-   - inertial (ECI) point-mass dynamics on a spherical, rotating Earth
-   - 1976-standard-atmosphere density table, wind, Mach-dependent drag, AoA normal force
-   - Merlin 1D (845 kN SL / 914 kN vac, Isp 282/311 s, 40 % deep throttle), MVac 934 kN / 348 s
+   - inertial (ECI) point-mass dynamics on a WGS-84 mean sphere
+   - ISO 2533 / U.S. Standard Atmosphere 1976 layers, wind, Mach drag, AoA normal force
+   - Merlin 1D (845 kN SL / 914 kN vac, Isp 282/311 s, 40 % deep throttle), MVac 981 kN / 348 s
    - gravity-turn ascent, MECO, stage sep, S2 closed-loop orbit insertion, fairing + payload deploy
    - booster: flip, boostback (predictor-corrector), coast, entry burn, grid-fin steering,
      suicide-burn landing guidance (ZEM/ZEV lateral) -> touchdown on LZ-1
@@ -167,7 +167,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
 (function (root) {
 'use strict';
 const PI = Math.PI, D2R = PI / 180, R2D = 180 / PI;
-const MU = 3.986004418e14, RE = 6371000, OMEGA = 7.2921159e-5, G0 = 9.80665;
+const MU = 3.986004418e14, RE = 6371008.8, OMEGA = 7.292115e-5, G0 = 9.80665;
 const LAT_S = 28.5619 * D2R;                       /* SLC-40 */
 const LAT_L = 28.48583 * D2R, DLON_L = 0.03286 * D2R; /* LZ-1: 28.48583 N, 80.54444 W */
 const T0 = -10;                                    /* timeline start (s) */
@@ -179,11 +179,11 @@ const V = {
   s1Dry: 22200, s1Prop: 411000,
   s2Dry: 4000, s2Prop: 107500, fairing: 1900, sat: 7000,
   merTvac: 914e3, merAe: 0.68, merMdot: 299.7, merMin: 0.40,
-  mvacT: 934e3, mvacMdot: 273.7, mvacMin: 0.39,
+  mvacT: 981e3, mvacMdot: 287.5, mvacMin: 0.39,
   S: 10.52,                                         /* reference area, 3.66 m dia */
   baseAboveFoot: 2.0,                               /* airframe base plane above the foot plane (legs out) */
   mountH: 2.5,
-  azimuth: 40.0 * D2R,                              /* launch azimuth (ISS-inclination class) */
+  azimuth: 40.0 * D2R,                              /* initial pitch-kick heading; modeled insertion 39.9 deg */
   propResidual: 54000                               /* S1 propellant at MECO */
 };
 
@@ -203,27 +203,48 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const AH = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150, 160, 180, 200, 250, 300];
 const AR = [1.225, 0.7364, 0.4135, 0.1948, 0.08891, 0.04008, 0.01841, 0.008463, 0.003996, 0.001966, 0.001027, 5.681e-4, 3.097e-4, 1.632e-4, 8.28e-5, 3.99e-5, 1.85e-5, 8.28e-6, 3.42e-6, 1.393e-6, 5.60e-7, 9.71e-8, 2.22e-8, 8.15e-9, 3.83e-9, 2.08e-9, 1.23e-9, 5.46e-10, 2.54e-10, 6.07e-11, 1.92e-11];
 const LNR = AR.map(Math.log);
+/* ISO 2533:1975 / U.S. Standard Atmosphere 1976.
+   Layer bases are geopotential metres; tempAt/pressAt convert from the
+   geometric altitude used by the flight model. The density table above is
+   retained as the drag extension above 84.852 km geopotential. */
+const ATM_R = 287.05287, ATM_G = 9.80665;
+const ATM = [
+  { h: 0, T: 288.15, L: -0.0065, P: 101325 },
+  { h: 11000, T: 216.65, L: 0.0, P: 22632.06 },
+  { h: 20000, T: 216.65, L: 0.001, P: 5474.89 },
+  { h: 32000, T: 228.65, L: 0.0028, P: 868.019 },
+  { h: 47000, T: 270.65, L: 0.0, P: 110.906 },
+  { h: 51000, T: 270.65, L: -0.0028, P: 66.9389 },
+  { h: 71000, T: 214.65, L: -0.002, P: 3.95642 },
+  { h: 84852, T: 186.946, L: 0.0, P: 0.3734 }
+];
+const geoAlt = h => RE * Math.max(h, 0) / (RE + Math.max(h, 0));
+function atmLayer(H) { let i = ATM.length - 1; while (i > 0 && H < ATM[i].h) i--; return ATM[i]; }
+function tempAt(h) {
+  const H = geoAlt(h), top = ATM[ATM.length - 1];
+  if (H >= top.h) return top.T;
+  const a = atmLayer(H);
+  return a.T + a.L * (H - a.h);
+}
+function pressAt(h) {
+  const H = geoAlt(h), top = ATM[ATM.length - 1];
+  if (H > top.h) return 0;
+  const a = atmLayer(H), d = H - a.h;
+  return a.L === 0 ? a.P * Math.exp(-ATM_G * d / (ATM_R * a.T))
+    : a.P * Math.pow(a.T / (a.T + a.L * d), ATM_G / (ATM_R * a.L));
+}
 function rhoAt(h) {
   if (h <= 0) return 1.225;
-  const k = h / 1000, n = AH.length;
-  if (k >= AH[n - 1]) return AR[n - 1] * Math.exp(-(k - AH[n - 1]) / 70);
-  let i = 0; while (AH[i + 1] < k) i++;
-  const f = (k - AH[i]) / (AH[i + 1] - AH[i]);
-  return Math.exp(LNR[i] + (LNR[i + 1] - LNR[i]) * f);
+  if (h > 86000) {
+    const k = h / 1000, n = AH.length;
+    if (k >= AH[n - 1]) return AR[n - 1] * Math.exp(-(k - AH[n - 1]) / 70);
+    let i = 0; while (AH[i + 1] < k) i++;
+    const f = (k - AH[i]) / (AH[i + 1] - AH[i]);
+    return Math.exp(LNR[i] + (LNR[i + 1] - LNR[i]) * f);
+  }
+  return pressAt(h) / (ATM_R * tempAt(h));
 }
-function tempAt(h) {
-  const k = Math.max(h, 0) / 1000;
-  if (k < 11) return 288.15 - 6.5 * k;
-  if (k < 20) return 216.65;
-  if (k < 32) return 216.65 + (k - 20);
-  if (k < 47) return 228.65 + 2.8 * (k - 32);
-  if (k < 51) return 270.65;
-  if (k < 71) return 270.65 - 2.8 * (k - 51);
-  if (k < 86) return 214.65 - 2.0 * (k - 71);
-  return 186.95 + Math.max(0, k - 100) * 5;
-}
-const soundAt = h => Math.sqrt(1.4 * 287.05 * tempAt(Math.min(h, 85000)));
-const pressAt = h => rhoAt(h) * 287.05 * tempAt(h);
+const soundAt = h => Math.sqrt(1.4 * ATM_R * tempAt(Math.min(h, 85000)));
 function windSpeed(hk) { return 3 + 30 * Math.exp(-Math.pow((hk - 11) / 6, 2)) + 8 * Math.exp(-Math.pow((hk - 36) / 12, 2)); }
 
 /* ---------------- aero tables ---------------- */
@@ -471,13 +492,13 @@ function stepBooster(S, t, dt, mode) {
   const h2 = nrm(S.r) - RE, vdown = dot(S.v, unit(S.r)) < 0, spd = nrm(relVel(S.r, S.v));
   switch (S.phase) {
     case 'BB':
-      if (t >= S.bbEnd || S.prop < 9000) { S.phase = 'COAST2'; S.tPh = 0; if (S.ev) S.ev.push(['BB_END', t]); }
+      if (t >= S.bbEnd || S.prop < 9000) { S.phase = 'COAST2'; S.tPh = 0; S.nEng = 0; S.thr = 0; S.thrN = 0; if (S.ev) S.ev.push(['BB_END', t]); }
       break;
     case 'COAST2':
       if (h2 < BP.hEntry && vdown) { S.phase = 'ENTRY'; S.tPh = 0; if (S.ev) S.ev.push(['ENTRY_BURN', t]); }
       break;
     case 'ENTRY':
-      if (spd < BP.entryVend || S.tPh > BP.entryMax || S.prop < 5200) { S.phase = 'AERO'; S.tPh = 0; if (S.ev) S.ev.push(['ENTRY_END', t]); }
+      if (spd < BP.entryVend || S.tPh > BP.entryMax || S.prop < 5200) { S.phase = 'AERO'; S.tPh = 0; S.nEng = 0; S.thr = 0; S.thrN = 0; if (S.ev) S.ev.push(['ENTRY_END', t]); }
       break;
     case 'AERO':
       if (mode === 'predict') { if (h2 <= BP.hAim) S.done = true; }
@@ -570,7 +591,7 @@ function planBoostback(S, t) {
    ========================================================================== */
 const ORB = { hTarget: 300000, perigeeMin: 190000 };
 const S2N = [0, 50, 110, 180, 260, 340];
-const S2P = [25.9, 33.3, 20.3, 15.3, 7.6, 3];            /* pitch above local horizontal (deg) at the nodes; tuned offline */
+const S2P = [20.72, 26.64, 16.24, 12.24, 6.08, 2.4];   /* pitch above local horizontal (deg) at the nodes; tuned offline */
 function s2Guide(S, t) {
   const r = S.r, v = S.v, Ub = unit(r), vr = dot(v, Ub);
   const ts = t - S.tIgn;
@@ -817,11 +838,13 @@ function run(opts) {
         S.prop = Math.max(0, S.prop - V.mvacMdot * S.thr * DT);
         const oe = orbitElems(S.r, S.v);
         if ((oe.a >= RE + ORB.hTarget && hh > 150000) || S.prop <= 50) {
-          S.seco = true; S.on = false; S.tSeco = t; ev('SECO', t, { alt: hh, perigee: (oe.rp - RE) / 1000, apogee: (oe.ra - RE) / 1000, inc: oe.inc, v: nrm(S.v), prop: S.prop });
+          S.seco = true; S.on = false; S.thr = 0; S.tSeco = t; ev('SECO', t, { alt: hh, perigee: (oe.rp - RE) / 1000, apogee: (oe.ra - RE) / 1000, inc: oe.inc, v: nrm(S.v), prop: S.prop });
           stats.orbit = oe;
         }
-      } else { S.thr *= Math.exp(-DT / 0.15); if (S.thr < 0.01) S.thr = 0; }
-      if (!S.on && S.thr > 0) T = V.mvacT * S.thr;
+      } else if (!S.seco) { S.thr *= Math.exp(-DT / 0.15); if (S.thr < 0.01) S.thr = 0; }
+      /* no thrust tail after SECO: propellant and thrust stop together, so the
+         reported orbit is the one the stage actually flies. */
+      if (!S.on && !S.seco && S.thr > 0) T = V.mvacT * S.thr;
       const wmax = S.on ? 3 * D2R : 1 * D2R;
       if (!S.on && !S.seco) S.axisCmd = unit(relVel(S.r, S.v));
       if (S.seco) { S.axisCmd = unit(S.v); }
@@ -867,7 +890,7 @@ function run(opts) {
 
 function lzRender() { const o = [0, 0, 0]; toRender(lzBase(0), 0, o, 0); o[1] -= V.baseAboveFoot; return o; }
 root.FlightSim = { lzRender: lzRender, run: run, V: V, BP: BP, T0: T0, DT: DT, SAMPLE_EVERY: SAMPLE_EVERY, PH: PH, rhoAt: rhoAt, soundAt: soundAt, pressAt: pressAt,
-  RE: RE, OMEGA: OMEGA, MU: MU, siteFrame: siteFrame, lzFrame: lzFrame, orbitElems: orbitElems };
+  RE: RE, OMEGA: OMEGA, MU: MU, G0: G0, LAT_S: LAT_S, LAT_L: LAT_L, DLON_L: DLON_L, tempAt: tempAt, siteFrame: siteFrame, lzFrame: lzFrame, orbitElems: orbitElems };
 if (typeof module !== 'undefined') module.exports = root.FlightSim;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -920,10 +943,15 @@ const NZ=(function(){
 const curv=(x,z)=>{const r2=x*x+z*z;return r2<4e12?Math.sqrt(RE*RE-r2)-RE:-RE;};   /* world surface height */
 
 /* ---------- track sampling (linear interpolation of the 25 Hz sim output) ---------- */
+const STEP_B=[8,25,28],STEP_S2=[8,16,19],STEP_BODY=[7];
 function sampleTrack(tr,t,out){
-  let f=(t-SIMT0)/SIMDT;f=clamp(f,0,SIMN-1.0001);
-  const i=Math.floor(f),u=f-i,K=tr.K,o=i*K,o2=o+K,d=tr.d;
+  let f=(t-SIMT0)/SIMDT;f=clamp(f,0,SIMN-1);
+  const i=Math.min(Math.floor(f),SIMN-2),u=f-i,K=tr.K,o=i*K,o2=o+K,d=tr.d;
   for(let k=0;k<K;k++)out[k]=d[o+k]*(1-u)+d[o2+k]*u;
+  /* engine counts, phases and landed/seco/deploy flags are states, not vectors:
+     hold the frame value so a blend cannot show 4.5 engines or a premature SECO. */
+  const step=tr===SIM.B?STEP_B:tr===SIM.S2?STEP_S2:STEP_BODY;
+  for(let k=0;k<step.length;k++)out[step[k]]=d[o+step[k]];
   out.idx=i;
   return out;
 }
@@ -973,7 +1001,7 @@ scene.add(engLight);
 /* ================= atmosphere (single-scatter, Rayleigh + Mie), local frame ================= */
 const ATM_COMMON=`
 #define PI 3.14159265359
-const float RE=6371000.0, HA=100000.0, HR=8000.0, HM=1200.0;
+const float RE=6371008.8, HA=100000.0, HR=8000.0, HM=1200.0;
 const vec3 bR=vec3(5.8e-6,13.5e-6,33.1e-6);
 const float bM=21e-6;
 const float SUNI=22.0;

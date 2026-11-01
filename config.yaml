@@ -1,10 +1,17 @@
-# Every vehicle/environment number below is APPROXIMATE, educational and generic.
-# These are NOT official Falcon 9 specifications. SI units; z is up; quaternion wxyz.
+# Python 400 m subscale lab configuration. This is NOT the browser Falcon 9
+# RTLS mission and is NOT an official Falcon 9 specification. Public reference
+# anchors live in data/reference/international-standard.json.
+# Every value below is modeled/approximate. SI units; z is up; quaternion wxyz.
 vehicle:
   dry_mass: 22000.0 # approximate kg
   fuel_mass: 16000.0 # approximate landing/ascent reserve kg, not full orbital propellant
-  isp: 300.0 # approximate seconds
-  max_thrust: 760000.0 # approximate N, one generic engine
+  isp: 311.0 # approximate vacuum seconds; sea-level Isp is supplied below
+  isp_sea_level: 282.0 # approximate s at one atmosphere
+  isp_vacuum: 311.0 # approximate s in vacuum
+  max_thrust: 914000.0 # approximate N vacuum, one Merlin-class engine
+  thrust_sea_level: 845000.0 # approximate N at one atmosphere
+  thrust_vacuum: 914000.0 # approximate N in vacuum
+  nozzle_exit_area: 0.68 # approximate m2; sea-level thrust = vacuum - p0*Ae
   min_throttle: 0.35 # approximate engine-on floor; engine can switch fully off
   throttle_rate: 2.0 # approximate fraction of max thrust per second while spooling up or throttling
   shutdown_rate: 5.0 # approximate fraction of max thrust per second during engine cutoff
@@ -19,14 +26,24 @@ vehicle:
   hold_down_release_time: 0.2 # seconds of sustained positive launch margin
   radius: 1.8 # approximate m
   inertia: [5100000.0, 5100000.0, 61000.0] # approximate kg m2 at dry mass, scaled with mass
-  drag_coefficient: 0.5 # approximate
-  area: 10.18 # approximate m2, isotropic lumped drag (no lift/grid-fin aerodynamics)
+  drag_coefficient: 0.5 # approximate axial drag coefficient
+  area: 10.18 # approximate m2, frontal area for axial drag
+  aero_model: axial-lateral # body-axis decomposition; broadside area is much larger
+  drag_coefficient_lateral: 1.0 # approximate broadside drag coefficient
+  area_lateral: 144.0 # approximate m2, length x diameter
+  aero_center: 5.0 # m above CoM toward the nose; positive gives engine-first weathercocking
+  drag_coefficient_mach: [[0.0,0.5],[0.8,0.5],[1.0,0.85],[1.2,0.75],[2.0,0.55],[4.0,0.4]] # approximate transonic rise
 world:
   gravity: 9.80665 # approximate constant; also g0 in Isp conversion
+  gravity_model: inverse_square # g(h)=g0*(R/(R+h))^2
+  earth_radius: 6371000.0 # m
+  atmosphere_model: layered # 1976 standard atmosphere through 84.852 km
   density_sea_level: 1.225 # approximate kg/m3
   scale_height: 8500.0 # approximate m
   wind_mean: [2.0, -1.0, 0.0] # approximate m/s
   gust_std: 0.8 # approximate m/s, mean-reverting process
+  wind_shear_exponent: 0.14 # approximate power-law boundary-layer profile
+  wind_reference_height: 10.0 # m, height at which wind_mean is quoted
   sensor_noise: 0.005 # approximate relative to observation scale
   position_noise_m: 0.12 # generic precision-navigation position standard deviation
   velocity_noise_m_s: 0.04 # generic velocity standard deviation; not vendor sensor data
@@ -49,6 +66,7 @@ mission:
   takeoff_velocity: 25.0 # approximate m/s
   takeoff_velocity_tolerance: 8.0 # approximate m/s
   timeout: 90.0 # approximate seconds
+  combined_timeout: 240.0 # minimum for the two-phase ascent/descent mission
   bounds: 2500.0 # approximate m
 reward:
   profile: state-potential-v3 # dense state-only shaping; no expert controls or target actions

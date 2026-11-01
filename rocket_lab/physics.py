@@ -7,7 +7,8 @@ Touchdown is detected before contact resolution, retaining impact velocity.
 import numpy as np
 import mujoco
 from .config import load_config
-from .atmosphere import air_density
+from .atmosphere import air_density, aerodynamic_force, aerodynamic_torque, wind_at
+from .propulsion import engine_performance
 
 class RocketPhysics:
     def __init__(self, config=None):
@@ -40,6 +41,7 @@ class RocketPhysics:
         self.throttle = 0.0
         self.command_throttle = 0.0
         self.thrust = 0.0
+        self.isp = self.v.get('isp_vacuum', self.v['isp'])
         self.hold_elapsed = 0.0
         self.release_time = None
         self.released_stage = None
@@ -171,11 +173,11 @@ class RocketPhysics:
                 # and shutdown ramp over a few tenths of a second instead of stepping instantly.
                 delta = effective - self.throttle
                 self.throttle += np.clip(delta, -rate_down*dt, rate_up*dt)
-                self.thrust = self.throttle * self.v["max_thrust"] * self.thrust_scale
+                self.thrust, self.isp = engine_performance(self.w, self.v, self.throttle, self.data.qpos[2]-self.rest, self.thrust_scale)
             else:
-                self.thrust = commanded * self.v["max_thrust"] * self.thrust_scale if self.fuel > 0 else 0
+                self.thrust, self.isp = engine_performance(self.w, self.v, commanded, self.data.qpos[2]-self.rest, self.thrust_scale) if self.fuel > 0 else (0., self.isp)
             # F = mdot * Isp * g0. Cap the final substep to available fuel.
-            self.thrust = min(self.thrust, self.fuel * self.v["isp"] * self.w["gravity"] / dt)
+            self.thrust = min(self.thrust, self.fuel * self.isp * self.w["gravity"] / dt)
             self.throttle = self.thrust / (self.v["max_thrust"] * self.thrust_scale) if self.thrust_scale > 0 else 0
             self._mass_update()
             rotation = self.rotation()
@@ -184,11 +186,14 @@ class RocketPhysics:
             force_world = rotation @ force_body
             torque_body = np.array([self.engine_lever*force_body[1], -self.engine_lever*force_body[0], 0.])
             # OU gusts are generated once per integration step from the seeded RNG.
-            self.wind += 0.3 * (np.array(self.w["wind_mean"])*self.wind_scale - self.wind)*dt + self.rng.normal(0, self.w["gust_std"]*self.wind_scale*np.sqrt(dt), 3)
+            # The mean follows a power-law wind profile with altitude.
+            target_wind = wind_at(self.w, self.w["wind_mean"], self.data.qpos[2]-self.rest, self.wind_scale)
+            self.wind += 0.3 * (target_wind - self.wind)*dt + self.rng.normal(0, self.w["gust_std"]*self.wind_scale*np.sqrt(dt), 3)
             self.wind[2] = 0
-            relative = self.data.qvel[:3] - self.wind
-            rho = air_density(self.w,self.data.qpos[2]-self.rest)
-            drag = -0.5*rho*self.v["drag_coefficient"]*self.v["area"]*np.linalg.norm(relative)*relative
+            drag = aerodynamic_force(self.w, self.v, rotation, self.data.qvel[:3], self.wind, self.data.qpos[2]-self.rest)
+            # Aerodynamic centre: a tilted body feels the drag moment, not just
+            # the force through its centre of mass.
+            aero_torque = rotation.T @ aerodynamic_torque(self.v, rotation, drag)
             self.data.qfrc_applied[:3] = force_world + drag
             # Free-joint rotational generalized forces use the local tangent
             # frame. Holding a world torque constant through RK4's stages
@@ -196,18 +201,18 @@ class RocketPhysics:
             # Cold-gas RCS: bounded body torque, used only by the controller during the coast.
             limit_rcs = self.v.get('rcs_torque_max', 0.)
             rcs = np.clip(self.rcs_torque, -limit_rcs, limit_rcs)
-            self.data.qfrc_applied[3:6] = torque_body + rcs
+            self.data.qfrc_applied[3:6] = torque_body + rcs + aero_torque
             self.model.opt.gravity[2] = -self.gravity()
             before_pos, before_vel, before_time = self.data.qpos.copy(), self.data.qvel.copy(), self.data.time
             before_clearance = self.contact_clearance()
             if self.on_pad:
-                ready = force_world[2] >= self.mass*self.w['gravity']*self.v.get('hold_down_release_margin', 1.)
+                ready = force_world[2] >= self.mass*self.gravity()*self.v.get('hold_down_release_margin', 1.)
                 self.hold_elapsed = self.hold_elapsed + dt if ready else 0.
                 if ready and self.hold_elapsed + 1e-9 >= self.v.get('hold_down_release_time', 0.):
                     self.on_pad = False
                     self.release_time = float(self.data.time)
             mujoco.mj_step(self.model, self.data)
-            self.fuel = max(0., self.fuel - self.thrust*dt/(self.v["isp"]*self.w["gravity"]))
+            self.fuel = max(0., self.fuel - self.thrust*dt/(self.isp*self.w["gravity"]))
             if self.on_pad:
                 # A constrained launch support carries the reaction load while
                 # thrust builds. It releases once, never reattaches in flight.
@@ -228,7 +233,7 @@ class RocketPhysics:
                         else: upper = fraction
                     self.data.qvel[:] = before_vel + upper*(after_vel-before_vel)
                     self.data.time = before_time + upper*dt
-                    self.fuel += self.thrust*dt*(1-upper)/(self.v['isp']*self.w['gravity'])
+                    self.fuel += self.thrust*dt*(1-upper)/(self.isp*self.w['gravity'])
                 break
         if self.released_stage:
             self.released_stage.advance(float(self.data.time))
@@ -258,7 +263,7 @@ class BallisticStage:
         nominal = self.cfg['world']['timestep']
         while self.data.time < clock-1e-8 and not self.impacted:
             self.model.opt.timestep = min(nominal, clock-self.data.time)
-            relative = self.data.qvel[:3]-np.asarray(self.cfg['world']['wind_mean'])
+            relative = self.data.qvel[:3]-wind_at(self.cfg['world'],self.cfg['world']['wind_mean'],self.data.qpos[2])
             rho = air_density(self.cfg['world'],self.data.qpos[2])
             self.model.opt.gravity[2] = -gravity_at(self.cfg['world'], self.data.qpos[2])
             self.data.xfrc_applied[1, :3] = -.5*rho*.5*10.18*np.linalg.norm(relative)*relative

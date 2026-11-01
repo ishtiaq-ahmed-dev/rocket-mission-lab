@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { fileURLToPath, URL } from 'node:url';
 
 const proxy = {
   '/api': {
@@ -9,6 +10,14 @@ const proxy = {
 };
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        ml: fileURLToPath(new URL('./ml.html', import.meta.url))
+      }
+    }
+  },
   server: {
     host: '0.0.0.0', // Listens on both 127.0.0.1 and [::1] (localhost)
     port: 5180,

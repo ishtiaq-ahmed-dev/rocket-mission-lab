@@ -36,7 +36,13 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
             if key in cfg['world']:cfg['world'][key]*=4
     elif scenario=="thrust_loss": cfg["vehicle"]["max_thrust"]*=.8
     elif scenario=="extreme_starts": cfg["mission"]["horizontal_position"]*=4; cfg["mission"]["initial_tilt_deg"]*=4
-    env=RocketEnv(mission,config=cfg,difficulty=difficulty)
+    # A combined learned actor may have an explicit six-value RCS action; the
+    # checkpoint manifest, not the mission name, decides the environment contract.
+    rcs_action=False
+    if checkpoint_id:
+        from .storage import checkpoint_meta
+        rcs_action=bool(checkpoint_meta(checkpoint_id).get('rcs_action',False))
+    env=RocketEnv(mission,config=cfg,difficulty=difficulty,rcs_action=rcs_action)
     policy=LearnedPolicy(checkpoint_id,observation_config=cfg) if checkpoint_id else None
     rows=[]
     progress_folder=None;progress_log=None;started=time.time()
@@ -61,7 +67,7 @@ def evaluate(mission="landing",level=4,episodes=10000,checkpoint_id=None,start_s
         controller=ClassicalController(level)
         while True:
             yield_background_work()
-            action=policy.action(obs) if policy else controller.action(env)
+            action=policy.action(obs,env=env) if policy else controller.action(env)
             obs,_,term,trunc,info=env.step(action)
             if term or trunc: break
         rows.append({**info,"seed":seed,"reward":env.total_reward})

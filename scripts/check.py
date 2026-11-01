@@ -12,6 +12,7 @@ def main():
     npm="npm.cmd" if os.name=="nt" else "npm"
     commands=[([sys.executable,"-m","pytest","-q"],ROOT)]
     node=shutil.which("node")
+    if node:commands.append(([node,"scripts/check_standards.js"],ROOT))
     if node:commands.append(([node,"scripts/check_flight.js"],ROOT))
     commands.append(([npm,"run","build"],ROOT/"frontend"))
     for command,cwd in commands:

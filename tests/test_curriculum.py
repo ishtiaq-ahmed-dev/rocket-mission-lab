@@ -51,9 +51,9 @@ def test_stage_probe_flies_the_practised_takeoff_goal_without_noise(monkeypatch)
         def __init__(self, mission, config=None, difficulty=0., training=False, randomize=True, noise=True):
             calls.append(dict(mission=mission, training=training, randomize=randomize, noise=noise))
         def reset(self, seed=None):
-            return np.zeros(21), {}
+            return np.zeros(22), {}
         def step(self, action):
-            return np.zeros(21), 0., True, False, {"outcome": "success"}
+            return np.zeros(22), 0., True, False, {"outcome": "success"}
         def close(self): pass
 
     monkeypatch.setattr(module, "RocketEnv", Probe)

@@ -4,7 +4,7 @@ import hashlib
 from .envs import RocketEnv
 from .controllers import ClassicalController
 from .schemas import Frame, RunMeta, Telemetry, RetargetEvent, TargetUpdate
-from .storage import atomic_json, config_hash, checkpoint_path, select_checkpoint,dynamics_hash
+from .storage import atomic_json, config_hash, checkpoint_path, checkpoint_meta, checkpoints, select_checkpoint,dynamics_hash
 from .config import DATA, load_config
 from .missions import configure_flight
 
@@ -17,19 +17,39 @@ class LearnedPolicy:
         self.meta=read_json(path/"checkpoint.json")
         self.input_config=observation_config or load_config()
         self.trained_config=self.meta.get("config") or read_json(DATA/"jobs"/self.meta["job_id"]/"config.json",{})
-        cls=PPO if self.meta["algorithm"]=="PPO" else SAC
-        self.norm=VecNormalize.load(path/"normalize.pkl",DummyVecEnv([lambda:RocketEnv(self.meta["mission"],config=self.trained_config or None)]))
-        self.norm.training=False; self.norm.norm_reward=False
-        # Inference never needs SAC's training replay buffer. Avoid allocating a
-        # full 250k-transition buffer for every evaluation/replay policy load.
-        self.model=cls.load(path/"model.zip",device="cpu",buffer_size=1) if cls is SAC else cls.load(path/"model.zip",device="cpu")
+        if self.meta.get("algorithm")=="BC":
+            from .bc import BCPolicy
+            self.bc=BCPolicy(path); self.norm=None; self.model=None
+            self.terminal_guard=bool(self.meta.get('terminal_guard',False)); self.guard=None
+        else:
+            self.bc=None
+            cls=PPO if self.meta["algorithm"]=="PPO" else SAC
+            self.norm=VecNormalize.load(path/"normalize.pkl",DummyVecEnv([lambda:RocketEnv(self.meta["mission"],config=self.trained_config or None)]))
+            self.norm.training=False; self.norm.norm_reward=False
+            # Inference never needs SAC's training replay buffer. Avoid allocating a
+            # full 250k-transition buffer for every evaluation/replay policy load.
+            self.model=cls.load(path/"model.zip",device="cpu",buffer_size=1) if cls is SAC else cls.load(path/"model.zip",device="cpu")
 
-    def action(self, observation):
+    def action(self, observation, env=None):
         observation=np.asarray(observation).copy()
         source=self.input_config.get("training",{});target=self.trained_config.get("training",{})
         position_ratio=np.asarray(source.get("observation_position_scale",[400]*3))/np.asarray(target.get("observation_position_scale",[400]*3))
         velocity_ratio=np.asarray(source.get("observation_velocity_scale",[50]*3))/np.asarray(target.get("observation_velocity_scale",[50]*3))
         observation[:3]*=position_ratio;observation[3:6]*=velocity_ratio;observation[15:18]*=position_ratio
+        if self.bc is not None:
+            # The learned actor flies the ascent, separation, flip and most of
+            # the descent. Below 35 m a classical terminal flare catches the
+            # residual regression error in the last metres; it is explicitly
+            # recorded on the checkpoint and in the UI, never hidden.
+            if self.terminal_guard and env is not None and env.phase=='landing' and env.physics.state()['altitude']<120.:
+                if self.guard is None:
+                    from .controllers import ClassicalController
+                    self.guard=ClassicalController(4)
+                gimbal=self.guard.action(env)
+                limit=float(env.cfg['vehicle'].get('rcs_torque_max',0.))
+                rcs=np.clip(env.physics.rcs_torque/max(limit,1e-12),-1.,1.)
+                return np.concatenate([gimbal,rcs]).astype(np.float32)
+            return self.bc.action(observation)
         normalized=self.norm.normalize_obs(np.array([observation]))
         return self.model.predict(normalized,deterministic=True)[0][0]
 
@@ -46,11 +66,23 @@ def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=
         if mission=='takeoff':raise ValueError("A takeoff flight has no landing target to retarget")
         # Diverting mid-air needs time to translate back over the surface.
         cfg['mission']['timeout']=max(cfg['mission']['timeout'],300.)
-    env=RocketEnv(mission,config=cfg,difficulty=difficulty,training=training)
+    # Resolve an explicit behavior-cloned actor before constructing the
+    # environment: its six-value action contract includes the RCS channel.
+    meta=None
+    if method in ("rl","bc") and checkpoint_id:
+        try:meta=checkpoint_meta(checkpoint_id)
+        except ValueError:meta=None
+    elif method=="bc":
+        candidates=[x for x in checkpoints(mission) if x.get("algorithm")=="BC"]
+        if not candidates:raise ValueError(f"No behavior-cloned {mission} checkpoint available")
+        explicit=max(candidates,key=lambda x:(x.get("success_rate",0.),x.get("steps",0)))
+        checkpoint_id=explicit["id"]
+        meta=checkpoint_meta(checkpoint_id)
+    env=RocketEnv(mission,config=cfg,difficulty=difficulty,training=training,rcs_action=bool(meta and meta.get("rcs_action")))
     observation,_=env.reset(seed=seed)
     controller=ClassicalController(level)
     policies={}
-    if method=="rl":
+    if method in ("rl","bc"):
         if mission=='combined' and not checkpoint_id:
             try:checkpoint_id=select_checkpoint('combined',level,config=env.cfg)['id']
             except ValueError:pass # legacy phase chaining remains available before a combined policy exists
@@ -71,6 +103,7 @@ def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=
         if mission!='combined':checkpoint_id=selected
         meta=policies[env.phase].meta
         steps,algorithm=meta["steps"],meta["algorithm"]
+        if env.rcs_action and steps is None:raise ValueError('Selected policy has no action metadata')
     else: steps,algorithm=None,None
     frames=[]
     def frame(reward=None):
@@ -91,9 +124,9 @@ def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=
             scale=np.asarray(env.cfg['training'].get('observation_position_scale',[400]*3))
             observation[15:18]=(env._target()-env.sensed_state['position'])/scale
             command_index+=1
-        action=controller.action(env) if method=="classical" else policies[env.phase].action(observation)
+        action=controller.action(env) if method=="classical" else policies[env.phase].action(observation,env=env)
         observation,reward,terminated,truncated,info=env.step(action)
-        frames.append(frame(reward if method=="rl" else None))
+        frames.append(frame(reward if method in ("rl","bc") else None))
         if terminated or truncated: break
     if command_index<len(commands):
         env.close()
@@ -118,7 +151,7 @@ def simulate(mission="landing",method="classical",level=4,seed=42,checkpoint_id=
                 landing_tolerance=env.cfg['mission'].get('landing_tolerance',env.cfg['mission']['pad_radius']),
                 launch_release_time=env.physics.release_time,separation=env.separation,dynamics_hash=source_hash,
                 retargets=[RetargetEvent(**value) for value in env.retargets],
-                controller_status=controller.plan_status if method=="classical" else "measured checkpoint; maturity not certified")
+                controller_status=controller.plan_status if method=="classical" else "behavior-cloned checkpoint" if method=="bc" else "measured checkpoint; maturity not certified")
     result=Telemetry(config_hash=run_hash,rocket_length=env.cfg["vehicle"]["length"],launch_stand_height=env.physics.stand,initial_fuel=env.cfg["vehicle"]["fuel_mass"]*env.physics.mass_scale,
                      min_throttle=env.cfg['vehicle']['min_throttle'],max_thrust=env.cfg['vehicle']['max_thrust'],
                      gravity_model=env.cfg['world'].get('gravity_model','constant'),run=run,frames=frames)

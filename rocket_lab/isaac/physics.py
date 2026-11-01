@@ -12,7 +12,7 @@ from isaacsim.core.api import World
 from isaacsim.core.api.objects import GroundPlane
 from isaacsim.core.api.materials import PhysicsMaterial
 from isaacsim.core.prims import RigidPrim
-from ..atmosphere import air_density
+from ..atmosphere import air_density, aerodynamic_force, aerodynamic_torque, wind_at
 from .actuators import Engine,RollThrusters,contact_geometry,gravity_at
 
 
@@ -249,9 +249,10 @@ class IsaacRocketPhysics:
             rotation=self.rotation();force,torque,burn=self.engine.step(action,dt,self.fuel,self.thrust_scale)
             torque[2]+=self.rcs.step(self.roll_command if not self.on_pad and not self._impacted else 0.,dt)
             self._mass_update()
-            self.wind+=.3*(np.asarray(self.w['wind_mean'])*self.wind_scale-self.wind)*dt+self.rng.normal(0,self.w['gust_std']*self.wind_scale*np.sqrt(dt),3);self.wind[2]=0.
-            relative=self.velocity-self.wind;rho=air_density(self.w,self.position[2]-self.rest)
-            drag=-.5*rho*self.v['drag_coefficient']*self.v['area']*np.linalg.norm(relative)*relative
+            target_wind=wind_at(self.w,self.w['wind_mean'],self.position[2]-self.rest,self.wind_scale)
+            self.wind+=.3*(target_wind-self.wind)*dt+self.rng.normal(0,self.w['gust_std']*self.wind_scale*np.sqrt(dt),3);self.wind[2]=0.
+            drag=aerodynamic_force(self.w,self.v,rotation,self.velocity,self.wind,self.position[2]-self.rest)
+            aero_torque=rotation.T@aerodynamic_torque(self.v,rotation,drag)
             pusher=np.zeros(3);pusher_torque=np.zeros(3);payload_pusher_torque=np.zeros(3)
             if self.separation_time is not None:
                 remaining=self.v.get('separation_pusher_seconds',.2)-(self.data.time-self.separation_time)
@@ -277,7 +278,7 @@ class IsaacRocketPhysics:
                 self.hold_elapsed=self.hold_elapsed+dt if ready else 0.
                 if ready and self.hold_elapsed>=self.v.get('hold_down_release_time',.2):
                     self.hold_joint.GetJointEnabledAttr().Set(False);self.on_pad=False;self.release_time=float(self.data.time)
-            self.booster.apply_forces_and_torques_at_pos(forces=(rotation@force+drag-pusher)[None,:].astype(np.float32),torques=(rotation@torque+pusher_torque)[None,:].astype(np.float32),is_global=True)
+            self.booster.apply_forces_and_torques_at_pos(forces=(rotation@force+drag-pusher)[None,:].astype(np.float32),torques=(rotation@(torque+aero_torque)+pusher_torque)[None,:].astype(np.float32),is_global=True)
             if getattr(self,'detached',False):
                 p,_=self.payload.get_world_poses();velocity=self.payload.get_velocities()[0,:3]-self.wind
                 stage_drag=-.5*air_density(self.w,p[0,2])*self.v['drag_coefficient']*np.pi*1.8**2*np.linalg.norm(velocity)*velocity

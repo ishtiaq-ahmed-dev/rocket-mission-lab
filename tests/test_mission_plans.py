@@ -128,7 +128,7 @@ def test_automatic_combined_replay_uses_the_matching_trained_combined_policy(mon
     class Policy:
         def __init__(self,identifier,observation_config=None):
             self.meta=dict(mission='combined',algorithm='PPO',steps=1000)
-        def action(self,observation):return np.array([-1.,0.,0.])
+        def action(self,observation,env=None):return np.array([-1.,0.,0.])
     monkeypatch.setattr(module,'select_checkpoint',select)
     monkeypatch.setattr(module,'LearnedPolicy',Policy)
     replay=module.simulate('combined','rl',save=False,flight_plan=dict(launch=[10,20],landing=[40,50],separation_altitude=400))

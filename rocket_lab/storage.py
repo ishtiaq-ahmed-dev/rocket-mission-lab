@@ -56,7 +56,7 @@ def checkpoints(mission=None):
     entries=[]
     for p in (DATA/"checkpoints").glob("*/*/checkpoint.json"):
         value=cached_record(p)
-        if value and (mission is None or value["mission"]==mission) and (p.parent/"model.zip").exists():
+        if value and (mission is None or value["mission"]==mission) and ((p.parent/"model.zip").exists() or (p.parent/"model.pt").exists()):
             value["id"]=p.parent.parent.name+"__"+p.parent.name
             entries.append(value)
     return sorted(entries,key=lambda x:x["steps"])
@@ -68,6 +68,10 @@ def checkpoint_path(identifier):
             job,folder=identifier.split("__",1)
             return DATA/"checkpoints"/job/folder
     raise ValueError("Unknown checkpoint")
+
+def checkpoint_meta(identifier):
+    """Read a checkpoint's manifest without loading its weights."""
+    return read_json(checkpoint_path(identifier)/"checkpoint.json")
 
 def select_checkpoint(mission,level,config=None):
     cfg=config or load_config();baseline_hash=config_hash()

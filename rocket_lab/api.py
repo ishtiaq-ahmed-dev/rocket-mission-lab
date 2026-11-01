@@ -163,4 +163,10 @@ def stop_training(job_id:str):
 
 @app.get("/system")
 def system():
-    return {"runtime":read_json(DATA/"runtime.json",{}),"config":load_config(),"config_hash":config_hash(),"dynamics_hash":LOADED_DYNAMICS_HASH,"source_is_current":dynamics_hash()==LOADED_DYNAMICS_HASH,"research":read_json(DATA/"research.json",[])}
+    base=load_config()
+    # A checkpoint records the mission's effective configuration, which is not
+    # always the raw config.yaml file: combined adds the unpowered upper stage.
+    # Expose the hash each mission would actually record so a client can tell a
+    # current-configuration policy from an archived one.
+    configured={mission:config_hash(configure_flight(base,None,mission)[0]) for mission in ('landing','takeoff','combined')}
+    return {"runtime":read_json(DATA/"runtime.json",{}),"config":base,"config_hash":config_hash(),"config_hashes":configured,"dynamics_hash":LOADED_DYNAMICS_HASH,"source_is_current":dynamics_hash()==LOADED_DYNAMICS_HASH,"research":read_json(DATA/"research.json",[])}
