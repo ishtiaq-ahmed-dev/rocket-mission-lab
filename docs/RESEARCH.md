@@ -41,3 +41,14 @@ We preserve state around MuJoCo mass updates, save normalization with every poli
 ## Evidence policy
 
 Numbers come from saved simulation records or evaluation CSV files. A curve with zero successes remains a failed/learning curve. Four replay slots never establish four distinct levels of competence. Full qualification means an actual completed 10,000-seed batch, not the default value of a command-line argument.
+
+## Public standards and vehicle anchors (1 November 2026)
+
+| Source | Applied decision | Important limit |
+| --- | --- | --- |
+| [SpaceX Falcon 9](https://www.spacex.com/vehicles/falcon-9) | 70 m, 3.7 m, 549,054 kg, 22.8 t LEO, nine-engine first stage | Public marketing figures; no proprietary flight data |
+| [SpaceX Falcon User's Guide](https://www.spacex.com/assets/media/falcon-users-guide-2025-05-09.pdf) | Public vehicle and mission reference | The replay does not implement the user guide's certification or mission-specific constraints |
+| [NGA WGS 84](https://earth-info.nga.mil/GandG/wgs84/index.html) | GM, rotation and WGS-84 site coordinates | The replay uses a spherical mean radius, not the WGS-84 ellipsoid |
+| [ISO 2533:1975](https://www.iso.org/standard/7472.html) | Layered standard-atmosphere temperature and pressure | ISO 2533's lower atmosphere is extended with the U.S. 1976 layer top and upper density table |
+| [U.S. Standard Atmosphere 1976](https://www.ngdc.noaa.gov/stp/space-weather/online-publications/miscellaneous/us-standard-atmosphere-1976/us-standard-atmosphere_st76-1562_noaa.pdf) | Geopotential layers and high-altitude density | A table extension above 84.852 km is for drag only, not a full thermosphere model |
+| [NASA specific impulse](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/specific-impulse/) | `mdot = T / (Isp * g0)` and pressure-dependent thrust | No chamber/nozzle transient or mixture-ratio model |

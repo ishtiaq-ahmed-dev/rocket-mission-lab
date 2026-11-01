@@ -90,7 +90,17 @@ class TrainingCallback(BaseCallback):
         result,rows=evaluate(self.mission,episodes=self.eval_episodes,checkpoint_id=identifier,start_seed=20000,config=self.config)
         meta.update(success_rate=result["success_rate"],mean_reward=result["mean_reward"],evaluation_episodes=self.eval_episodes,
                     successes=result["successes"],confidence_interval=result["confidence_interval"],failures=result["failures"],
-                    qualification=result["qualification"])
+                    qualification=result["qualification"],mean_touchdown_speed=result["mean_touchdown_speed"],
+                    median_touchdown_speed=result["median_touchdown_speed"],mean_tilt=result["mean_tilt"],
+                    median_tilt=result["median_tilt"],mean_pad_distance=result["mean_pad_distance"],
+                    median_pad_distance=result["median_pad_distance"],
+                    touchdown_speed_std=float(np.std([row['touchdown_speed'] for row in rows])),
+                    tilt_std=float(np.std([row['tilt'] for row in rows])),
+                    pad_distance_std=float(np.std([row['pad_distance'] for row in rows])),
+                    rcs_action=bool(self.config['training'].get('rcs_action',False)),
+                    hidden=int((self.config['training'].get('policy_architecture') or [256])[-1]),
+                    action_dim=6 if self.config['training'].get('rcs_action',False) else 3,
+                    observation_dim=22)
         # A curriculum policy is selected for the stage it was trained on, so
         # measure that stage too; the full-mission batch above stays the promise.
         if self.difficulty<1:

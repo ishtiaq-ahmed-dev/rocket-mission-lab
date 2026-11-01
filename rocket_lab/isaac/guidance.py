@@ -6,7 +6,7 @@ retain their configured physical parameters throughout a flight.
 from types import SimpleNamespace
 import numpy as np
 from ..controllers import ClassicalController
-from ..atmosphere import air_density
+from ..atmosphere import aerodynamic_force
 
 
 class View:
@@ -33,8 +33,8 @@ class NativeGuidance(ClassicalController):
         if not 0<dt<.25 or throttle<.25 or abs(s['throttle']-previous['throttle'])>.02 or s['hold_down'] or s['clearance']<5:return
         ph=env.physics;gimbal=.5*(np.asarray(s['gimbal'])+previous['gimbal'])
         direction=np.array([np.tan(gimbal[0]),np.tan(gimbal[1]),1.]);direction/=np.linalg.norm(direction);axis=ph.rotation()@direction
-        velocity=.5*(np.asarray(s['velocity'])+previous['velocity']);relative=velocity-s['wind']
-        drag=-.5*air_density(ph.w,s['position'][2]-ph.rest)*ph.v['drag_coefficient']*ph.v['area']*np.linalg.norm(relative)*relative
+        velocity=.5*(np.asarray(s['velocity'])+previous['velocity'])
+        drag=aerodynamic_force(ph.w,ph.v,ph.rotation(),velocity,s['wind'],s['position'][2]-ph.rest)
         observed=(np.asarray(s['velocity'])-previous['velocity'])/dt+np.array([0.,0.,ph.gravity()])-drag/s['mass']
         estimate=float(np.dot(observed,axis)/(throttle*ph.v['max_thrust']/s['mass']))
         if .8<estimate<1.2:self.engine_scale+=(1-np.exp(-dt/3.))*(estimate-self.engine_scale)

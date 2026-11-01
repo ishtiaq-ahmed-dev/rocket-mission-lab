@@ -7,7 +7,7 @@ def test_automatically_selected_actor_is_recorded_and_wrong_mission_rejected(mon
     class FakePolicy:
         def __init__(self,identifier,observation_config=None):
             self.meta=dict(mission='landing',steps=100,algorithm='PPO')
-        def action(self,observation):return np.array([-1.,0.,0.])
+        def action(self,observation,env=None):return np.array([-1.,0.,0.])
     monkeypatch.setattr(simulation,'LearnedPolicy',FakePolicy)
     monkeypatch.setattr(simulation,'select_checkpoint',lambda mission,level,**kwargs:dict(id='landing-job__step-000000100'))
     replay=simulation.simulate('landing','rl',seed=42,save=False)

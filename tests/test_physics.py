@@ -7,7 +7,7 @@ from rocket_lab.envs import LandingEnv, TakeoffEnv
 from rocket_lab.controllers import ClassicalController
 
 def vacuum():
-    cfg=load_config(); cfg["world"]["density_sea_level"]=0; cfg["world"]["wind_mean"]=[0,0,0]; cfg["world"]["gust_std"]=0
+    cfg=load_config(); cfg["world"]["gravity_model"]='constant';cfg["world"]["atmosphere_model"]='exponential';cfg["world"]["density_sea_level"]=0; cfg["world"]["wind_mean"]=[0,0,0]; cfg["world"]["gust_std"]=0
     return cfg
 
 def test_free_fall():
@@ -56,9 +56,39 @@ def test_fuel_and_limits():
     for _ in range(10): p.step([-.9,1,1])
     before=p.fuel; s=p.step([-.9,1,1]); interval=p.w["timestep"]*p.w["control_substeps"]
     assert s["throttle"]==pytest.approx(p.v["min_throttle"])
-    assert initial-s["fuel_mass"]==pytest.approx((initial-before)+p.thrust*interval/(p.v["isp"]*p.w["gravity"]))
+    assert initial-s["fuel_mass"]==pytest.approx((initial-before)+p.thrust*interval/(p.isp*p.w["gravity"]))
     assert np.max(np.abs(s["gimbal"]))<=np.deg2rad(p.v["gimbal_limit_deg"])
     p.fuel=0; s=p.step([1,0,0]); assert s["throttle"]==0
+
+def test_inverse_square_gravity_and_standard_atmosphere():
+    from rocket_lab.physics import gravity_at
+    from rocket_lab.atmosphere import temperature_at,pressure_at,air_density,speed_of_sound
+    cfg=load_config();w=cfg['world']
+    assert gravity_at(w,0.)==pytest.approx(9.80665)
+    assert gravity_at(w,70000.)==pytest.approx(9.80665*(6371000/(6371000+70000))**2)
+    assert gravity_at(w,400000.)==pytest.approx(8.68,abs=.01)
+    assert temperature_at(w,0.)==pytest.approx(288.15)
+    assert temperature_at(w,11000.)==pytest.approx(216.65,abs=.2)
+    assert pressure_at(w,0.)==pytest.approx(101325.,rel=1e-6)
+    # 11 km geometric altitude is slightly below 11 km geopotential; the
+    # standard-table comparison tolerates the 0.3% conversion difference.
+    assert pressure_at(w,11000.)==pytest.approx(22632.,rel=.004)
+    assert air_density(w,0.)==pytest.approx(1.225,rel=1e-5)
+    assert speed_of_sound(w,0.)==pytest.approx(340.3,abs=.2)
+
+def test_engine_sea_level_and_vacuum_performance():
+    from rocket_lab.propulsion import engine_performance
+    from rocket_lab.atmosphere import drag_coefficient_at
+    cfg=load_config();w,v=cfg['world'],cfg['vehicle']
+    sea,isp_sea=engine_performance(w,v,1.,0.)
+    vacuum,isp_vac=engine_performance(w,v,1.,100000.)
+    assert sea==pytest.approx(914000.-101325.*.68,rel=1e-6)
+    assert vacuum==pytest.approx(914000.,rel=1e-6)
+    assert isp_sea==pytest.approx(282.,abs=.3)
+    assert isp_vac==pytest.approx(311.,abs=.3)
+    assert drag_coefficient_at(v,0.)==.5
+    assert drag_coefficient_at(v,1.)==pytest.approx(.85)
+    assert drag_coefficient_at(v,2.)==pytest.approx(.55)
 
 @pytest.mark.parametrize("cls",[LandingEnv,TakeoffEnv])
 def test_gym_and_determinism(cls):
@@ -160,3 +190,63 @@ def test_takeoff_goal_curriculum_exposes_the_actual_goal_and_keeps_evaluation_fu
     replay=simulate('takeoff',level=1,seed=42,save=False,config=cfg,difficulty=0,training=True)
     assert replay.run.training_mode and replay.run.target_altitude==5 and replay.run.target_velocity==3
     assert '-practice-' in replay.run.id
+
+
+def test_axial_lateral_drag_uses_broadside_area_and_body_axis():
+    from rocket_lab.atmosphere import aerodynamic_force
+    cfg=load_config();vehicle=cfg['vehicle'];world=cfg['world']
+    vertical=aerodynamic_force(world,vehicle,np.eye(3),[0,0,20],[0,0,0],0.)
+    broadside=aerodynamic_force(world,vehicle,np.eye(3),[20,0,0],[0,0,0],0.)
+    assert vertical[2]<0 and abs(vertical[0])<1e-12
+    assert broadside[0]<0 and abs(broadside[2])<1e-12
+    assert abs(broadside[0])>abs(vertical[2])
+
+
+def test_legacy_isotropic_drag_is_unchanged_without_the_new_model():
+    from rocket_lab.atmosphere import air_density, aerodynamic_force
+    cfg=load_config();cfg['vehicle'].pop('aero_model')
+    force=aerodynamic_force(cfg['world'],cfg['vehicle'],np.eye(3),[3,4,0],[0,0,0],0.)
+    rho=air_density(cfg['world'],0.)
+    np.testing.assert_allclose(force,-0.5*rho*cfg['vehicle']['drag_coefficient']*cfg['vehicle']['area']*5*np.array([3,4,0]))
+
+
+def test_aerodynamic_center_weathercocks_a_tilted_descent():
+    cfg=load_config();cfg['world']['wind_mean']=[0,0,0];cfg['world']['gust_std']=0
+    tilt=np.deg2rad(10);quaternion=[np.cos(tilt/2),0,np.sin(tilt/2),0]
+    def angular_rate(center):
+        cfg['vehicle']['aero_center']=center
+        p=RocketPhysics(cfg);p.reset(5,position=[0,0,600],velocity=[0,0,-20],quaternion=quaternion)
+        return p.step([-1,0,0])['angular_velocity']
+    without=angular_rate(0.)
+    with_center=angular_rate(5.)
+    assert abs(without[1])<1e-8
+    assert with_center[1]<-1e-6
+
+
+def test_wind_shear_increases_mean_wind_with_altitude():
+    from rocket_lab.atmosphere import wind_at
+    cfg=load_config();world=cfg['world']
+    low=wind_at(world,[2.,-1.,0.],0.)
+    high=wind_at(world,[2.,-1.,0.],120.)
+    assert np.linalg.norm(high)>np.linalg.norm(low)
+
+
+def test_combined_mission_gets_a_two_phase_timeout():
+    from rocket_lab.envs import RocketEnv
+    combined=RocketEnv('combined',config=load_config(),noise=False,randomize=False)
+    landing=LandingEnv()
+    assert combined.cfg['mission']['timeout']>=240.
+    assert landing.cfg['mission']['timeout']==load_config()['mission']['timeout']
+    combined.close();landing.close()
+
+
+def test_curriculum_relaxes_tilt_at_easy_stages_and_restores_it_at_full():
+    def outcome(difficulty):
+        env=LandingEnv(difficulty=difficulty)
+        tilt=np.deg2rad(8);quaternion=[np.cos(tilt/2),0,np.sin(tilt/2),0]
+        env.reset(seed=1,options={'state':dict(position=[0,0,env.physics.rest+.2],velocity=[0,0,-.5],quaternion=quaternion)})
+        while True:
+            _,_,term,trunc,info=env.step([-1.,0.,0.])
+            if term or trunc:return info['outcome']
+    assert outcome(0.)=='success'
+    assert outcome(1.)=='crash_tilt'

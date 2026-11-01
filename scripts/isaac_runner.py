@@ -385,9 +385,12 @@ def _diagnostic(env,server,publish,exchange,capture=None):
     result=dict(physics_seconds=env.physics.data.time,fuel_burned=initial['fuel_mass']-env.physics.fuel,final_position=env.physics.position.tolist(),
         payload_joint_disabled=True,payload_moved_after_release=True,telemetry_packets=packets,socket_received=True,dashboard_backend_received=True,retarget_applied=True,retarget_preserved_state=True,render_artifact=artifact,
         note='Native runtime diagnostic; visual quality and mission reliability require separate validation')
-    physics=env.physics;drag=physics.v['drag_coefficient'];gust=physics.w['gust_std']
+    physics=env.physics;drag=physics.v['drag_coefficient'];had_lateral='drag_coefficient_lateral' in physics.v;lateral_drag=physics.v.get('drag_coefficient_lateral');had_center='aero_center' in physics.v;aero_center=physics.v.get('aero_center');gust=physics.w['gust_std']
     try:
-        physics.v['drag_coefficient']=0.;physics.w['gust_std']=0.
+        # The axial/lateral model has two coefficients and a centre-of-pressure
+        # moment; zeroing only the axial term would leave broadside drag active
+        # in a diagnostic that claims to remove aerodynamics.
+        physics.v['drag_coefficient']=0.;physics.v['drag_coefficient_lateral']=0.;physics.v['aero_center']=0.;physics.w['gust_std']=0.
         physics.reset(11,position=[0.,0.,1000.],velocity=[0.,0.,0.],wind_scale=0.)
         g=physics.gravity()
         for _ in range(10):physics.step([-1.,0.,0.])
@@ -448,7 +451,13 @@ def _diagnostic(env,server,publish,exchange,capture=None):
         assert abs(initial_gas-physics.rcs.fuel-expected_gas)<1e-6,'RCS gas consumption does not match jet impulse'
         result.update(rcs_impulse_verified=True,rcs_roll_rate=actual_rate,rcs_expected_roll_rate=expected_rate,rcs_gas_used_kg=initial_gas-physics.rcs.fuel)
         physics.set_roll_command(0.)
-    finally:physics.v['drag_coefficient']=drag;physics.w['gust_std']=gust
+    finally:
+        physics.v['drag_coefficient']=drag
+        if had_lateral:physics.v['drag_coefficient_lateral']=lateral_drag
+        else:physics.v.pop('drag_coefficient_lateral',None)
+        if had_center:physics.v['aero_center']=aero_center
+        else:physics.v.pop('aero_center',None)
+        physics.w['gust_std']=gust
     return result
 
 

@@ -2,7 +2,7 @@
 
 ## What it does
 
-MuJoCo advances one rigid body with a free joint. World z points up. Attitude is a unit quaternion in wxyz order. External force acts at the center of mass; a gimballed engine at the lower end creates torque through its physical lever. Four RK4 evaluations approximate continuous acceleration within each integration step.
+MuJoCo advances one rigid body with a free joint. World z points up. Attitude is a unit quaternion in wxyz order. Thrust acts at the center of mass; a gimballed engine at the lower end creates torque through its physical lever. Aerodynamic drag is resolved into body-axis and broadside components, applied at a center-of-pressure offset, so a tilted vehicle also weathercocks. Four RK4 evaluations approximate continuous acceleration within each integration step.
 
 ## Why this approach
 
@@ -12,7 +12,7 @@ MuJoCo avoids maintaining a second hand-coded integrator for controllers versus 
 
 ```text
 m v_dot = R(q) F_body + m g + F_drag
-I omega_dot + omega cross (I omega) = tau
+I omega_dot + omega cross (I omega) = tau_engine + tau_aero
 q_dot = 0.5 q multiply [0, omega]
 ```
 
@@ -26,7 +26,7 @@ q_dot = 0.5 q multiply [0, omega]
 
 4. **How was the integrator checked?** Free fall is compared with h=h0+v0*t-0.5*g*t^2; vacuum energy and horizontal momentum are checked numerically.
 
-5. **What is missing?** Flexible-body motion, detailed aerodynamics, contact stability, slosh and center-of-mass migration. The touchdown plane is a simplified COM-height test.
+5. **What is missing?** Flexible-body motion, Mach-dependent coefficients, compliant multi-foot contact, slosh and center-of-mass migration. The touchdown plane is a simplified COM-height test.
 
 ## Evidence and further reading
 

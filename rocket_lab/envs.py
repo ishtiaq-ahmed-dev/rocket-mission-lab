@@ -8,10 +8,15 @@ from .config import load_config
 class RocketEnv(gym.Env):
     metadata = {"render_modes": []}
 
-    def __init__(self, mission="landing", config=None, difficulty=1.0, randomize=True, noise=True, training=False,physics_factory=None):
+    def __init__(self, mission="landing", config=None, difficulty=1.0, randomize=True, noise=True, training=False,physics_factory=None,rcs_action=False):
         super().__init__()
         self.cfg = copy.deepcopy(config or load_config())
-        if mission=='combined':self.cfg['vehicle'].setdefault('upper_stage_mass',2500.)
+        if mission=='combined':
+            self.cfg['vehicle'].setdefault('upper_stage_mass',2500.)
+            # A 400 m ascent and descent is a two-phase mission. The landing
+            # timeout alone cuts a valid combined flight short, so combined
+            # gets its own configurable minimum instead of a test-only override.
+            self.cfg['mission']['timeout']=max(self.cfg['mission'].get('timeout',0.),self.cfg['mission'].get('combined_timeout',240.))
         self.mission = mission
         self.difficulty = difficulty
         self.episode_difficulty = difficulty
@@ -30,7 +35,12 @@ class RocketEnv(gym.Env):
             from .physics import RocketPhysics
             physics_factory=RocketPhysics
         self.physics = physics_factory(self.cfg)
-        self.action_space = spaces.Box(-1., 1., (3,), dtype=np.float32)
+        # The combined mission has to turn the booster during an unpowered
+        # coast, where gimballing a shut-down engine cannot produce torque.
+        # Keep the classical three-value contract by default, but let learned
+        # combined policies command the cold-gas RCS explicitly.
+        self.rcs_action = bool(rcs_action or self.cfg.get('training',{}).get('rcs_action',False))
+        self.action_space = spaces.Box(-1., 1., (6 if self.rcs_action else 3,), dtype=np.float32)
         self.observation_space = spaces.Box(-np.inf, np.inf, (22,), dtype=np.float32)
         self.phase = mission
 
@@ -178,10 +188,21 @@ class RocketEnv(gym.Env):
 
     def step(self, action):
         old = self.last_state
+        action = np.asarray(action, dtype=float).copy()
+        if self.rcs_action:
+            if action.shape != (6,):
+                raise ValueError('RCS-controlled environments require six action values')
+            limit=float(self.cfg['vehicle'].get('rcs_torque_max',0.))
+            self.physics.rcs_torque=np.clip(action[3:],-1.,1.)*limit
+            control=action[:3]
+        else:
+            if action.shape != (3,):
+                raise ValueError('Rocket environments require three action values')
+            control=action
         if self.staging_pending:
-            action = np.asarray(action, dtype=float).copy()
-            action[0] = -1. # interstage cannot release with the main engine firing
-        s = self.physics.step(action)
+            control = np.asarray(control, dtype=float).copy()
+            control[0] = -1. # interstage cannot release with the main engine firing
+        s = self.physics.step(control)
         if self.phase=='landing':
             self.landing_elapsed+=max(0.,s['t']-old['t'])
         if self.auto_retarget is not None and not self.retarget_applied and self.phase=='landing':
@@ -194,14 +215,21 @@ class RocketEnv(gym.Env):
         m, r = self.cfg["mission"], self.cfg["reward"]
         speed = float(np.linalg.norm(s["velocity"]))
         distance = float(np.linalg.norm(s["position"][:2]-self._target()[:2]))
+        d = self.episode_difficulty
+        # Precision is the last skill a policy learns. The landing speed and
+        # position envelopes already start wide and tighten to the exact mission
+        # limits; tilt and takeoff drift must follow the same schedule instead of
+        # failing an early stage at the full-mission 5 degree / pad-radius gate.
+        tilt_limit = m["touchdown_tilt_deg"] * (2. - d)
+        takeoff_tolerance = m["pad_radius"] * (2. - d)
         reason = None
         phase_changed = False
         if self.phase == "takeoff" and s["altitude"] >= self.takeoff_altitude and not self.staging_pending:
             if abs(s["velocity"][2]-self.takeoff_velocity) > m["takeoff_velocity_tolerance"]:
                 reason = "crash_speed"
-            elif s["tilt"] >= m["touchdown_tilt_deg"]:
+            elif s["tilt"] >= tilt_limit:
                 reason = "crash_tilt"
-            elif distance > m["pad_radius"]:
+            elif distance > takeoff_tolerance:
                 reason = "missed_pad"
             elif self.mission == "combined":
                 self.staging_pending = True
@@ -218,7 +246,6 @@ class RocketEnv(gym.Env):
             # Precision is the last skill a policy learns, so the training
             # envelope starts wide and tightens to the exact mission limits at
             # difficulty 1: 4 m/s and the full pad at 0, 2 m/s and 1 m at 1.
-            d = self.episode_difficulty
             speed_limit = m["touchdown_speed"] * (2. - d)
             tolerance = m.get('landing_tolerance', m["pad_radius"])
             tolerance += (1. - d) * (m["pad_radius"] - tolerance)
@@ -226,7 +253,7 @@ class RocketEnv(gym.Env):
                 reason = "crash_speed"
             elif max(speed, s['contact_speed']) >= speed_limit:
                 reason = "crash_speed"
-            elif s["tilt"] >= m["touchdown_tilt_deg"]:
+            elif s["tilt"] >= tilt_limit:
                 reason = "crash_tilt"
             elif distance > tolerance:
                 reason = "missed_pad"
@@ -249,7 +276,7 @@ class RocketEnv(gym.Env):
         if r.get("profile") in ("state-potential-v3","state-potential-v4"):
             # Difference of physical-state potentials, plus bounded running
             # costs. No PID action, optimal-control reference or expert data.
-            reward=progress-dt*(r.get("time_cost",.3)+r["tilt"]*(1-np.cos(np.deg2rad(s["tilt"])))+r["angular_velocity"]*np.linalg.norm(s["angular_velocity"])**2+r["action_cost"]*float(np.dot(np.asarray(action)[1:],np.asarray(action)[1:]))) - r["fuel"]*(old["fuel_mass"]-s["fuel_mass"])
+            reward=progress-dt*(r.get("time_cost",.3)+r["tilt"]*(1-np.cos(np.deg2rad(s["tilt"])))+r["angular_velocity"]*np.linalg.norm(s["angular_velocity"])**2+r["action_cost"]*float(np.dot(control[1:],control[1:]))) - r["fuel"]*(old["fuel_mass"]-s["fuel_mass"])
         if reason:
             reward += r["success"] if reason=="success" else r["failure"]
             # Efficiency is paid only on a landing that happens. A per-kg cost

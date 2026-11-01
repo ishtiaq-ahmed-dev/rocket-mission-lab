@@ -344,7 +344,8 @@
         "method": {
           "enum": [
             "classical",
-            "rl"
+            "rl",
+            "bc"
           ],
           "title": "Method",
           "type": "string"
