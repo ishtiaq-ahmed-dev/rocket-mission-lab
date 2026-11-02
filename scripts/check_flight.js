@@ -11,15 +11,8 @@ const fs=require('fs');
 const path=require('path');
 
 const root=path.resolve(__dirname,'..');
-const html=fs.readFileSync(path.join(root,'frontend','index.html'),'utf8');
-const start=html.indexOf('(function (root) {');
-const endMarker="})(typeof window !== 'undefined' ? window : globalThis);";
-const end=html.indexOf(endMarker,start);
-if(start<0||end<0){console.error('flight model block not found in frontend/index.html');process.exit(1);}
-
-const module_={exports:{}};
-new Function('module','exports',html.slice(start,end+endMarker.length))(module_,module_.exports);
-const Flight=module_.exports;
+/* the simulator block that ships in frontend/index.html, flown by the shipped policy weights */
+const Flight=require('./flight_policy/sim').loadSim();
 
 const failures=[];
 const check=(name,condition,detail)=>{
@@ -158,7 +151,8 @@ function sample(tr,t,out,step){
   f=Math.min(Math.max(f,0),tr.n-1);
   const i=Math.min(Math.floor(f),tr.n-2),u=f-i,Ks=tr.K,o=i*Ks,o2=o+Ks,d=tr.d;
   for(let k=0;k<Ks;k++)out[k]=d[o+k]*(1-u)+d[o2+k]*u;
-  for(let k=0;k<step.length;k++)out[step[k]]=d[o+step[k]];
+  const discrete=u>=1?o2:o;
+  for(let k=0;k<step.length;k++)out[step[k]]=d[discrete+step[k]];
   return out;
 }
 const bSample=new Float64Array(K),sSample=new Float64Array(K2);
@@ -192,6 +186,7 @@ sample(sim.B,lastT,finalSample,STEP_B);
 const finalRow=row(sim.n-1);
 check('final frame is sampled exactly',finalSample[0]===finalRow.x&&finalSample[1]===finalRow.y&&finalSample[2]===finalRow.z,
   `${finalSample[0]},${finalSample[1]},${finalSample[2]} vs ${finalRow.x},${finalRow.y},${finalRow.z}`);
+for(const k of STEP_B)check(`final booster discrete field ${k}`,finalSample[k]===B[(sim.n-1)*K+k]);
 
 if(frameErrors)failures.push(`every-frame checks: ${frameErrors} failure(s); first: ${firstFrameError}`);
 
@@ -202,6 +197,14 @@ check('MECO altitude',meco.alt>40000&&meco.alt<120000,meco.alt);
 check('MECO speed',meco.v>1200&&meco.v<3000,meco.v);
 check('stage separation follows MECO',sep.t>meco.t&&sep.t-meco.t<10,sep.t-meco.t);
 check('stage separation above MECO',sep.alt>=meco.alt,sep.alt);
+
+/* During the unpowered coast after separation, upward momentum does not
+   remove gravity: the booster velocity must still accelerate downward. */
+const coastStart=frame(sep.t+1),coastEnd=frame(sep.t+2);
+const a=coastStart*K,b=coastEnd*K;
+const radius=[B[a],B[a+1]+Flight.RE,B[a+2]],radiusLength=Math.hypot(...radius);
+const radialDeltaV=radius.reduce((sum,value,i)=>sum+value/radiusLength*(B[b+22+i]-B[a+22+i]),0);
+check('unpowered separation coast experiences gravity',B[a+8]===0&&B[b+8]===0&&radialDeltaV< -8&&radialDeltaV> -11,radialDeltaV);
 
 /* --- orbital insertion (vis-viva must match the integrated state) --- */
 const orbit=sim.stats.orbit;
@@ -225,6 +228,24 @@ check('touchdown inside pad',td.err<=43,td.err);
 check('touchdown before timeline end',td.t<lastT,td.t);
 const tdRow=row(frame(td.t));
 check('contact altitude at leg span',tdRow.alt>1.5&&tdRow.alt<2.05,tdRow.alt);
+
+/* --- physical logic: the model flies, the booster never thrusts toward the ground --- */
+const html=fs.readFileSync(path.join(root,'frontend','index.html'),'utf8');
+check('no scripted guidance in the shipped page',!/boosterGuide|planBoostback|s2Guide|predictMiss|solveSteer/.test(html));
+check('neural policy weights loaded',!!(globalThis.FLIGHT_POLICY&&globalThis.FLIGHT_POLICY.booster&&globalThis.FLIGHT_POLICY.upper));
+let lowestThrustAxis=1;
+for(let i=frame(sep.t);i<sim.n;i++){
+  const o=i*K;
+  if(B[o+8]>0&&B[o+28]===0){
+    const x=B[o],y=B[o+1]+Flight.RE,z=B[o+2],r=Math.hypot(x,y,z);
+    lowestThrustAxis=Math.min(lowestThrustAxis,(B[o+3]*x+B[o+4]*y+B[o+5]*z)/r);
+  }
+}
+check('booster thrust never points toward the ground',lowestThrustAxis>-0.02,lowestThrustAxis);
+const bb=events.BOOSTBACK_START,entry=events.ENTRY_BURN,landing=events.LANDING_BURN;
+check('return burns in order: boostback, entry, landing',bb&&entry&&landing&&bb.t<entry.t&&entry.t<landing.t);
+check('entry burn starts in the upper atmosphere',entry&&entry.alt>40000&&entry.alt<80000,entry&&entry.alt);
+check('landing burn is a low, single-engine burn',landing&&landing.alt<12000,landing&&landing.alt);
 
 /* --- global envelope --- */
 check('booster altitude envelope',maxAltitude>80000&&maxAltitude<250000,maxAltitude);

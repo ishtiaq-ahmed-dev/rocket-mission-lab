@@ -58,3 +58,21 @@ def test_production_preview_serves_static_and_api_from_one_app(tmp_path):
     assert client.get('/').text=='<html>Rocket Mission Lab</html>'
     assert client.get('/api/health').json()['physics']=='MuJoCo'
     assert client.get('/api/docs').status_code==200
+
+
+def test_replay_last_sample_keeps_final_discrete_state():
+    import subprocess
+    from rocket_lab.config import ROOT
+    script=r"""
+    const fs=require('fs'),assert=require('assert');
+    const html=fs.readFileSync('frontend/index.html','utf8');
+    const start=html.indexOf('const STEP_B=[8,25,28]');
+    const end=html.indexOf('const sB=',start);
+    assert(start>=0 && end>start);
+    const data=new Float64Array(66);data[33+8]=3;data[33+25]=9;data[33+28]=1;
+    const track={K:33,d:data};
+    const sample=new Function('SIM','SIMT0','SIMDT','SIMN','clamp',html.slice(start,end)+';return sampleTrack')({B:track},0,1,2,(x,a,b)=>Math.min(b,Math.max(a,x)));
+    const result=sample(track,1,new Float64Array(33));
+    assert.strictEqual(result[8],3);assert.strictEqual(result[25],9);assert.strictEqual(result[28],1);
+    """
+    subprocess.run(['node','-e',script],cwd=ROOT,check=True)

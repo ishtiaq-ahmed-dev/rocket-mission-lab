@@ -35,3 +35,13 @@ videos/*.webm
 /screenshot*.png
 /pad-*.png
 
+
+# Flight-policy training data, checkpoints and logs (regenerable, multi-GB)
+data/flight-policy/
+# Local text-to-speech model for scripts/broadcast.py (over the 100 MB GitHub limit)
+data/models/
+# Rendered films and analysis stills
+videos/
+# Other tools' local state
+.freebuff/
+.cloud-attachments/

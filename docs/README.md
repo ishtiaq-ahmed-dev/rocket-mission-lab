@@ -1,6 +1,13 @@
-# Flight manual
+# Documentation
 
-- [28 October: pad labels, distance checks and physical timing](31-pad-labels-distance-and-timing.md)
+## Falcon 9 RTLS replay (browser)
+
+- [Neural flight policy and mission profile](FLIGHT-POLICY.md): what flies the rocket, why each phase is physical, how the network was trained and how it performs.
+- [International-standard reference profile](STANDARDS.md): WGS-84, ISO 2533 / US 1976, public Falcon 9 anchors and the default-flight regression.
+- [Research sources](RESEARCH.md)
+- [Project history](HISTORY.md): earlier revisions, merged from the dated notes.
+
+## Python laboratory (`rocket_lab/`, 400 m subscale vehicle)
 
 - [Six-degree-of-freedom dynamics](01-dynamics.md)
 - [Fuel flow and the rocket equation](02-rocket-equation.md)
@@ -14,13 +21,7 @@
 - [Domain randomization and robustness](10-randomization.md)
 - [Evaluation statistics](11-statistics.md)
 - [Why RL and classical control differ](12-comparison.md)
+- [API and telemetry](14-api-telemetry.md)
+- [Training operations](15-training-operations.md)
 
-- [Research sources](RESEARCH.md)
-- [Validation record](VALIDATION.md)
-
-
-## Mission Control update (21 October 2026)
-
-- [Mission geometry, rendering and worker contracts](21-mission-controls.md)
-- [Dated validation and current limits](VALIDATION-2026-10-21.md)
-- [Raw pilot and worker evidence](evidence/2026-10-21/)
+Raw measurement files referenced by older notes remain under [evidence/](evidence/).

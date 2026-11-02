@@ -78,13 +78,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
 @keyframes bl{50%{opacity:.15}}
 #msg,#nojs{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#9fd8ee;font-size:14px;padding:30px;background:#06090d;z-index:20;letter-spacing:.08em}
 @media(max-width:1150px){#cams button span{display:none}#cams #focusname{display:inline}}
+@media(max-width:1150px){#ticks i{font-size:0}}
 @media(max-width:900px){#huds{width:200px}.hud .r b{font-size:11px}#cams button span{display:none}#hint{display:none}#tnow{width:110px}#mc{min-width:0}}
 </style>
 </head>
 <body>
 <div id="stage"></div>
 <div id="ob"><span id="obl">ONBOARD CAM</span></div>
-<div id="title"><b>Falcon 9</b> &middot; real-time mission replay &middot; RTLS</div>
+<div id="title"><b>Falcon 9</b> &middot; RTLS mission &middot; flown by neural policy</div>
 <div id="camlabel"></div>
 <div id="focuslabel"></div>
 <div id="mc" class="panel"><div id="clock">T+00:00:00</div><div id="phase">PRE-LAUNCH</div><div id="next"></div></div>
@@ -93,10 +94,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
     <div class="hd"><div><i></i>BOOSTER B1</div><div id="bst">&nbsp;</div></div>
     <div class="r"><span>ALTITUDE</span><b><em id="alt">0</em><u id="altu">m</u></b></div>
     <div class="r"><span>SPEED (GND)</span><b><em id="spd2">0</em><u>m/s</u></b></div>
-    <div class="r"><span>V VERT</span><b><em id="vv">0</em><u>m/s</u></b></div>
+    <div class="r"><span id="vvlabel">VERTICAL SPEED</span><b><em id="vv">0</em><u>m/s</u></b></div>
     <div class="r"><span>MACH</span><b><em id="mach">0.00</em></b></div>
     <div class="r"><span>DYN Q</span><b><em id="q">0.0</em><u>kPa</u></b></div>
-    <div class="r"><span>G-LOAD</span><b><em id="gl">0.0</em><u>g</u></b></div>
+    <div class="r"><span>GRAVITY</span><b><em id="grav">0.00</em><u>m/s²</u></b></div>
+    <div class="r"><span>THRUST LOAD</span><b><em id="gl">0.0</em><u>g</u></b></div>
     <div class="r"><span>DIST TO LZ-1</span><b><em id="dlz">0</em><u id="dlzu">km</u></b></div>
     <div class="r"><span>ENGINES / THR</span><b><em id="eng">0</em><u>/</u><em id="thr">0</em><u>%</u></b></div>
     <div class="bar"><div id="thrb"></div></div>
@@ -121,10 +123,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
     <p>Independent educational model, not affiliated with, endorsed by, or derived from SpaceX flight data. Every figure here is simulated, not a vehicle specification or a flight-certification claim.</p>
     <h3>REFERENCE ANCHORS</h3>
     <ul><li>Public Falcon 9 Block 5 figures: 549,054 kg published liftoff mass, nine Merlin 1D engines at 845 kN sea level / 914 kN vacuum, 282/311 s, and one MVac at 981 kN / 348 s. The model's no-payload mass closes to 546.6 t, 0.45% below the published figure; dry mass and drag coefficients are modeled.</li><li>WGS-84 GM and rotation, a spherical mean Earth radius, ISO 2533:1975 / U.S. Standard Atmosphere 1976 layers, and Mach-dependent drag. The reference profile is <code>data/reference/international-standard.json</code>.</li></ul>
-    <h3>VEHICLE / GUIDANCE</h3>
-    <ul><li>Point-mass dynamics, staged mass, hold-down, gravity-turn ascent, MECO, separation, closed-loop S2 insertion, boostback, entry burn, grid-fin steering and a landing burn.</li><li>Guidance is tuned for this replay, not SpaceX GNC; the S2 pitch schedule is offline-tuned.</li></ul>
+    <h3>FLIGHT CONTROL &middot; NEURAL POLICY</h3>
+    <ul><li>Every command in this flight comes from a trained neural network evaluated at 10 Hz on the vehicle's own state: engine ignition, cutoff and count, throttle, attitude, stage separation, second-stage burn, fairing jettison and payload deploy. There is no scripted guidance and no fallback controller in this page.</li><li>The network was trained by imitation of a classical teacher with DAgger (<code>scripts/flight_policy/</code>). On 300 unseen dispersed flights (wind, thrust, drag and mass) it completed 298 missions; the teacher completed 295 of the same flights.</li><li>Return profile after Falcon 9 RTLS practice: cold-gas flip, three-engine boostback with horizontal thrust (never toward the ground), unpowered ballistic coast with engines leading, three-engine entry burn near 60 km, unpowered grid-fin glide, single-engine landing burn lit at the last feasible moment.</li><li>After separation the booster still climbs on its own momentum while gravity slows it, and falls after apogee. Stage separation conserves momentum; an engine finishes its shutdown before it can relight.</li></ul>
     <h3>NOT MODELLED / NOT CERTIFIED</h3>
-    <ul><li>6-DOF rigid-body dynamics, gimbal and RCS actuator limits, propellant slosh, aeroelasticity, sensor noise, abort modes, weather, FAA/range safety and structural or thermal limits.</li><li>Plume, soot, grid-fin and leg motion are illustrative. This is not a validated real-world flight model.</li></ul>
+    <ul><li>6-DOF rigid-body dynamics (attitude is a rate-limited first-order response), propellant slosh, aeroelasticity, sensor noise, abort modes, weather, FAA/range safety and structural or thermal limits.</li><li>Plume, soot, grid-fin and leg motion are illustrative. This is not a validated real-world flight model.</li></ul>
     <h3>THIS RUN</h3>
     <ul><li>Main engine cutoff at <b id="n-meco">&mdash;</b>; booster apogee <b id="n-apo">&mdash;</b>.</li><li>Insertion orbit <b id="n-orb">&mdash;</b>.</li><li>Touchdown <b id="n-td">&mdash;</b>.</li></ul>
     <p>Values are read from the flight currently loaded in this page. Reference checks: <code>node scripts/check_standards.js</code>.</p>
@@ -144,7 +146,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
   </div>
   <div id="play" class="panel">
     <button id="pp" title="Play / pause (Space)">&#10074;&#10074;</button>
-    <div id="spd"><button data-s="0.25">.25x</button><button data-s="1" class="on">1x</button><button data-s="2">2x</button><button data-s="5">5x</button><button data-s="10">10x</button><button data-s="30">30x</button></div>
+    <div id="spd"><button data-s="0.1">.1x</button><button data-s="0.25">.25x</button><button data-s="1" class="on">1x</button><button data-s="2">2x</button><button data-s="5">5x</button><button data-s="10">10x</button><button data-s="30">30x</button></div>
     <div id="tl"><input id="scrub" type="range" min="-10" max="660" step="0.01" value="-10"><div id="ticks"></div></div>
     <div id="tnow">T+00.00</div>
   </div>
@@ -156,12 +158,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
 'use strict';
 /* ============================================================================
    Falcon-9-class RTLS mission simulator  (plain JS, runs in Node and the browser)
+   PHYSICS
    - inertial (ECI) point-mass dynamics on a WGS-84 mean sphere
    - ISO 2533 / U.S. Standard Atmosphere 1976 layers, wind, Mach drag, AoA normal force
    - Merlin 1D (845 kN SL / 914 kN vac, Isp 282/311 s, 40 % deep throttle), MVac 981 kN / 348 s
-   - gravity-turn ascent, MECO, stage sep, S2 closed-loop orbit insertion, fairing + payload deploy
-   - booster: flip, boostback (predictor-corrector), coast, entry burn, grid-fin steering,
-     suicide-burn landing guidance (ZEM/ZEV lateral) -> touchdown on LZ-1
+   - actuator limits: engine spool/tail-off, gimbal and cold-gas/grid-fin slew rates,
+     hold-down release, momentum-conserving pneumatic stage separation
+   CONTROL
+   - every engine, throttle, attitude, staging, fairing and payload command comes from
+     the trained neural flight policy (FLIGHT_POLICY, frontend/public/flight-policy.js),
+     evaluated at 10 Hz on the vehicle's own sensed state. There is no scripted guidance
+     in this file; the classical teacher used for training lives in scripts/flight_policy/.
    Output: sampled tracks in a launch-site East/Up/South render frame.
    ========================================================================== */
 (function (root) {
@@ -173,6 +180,7 @@ const LAT_L = 28.48583 * D2R, DLON_L = 0.03286 * D2R; /* LZ-1: 28.48583 N, 80.54
 const T0 = -10;                                    /* timeline start (s) */
 const DT = 0.02;                                   /* integration step */
 const SAMPLE_EVERY = 2;                            /* 25 Hz tracks */
+const CTRL_EVERY = 5;                              /* policy runs at 10 Hz, zero-order hold */
 
 /* ---------------- vehicle data (Falcon 9 Block 5 class) ---------------- */
 const V = {
@@ -183,9 +191,12 @@ const V = {
   S: 10.52,                                         /* reference area, 3.66 m dia */
   baseAboveFoot: 2.0,                               /* airframe base plane above the foot plane (legs out) */
   mountH: 2.5,
-  azimuth: 40.0 * D2R,                              /* initial pitch-kick heading; modeled insertion 39.9 deg */
-  propResidual: 54000                               /* S1 propellant at MECO */
+  azimuth: 40.0 * D2R,                              /* launch azimuth used by the training teacher */
+  sepDv: 1.8                                        /* pneumatic pusher relative separation speed (m/s) */
 };
+/* Run-to-run dispersions (training/evaluation only; the replay flies nominal). */
+const DSP_NOMINAL = { wind: 1, windRot: 0, thrust: 1, mvac: 1, drag: 1, s1Dry: 0, sat: 0 };
+const DSP = Object.assign({}, DSP_NOMINAL);
 
 /* ---------------- tiny vector helpers ---------------- */
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -245,7 +256,7 @@ function rhoAt(h) {
   return pressAt(h) / (ATM_R * tempAt(h));
 }
 const soundAt = h => Math.sqrt(1.4 * ATM_R * tempAt(Math.min(h, 85000)));
-function windSpeed(hk) { return 3 + 30 * Math.exp(-Math.pow((hk - 11) / 6, 2)) + 8 * Math.exp(-Math.pow((hk - 36) / 12, 2)); }
+function windSpeed(hk) { return DSP.wind * (3 + 30 * Math.exp(-Math.pow((hk - 11) / 6, 2)) + 8 * Math.exp(-Math.pow((hk - 36) / 12, 2))); }
 
 /* ---------------- aero tables ---------------- */
 const TAB = (M, T) => { if (M <= T[0][0]) return T[0][1]; for (let i = 1; i < T.length; i++) if (M <= T[i][0]) { const f = (M - T[i - 1][0]) / (T[i][0] - T[i - 1][0]); return T[i - 1][1] + (T[i][1] - T[i - 1][1]) * f; } return T[T.length - 1][1]; };
@@ -270,28 +281,18 @@ function dirToRender(a, t, out, o) {
   const F = siteFrame(t);
   out[o] = dot(F.E, a); out[o + 1] = dot(F.U, a); out[o + 2] = -dot(F.N, a);
 }
-function renderToECI(x, y, z, t) {
-  const F = siteFrame(t);
-  return [F.U[0] * RE + F.E[0] * x + F.U[0] * y - F.N[0] * z, F.U[1] * RE + F.E[1] * x + F.U[1] * y - F.N[1] * z, F.U[2] * RE + F.E[2] * x + F.U[2] * y - F.N[2] * z];
-}
 function localBasis(r) {                         /* east, north, up unit vectors at an ECI position */
   const U = unit(r), E = unit([-r[1], r[0], 0]), N = crs(U, E);
   return { E, N, U };
-}
-function headingVec(r) {                         /* horizontal launch-azimuth direction */
-  const B = localBasis(r), s = Math.sin(V.azimuth), c = Math.cos(V.azimuth);
-  return [B.E[0] * s + B.N[0] * c, B.E[1] * s + B.N[1] * c, B.E[2] * s + B.N[2] * c];
 }
 const LZ_BASE = () => RE + V.baseAboveFoot;      /* target radius of the booster base plane at touchdown */
 function lzBase(t) { const F = lzFrame(t); return sc(F.U, LZ_BASE()); }
 function relVel(r, v) {                          /* velocity relative to rotating air (no wind) */
   return [v[0] + OMEGA * r[1], v[1] - OMEGA * r[0], v[2]];
 }
-function groundVel(r, v) { return relVel(r, v); }
 
 /* ---------------- dynamics ---------------- */
-/* body: { m, S, tail:bool, axis:[3] (nose dir), thrust:[N], dragOnly:bool, cd:number } */
-const _w = [0, 0, 0];
+/* body: { m, axis:[3] (nose dir) | cdS, thrust:[N] } */
 function accel(r, v, t, B, out) {
   const rr = Math.sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
   const g = -MU / (rr * rr * rr);
@@ -301,10 +302,11 @@ function accel(r, v, t, B, out) {
     const rho = rhoAt(h);
     const hk = h / 1000, sp = windSpeed(hk);
     const Ex = -r[1] / Math.hypot(r[0], r[1]), Ey = r[0] / Math.hypot(r[0], r[1]);
-    /* wind blows towards ENE : east 0.93, north 0.37 */
+    /* wind blows towards ENE (east 0.93, north 0.37), rotated by the run's dispersion */
+    const cw = Math.cos(DSP.windRot), sw = Math.sin(DSP.windRot), we = 0.93 * cw - 0.37 * sw, wn = 0.37 * cw + 0.93 * sw;
     const ux = r[0] / rr, uy = r[1] / rr, uz = r[2] / rr;
-    const Nx = uy * 0 - uz * Ey, Ny = uz * Ex - ux * 0, Nz = ux * Ey - uy * Ex;   /* N = U x E  (E has z=0) */
-    const wx = sp * (0.93 * Ex + 0.37 * Nx), wy = sp * (0.93 * Ey + 0.37 * Ny), wz = sp * (0.37 * Nz);
+    const Nx = -uz * Ey, Ny = uz * Ex, Nz = ux * Ey - uy * Ex;   /* N = U x E  (E has z=0) */
+    const wx = sp * (we * Ex + wn * Nx), wy = sp * (we * Ey + wn * Ny), wz = sp * (wn * Nz);
     const vx = v[0] + OMEGA * r[1] - wx, vy = v[1] - OMEGA * r[0] - wy, vz = v[2] - wz;
     const Vm = Math.sqrt(vx * vx + vy * vy + vz * vz);
     if (Vm > 0.5 && rho > 1e-12) {
@@ -312,16 +314,14 @@ function accel(r, v, t, B, out) {
       const M = h < 85000 ? Vm / soundAt(h) : Vm / 295;
       if (B.axis) {
         const a = B.axis, ca = (a[0] * vx + a[1] * vy + a[2] * vz) / Vm;
-        const CA = TAB(M, ca >= 0 ? CA_NOSE : CA_TAIL) * (B.caScale || 1);
+        const CA = TAB(M, ca >= 0 ? CA_NOSE : CA_TAIL) * DSP.drag;
         const sa2 = Math.max(0, 1 - ca * ca), sa = Math.sqrt(sa2), ac = Math.abs(ca);
-        /* axial */
-        const fa = -q * V.S * CA * ca * ac;
+        const fa = -q * V.S * CA * ca * ac;                     /* axial */
         let fx = fa * a[0], fy = fa * a[1], fz = fa * a[2];
-        /* normal */
-        if (sa > 1e-4) {
+        if (sa > 1e-4) {                                        /* normal */
           const vnx = vx - ca * Vm * a[0], vny = vy - ca * Vm * a[1], vnz = vz - ca * Vm * a[2];
           const vn = Math.sqrt(vnx * vnx + vny * vny + vnz * vnz) || 1;
-          const fn = -q * V.S * (CN_ALPHA * sa * ac + CD_CROSS * sa2) * (B.nScale || 1);
+          const fn = -q * V.S * (CN_ALPHA * sa * ac + CD_CROSS * sa2) * DSP.drag;
           fx += fn * vnx / vn; fy += fn * vny / vn; fz += fn * vnz / vn;
         }
         ax += fx / B.m; ay += fy / B.m; az += fz / B.m;
@@ -335,7 +335,7 @@ function accel(r, v, t, B, out) {
   out[0] = ax; out[1] = ay; out[2] = az;
 }
 const _k = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
-function rk4(r, v, t, dt, B) {                    /* returns new [r,v] in place */
+function rk4(r, v, t, dt, B) {                    /* advances [r,v] in place */
   const r0 = r.slice(), v0 = v.slice();
   const tr = [0, 0, 0], tv = [0, 0, 0];
   accel(r0, v0, t, B, _k[0]);
@@ -358,7 +358,6 @@ function slewAxis(a, tgt, dt, wmax, tau) {
   if (ang < 1e-7) return a;
   const step = Math.min(ang, wmax * dt, ang * (1 - Math.exp(-dt / tau)) + 0.02 * wmax * dt);
   if (step >= ang - 1e-9) return tgt.slice();
-  /* rotate a toward tgt by 'step' */
   let p = sub(tgt, sc(a, c));
   let pn = nrm(p);
   if (pn < 1e-9) { p = crs(a, Math.abs(a[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0]); pn = nrm(p); }
@@ -369,308 +368,243 @@ function rotAbout(v, k, ang) {                    /* Rodrigues rotation */
   const c = Math.cos(ang), s = Math.sin(ang), kv = dot(k, v), kx = crs(k, v);
   return [v[0] * c + kx[0] * s + k[0] * kv * (1 - c), v[1] * c + kx[1] * s + k[1] * kv * (1 - c), v[2] * c + kx[2] * s + k[2] * kv * (1 - c)];
 }
-function engineThrust(n, f, Tvac, Ae, h) { return n * Math.max(0, f * Tvac - Ae * pressAt(h) * (f > 0 ? 1 : 0)); }
+function engineThrust(n, f, Tvac, Ae, h) { return n * Math.max(0, f * Tvac * DSP.thrust - Ae * pressAt(h) * (f > 0 ? 1 : 0)); }
 
 /* ============================================================================
-   BOOSTER  (shared stepper used by the real run and by the predictor)
+   VEHICLE MODELS  (actuators only: what a command can physically do)
    ========================================================================== */
-const pn = a => Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
-const BP = {
-  tFlipAfterSep: 4.0, bbAfterMeco: 20.0, bbThr: 0.80, bbN: 3, bbPitch: -14 * D2R,
-  hEntry: 68000, entryThr: 0.45, entryN: 3, entryVend: 500, entryMax: 30, entryTiltMax: 14 * D2R,
-  aeroTiltMax: 16 * D2R, hAim: 3600, landTiltMax: 32 * D2R, vTd: 1.8,
-  landFrac: 0.90, aoaBase: 0.25, vWeight: 1.0, aBrake: 7, aLat: 6, hX: 9, aEnd: 2.0, vX: 0
-};
-function newBooster(r, v, axis) {
+const ENGINES = [0, 1, 3, 9];
+const boosterMass = S => V.s1Dry + DSP.s1Dry + S.prop;
+const upperMass = U => V.s2Dry + U.prop + (U.hasFair ? V.fairing : 0) + (U.hasSat ? V.sat + DSP.sat : 0);
+function newBooster(t) {
+  const F = siteFrame(t), r = sc(F.U, RE + V.mountH);
   return {
-    r: r.slice(), v: v.slice(), prop: V.s1Prop, axis: axis.slice(), axisCmd: axis.slice(), thr: 0, thrCmd: 0, nEng: 0, nCmd: 0,
-    phase: 'ASCENT', tPh: 0, steer: [0, 0], bbDir: null, bbEnd: 0, ev: null, done: false, cut: false, wmax: 0.3, tau: 1,
-    thrN: 0, tSep: 0, tLand0: 0, aNeed: 0
+    r: r, v: [-OMEGA * r[1], OMEGA * r[0], 0], prop: V.s1Prop, axis: F.U.slice(), thr: 0, nEng: 0, cutting: false,
+    onPad: true, attached: true, landed: false, ign: 0, tIgn: -1e9, tCut: -1e9, tMeco: -1e9, tSep: -1e9, tLift: -1e9,
+    T: 0, q: 0, X: F.E.slice(), roll: 0, fins: 0, legs: 0
   };
 }
-function cloneB(S) {
-  const c = Object.assign({}, S);
-  c.r = S.r.slice(); c.v = S.v.slice(); c.axis = S.axis.slice(); c.axisCmd = S.axisCmd.slice(); c.steer = S.steer.slice();
-  if (S.bbDir) c.bbDir = S.bbDir.slice();
-  c.ev = null;
-  return c;
+function newUpper() {
+  return { r: [0, 0, 0], v: [0, 0, 0], axis: [0, 0, 1], prop: V.s2Prop, thr: 0, on: false, seco: false, separated: false,
+    hasFair: true, hasSat: true, tIgn: -1e9, tSep: -1e9, tSeco: -1e9, tFair: -1e9, m: 0, T: 0, X: [1, 0, 0], roll: 0 };
 }
-const boosterMass = S => V.s1Dry + S.prop;
-function aMaxNet(S, h) { const m = boosterMass(S); return engineThrust(1, 1, V.merTvac, V.merAe, h) / m - MU / Math.pow(RE + h, 2); }
-
-function landProfile(S, pU, vU, h) {
-  const vf = BP.vTd;
-  return Math.max(0, (vU * vU - vf * vf) / (2 * Math.max(pU, 0.3)));
+/* Attitude authority by configuration: the stack and burning booster steer with
+   engine gimbal; an unpowered booster uses cold-gas thrusters above the sensible
+   atmosphere and grid fins inside it. */
+function boosterRate(S) {
+  if (S.attached) return [4 * D2R, 0.5];
+  if (S.nEng >= 3) return [9 * D2R, 0.55];
+  if (S.nEng === 1) return [14 * D2R, 0.35];
+  return S.q > 1500 ? [8 * D2R, 0.8] : [18 * D2R, 1.2];
 }
-
-function boosterGuide(S, t) {
-  const r = S.r, v = S.v, rr = nrm(r), h = rr - RE;
-  const vr = relVel(r, v), spd = nrm(vr), vh = spd > 1 ? unit(vr) : unit(r);
-  const Bs = localBasis(r);
-  const sx = S.steer[0], sy = S.steer[1];
-  const steerDir = [Bs.E[0] * sx + Bs.N[0] * sy, Bs.E[1] * sx + Bs.N[1] * sy, Bs.E[2] * sx + Bs.N[2] * sy];
-  const steerMag = Math.min(1, Math.hypot(sx, sy));
-  S.wmax = 18 * D2R; S.tau = 1.0;
-  switch (S.phase) {
-    case 'COAST1':
-      S.nCmd = 0; S.thrCmd = 0;
-      if (t - S.tSep > BP.tFlipAfterSep && S.bbDir) { S.axisCmd = S.bbDir; S.wmax = 24 * D2R; S.tau = 1.6; }
-      else S.axisCmd = S.axis;
-      break;
-    case 'BB':
-      S.nCmd = BP.bbN; S.thrCmd = BP.bbThr; S.axisCmd = S.bbDir; S.wmax = 10 * D2R; S.tau = 0.6;
-      break;
-    case 'COAST2':
-      S.nCmd = 0; S.thrCmd = 0; S.axisCmd = sc(vh, -1); S.wmax = 14 * D2R; S.tau = 1.2;
-      break;
-    case 'ENTRY': {
-      S.nCmd = BP.entryN; S.thrCmd = BP.entryThr;
-      const ret = sc(vh, -1), p = sub(steerDir, sc(ret, dot(steerDir, ret))), ang = steerMag * BP.entryTiltMax;
-      S.axisCmd = pn(p) > 1e-9 ? unit(add(sc(ret, Math.cos(ang)), sc(unit(p), Math.sin(ang)))) : ret;
-      S.wmax = 8 * D2R; S.tau = 0.5;
-      break;
-    }
-    case 'AERO': {
-      S.nCmd = 0; S.thrCmd = 0;
-      /* baseline angle of attack: nose tilted away from the pad so the aero force points at it */
-      const lpz = lzBase(t), toL = sub(lpz, r), toLh = sub(toL, sc(Bs.U, dot(toL, Bs.U))), tl = unit(toLh);
-      const bx = -BP.aoaBase * dot(tl, Bs.E), by = -BP.aoaBase * dot(tl, Bs.N);
-      let ex = sx + bx, ey = sy + by; const em = Math.hypot(ex, ey); if (em > 1) { ex /= em; ey /= em; }
-      const sd2 = [Bs.E[0] * ex + Bs.N[0] * ey, Bs.E[1] * ex + Bs.N[1] * ey, Bs.E[2] * ex + Bs.N[2] * ey];
-      const ret = sc(vh, -1), p = sub(sd2, sc(ret, dot(sd2, ret))), ang = Math.min(1, em) * BP.aeroTiltMax;
-      S.axisCmd = pn(p) > 1e-9 ? unit(add(sc(ret, Math.cos(ang)), sc(unit(p), Math.sin(ang)))) : ret;
-      S.wmax = 8 * D2R; S.tau = 0.8;
-      break;
-    }
-    case 'LAND': {
-      const L = lzFrame(t), lp = lzBase(t), d = sub(r, lp), gv = relVel(r, v);
-      const pE = dot(d, L.E), pN = dot(d, L.N), pU = dot(d, L.U);
-      const vE = dot(gv, L.E), vN = dot(gv, L.N), vU = dot(gv, L.U);
-      const gl = MU / (rr * rr), mNow = boosterMass(S);
-      let tg = clamp(2 * Math.max(pU, 0.5) / (Math.abs(vU) + BP.vTd), 4.0, 40);
-      /* lateral: braking-curve velocity tracking, faded out towards the ground */
-      const fade = clamp(pU / 90, 0, 1), tauL = pU < 60 ? 1.2 : 2.5;
-      const vcmd = (p) => -Math.sign(p) * Math.min(Math.sqrt(2 * BP.aLat * Math.abs(p)), 0.3 * Math.abs(p)) * fade;
-      let aE = (vcmd(pE) - vE) / tauL, aN = (vcmd(pN) - vN) / tauL;
-      /* vertical constant-decel profile (+ gentle feedback on speed error) */
-      const aNeed = landProfile(S, pU, -vU, h);
-      S.aNeed = aNeed;
-      const aU = aNeed + gl;
-      const tl = (pU < 30 ? 5.0 : pU < 120 ? 5.0 + (pU - 30) / 90 * 11 : 16 + clamp((pU - 120) / 200, 0, 1) * (BP.landTiltMax / D2R - 16)) * D2R;
-      let hz = Math.hypot(aE, aN);
-      const hzMax = Math.tan(tl) * aU;
-      if (hz > hzMax) { aE *= hzMax / hz; aN *= hzMax / hz; hz = hzMax; }
-      const ta = [L.E[0] * aE + L.N[0] * aN + L.U[0] * aU, L.E[1] * aE + L.N[1] * aN + L.U[1] * aU, L.E[2] * aE + L.N[2] * aN + L.U[2] * aU];
-      S.axisCmd = unit(ta);
-      if (!S.cut) S.nCmd = 1;
-      const Tneed = mNow * nrm(ta);
-      S.thrCmd = clamp((Tneed + V.merAe * pressAt(h)) / V.merTvac, V.merMin, 1);
-      S.pU = pU; S.vU = vU; S.pE = pE; S.pN = pN; S.vE = vE; S.vN = vN;
-      S.wmax = 14 * D2R; S.tau = 0.35;
-      if (pU < 6.0 && vU > -0.8) { S.cut = true; }
-      if (S.cut) S.nCmd = 0;
-      break;
-    }
-    default: S.nCmd = 0; S.thrCmd = 0; S.axisCmd = S.axis;
+/* One integration step of the first stage (alone, or carrying `upper` kg as the stack). */
+function boosterStep(S, cmd, t, dt, upper) {
+  const h0 = nrm(S.r) - RE;
+  /* an engine finishing its shutdown transient must reach zero thrust before it can relight */
+  const want = S.landed || S.prop <= 0 || S.cutting ? 0 : (cmd.n | 0);
+  if (want > 0) {
+    if (S.nEng === 0) { S.thr = S.onPad ? 0 : V.merMin; S.tIgn = t; if (!S.attached) S.ign++; }
+    S.nEng = want;
+    S.thr += (clamp(cmd.thr, S.onPad || t < 0 ? 0 : V.merMin, 1) - S.thr) * (1 - Math.exp(-dt / 0.22));
+  } else if (S.nEng > 0) {                       /* shutdown transient: thrust tails off */
+    if (!S.cutting) { S.cutting = true; S.tCut = t; if (S.attached && S.tMeco < -1e8) S.tMeco = t; }
+    S.thr *= Math.exp(-dt / 0.12);
+    if (S.thr < 0.03 || S.prop <= 0) { S.thr = 0; S.nEng = 0; S.cutting = false; }
   }
-}
-
-function stepBooster(S, t, dt, mode) {
-  boosterGuide(S, t);
-  S.axis = slewAxis(S.axis, S.axisCmd, dt, S.wmax, S.tau);
-  if (S.nCmd > 0) {
-    if (S.nEng === 0) S.thr = V.merMin;
-    S.nEng = S.nCmd;
-    S.thr += (S.thrCmd - S.thr) * (1 - Math.exp(-dt / 0.22));
-  } else { S.nEng = 0; S.thr = 0; }
-  const h = nrm(S.r) - RE;
-  const T = S.nEng > 0 ? engineThrust(S.nEng, S.thr, V.merTvac, V.merAe, h) : 0;
-  const m = boosterMass(S);
-  rk4(S.r, S.v, t, dt, { m: m, axis: S.axis, thrust: [S.axis[0] * T, S.axis[1] * T, S.axis[2] * T] });
-  if (S.nEng > 0) S.prop = Math.max(0, S.prop - S.nEng * S.thr * V.merMdot * dt);
-  S.tPh += dt; S.thrN = T;
-  const h2 = nrm(S.r) - RE, vdown = dot(S.v, unit(S.r)) < 0, spd = nrm(relVel(S.r, S.v));
-  switch (S.phase) {
-    case 'BB':
-      if (t >= S.bbEnd || S.prop < 9000) { S.phase = 'COAST2'; S.tPh = 0; S.nEng = 0; S.thr = 0; S.thrN = 0; if (S.ev) S.ev.push(['BB_END', t]); }
-      break;
-    case 'COAST2':
-      if (h2 < BP.hEntry && vdown) { S.phase = 'ENTRY'; S.tPh = 0; if (S.ev) S.ev.push(['ENTRY_BURN', t]); }
-      break;
-    case 'ENTRY':
-      if (spd < BP.entryVend || S.tPh > BP.entryMax || S.prop < 5200) { S.phase = 'AERO'; S.tPh = 0; S.nEng = 0; S.thr = 0; S.thrN = 0; if (S.ev) S.ev.push(['ENTRY_END', t]); }
-      break;
-    case 'AERO':
-      if (mode === 'predict') { if (h2 <= BP.hAim) S.done = true; }
-      else if (h2 < 9000) {
-        const L = lzFrame(t), lp = lzBase(t), d = sub(S.r, lp), gv = relVel(S.r, S.v);
-        const pU = dot(d, L.U), vU = dot(gv, L.U);
-        const aReq = landProfile(S, pU - Math.abs(vU) * 0.55, -vU, h2);
-        let go = aReq >= BP.landFrac * aMaxNet(S, Math.max(h2 - 2500, 0)) && vU < 0;
-        if (go) {                                   /* look 1.5 s ahead (unpowered): ignite only when waiting would make it infeasible */
-          const C = cloneB(S); C.phase = 'AERO'; let tt = t;
-          for (let i = 0; i < 3; i++) { stepBooster(C, tt, 0.5, 'predict'); C.done = false; tt += 0.5; }
-          const L2 = lzFrame(tt), d2 = sub(C.r, lzBase(tt)), g2 = relVel(C.r, C.v);
-          const a2 = landProfile(C, dot(d2, L2.U) - Math.abs(dot(g2, L2.U)) * 0.55, -dot(g2, L2.U), nrm(C.r) - RE);
-          go = a2 >= 1.0 * aMaxNet(C, Math.max(nrm(C.r) - RE - 2500, 0));
-        }
-        if (go) {
-          S.phase = 'LAND'; S.tPh = 0; S.tLand0 = t; if (S.ev) S.ev.push(['LANDING_BURN', t, { alt: pU, v: -vU }]);
-        }
-      }
-      break;
+  const vr = relVel(S.r, S.v), sp = nrm(vr);
+  S.q = 0.5 * rhoAt(h0) * sp * sp;
+  const T = S.nEng > 0 ? engineThrust(S.nEng, S.thr, V.merTvac, V.merAe, h0) : 0;
+  const m = boosterMass(S) + (S.attached ? upper : 0);
+  if (S.onPad) {                                 /* hold-down clamps release at T-0 once thrust exceeds weight */
+    if (t >= 0 && T > m * MU / Math.pow(nrm(S.r), 2)) { S.onPad = false; S.tLift = t; }
+    else {
+      const F = siteFrame(t + dt);
+      S.r = sc(F.U, RE + V.mountH); S.v = [-OMEGA * S.r[1], OMEGA * S.r[0], 0]; S.axis = F.U.slice();
+    }
   }
+  if (!S.onPad && !S.landed) {
+    const w = boosterRate(S);
+    S.axis = slewAxis(S.axis, cmd.dir, dt, w[0], w[1]);
+    rk4(S.r, S.v, t, dt, { m: m, axis: S.axis, thrust: [S.axis[0] * T, S.axis[1] * T, S.axis[2] * T] });
+  }
+  if (S.nEng > 0) S.prop = Math.max(0, S.prop - S.nEng * S.thr * V.merMdot * DSP.thrust * dt);
+  S.T = T;
   return S;
 }
-
-function predictMiss(S0, t0, steer, dtp, bb) {
-  const S = cloneB(S0);
-  if (steer) S.steer = steer.slice();
-  S.done = false;
-  if (bb) { S.phase = 'BB'; S.bbDir = bb.dir; S.bbEnd = t0 + bb.dur; S.axis = bb.dir.slice(); S.axisCmd = bb.dir.slice(); }
-  else if (S.phase === 'BB' || S.phase === 'COAST1') S.phase = 'COAST2';
-  let t = t0, guard = 0, rp = S.r.slice(), hp = nrm(S.r) - RE, tp = t0;
-  while (!S.done && guard++ < 3000) {
-    const dts = (S.phase === 'BB' || S.phase === 'ENTRY') ? Math.min(dtp, 0.25) : (nrm(S.r) - RE > 90000 ? dtp * 2 : dtp);
-    rp = S.r.slice(); hp = nrm(rp) - RE; tp = t;
-    stepBooster(S, t, dts, 'predict'); t += dts;
-    if (nrm(S.r) - RE < 200) break;
-  }
-  let rf = S.r, tf = t;
-  const hn = nrm(S.r) - RE;
-  if (S.done && hp > BP.hAim && hn < BP.hAim) { const f = (hp - BP.hAim) / (hp - hn); rf = add(rp, sc(sub(S.r, rp), f)); tf = tp + (t - tp) * f; }
-  const L = lzFrame(tf), lp = lzBase(tf), d = sub(rf, lp);
-  const gv = relVel(S.r, S.v), vE = dot(gv, L.E), vN = dot(gv, L.N), vU = dot(gv, L.U);
-  const tgo = 2 * BP.hAim / Math.max(Math.abs(vU), 50);
-  return { mE: dot(d, L.E), mN: dot(d, L.N), t: tf, S: S, h: hn, vE: vE, vN: vN, eE: dot(d, L.E) + BP.vWeight * vE * Math.abs(vE) / (2 * BP.aBrake), eN: dot(d, L.N) + BP.vWeight * vN * Math.abs(vN) / (2 * BP.aBrake) };
+/* Pneumatic pushers: equal and opposite impulse along the stack axis. */
+function separate(S, U, t) {
+  const mb = boosterMass(S), mu = upperMass(U);
+  const J = V.sepDv / (1 / mb + 1 / mu);
+  U.r = add(S.r, sc(S.axis, 39.2)); U.v = add(S.v, sc(S.axis, J / mu)); U.axis = S.axis.slice(); U.X = S.X.slice();
+  S.v = add(S.v, sc(S.axis, -J / mb));
+  S.attached = false; S.tSep = t; U.separated = true; U.tSep = t;
 }
-function solveSteer(S, t, dtp) {
-  const s0 = S.steer.slice(), m0 = predictMiss(S, t, s0, dtp), e = 0.3;
-  const m1 = predictMiss(S, t, [s0[0] + e, s0[1]], dtp), m2 = predictMiss(S, t, [s0[0], s0[1] + e], dtp);
-  const J = [[(m1.mE - m0.mE) / e, (m2.mE - m0.mE) / e], [(m1.mN - m0.mN) / e, (m2.mN - m0.mN) / e]];
-  const det = J[0][0] * J[1][1] - J[0][1] * J[1][0];
-  if (Math.abs(det) < 100) return { s: s0, miss: m0, det: det };
-  const dE = (J[1][1] * m0.mE - J[0][1] * m0.mN) / det, dN = (-J[1][0] * m0.mE + J[0][0] * m0.mN) / det;
-  const sn = [s0[0] - 0.85 * dE, s0[1] - 0.85 * dN];
-  const mag = Math.hypot(sn[0], sn[1]);
-  if (mag > 1) { sn[0] /= mag; sn[1] /= mag; }
-  return { s: sn, miss: m0, det: det };
-}
-function bbDirFrom(S, az) {
-  const Bs = localBasis(S.r);
-  const hv = relVel(S.r, S.v), vh = sub(hv, sc(Bs.U, dot(hv, Bs.U)));
-  /* base direction: against the horizontal velocity, rotated by az about up */
-  const h0 = unit(sc(vh, -1)), hd = rotAbout(h0, Bs.U, az);
-  return unit(add(sc(hd, Math.cos(BP.bbPitch)), sc(Bs.U, Math.sin(BP.bbPitch))));
-}
-function planBoostback(S, t) {
-  /* unknowns: az (rad), dur (s). Newton on the 2-D miss at the aim altitude */
-  const m = boosterMass(S), T = BP.bbN * BP.bbThr * V.merTvac;
-  const hv = relVel(S.r, S.v), Ub = unit(S.r), vhor = nrm(sub(hv, sc(Ub, dot(hv, Ub))));
-  let az = 0, dur = clamp(m * vhor * 0.9 / T, 8, 60);
-  const dtp = 1.0;
-  let last = null;
-  for (let it = 0; it < 7; it++) {
-    const f = (a, d) => { const mm = predictMiss(S, t, null, dtp, { dir: bbDirFrom(S, a), dur: d }); return mm; };
-    const m0 = f(az, dur), ea = 0.01, ed = 0.6;
-    const ma = f(az + ea, dur), md = f(az, dur + ed);
-    last = m0;
-    const J = [[(ma.mE - m0.mE) / ea, (md.mE - m0.mE) / ed], [(ma.mN - m0.mN) / ea, (md.mN - m0.mN) / ed]];
-    const det = J[0][0] * J[1][1] - J[0][1] * J[1][0];
-    if (Math.abs(Math.hypot(m0.mE, m0.mN)) < 150) break;
-    if (Math.abs(det) < 1e-6) break;
-    const da = (J[1][1] * m0.mE - J[0][1] * m0.mN) / det, dd = (-J[1][0] * m0.mE + J[0][0] * m0.mN) / det;
-    az -= clamp(da, -0.3, 0.3); dur -= clamp(dd, -8, 8);
-    dur = clamp(dur, 4, 70);
-  }
-  return { dir: bbDirFrom(S, az), dur: dur, az: az, miss: last };
-}
-
-/* ============================================================================
-   S2 guidance (orbit insertion by vertical-velocity tracking)
-   ========================================================================== */
-const ORB = { hTarget: 300000, perigeeMin: 190000 };
-const S2N = [0, 50, 110, 180, 260, 340];
-const S2P = [20.72, 26.64, 16.24, 12.24, 6.08, 2.4];   /* pitch above local horizontal (deg) at the nodes; tuned offline */
-function s2Guide(S, t) {
-  const r = S.r, v = S.v, Ub = unit(r), vr = dot(v, Ub);
-  const ts = t - S.tIgn;
-  let i = 0; while (i < S2N.length - 2 && ts > S2N[i + 1]) i++;
-  const f = clamp((ts - S2N[i]) / (S2N[i + 1] - S2N[i]), 0, 1.3);
-  const pitch = (S2P[i] + (S2P[i + 1] - S2P[i]) * f) * D2R;
-  const vh = sub(v, sc(Ub, vr));
-  const hdir = unit(nrm(vh) > 80 ? vh : headingVec(r));
-  return unit(add(sc(hdir, Math.cos(pitch)), sc(Ub, Math.sin(pitch))));
+function upperStep(U, cmd, t, dt) {
+  const h = nrm(U.r) - RE;
+  U.m = upperMass(U);
+  if (cmd.on && !U.seco && U.prop > 50) {
+    if (!U.on) { U.on = true; U.thr = 0; U.tIgn = t; }
+    U.thr += (clamp(cmd.thr, V.mvacMin, 1) - U.thr) * (1 - Math.exp(-dt / 0.6));
+  } else if (U.on) { U.on = false; U.seco = true; U.tSeco = t; U.thr = 0; }   /* single-burn MVac: cutoff is SECO */
+  U.axis = slewAxis(U.axis, cmd.dir, dt, (U.on ? 3 : 1) * D2R, 1.0);
+  const T = U.on ? V.mvacT * DSP.mvac * U.thr : 0;
+  rk4(U.r, U.v, t, dt, { m: U.m, cdS: 7, thrust: [U.axis[0] * T, U.axis[1] * T, U.axis[2] * T] });
+  if (U.on) U.prop = Math.max(0, U.prop - V.mvacMdot * DSP.mvac * U.thr * dt);
+  U.T = T; U.h = h;
+  return U;
 }
 function orbitElems(r, v) {
   const rr = nrm(r), vv = nrm(v), eps = vv * vv / 2 - MU / rr, a = -MU / (2 * eps);
   const hvec = crs(r, v), e = sub(sc(crs(v, hvec), 1 / MU), sc(r, 1 / rr)), ecc = nrm(e);
   return { a: a, ecc: ecc, rp: a * (1 - ecc), ra: a * (1 + ecc), inc: Math.acos(hvec[2] / nrm(hvec)) * R2D, vv: vv };
 }
+/* Mission phase is a readout of the booster's own state (staging, burn count, engines),
+   never an input that switches guidance. */
+const PH = { PAD: 0, ASC: 1, SEP: 2, FLIP: 3, BB: 4, COAST: 5, ENTRY: 6, AERO: 7, LAND: 8, LANDED: 9 };
+function boosterPhase(S, t) {
+  if (S.landed) return PH.LANDED;
+  if (S.attached) return S.onPad ? PH.PAD : PH.ASC;
+  if (S.ign === 0) return t - S.tSep < 4 ? PH.SEP : PH.FLIP;
+  if (S.ign === 1) return S.nEng > 0 ? PH.BB : PH.COAST;
+  if (S.ign === 2) return S.nEng > 0 ? PH.ENTRY : PH.AERO;
+  return PH.LAND;
+}
+
+/* ============================================================================
+   POLICY INTERFACE  (sensed features in, actuator commands out)
+   ========================================================================== */
+const cl3 = (x, s) => clamp(x / s, -3, 3);
+/* unit velocity (E, N, U) and unit horizontal velocity (E, N), faded to zero below `slow` m/s */
+function dirFeat(v, Lb, slow) {
+  const e = dot(v, Lb.E), n = dot(v, Lb.N), u = dot(v, Lb.U), s = Math.hypot(e, n, u), hs = Math.hypot(e, n);
+  const k = s > 1e-6 ? clamp(s / slow, 0, 1) / s : 0, kh = hs > 1e-6 ? clamp(hs / slow, 0, 1) / hs : 0;
+  return [e * k, n * k, u * k, e * kh, n * kh];
+}
+const since = (t, t0, s, cap) => t0 < -1e8 ? 0 : clamp((t - t0) / s, 0, cap);
+/* Booster/stack features: relative to LZ-1 at three scales, local-frame velocity,
+   attitude, propellant, engine state and the vehicle's own event clocks. */
+function boosterFeatures(B, t) {
+  const L = lzFrame(t), d = sub(B.r, lzBase(t)), gv = relVel(B.r, B.v), Lb = localBasis(B.r);
+  const pE = dot(d, L.E), pN = dot(d, L.N), pU = dot(d, L.U), vE = dot(gv, L.E), vN = dot(gv, L.N), vU = dot(gv, L.U);
+  const h = nrm(B.r) - RE, sp = nrm(gv);
+  return [
+    pE / 1e5, pN / 1e5, pU / 1e5, cl3(pE, 2000), cl3(pN, 2000), cl3(pU, 2000), cl3(pE, 100), cl3(pN, 100), cl3(pU, 100),
+    vE / 1000, vN / 1000, vU / 1000, cl3(vE, 50), cl3(vN, 50), cl3(vU, 50),
+    dot(B.axis, Lb.E), dot(B.axis, Lb.N), dot(B.axis, Lb.U),
+    B.prop / V.s1Prop, B.thr, B.nEng === 0 ? 1 : 0, B.nEng === 1 ? 1 : 0, B.nEng === 3 ? 1 : 0, B.nEng === 9 ? 1 : 0, B.cutting ? 1 : 0,
+    B.attached ? 1 : 0, B.onPad ? 1 : 0, B.ign === 0 ? 1 : 0, B.ign === 1 ? 1 : 0, B.ign === 2 ? 1 : 0, B.ign >= 3 ? 1 : 0,
+    clamp(t / 600, -0.1, 1.2), clamp(t / 10, -1.2, 2.5), since(t, B.tMeco, 10, 4), since(t, B.tSep, 10, 4), since(t, B.tIgn, 30, 3), since(t, B.tCut, 30, 3),
+    B.q / 30000, sp / soundAt(Math.min(h, 85000)) / 6, Math.log10(Math.max(h, 1)) / 5, sp / 2000,
+    /* direction of motion relative to the air, as unit vectors in the local frame */
+    ...dirFeat(gv, Lb, 30),
+    /* fine height and sink rate for the last metres of the landing burn */
+    cl3(pU, 10), cl3(vU, 5)
+  ];
+}
+/* Upper stage features: altitude, inertial velocity in the local frame, attitude,
+   orbit energy against the 300 km target, and the stage's own event clocks. */
+function upperFeatures(U, t) {
+  const Lb = localBasis(U.r), h = nrm(U.r) - RE, oe = orbitElems(U.r, U.v);
+  const vr = relVel(U.r, U.v), q = 0.5 * rhoAt(h) * dot(vr, vr);
+  return [
+    h / 1e5, dot(U.v, Lb.E) / 7000, dot(U.v, Lb.N) / 7000, dot(U.v, Lb.U) / 1000,
+    dot(U.axis, Lb.E), dot(U.axis, Lb.N), dot(U.axis, Lb.U),
+    U.prop / V.s2Prop, U.thr, U.on ? 1 : 0, U.seco ? 1 : 0, U.separated ? 1 : 0, U.hasFair ? 1 : 0, U.hasSat ? 1 : 0,
+    since(t, U.tSep, 10, 4), since(t, U.tIgn, 100, 5), since(t, U.tSeco, 30, 3),
+    clamp((oe.a - RE - 300000) / 1e5, -5, 5), clamp((oe.a - RE - 300000) / 5000, -3, 3), clamp(t / 600, -0.1, 1.2), q / 1000,
+    ...dirFeat(U.v, Lb, 30)
+  ];
+}
+function toLocal(B, e, n, u) { const L = localBasis(B.r); return unit([L.E[0] * e + L.N[0] * n + L.U[0] * u, L.E[1] * e + L.N[1] * n + L.U[1] * u, L.E[2] * e + L.N[2] * n + L.U[2] * u]); }
+
+/* ---------------- neural flight policy runtime ---------------- */
+function b64f32(s) {
+  const bin = typeof atob === 'function' ? atob(s) : Buffer.from(s, 'base64').toString('binary');
+  const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new Float32Array(u.buffer);
+}
+function makeNet(spec) {
+  const mean = b64f32(spec.mean), std = b64f32(spec.std);
+  const layers = spec.layers.map(l => ({ W: b64f32(l.W), b: b64f32(l.b), n: l.out, k: l.in }));
+  const buf = [new Float64Array(1024), new Float64Array(1024)];
+  return function (x) {
+    let a = buf[0], k = x.length;
+    for (let i = 0; i < k; i++) a[i] = (x[i] - mean[i]) / std[i];
+    for (let li = 0; li < layers.length; li++) {
+      const L = layers[li], o = li % 2 ? buf[0] : buf[1], last = li === layers.length - 1;
+      for (let j = 0; j < L.n; j++) {
+        let s = L.b[j]; const row = j * L.k;
+        for (let i = 0; i < L.k; i++) s += L.W[row + i] * a[i];
+        o[j] = last ? s : s / (1 + Math.exp(-s));           /* SiLU hidden layers */
+      }
+      a = o; k = L.n;
+    }
+    return Array.prototype.slice.call(a, 0, k);
+  };
+}
+function neuralController(P) {
+  if (!P || !P.booster || !P.upper) throw new Error('flight policy weights (FLIGHT_POLICY) are not loaded');
+  const nb = makeNet(P.booster), nu = makeNet(P.upper);
+  return function (ctx) {
+    const B = ctx.B, U = ctx.U, t = ctx.t;
+    const yb = nb(boosterFeatures(B, t));
+    let best = 0; for (let i = 1; i < 4; i++) if (yb[4 + i] > yb[4 + best]) best = i;
+    const out = { booster: { dir: toLocal(B, yb[0], yb[1], yb[2]), thr: clamp(yb[3], 0, 1), n: ENGINES[best], sep: yb[8] > 0 } };
+    if (U.separated) {
+      const yu = nu(upperFeatures(U, t));
+      out.upper = { dir: toLocal(U, yu[0], yu[1], yu[2]), thr: clamp(yu[3], 0, 1), on: yu[4] > 0, fair: yu[5] > 0, deploy: yu[6] > 0 };
+    } else out.upper = { dir: U.axis, thr: 0, on: false, fair: false, deploy: false };
+    return out;
+  };
+}
 
 /* ============================================================================
    MAIN RUN
    ========================================================================== */
 const projX = (X, a) => unit(sub(X, sc(a, dot(X, a))));
-const PH = { PAD: 0, ASC: 1, SEP: 2, FLIP: 3, BB: 4, COAST: 5, ENTRY: 6, AERO: 7, LAND: 8, LANDED: 9 };
 function run(opts) {
   opts = opts || {};
-  const P = opts.params || {};
-  Object.assign(V, opts.vehicle || {});
-  Object.assign(BP, opts.bp || {});
-  const kick = P.kick != null ? P.kick : 1.6 * D2R, tKick0 = P.tKick0 != null ? P.tKick0 : 8.0, kickDur = P.kickDur != null ? P.kickDur : 5;
-  const tEnd = P.tEnd || 660, tFairSep = P.tFairSep || 200;
-  if (P.s2p) for (let i = 0; i < S2P.length; i++) S2P[i] = P.s2p[i];
+  Object.assign(DSP, DSP_NOMINAL, opts.dispersion || {});
+  const control = opts.controller || neuralController(opts.policy || root.FLIGHT_POLICY);
+  const tEnd = opts.tEnd || 660, quick = !!opts.quick;
   const nS = Math.floor((tEnd - T0) / (DT * SAMPLE_EVERY)) + 3;
   const events = [];
   const ev = (name, t, extra) => events.push(Object.assign({ name: name, t: t }, extra || {}));
-  const KB = 33, K2 = 25, KF = 15, KS = 15;
-  const TB = { K: KB, n: 0, d: new Float64Array(nS * KB) }, T2 = { K: K2, n: 0, d: new Float64Array(nS * K2) };
-  const TFA = { K: KF, n: 0, d: new Float64Array(nS * KF) }, TFB = { K: KF, n: 0, d: new Float64Array(nS * KF) }, TSAT = { K: KS, n: 0, d: new Float64Array(nS * KS) };
+  const KB = 33, K2 = 25, KF = 15, KS = 15, alloc = K => ({ K: K, n: 0, d: new Float64Array(quick ? K : nS * K) });
+  const TB = alloc(KB), T2 = alloc(K2), TFA = alloc(KF), TFB = alloc(KF), TSAT = alloc(KS);
   const stats = { maxQ: 0, tMaxQ: 0, peakG: 0, peakHeat: 0, apogee: 0, tApogee: 0 };
 
-  /* ----- initial conditions ----- */
-  const F0 = siteFrame(T0);
-  const B = newBooster(sc(F0.U, RE + V.mountH), [0, 0, 0], F0.U);
-  B.v = [-OMEGA * B.r[1], OMEGA * B.r[0], 0];
-  B.X = F0.E.slice(); B.rollPrev = 0;
-  const upperMass = () => V.s2Dry + S2.prop + (S2.hasFair ? V.fairing : 0) + (S2.hasSat ? V.sat : 0);
-  const S2 = { r: [0, 0, 0], v: [0, 0, 0], axis: F0.U.slice(), axisCmd: F0.U.slice(), prop: V.s2Prop, thr: 0, thrCmd: 0, on: false, hasFair: true, hasSat: true, m: 0, separated: false,
-    tIgn: 0, tSeco: -1, seco: false, roll: 0, omega: 0, X: [1, 0, 0] };
-  let FA = null, FB = null, SAT = null;
-  let stage = 'STACK', t = T0, ignT = -3.6, released = false, tMeco = -1, tSep = -1, tFairDone = false, tDeploy = -1;
-  let thrStack = 0, rollSt = 0, apogeeSeen = false, qMax = 0;
-  B.ev = [];
+  const B = newBooster(T0), U = newUpper();
+  let FA = null, FB = null, SAT = null, cmd = null, apogeeSeen = false, lastPhase = -1;
   const lastAxisB = B.axis.slice();
 
   function writeCommon(tr, k, r, ax, roll, t_) {
     const o = k * tr.K, d = tr.d;
     toRender(r, t_, d, o); dirToRender(ax, t_, d, o + 3); d[o + 6] = roll;
   }
-  function sampleBooster(k, t_, S, extra) {
+  function sampleBooster(k, t_, extra) {
     const o = k * KB, d = TB.d;
-    writeCommon(TB, k, S.r, S.axis, S.roll || 0, t_);
-    d[o + 7] = S.thr; d[o + 8] = S.nEng; d[o + 9] = S.prop; d[o + 10] = boosterMass(S) + (S.stackExtra || 0);
+    writeCommon(TB, k, B.r, B.axis, B.roll, t_);
+    d[o + 7] = B.thr; d[o + 8] = B.nEng; d[o + 9] = B.prop; d[o + 10] = boosterMass(B) + (B.attached ? upperMass(U) : 0);
     d[o + 11] = extra.q;
-    /* angular rate vector (render frame): axis change per second */
-    const dax = sub(S.axis, lastAxisB), w = sc(crs(lastAxisB, dax), 1 / (DT * SAMPLE_EVERY));
+    const dax = sub(B.axis, lastAxisB), w = sc(crs(lastAxisB, dax), 1 / (DT * SAMPLE_EVERY));
     dirToRender(w, t_, d, o + 12);
-    d[o + 15] = S.fins || 0;
+    d[o + 15] = B.fins;
     dirToRender(extra.aeroDir || [0, 0, 0], t_, d, o + 16);
-    d[o + 19] = S.legs || 0; d[o + 20] = extra.heat || 0; d[o + 21] = extra.mach || 0;
-    const gv = relVel(S.r, S.v); dirToRender(gv, t_, d, o + 22);
-    dirToRender(S.X, t_, d, o + 30);
-    d[o + 25] = extra.phase; d[o + 26] = extra.g || 0; d[o + 27] = extra.alpha || 0; d[o + 28] = S.landed ? 1 : 0;
-    lastAxisB[0] = S.axis[0]; lastAxisB[1] = S.axis[1]; lastAxisB[2] = S.axis[2];
+    d[o + 19] = B.legs; d[o + 20] = extra.heat || 0; d[o + 21] = extra.mach || 0;
+    dirToRender(relVel(B.r, B.v), t_, d, o + 22);
+    dirToRender(B.X, t_, d, o + 30);
+    d[o + 25] = extra.phase; d[o + 26] = extra.g || 0; d[o + 27] = extra.alpha || 0; d[o + 28] = B.landed ? 1 : 0;
+    lastAxisB[0] = B.axis[0]; lastAxisB[1] = B.axis[1]; lastAxisB[2] = B.axis[2];
   }
   function sampleS2(k, t_) {
     const o = k * K2, d = T2.d;
-    writeCommon(T2, k, S2.r, S2.axis, S2.roll, t_);
-    d[o + 7] = S2.thr; d[o + 8] = S2.on ? 1 : 0; d[o + 9] = S2.prop; d[o + 10] = S2.m;
-    const gv = relVel(S2.r, S2.v); dirToRender(gv, t_, d, o + 11);
-    d[o + 14] = nrm(S2.v); d[o + 15] = nrm(S2.r) - RE; d[o + 16] = S2.separated ? 1 : 0; d[o + 17] = S2.omega;
-    d[o + 18] = nrm(gv); d[o + 19] = S2.seco ? 1 : 0;
-    dirToRender(S2.X || [1, 0, 0], t_, d, o + 20);
+    writeCommon(T2, k, U.r, U.axis, U.roll, t_);
+    d[o + 7] = U.thr; d[o + 8] = U.on ? 1 : 0; d[o + 9] = U.prop; d[o + 10] = upperMass(U);
+    const gv = relVel(U.r, U.v); dirToRender(gv, t_, d, o + 11);
+    d[o + 14] = nrm(U.v); d[o + 15] = nrm(U.r) - RE; d[o + 16] = U.separated ? 1 : 0; d[o + 17] = 0;
+    d[o + 18] = nrm(gv); d[o + 19] = U.seco ? 1 : 0;
+    dirToRender(U.X, t_, d, o + 20);
   }
   function sampleBody(tr, k, t_, X) {
     const o = k * tr.K, d = tr.d;
@@ -679,218 +613,124 @@ function run(opts) {
     d[o + 7] = 1; d[o + 8] = t_ - X.t0; d[o + 9] = nrm(X.v); d[o + 10] = nrm(X.r) - RE;
     dirToRender(X.X, t_, d, o + 12);
   }
+  /* the upper stage rides on the interstage until separation */
+  const ride = () => { U.r = add(B.r, sc(B.axis, 39.2)); U.v = B.v.slice(); U.axis = B.axis.slice(); U.roll = B.roll; U.X = B.X.slice(); };
+  ride();
 
-  let nextSteerT = 0, nextPlanT = 0, planDone = 0, bbPlanned = false, steerStats = [];
-  let landed = false, tLanded = 0;
   for (let step = 0; ; step++) {
-    t = T0 + step * DT;
-    if (t > tEnd) break;
-    const sampling = step % SAMPLE_EVERY === 0, k = step / SAMPLE_EVERY;
-    let bExtra = { q: 0, phase: 0, mach: 0, heat: 0, g: 0, alpha: 0 };
+    const t = T0 + step * DT;
+    if (t > tEnd + 1e-9) break;
+    const h = nrm(B.r) - RE, vrel = relVel(B.r, B.v), sp = nrm(vrel), q = 0.5 * rhoAt(h) * sp * sp;
+    if (B.attached && !B.onPad && q > stats.maxQ) { stats.maxQ = q; stats.tMaxQ = t; }
+    const phase = boosterPhase(B, t);
 
-    if (stage === 'STACK' || stage === 'COAST_STACK') {
-      const mNow = V.s1Dry + B.prop + upperMass();
-      const h = nrm(B.r) - RE;
-      let thrCmd, nCmd = 9;
-      if (stage === 'STACK') {
-        if (t < ignT) { thrCmd = 0; nCmd = 0; }
-        else if (t < 0) thrCmd = clamp((t - ignT) / 3.0, 0, 1) * 0.95 + 0.0;
-        else thrCmd = 1 - 0.30 * Math.exp(-Math.pow((t - 66) / 14, 2));
-        const aLim = 3.65 * G0;
-        thrCmd = Math.min(thrCmd, aLim * mNow / (9 * V.merTvac) + V.merAe * pressAt(h) / V.merTvac);
-        if (t >= 0) thrCmd = Math.max(thrCmd, V.merMin);
-        B.thr += (thrCmd - B.thr) * (1 - Math.exp(-DT / 0.2));
-      } else { B.thr *= Math.exp(-DT / 0.12); if (B.thr < 0.03) { B.thr = 0; nCmd = 0; } }
-      if (nCmd === 0) B.thr = 0;
-      B.nEng = nCmd;
-      const T = B.nEng > 0 ? engineThrust(B.nEng, B.thr, V.merTvac, V.merAe, h) : 0;
-      const Ub = unit(B.r), vrel = relVel(B.r, B.v);
-      let cmd;
-      if (stage === 'COAST_STACK') cmd = unit(vrel);
-      else if (t < tKick0) cmd = Ub;
-      else if (t < tKick0 + kickDur) { const kk = kick * sstep(0, 1, (t - tKick0) / kickDur), hd = headingVec(B.r); cmd = unit(add(sc(Ub, Math.cos(kk)), sc(hd, Math.sin(kk)))); }
-      else cmd = unit(vrel);
-      B.axis = t < 0 ? siteFrame(t).U : slewAxis(B.axis, cmd, DT, 4 * D2R, 0.5);
-      if (t < 0) { const Us = siteFrame(t).U; B.r = sc(Us, RE + V.mountH); B.v = [-OMEGA * B.r[1], OMEGA * B.r[0], 0]; }
-      else {
-        rk4(B.r, B.v, t, DT, { m: mNow, axis: B.axis, thrust: [B.axis[0] * T, B.axis[1] * T, B.axis[2] * T] });
-        B.prop = Math.max(0, B.prop - B.nEng * B.thr * V.merMdot * DT);
-        if (!released) { released = true; ev('LIFTOFF', 0); }
-      }
-      B.stackExtra = upperMass();
-      const rv = relVel(B.r, B.v), sp = nrm(rv), hh = nrm(B.r) - RE, q = 0.5 * rhoAt(hh) * sp * sp;
-      if (q > stats.maxQ) { stats.maxQ = q; stats.tMaxQ = t; }
-      B.roll = (-70 * D2R) * sstep(0, 1, (t - 5) / 16);
-      B.X = projX(rotAbout(B.X, B.axis, B.roll - B.rollPrev), B.axis); B.rollPrev = B.roll;
-      S2.X = B.X.slice();
-      const a = T / mNow / G0;
-      stats.peakG = Math.max(stats.peakG, a);
-      bExtra = { q: q, phase: t < 0 ? PH.PAD : PH.ASC, mach: sp / soundAt(Math.min(hh, 85000)), g: a, alpha: 0, heat: 0 };
-      /* S2 rides on top: keep a copy for sampling */
-      S2.r = add(B.r, sc(B.axis, 39.2)); S2.v = B.v.slice(); S2.axis = B.axis.slice(); S2.roll = B.roll; S2.m = upperMass();
-      if (stage === 'STACK' && B.prop <= V.propResidual && t > 60) {
-        tMeco = t; stage = 'COAST_STACK';
-        ev('MAX_Q', stats.tMaxQ, { q: stats.maxQ }); ev('MECO', t, { alt: hh, v: sp, prop: B.prop, vInertial: nrm(B.v) });
-      }
-      if (stage === 'COAST_STACK' && t >= tMeco + 3.0) {
-        tSep = t; ev('STAGE_SEP', t, { alt: hh });
-        const axSep = B.axis.slice();
-        B.phase = 'COAST1'; B.tSep = t; B.v = add(B.v, sc(axSep, -0.5)); B.stackExtra = 0; B.ev = [];
-        B.fins = 0; B.legs = 0;
-        S2.X = B.X.slice(); S2.r = add(B.r, sc(axSep, 39.2)); S2.v = add(B.v, sc(axSep, 1.3)); S2.axis = axSep.slice(); S2.axisCmd = axSep.slice(); S2.separated = true; S2.tIgn = t + 5.0;
-        stage = 'SPLIT';
-        nextPlanT = t + 0.5;
-      }
-      if (sampling) {
-        sampleBooster(k, t, B, bExtra); sampleS2(k, t);
-        TB.n = T2.n = TFA.n = TFB.n = TSAT.n = k + 1; sampleBody(TFA, k, t, null); sampleBody(TFB, k, t, null); sampleBody(TSAT, k, t, null);
-      }
-      continue;
+    /* ---------- sample the state at t ---------- */
+    if (step % SAMPLE_EVERY === 0) {
+      const k = quick ? 0 : step / SAMPLE_EVERY;
+      const flux = Math.sqrt(rhoAt(h) / 1.225) * Math.pow(sp / 1000, 3), heat = B.attached ? 0 : clamp(flux / 0.20, 0, 1.4);
+      if (!B.attached && heat > stats.peakHeat) { stats.peakHeat = heat; stats.tPeakHeat = t; }
+      const ca = sp > 1 ? dot(B.axis, unit(vrel)) : 1;
+      let aeroDir = [0, 0, 0];
+      if (!B.attached && sp > 30 && q > 200) aeroDir = sc(sub(unit(vrel), sc(B.axis, ca)), -clamp(q / 3000, 0, 1));
+      const g = B.T / (boosterMass(B) + (B.attached ? upperMass(U) : 0)) / G0;
+      stats.peakG = Math.max(stats.peakG, g);
+      sampleBooster(k, t, { q: B.landed || B.onPad ? 0 : q, phase: phase, mach: B.landed ? 0 : sp / soundAt(Math.min(h, 85000)), heat: heat, g: g,
+        alpha: B.attached || B.landed ? 0 : Math.acos(clamp(-ca, -1, 1)) * R2D, aeroDir: aeroDir });
+      sampleS2(k, t); sampleBody(TFA, k, t, FA); sampleBody(TFB, k, t, FB); sampleBody(TSAT, k, t, SAT);
+      TB.n = T2.n = TFA.n = TFB.n = TSAT.n = quick ? 1 : k + 1;
     }
+    if (t >= tEnd - 1e-9) break;
 
-    /* ======================= SPLIT : independent bodies ======================= */
-    /* ---------- booster ---------- */
-    const Bh = nrm(B.r) - RE;
+    /* ---------- policy (10 Hz, zero-order hold) ---------- */
+    if (step % CTRL_EVERY === 0 || !cmd) cmd = control({ t: t, B: B, U: U, phase: phase });
+    const cb = cmd.booster, cu = cmd.upper;
+
+    /* ---------- booster / stack ---------- */
+    const prevN = B.nEng, prevIgn = B.ign, wasCut = B.cutting, wasPad = B.onPad;
     if (!B.landed) {
-      /* planning / steering cycles */
-      if (B.phase === 'COAST1' && t >= nextPlanT && !B.bbCommitted) {
-        const pl = planBoostback(B, t);
-        B.bbDir = pl.dir; B.bbDur = pl.dur; B.plan = pl;
-        nextPlanT = t + (t < tMeco + 16 ? 4.0 : 0.5);
-        if (t >= tMeco + BP.bbAfterMeco - 0.01 && dot(B.axis, B.bbDir) > Math.cos(10 * D2R)) {
-          B.phase = 'BB'; B.tPh = 0; B.bbEnd = t + pl.dur; B.bbCommitted = true; ev('BOOSTBACK_START', t, { dur: pl.dur, miss: pl.miss ? Math.hypot(pl.miss.mE, pl.miss.mN) : -1 });
-        } else if (t >= tMeco + BP.bbAfterMeco + 6) { B.phase = 'BB'; B.tPh = 0; B.bbEnd = t + pl.dur; B.bbCommitted = true; ev('BOOSTBACK_START', t, { dur: pl.dur }); }
-      }
-      if ((B.phase === 'COAST2' || B.phase === 'ENTRY' || B.phase === 'AERO') && t >= nextSteerT && Bh < 120000) {
-        const dtp = B.phase === 'COAST2' ? 1.0 : 0.5;
-        const mm = predictMiss(B, t, null, dtp);
-        const sgn = B.phase === 'AERO' ? 1 : B.phase === 'ENTRY' ? -1 : 0;
-        const gain = B.phase === 'AERO' ? clamp((30000 - Bh) / 20000, 0.15, 1) * 0.5 : 0.5;
-        let s0 = B.steer[0] + sgn * gain * mm.eE / 1500, s1 = B.steer[1] + sgn * gain * mm.eN / 1500;
-        const mag = Math.hypot(s0, s1); if (mag > 1) { s0 /= mag; s1 /= mag; }
-        B.steer = [s0, s1]; B.lastMiss = mm;
-        const sol = { miss: mm, det: 0 };
-        nextSteerT = t + (B.phase === 'AERO' && Bh < 15000 ? 0.5 : 1.0);
-        if (sampling) steerStats.push([t, sol.miss.mE, sol.miss.mN, sol.det]);
-      }
-      /* fins / legs deploy schedule */
-      if (B.phase !== 'ASCENT') {
-        if (t > tSep + 10) B.fins = clamp((t - tSep - 10) / 2.5, 0, 1);
-        if (B.legsT0 != null) B.legs = clamp((t - B.legsT0) / 3.0, 0, 1);
-      }
-      const prevPhase = B.phase;
-      stepBooster(B, t, DT, 'real'); B.X = projX(B.X, B.axis);
-      if (B.ev && B.ev.length) { B.ev.forEach(e => ev(e[0], e[1], e[2] || {})); B.ev.length = 0; }
-      if (prevPhase !== 'LAND' && B.phase === 'LAND') { B.legsT0 = t + 2.0; }
-      /* apogee */
-      if (!apogeeSeen && (B.phase === 'COAST2' || B.phase === 'BB') && dot(B.v, unit(B.r)) < 0) { apogeeSeen = true; stats.apogee = Bh; stats.tApogee = t; ev('APOGEE', t, { alt: Bh }); }
-      /* touchdown */
-      if (B.phase === 'LAND') {
-        const L = lzFrame(t), lp = lzBase(t), d = sub(B.r, lp), pU = dot(d, L.U);
+      const rB = B.r.slice(), lp0 = lzBase(t), L0 = lzFrame(t), pU0 = dot(sub(B.r, lp0), L0.U);
+      boosterStep(B, cb, t, DT, upperMass(U));
+      if (wasPad && !B.onPad) ev('LIFTOFF', B.tLift);
+      if (B.attached) {
+        B.roll = (-70 * D2R) * sstep(0, 1, (t - 5) / 16);          /* cosmetic roll to flight azimuth (point mass) */
+        B.X = projX(rotAbout(B.X, B.axis, B.roll - (B.rollPrev || 0)), B.axis); B.rollPrev = B.roll;
+        if (!wasCut && B.cutting && B.tMeco === B.tCut) ev('MAX_Q', stats.tMaxQ, { q: stats.maxQ }), ev('MECO', t, { alt: h, v: sp, prop: B.prop, vInertial: nrm(B.v) });
+        if (cb.sep && B.nEng === 0 && B.tMeco > -1e8) { separate(B, U, t + DT); ev('STAGE_SEP', t + DT, { alt: nrm(B.r) - RE }); }
+        else ride();
+      } else B.X = projX(B.X, B.axis);
+      if (!B.attached) {
+        if (B.ign > prevIgn) ev(['BOOSTBACK_START', 'ENTRY_BURN', 'LANDING_BURN'][Math.min(B.ign, 3) - 1], t, { alt: h, v: sp, prop: B.prop });
+        if (!wasCut && B.cutting && B.ign <= 2) ev(B.ign === 1 ? 'BB_END' : 'ENTRY_END', t, { alt: h, v: sp, prop: B.prop });
+        if (!apogeeSeen && dot(B.v, unit(B.r)) < 0) { apogeeSeen = true; stats.apogee = h; stats.tApogee = t; ev('APOGEE', t, { alt: h }); }
+        if (B.ign >= 1 && B.nEng === 0) B.fins = Math.min(1, B.fins + DT / 2.5);       /* grid fins out after boostback */
+        if (B.ign >= 3 && B.nEng > 0 && pU0 < 600) B.legs = Math.min(1, B.legs + DT / 3.0); /* legs out low in the landing burn */
+        /* touchdown: base plane reaches the pad surface */
+        const t1 = t + DT, L = lzFrame(t1), lp = lzBase(t1), pU = dot(sub(B.r, lp), L.U);
         if (pU <= 0) {
-          const gv = relVel(B.r, B.v);
-          B.landed = true; B.phase = 'LANDED'; tLanded = t;
-          const info = { vV: dot(gv, L.U), vH: Math.hypot(dot(gv, L.E), dot(gv, L.N)), errE: dot(d, L.E), errN: dot(d, L.N), err: Math.hypot(dot(d, L.E), dot(d, L.N)), prop: B.prop, tilt: Math.acos(clamp(dot(B.axis, L.U), -1, 1)) * R2D };
-          ev('TOUCHDOWN', t, info); stats.landing = info;
-          B.nEng = 0; B.thr = 0; B.nCmd = 0;
-          B.landAxisRef = B.axis.slice(); B.lE = dot(d, L.E); B.lN = dot(d, L.N);
+          const f = clamp(pU0 / Math.max(pU0 - pU, 1e-9), 0, 1), tT = t + f * DT;
+          B.r = add(rB, sc(sub(B.r, rB), f));
+          const L2 = lzFrame(tT), d = sub(B.r, lzBase(tT)), gv = relVel(B.r, B.v);
+          const info = { vV: dot(gv, L2.U), vH: Math.hypot(dot(gv, L2.E), dot(gv, L2.N)), errE: dot(d, L2.E), errN: dot(d, L2.N),
+            err: Math.hypot(dot(d, L2.E), dot(d, L2.N)), prop: B.prop, tilt: Math.acos(clamp(dot(B.axis, L2.U), -1, 1)) * R2D };
+          info.success = info.vV > -3 && info.vH < 1.5 && info.tilt < 5 && info.err <= 43;
+          ev('TOUCHDOWN', tT, info); stats.landing = info;
+          B.landed = true; B.nEng = 0; B.thr = 0; B.cutting = false; B.lE = info.errE; B.lN = info.errN; B.legs = 1;
         }
       }
-      /* heat + aero info */
-      const vrel = relVel(B.r, B.v), sp = nrm(vrel), rho = rhoAt(Bh), q = 0.5 * rho * sp * sp;
-      const flux = Math.sqrt(rho / 1.225) * Math.pow(sp / 1000, 3);
-      const heat = clamp(flux / 0.20, 0, 1.4);
-      if (heat > stats.peakHeat) { stats.peakHeat = heat; stats.tPeakHeat = t; }
-      const ca = sp > 1 ? dot(B.axis, unit(vrel)) : 1;
-      const alpha = Math.acos(clamp(-ca, -1, 1)) * R2D;
-      /* aerodynamic lateral direction (for fin deflection) */
-      let aeroDir = [0, 0, 0];
-      if (sp > 30 && q > 200) { const vn = sub(unit(vrel), sc(B.axis, ca)); aeroDir = sc(vn, -clamp(q / 8000, 0, 1) * 0 - 1); aeroDir = sc(aeroDir, clamp(q / 3000, 0, 1)); }
-      const m = boosterMass(B);
-      const gl = B.nEng > 0 ? B.thrN / m / G0 : 0;
-      stats.peakG = Math.max(stats.peakG, gl);
-      let ph = PH.COAST;
-      switch (B.phase) { case 'COAST1': ph = t - tSep < BP.tFlipAfterSep ? PH.SEP : PH.FLIP; break; case 'BB': ph = PH.BB; break; case 'COAST2': ph = PH.COAST; break; case 'ENTRY': ph = PH.ENTRY; break; case 'AERO': ph = PH.AERO; break; case 'LAND': ph = PH.LAND; break; case 'LANDED': ph = PH.LANDED; break; }
-      bExtra = { q: q, phase: ph, mach: sp / soundAt(Math.min(Bh, 85000)), heat: heat, g: gl, alpha: alpha, aeroDir: aeroDir };
     } else {
-      /* landed: ease the axis to local vertical, hold */
-      const L = lzFrame(t);
+      /* landed: legs level the airframe, the booster rotates with the Earth */
+      const L = lzFrame(t + DT);
       B.axis = slewAxis(B.axis, L.U, DT, 0.6 * D2R, 0.8); B.X = projX(B.X, B.axis);
-      const lp = lzBase(t), pE = B.lE, pN = B.lN;
-      B.r = add(lp, add(sc(L.E, pE), sc(L.N, pN)));
+      B.r = add(lzBase(t + DT), add(sc(L.E, B.lE), sc(L.N, B.lN)));
       B.v = [-OMEGA * B.r[1], OMEGA * B.r[0], 0];
-      bExtra = { q: 0, phase: PH.LANDED, mach: 0, heat: 0, g: 0, alpha: 0 };
     }
 
     /* ---------- second stage ---------- */
-    {
-      const S = S2;
-      const hh = nrm(S.r) - RE;
-      const ignited = t >= S.tIgn && !S.seco && S.prop > 50;
-      if (ignited && !S.on) { S.on = true; ev('S2_IGNITION', t, { alt: hh }); S.thr = 0.0; }
-      S.m = upperMass();
-      let T = 0;
-      if (S.on && !S.seco) {
-        const aLim = 3.7 * G0, cmdThr = clamp(aLim * S.m / V.mvacT, V.mvacMin, 1);
-        S.thr += (cmdThr - S.thr) * (1 - Math.exp(-DT / 0.6));
-        S.axisCmd = s2Guide(S, t);
-        T = V.mvacT * S.thr * (1 - 0 * hh);
-        S.prop = Math.max(0, S.prop - V.mvacMdot * S.thr * DT);
-        const oe = orbitElems(S.r, S.v);
-        if ((oe.a >= RE + ORB.hTarget && hh > 150000) || S.prop <= 50) {
-          S.seco = true; S.on = false; S.thr = 0; S.tSeco = t; ev('SECO', t, { alt: hh, perigee: (oe.rp - RE) / 1000, apogee: (oe.ra - RE) / 1000, inc: oe.inc, v: nrm(S.v), prop: S.prop });
-          stats.orbit = oe;
-        }
-      } else if (!S.seco) { S.thr *= Math.exp(-DT / 0.15); if (S.thr < 0.01) S.thr = 0; }
-      /* no thrust tail after SECO: propellant and thrust stop together, so the
-         reported orbit is the one the stage actually flies. */
-      if (!S.on && !S.seco && S.thr > 0) T = V.mvacT * S.thr;
-      const wmax = S.on ? 3 * D2R : 1 * D2R;
-      if (!S.on && !S.seco) S.axisCmd = unit(relVel(S.r, S.v));
-      if (S.seco) { S.axisCmd = unit(S.v); }
-      S.axis = slewAxis(S.axis, S.axisCmd, DT, wmax, 1.0); S.X = projX(S.X, S.axis);
-      rk4(S.r, S.v, t, DT, { m: S.m, cdS: 7, thrust: [S.axis[0] * T, S.axis[1] * T, S.axis[2] * T] });
-      /* fairing jettison */
-      if (!tFairDone && t >= tFairSep && S.hasFair) {
-        tFairDone = true; S.hasFair = false; ev('FAIRING_SEP', t, { alt: hh });
-        const base = add(S.r, sc(S.axis, 11.6));
-        const mk = (sgn) => { const side = sc(S.X, sgn); return { r: base.slice(), v: add(add(S.v, sc(side, 2.6)), sc(S.axis, -0.6)), axis: S.axis.slice(), roll: 0, t0: t, ax0: S.axis.slice(), X0: side.slice(), X: side.slice(), hinge: unit(crs(S.axis, side)), w: (20 + 6 * sgn) * D2R }; };
+    if (U.separated) {
+      const wasOn = U.on, wasSeco = U.seco;
+      upperStep(U, cu, t, DT);
+      U.X = projX(U.X, U.axis);
+      const hh = nrm(U.r) - RE;
+      if (!wasOn && U.on) ev('S2_IGNITION', t, { alt: hh });
+      if (!wasSeco && U.seco) {
+        const oe = orbitElems(U.r, U.v);
+        ev('SECO', t, { alt: hh, perigee: (oe.rp - RE) / 1000, apogee: (oe.ra - RE) / 1000, inc: oe.inc, v: nrm(U.v), prop: U.prop });
+        stats.orbit = oe;
+      }
+      if (cu.fair && U.hasFair) {                    /* fairing jettison */
+        U.hasFair = false; U.tFair = t; ev('FAIRING_SEP', t, { alt: hh, q: 0.5 * rhoAt(hh) * dot(relVel(U.r, U.v), relVel(U.r, U.v)) });
+        const base = add(U.r, sc(U.axis, 11.6));
+        const mk = (sgn) => { const side = sc(U.X, sgn); return { r: base.slice(), v: add(add(U.v, sc(side, 2.6)), sc(U.axis, -0.6)), axis: U.axis.slice(), roll: 0, t0: t, ax0: U.axis.slice(), X0: side.slice(), X: side.slice(), hinge: unit(crs(U.axis, side)), w: (20 + 6 * sgn) * D2R }; };
         FA = mk(1); FB = mk(-1);
       }
-      /* payload deploy */
-      if (S.seco && S.hasSat && t >= S.tSeco + 60) {
-        S.hasSat = false; tDeploy = t; ev('SAT_DEPLOY', t, { alt: hh, v: nrm(S.v) });
-        /* sits on the payload adapter at separation; the step it is born is not integrated again,
-           otherwise the stage advances a full 155 m at orbital speed before the first sample */
-        SAT = { r: add(S.r, sc(S.axis, 12.4)), v: add(S.v, sc(S.axis, 0.9)), axis: S.axis.slice(), X: S.X.slice(), roll: 0, t0: t, fresh: true };
-        S.v = add(S.v, sc(S.axis, -0.25));
+      if (cu.deploy && U.hasSat && U.seco) {          /* payload deploy: spring separation, momentum conserving */
+        U.hasSat = false; ev('SAT_DEPLOY', t, { alt: hh, v: nrm(U.v) });
+        const ms = V.sat + DSP.sat, J = 0.9 * ms;
+        SAT = { r: add(U.r, sc(U.axis, 12.4)), v: add(U.v, sc(U.axis, 0.9)), axis: U.axis.slice(), X: U.X.slice(), roll: 0, t0: t, fresh: true };
+        U.v = add(U.v, sc(U.axis, -J / upperMass(U)));
       }
-      S.omega = 0;
     }
-    /* ---------- fairing halves + satellite ---------- */
     [FA, FB].forEach(F => {
       if (!F) return;
       rk4(F.r, F.v, t, DT, { m: 450, cdS: 40 });
       const th = F.w * (t - F.t0);
       F.axis = rotAbout(F.ax0, F.hinge, th); F.X = rotAbout(F.X0, F.hinge, th);
-      F.roll = 0;
     });
     if (SAT) { if (SAT.fresh) SAT.fresh = false; else rk4(SAT.r, SAT.v, t, DT, { m: V.sat, cdS: 0 }); }
-
-    if (sampling) {
-      sampleBooster(k, t, B, bExtra); sampleS2(k, t);
-      sampleBody(TFA, k, t, FA); sampleBody(TFB, k, t, FB); sampleBody(TSAT, k, t, SAT);
-      TB.n = T2.n = TFA.n = TFB.n = TSAT.n = k + 1;
-    }
+    if (opts.stopWhen && opts.stopWhen(B, U, t)) break;
   }
   events.sort((a, b) => a.t - b.t);
-  return { t0: T0, dt: DT * SAMPLE_EVERY, n: TB.n, B: TB, S2: T2, FA: TFA, FB: TFB, SAT: TSAT, events: events, stats: stats, steerStats: steerStats,
-           final: { B: B, S2: S2 } };
+  return { t0: T0, dt: DT * SAMPLE_EVERY, n: TB.n, B: TB, S2: T2, FA: TFA, FB: TFB, SAT: TSAT, events: events, stats: stats,
+           final: { B: B, S2: U } };
 }
 
 function lzRender() { const o = [0, 0, 0]; toRender(lzBase(0), 0, o, 0); o[1] -= V.baseAboveFoot; return o; }
-root.FlightSim = { lzRender: lzRender, run: run, V: V, BP: BP, T0: T0, DT: DT, SAMPLE_EVERY: SAMPLE_EVERY, PH: PH, rhoAt: rhoAt, soundAt: soundAt, pressAt: pressAt,
-  RE: RE, OMEGA: OMEGA, MU: MU, G0: G0, LAT_S: LAT_S, LAT_L: LAT_L, DLON_L: DLON_L, tempAt: tempAt, siteFrame: siteFrame, lzFrame: lzFrame, orbitElems: orbitElems };
+root.FlightSim = { lzRender: lzRender, run: run, V: V, T0: T0, DT: DT, SAMPLE_EVERY: SAMPLE_EVERY, CTRL_EVERY: CTRL_EVERY, PH: PH, rhoAt: rhoAt, soundAt: soundAt, pressAt: pressAt,
+  RE: RE, OMEGA: OMEGA, MU: MU, G0: G0, LAT_S: LAT_S, LAT_L: LAT_L, DLON_L: DLON_L, tempAt: tempAt, siteFrame: siteFrame, lzFrame: lzFrame, orbitElems: orbitElems,
+  boosterFeatures: boosterFeatures, upperFeatures: upperFeatures, neuralController: neuralController, ENGINES: ENGINES,
+  /* internals shared with the offline training teacher (scripts/flight_policy) */
+  _: { dot, crs, nrm, add, sub, sc, unit, clamp, sstep, lerp, rotAbout, localBasis, lzBase, relVel, accel, boosterStep, boosterMass, upperMass,
+       engineThrust, boosterPhase, newBooster, DSP, D2R, R2D } };
 if (typeof module !== 'undefined') module.exports = root.FlightSim;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -907,7 +747,8 @@ function loadScript(urls){
 }
 const MSG=document.getElementById('msg');
 loadScript(['/three.min.js'])
-.then(function(){MSG.textContent='COMPUTING FLIGHT PROFILE...';return new Promise(function(r){setTimeout(r,30);});})
+.then(function(){MSG.textContent='LOADING FLIGHT POLICY...';return loadScript(['/flight-policy.js']);})
+.then(function(){MSG.textContent='NEURAL POLICY FLYING THE MISSION...';return new Promise(function(r){setTimeout(r,30);});})
 .then(function(){start();})
 .catch(function(e){MSG.textContent='Could not start: '+e.message;console.error(e);});
 
@@ -951,7 +792,8 @@ function sampleTrack(tr,t,out){
   /* engine counts, phases and landed/seco/deploy flags are states, not vectors:
      hold the frame value so a blend cannot show 4.5 engines or a premature SECO. */
   const step=tr===SIM.B?STEP_B:tr===SIM.S2?STEP_S2:STEP_BODY;
-  for(let k=0;k<step.length;k++)out[step[k]]=d[o+step[k]];
+  const discrete=u>=1?o2:o;
+  for(let k=0;k<step.length;k++)out[step[k]]=d[discrete+step[k]];
   out.idx=i;
   return out;
 }
@@ -2296,6 +2138,7 @@ function nozzleWorld(B,out,back){   /* engine exit plane centre, world */
   return out.set(B[0]-ax.x*back,B[1]-ax.y*back,B[2]-ax.z*back);
 }
 const pr0=FlightSim.pressAt(0);
+const plumeOffset=new V3(),plumeAxis=new V3();
 function updatePlume(B,Sx,t,tr,camPos){
   const hB=Math.hypot(B[0],B[1]-EC_Y,B[2])-RE;
   const pr=clamp(FlightSim.pressAt(Math.max(hB,0))/pr0,0,1.2);
@@ -2313,8 +2156,20 @@ function updatePlume(B,Sx,t,tr,camPos){
   const hS=Sx[15];
   const prS=clamp(FlightSim.pressAt(Math.max(hS,0))/pr0,0,1.2),XpS=1/(0.14+0.86*Math.sqrt(prS)),thS=Sx[7],onS=Sx[8]>0.5&&thS>0.01;
   PU2.uTime.value=tr;PU2.uThr.value=thS;PU2.uAmb.value=prS;PU2.uXp.value=XpS;
-  PU2.uLen.value=lerp(18,48,thS)*(0.6+0.4*Math.min(XpS,3));PU2.uDiam.value=clamp(prS*1.5,0,1);PU2.uGain.value=0.5;
-  plume2.visible=onS&&s2.visible;
+  let s2Length=lerp(18,48,thS)*(0.6+0.4*Math.min(XpS,3));
+  /* Visual plume only: keep it outside the nearby booster's bounding sphere. */
+  plumeAxis.set(Sx[3],Sx[4],Sx[5]).normalize();
+  plumeOffset.set(B[0]+B[3]*19.6-Sx[0]+plumeAxis.x*2.7,
+                  B[1]+B[4]*19.6-Sx[1]+plumeAxis.y*2.7,
+                  B[2]+B[5]*19.6-Sx[2]+plumeAxis.z*2.7);
+  const along=-plumeOffset.dot(plumeAxis),side2=plumeOffset.lengthSq()-along*along,radius=20.5;
+  if(along>0&&side2<radius*radius)s2Length=Math.min(s2Length,Math.max(0,along-Math.sqrt(radius*radius-side2)-2));
+  /* A clipped vacuum plume must not become a short, fat, opaque blob: shrink its expansion and
+     fade it in proportion to how much of it is shown, as it grows clear of the booster. */
+  const shown=clamp(s2Length/Math.max(lerp(18,48,thS)*(0.6+0.4*Math.min(XpS,3)),1),0,1);
+  PU2.uXp.value=1+(XpS-1)*shown*shown;
+  PU2.uLen.value=s2Length;PU2.uDiam.value=clamp(prS*1.5,0,1);PU2.uGain.value=0.5*shown*(0.22+0.78*clamp(prS*4,0,1));   /* vacuum plumes are wide but faint */
+  plume2.visible=onS&&s2.visible&&s2Length>3;
   bloom2.material.opacity=onS?clamp(thS*0.5,0,1):0;bloom2.scale.setScalar(9+5*thS);
   /* lights */
   const dB=camPos.distanceTo(_a.set(B[0]-ORG.x,B[1]-ORG.y,B[2]-ORG.z));
@@ -2704,6 +2559,9 @@ function updateEnvironment(t,tr){
   sky.position.copy(camera.position);
   skyUniforms.uCloudAmt.value=sstep(14000,50000,camH);
   const near=camH<60000;
+  /* The local terrain is a finite patch, not a horizon: use the Earth sky
+     background above it so its boundary and pad buildings cannot fill the view. */
+  WG.visible=camH<30000;
   ocean.visible=near;land.visible=near;
   oceanUniforms.uCam.value.copy(camera.position);oceanUniforms.uOrg.value=ORG;
   WG.position.set(-ORG.x,-ORG.y,-ORG.z);
@@ -2727,14 +2585,14 @@ function updateEnvironment(t,tr){
 
 /* ================= HUD / UI ================= */
 const $=id=>document.getElementById(id);
-const el={};['alt','altu','spd2','vv','mach','q','gl','dlz','dlzu','eng','thr','thrb','prop','propb','bst','s2alt','s2v','s2dr','s2p','s2st','orb','clock','phase','next','scrub','ticks','tnow','pp'].forEach(k=>el[k]=$(k));
-const EVLAB={LIFTOFF:['LIFTOFF',0],MAX_Q:['MAX-Q',1],MECO:['MECO / SEP',0],STAGE_SEP:['',0],S2_IGNITION:['',0],BOOSTBACK_START:['BOOSTBACK',1],FAIRING_SEP:['FAIRING',0],BB_END:['',0],APOGEE:['APOGEE',1],ENTRY_BURN:['ENTRY BURN',0],ENTRY_END:['',0],LANDING_BURN:['LAND BURN',0],TOUCHDOWN:['TOUCHDOWN',1],SECO:['SECO',0],SAT_DEPLOY:['SAT DEPLOY',1]};
+const el={};['alt','altu','spd2','vv','vvlabel','mach','q','grav','gl','dlz','dlzu','eng','thr','thrb','prop','propb','bst','s2alt','s2v','s2dr','s2p','s2st','orb','clock','phase','next','scrub','ticks','tnow','pp'].forEach(k=>el[k]=$(k));
+const EVLAB={LIFTOFF:['LIFTOFF',0],MAX_Q:['MAX-Q',1],MECO:['MECO',0],STAGE_SEP:['STAGE SEP',1],S2_IGNITION:['S2 IGNITION',0],BOOSTBACK_START:['BOOSTBACK',1],FAIRING_SEP:['FAIRING',0],BB_END:['',0],APOGEE:['APOGEE',1],ENTRY_BURN:['ENTRY BURN',0],ENTRY_END:['',0],LANDING_BURN:['LAND BURN',0],TOUCHDOWN:['TOUCHDOWN',1],SECO:['SECO',0],SAT_DEPLOY:['SAT DEPLOY',1]};
 const EVNAME={LIFTOFF:'LIFTOFF',MAX_Q:'MAX-Q',MECO:'MAIN ENGINE CUTOFF',STAGE_SEP:'STAGE SEPARATION',S2_IGNITION:'STAGE 2 IGNITION',BOOSTBACK_START:'BOOSTBACK BURN',FAIRING_SEP:'FAIRING SEPARATION',BB_END:'BOOSTBACK CUTOFF',APOGEE:'BOOSTER APOGEE',ENTRY_BURN:'ENTRY BURN',ENTRY_END:'ENTRY BURN END',LANDING_BURN:'LANDING BURN',TOUCHDOWN:'TOUCHDOWN',SECO:'STAGE 2 ORBIT INSERTION',SAT_DEPLOY:'SATELLITE DEPLOY'};
 el.scrub.min=SIMT0;el.scrub.max=T_END;
 const span=T_END-SIMT0;
 SIM.events.forEach(e=>{
   const L=EVLAB[e.name];if(!L||!L[0])return;
-  const i=document.createElement('i');i.textContent=L[0];i.style.left=((e.t-SIMT0)/span*100)+'%';if(L[1])i.className='lo';
+  const i=document.createElement('i');i.textContent=L[0];i.title=L[0];i.style.left=((e.t-SIMT0)/span*100)+'%';if(L[1])i.className='lo';
   i.addEventListener('click',()=>{seek(e.t-3);});el.ticks.appendChild(i);
 });
 function fmtClock(t){const s=Math.abs(t),h=Math.floor(s/3600),m=Math.floor(s%3600/60),sec=Math.floor(s%60);return (t<0?'T-':'T+')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}
@@ -2753,8 +2611,10 @@ function updateHUD(t){
   const spd=Math.hypot(B[22],B[23],B[24]),vv=B[22]*upH.x+B[23]*upH.y+B[24]*upH.z;
   el.spd2.textContent=spd.toFixed(spd<100?1:0);
   el.vv.textContent=(vv>=0?'+':'')+vv.toFixed(Math.abs(vv)<100?1:0);
+  el.vvlabel.textContent=B[28]>0.5?'VERTICAL SPEED':vv>1?'ASCENDING':vv< -1?'DESCENDING':'VERTICAL SPEED';
   el.mach.textContent=B[21].toFixed(2);
   el.q.textContent=(B[11]/1000).toFixed(1);
+  el.grav.textContent=(FlightSim.MU/Math.pow(RE+Math.max(hB,0),2)).toFixed(2);
   el.gl.textContent=B[26].toFixed(1);
   const dl=Math.hypot(B[0]-LZW[0],B[1]-LZW[1],B[2]-LZW[2]);
   if(dl<5000){el.dlz.textContent=dl.toFixed(0);el.dlzu.textContent='m';}else{el.dlz.textContent=(dl/1000).toFixed(dl<100000?2:1);el.dlzu.textContent='km';}

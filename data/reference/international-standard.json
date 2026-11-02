@@ -1,0 +1,169 @@
+{
+  "schema": "rocket-lab.international-standard/1",
+  "revision": "2026-11-02",
+  "scope": "Public-data anchors for the browser Falcon 9-class RTLS replay. This is a modeled educational simulator, not flight certification and not official SpaceX flight data.",
+  "units": "SI; WGS-84 geographic coordinates; geopotential layer altitudes in metres",
+  "earth": {
+    "geodetic_system": "WGS 84",
+    "semi_major_axis_m": 6378137,
+    "flattening": 0.0033528106647474805,
+    "mean_radius_m": 6371008.8,
+    "gm_m3_s2": 398600441800000,
+    "angular_velocity_rad_s": 0.00007292115,
+    "standard_gravity_m_s2": 9.80665,
+    "model": "WGS-84 GM and rotation on a spherical mean-radius Earth; the WGS-84 ellipsoid is not integrated."
+  },
+  "atmosphere": {
+    "standard": "ISO 2533:1975 / U.S. Standard Atmosphere 1976",
+    "top_geopotential_m": 84852,
+    "model": "Layered barometric model below 84.852 km geopotential; tabulated density extension above it.",
+    "checks": [
+      {
+        "geopotential_altitude_m": 0,
+        "temperature_k": 288.15,
+        "pressure_pa": 101325,
+        "density_kg_m3": 1.225,
+        "speed_of_sound_m_s": 340.294
+      },
+      {
+        "geopotential_altitude_m": 11000,
+        "temperature_k": 216.65,
+        "pressure_pa": 22632.06,
+        "density_kg_m3": 0.363918,
+        "speed_of_sound_m_s": 295.07
+      },
+      {
+        "geopotential_altitude_m": 20000,
+        "temperature_k": 216.65,
+        "pressure_pa": 5474.89,
+        "density_kg_m3": 0.0880349,
+        "speed_of_sound_m_s": 295.07
+      },
+      {
+        "geopotential_altitude_m": 32000,
+        "temperature_k": 228.65,
+        "pressure_pa": 868.019,
+        "density_kg_m3": 0.013225,
+        "speed_of_sound_m_s": 301.7
+      },
+      {
+        "geopotential_altitude_m": 47000,
+        "temperature_k": 270.65,
+        "pressure_pa": 110.906,
+        "density_kg_m3": 0.001427,
+        "speed_of_sound_m_s": 329.8
+      },
+      {
+        "geopotential_altitude_m": 51000,
+        "temperature_k": 270.65,
+        "pressure_pa": 66.9389,
+        "density_kg_m3": 0.000861,
+        "speed_of_sound_m_s": 329.8
+      },
+      {
+        "geopotential_altitude_m": 71000,
+        "temperature_k": 214.65,
+        "pressure_pa": 3.95642,
+        "density_kg_m3": 0.00006421,
+        "speed_of_sound_m_s": 293.7
+      },
+      {
+        "geopotential_altitude_m": 84852,
+        "temperature_k": 186.946,
+        "pressure_pa": 0.3734,
+        "density_kg_m3": 0.000006958
+      }
+    ]
+  },
+  "vehicle": {
+    "name": "Falcon 9 Block 5",
+    "public": {
+      "height_m": 70,
+      "diameter_m": 3.7,
+      "liftoff_mass_kg": 549054,
+      "payload_leo_kg": 22800,
+      "payload_gto_kg": 8300,
+      "stage1_engine_count": 9,
+      "stage1_propellant_kg": 411000,
+      "stage1_thrust_sl_n": 845000,
+      "stage1_thrust_vac_n": 914000,
+      "stage1_isp_sl_s": 282,
+      "stage1_isp_vac_s": 311,
+      "stage2_engine_count": 1,
+      "stage2_propellant_kg": 107500,
+      "stage2_thrust_vac_n": 981000,
+      "stage2_isp_vac_s": 348,
+      "fairing_diameter_m": 5.2,
+      "fairing_length_m": 13.1
+    },
+    "modeled": {
+      "note": "Stage dry masses, fairing mass, payload, drag and guidance are modeled. The check verifies public anchors and mass closure, not every internal parameter.",
+      "stage1_dry_kg": 22200,
+      "stage2_dry_kg": 4000,
+      "fairing_mass_kg": 1900,
+      "payload_kg": 7000
+    }
+  },
+  "mission": {
+    "launch_site": {
+      "name": "SLC-40, Cape Canaveral",
+      "lat_deg": 28.5619,
+      "lon_deg": -80.5773
+    },
+    "landing_zone": {
+      "name": "LZ-1",
+      "lat_deg": 28.48583,
+      "lon_deg": -80.54444
+    },
+    "default_orbit": {
+      "semi_major_axis_altitude_km": 300,
+      "inclination_deg": 39.9,
+      "payload_kg": 7000
+    },
+    "model_output": {
+      "meco_altitude_m": 71934.8875,
+      "meco_speed_m_s": 1781.1037,
+      "booster_apogee_m": 183893.9516,
+      "insertion_perigee_km": 269.9404,
+      "insertion_apogee_km": 340.9019,
+      "insertion_inclination_deg": 39.5414,
+      "insertion_eccentricity": 0.0053,
+      "touchdown_vertical_m_s": -1.7626,
+      "touchdown_horizontal_m_s": 0.032,
+      "touchdown_tilt_deg": 0.103,
+      "touchdown_offset_m": 0.2222
+    }
+  },
+  "sources": [
+    {
+      "title": "SpaceX - Falcon 9",
+      "url": "https://www.spacex.com/vehicles/falcon-9",
+      "used_for": "height, diameter, liftoff mass, payload, nine-engine first stage"
+    },
+    {
+      "title": "SpaceX - Falcon User's Guide (2025-05-09)",
+      "url": "https://www.spacex.com/assets/media/falcon-users-guide-2025-05-09.pdf",
+      "used_for": "public vehicle and mission reference; no proprietary flight data used"
+    },
+    {
+      "title": "NGA - World Geodetic System 1984",
+      "url": "https://earth-info.nga.mil/GandG/wgs84/index.html",
+      "used_for": "WGS-84 defining constants and coordinate system"
+    },
+    {
+      "title": "ISO 2533:1975 - Standard Atmosphere",
+      "url": "https://www.iso.org/standard/7472.html",
+      "used_for": "standard-atmosphere temperature and pressure layers"
+    },
+    {
+      "title": "NOAA - U.S. Standard Atmosphere, 1976",
+      "url": "https://www.ngdc.noaa.gov/stp/space-weather/online-publications/miscellaneous/us-standard-atmosphere-1976/us-standard-atmosphere_st76-1562_noaa.pdf",
+      "used_for": "layer values and high-altitude density table"
+    },
+    {
+      "title": "NASA - Specific Impulse",
+      "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/specific-impulse/",
+      "used_for": "Isp and propellant-flow relation"
+    }
+  ]
+}

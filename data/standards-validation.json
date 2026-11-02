@@ -1,0 +1,475 @@
+{
+  "schema": "rocket-lab.standards-validation/1",
+  "reference": "data/reference/international-standard.json",
+  "passed": true,
+  "checks": [
+    {
+      "name": "WGS-84 GM",
+      "actual": 398600441800000,
+      "expected": 398600441800000,
+      "tolerance": 398600.44180000003,
+      "unit": " m3/s2",
+      "ok": true
+    },
+    {
+      "name": "WGS-84 mean radius",
+      "actual": 6371008.8,
+      "expected": 6371008.8,
+      "tolerance": 0.0063710088,
+      "unit": " m",
+      "ok": true
+    },
+    {
+      "name": "WGS-84 rotation rate",
+      "actual": 0.00007292115,
+      "expected": 0.00007292115,
+      "tolerance": 7.292115e-14,
+      "unit": " rad/s",
+      "ok": true
+    },
+    {
+      "name": "standard gravity",
+      "actual": 9.80665,
+      "expected": 9.80665,
+      "tolerance": 1e-12,
+      "unit": " m/s2",
+      "ok": true
+    },
+    {
+      "name": "stage 1 propellant",
+      "actual": 411000,
+      "expected": 411000,
+      "tolerance": 4110,
+      "unit": " kg",
+      "ok": true
+    },
+    {
+      "name": "stage 2 propellant",
+      "actual": 107500,
+      "expected": 107500,
+      "tolerance": 1075,
+      "unit": " kg",
+      "ok": true
+    },
+    {
+      "name": "stage 1 vacuum thrust (9 engines)",
+      "actual": 8226000,
+      "expected": 8226000,
+      "tolerance": 41130,
+      "unit": " N",
+      "ok": true
+    },
+    {
+      "name": "stage 1 sea-level thrust (9 engines)",
+      "actual": 7605891,
+      "expected": 7605000,
+      "tolerance": 38025,
+      "unit": " N",
+      "ok": true
+    },
+    {
+      "name": "Merlin 1D vacuum Isp",
+      "actual": 310.9845240780202,
+      "expected": 311,
+      "tolerance": 3.11,
+      "unit": " s",
+      "ok": true
+    },
+    {
+      "name": "MVac vacuum thrust",
+      "actual": 981000,
+      "expected": 981000,
+      "tolerance": 4905,
+      "unit": " N",
+      "ok": true
+    },
+    {
+      "name": "MVac vacuum Isp",
+      "actual": 347.94490606307744,
+      "expected": 348,
+      "tolerance": 3.48,
+      "unit": " s",
+      "ok": true
+    },
+    {
+      "name": "reference area from 3.7 m diameter",
+      "actual": 10.52,
+      "expected": 10.752100856911069,
+      "tolerance": 0.32256302570733203,
+      "unit": " m2",
+      "ok": true
+    },
+    {
+      "name": "model liftoff mass closure",
+      "actual": 546600,
+      "expected": 549054,
+      "tolerance": 5490.54,
+      "unit": " kg",
+      "ok": true
+    },
+    {
+      "name": "0 m geopotential temperature",
+      "actual": 288.15,
+      "expected": 288.15,
+      "tolerance": 1.44075,
+      "unit": " K",
+      "ok": true
+    },
+    {
+      "name": "0 m geopotential pressure",
+      "actual": 101325,
+      "expected": 101325,
+      "tolerance": 2026.5,
+      "unit": " Pa",
+      "ok": true
+    },
+    {
+      "name": "0 m geopotential density",
+      "actual": 1.225,
+      "expected": 1.225,
+      "tolerance": 0.030625000000000003,
+      "unit": " kg/m3",
+      "ok": true
+    },
+    {
+      "name": "0 m geopotential sound speed",
+      "actual": 340.293988026089,
+      "expected": 340.294,
+      "tolerance": 3.40294,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "11000 m geopotential temperature",
+      "actual": 216.64999999999998,
+      "expected": 216.65,
+      "tolerance": 1.08325,
+      "unit": " K",
+      "ok": true
+    },
+    {
+      "name": "11000 m geopotential pressure",
+      "actual": 22632.040095007786,
+      "expected": 22632.06,
+      "tolerance": 452.6412,
+      "unit": " Pa",
+      "ok": true
+    },
+    {
+      "name": "11000 m geopotential density",
+      "actual": 0.36391764810160326,
+      "expected": 0.363918,
+      "tolerance": 0.00909795,
+      "unit": " kg/m3",
+      "ok": true
+    },
+    {
+      "name": "11000 m geopotential sound speed",
+      "actual": 295.0694935090715,
+      "expected": 295.07,
+      "tolerance": 2.9507,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "20000 m geopotential temperature",
+      "actual": 216.65,
+      "expected": 216.65,
+      "tolerance": 1.08325,
+      "unit": " K",
+      "ok": true
+    },
+    {
+      "name": "20000 m geopotential pressure",
+      "actual": 5474.89,
+      "expected": 5474.89,
+      "tolerance": 109.49780000000001,
+      "unit": " Pa",
+      "ok": true
+    },
+    {
+      "name": "20000 m geopotential density",
+      "actual": 0.08803488700315955,
+      "expected": 0.0880349,
+      "tolerance": 0.0022008725,
+      "unit": " kg/m3",
+      "ok": true
+    },
+    {
+      "name": "20000 m geopotential sound speed",
+      "actual": 295.0694935090715,
+      "expected": 295.07,
+      "tolerance": 2.9507,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "32000 m geopotential temperature",
+      "actual": 228.65,
+      "expected": 228.65,
+      "tolerance": 1.14325,
+      "unit": " K",
+      "ok": true
+    },
+    {
+      "name": "32000 m geopotential pressure",
+      "actual": 868.019,
+      "expected": 868.019,
+      "tolerance": 17.36038,
+      "unit": " Pa",
+      "ok": true
+    },
+    {
+      "name": "32000 m geopotential density",
+      "actual": 0.013225013755774085,
+      "expected": 0.013225,
+      "tolerance": 0.000330625,
+      "unit": " kg/m3",
+      "ok": true
+    },
+    {
+      "name": "32000 m geopotential sound speed",
+      "actual": 303.13115019030954,
+      "expected": 301.7,
+      "tolerance": 3.017,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "47000 m geopotential temperature",
+      "actual": 270.65,
+      "expected": 270.65,
+      "tolerance": 1.3532499999999998,
+      "unit": " K",
+      "ok": true
+    },
+    {
+      "name": "47000 m geopotential pressure",
+      "actual": 110.9059999999999,
+      "expected": 110.906,
+      "tolerance": 2.2181200000000003,
+      "unit": " Pa",
+      "ok": true
+    },
+    {
+      "name": "47000 m geopotential density",
+      "actual": 0.0014275295838985485,
+      "expected": 0.001427,
+      "tolerance": 0.000035675000000000007,
+      "unit": " kg/m3",
+      "ok": true
+    },
+    {
+      "name": "47000 m geopotential sound speed",
+      "actual": 329.79873100377444,
+      "expected": 329.8,
+      "tolerance": 3.298,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "51000 m geopotential temperature",
+      "actual": 270.65,
+      "expected": 270.65,
+      "tolerance": 1.3532499999999998,
+      "unit": " K",
+      "ok": true
+    },
+    {
+      "name": "51000 m geopotential pressure",
+      "actual": 66.9389,
+      "expected": 66.9389,
+      "tolerance": 1.338778,
+      "unit": " Pa",
+      "ok": true
+    },
+    {
+      "name": "51000 m geopotential density",
+      "actual": 0.0008616058649994287,
+      "expected": 0.000861,
+      "tolerance": 0.000021525,
+      "unit": " kg/m3",
+      "ok": true
+    },
+    {
+      "name": "51000 m geopotential sound speed",
+      "actual": 329.79873100377444,
+      "expected": 329.8,
+      "tolerance": 3.298,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "71000 m geopotential temperature",
+      "actual": 214.65,
+      "expected": 214.65,
+      "tolerance": 1.07325,
+      "unit": " K",
+      "ok": true
+    },
+    {
+      "name": "71000 m geopotential pressure",
+      "actual": 3.95642,
+      "expected": 3.95642,
+      "tolerance": 0.0791284,
+      "unit": " Pa",
+      "ok": true
+    },
+    {
+      "name": "71000 m geopotential density",
+      "actual": 0.00006421102496912219,
+      "expected": 0.00006421,
+      "tolerance": 0.00000160525,
+      "unit": " kg/m3",
+      "ok": true
+    },
+    {
+      "name": "71000 m geopotential sound speed",
+      "actual": 293.7043717136332,
+      "expected": 293.7,
+      "tolerance": 2.937,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "84852 m geopotential temperature",
+      "actual": 186.946,
+      "expected": 186.946,
+      "tolerance": 0.9347300000000001,
+      "unit": " K",
+      "ok": true
+    },
+    {
+      "name": "84852 m geopotential pressure",
+      "actual": 0.3734,
+      "expected": 0.3734,
+      "tolerance": 0.007468000000000001,
+      "unit": " Pa",
+      "ok": true
+    },
+    {
+      "name": "84852 m geopotential density",
+      "actual": 0.000006958189353686369,
+      "expected": 0.000006958,
+      "tolerance": 1.7395000000000002e-7,
+      "unit": " kg/m3",
+      "ok": true
+    },
+    {
+      "name": "SLC-40 latitude",
+      "actual": 28.5619,
+      "expected": 28.5619,
+      "tolerance": 0.001,
+      "unit": " deg",
+      "ok": true
+    },
+    {
+      "name": "LZ-1 latitude",
+      "actual": 28.48583,
+      "expected": 28.48583,
+      "tolerance": 0.001,
+      "unit": " deg",
+      "ok": true
+    },
+    {
+      "name": "LZ-1 longitude offset",
+      "actual": 0.03286,
+      "expected": 0.032859999999999445,
+      "tolerance": 0.001,
+      "unit": " deg",
+      "ok": true
+    },
+    {
+      "name": "MECO altitude",
+      "actual": 71934.88752407208,
+      "expected": 71934.8875,
+      "tolerance": 1438.69775,
+      "unit": " m",
+      "ok": true
+    },
+    {
+      "name": "MECO speed",
+      "actual": 1781.1036846298614,
+      "expected": 1781.1037,
+      "tolerance": 35.622074,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "insertion perigee",
+      "actual": 269.940404497629,
+      "expected": 269.9404,
+      "tolerance": 8.098212,
+      "unit": " km",
+      "ok": true
+    },
+    {
+      "name": "insertion apogee",
+      "actual": 340.90192223382087,
+      "expected": 340.9019,
+      "tolerance": 10.227057,
+      "unit": " km",
+      "ok": true
+    },
+    {
+      "name": "insertion inclination",
+      "actual": 39.541449740942646,
+      "expected": 39.5414,
+      "tolerance": 0.5,
+      "unit": " deg",
+      "ok": true
+    },
+    {
+      "name": "insertion eccentricity",
+      "actual": 0.00531433102163623,
+      "expected": 0.0053,
+      "tolerance": 0.01,
+      "unit": "",
+      "ok": true
+    },
+    {
+      "name": "touchdown vertical speed",
+      "actual": -1.7626220716459353,
+      "expected": -1.7626,
+      "tolerance": 0.2,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "touchdown horizontal speed",
+      "actual": 0.03199502875560657,
+      "expected": 0.032,
+      "tolerance": 0.1,
+      "unit": " m/s",
+      "ok": true
+    },
+    {
+      "name": "touchdown tilt",
+      "actual": 0.10300720331970924,
+      "expected": 0.103,
+      "tolerance": 0.5,
+      "unit": " deg",
+      "ok": true
+    },
+    {
+      "name": "touchdown pad offset",
+      "actual": 0.22221643751970535,
+      "expected": 0.2222,
+      "tolerance": 3,
+      "unit": " m",
+      "ok": true
+    }
+  ],
+  "model": {
+    "meco_altitude_m": 71934.88752407208,
+    "meco_speed_m_s": 1781.1036846298614,
+    "insertion_perigee_km": 269.940404497629,
+    "insertion_apogee_km": 340.90192223382087,
+    "insertion_inclination_deg": 39.541449740942646,
+    "insertion_eccentricity": 0.00531433102163623,
+    "touchdown_vertical_m_s": -1.7626220716459353,
+    "touchdown_horizontal_m_s": 0.03199502875560657,
+    "touchdown_tilt_deg": 0.10300720331970924,
+    "touchdown_offset_m": 0.22221643751970535
+  }
+}

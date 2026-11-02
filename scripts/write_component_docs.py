@@ -81,7 +81,7 @@ def main():
     for slug,(title,what,formula,why,questions) in TOPICS.items():
         text=f"# {title}\n\n## What it does\n\n{what}\n\n## Why this approach\n\n{why}\n\n## Key formulas\n\n```text\n{formula}\n```\n\n## Five interview questions\n\n"
         for i,(q,a) in enumerate(questions,1):text+=f"{i}. **{q}** {a}\n\n"
-        text+="## Evidence and further reading\n\nSee [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the actual validation record in [VALIDATION.md](VALIDATION.md).\n"
+        text+="## Evidence and further reading\n\nSee [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the validation history in [HISTORY.md](HISTORY.md).\n"
         (folder/f"{slug}.md").write_text(text,encoding="utf-8");links.append(f"- [{title}]({slug}.md)")
-    (folder/"README.md").write_text("# Flight manual\n\n"+"\n".join(links)+"\n\n- [Research sources](RESEARCH.md)\n- [Validation record](VALIDATION.md)\n",encoding="utf-8")
+    (folder/"README.md").write_text("# Flight manual\n\n"+"\n".join(links)+"\n\n- [Research sources](RESEARCH.md)\n- [Project history](HISTORY.md)\n",encoding="utf-8")
 if __name__=="__main__":main()

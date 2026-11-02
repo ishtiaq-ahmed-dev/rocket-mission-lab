@@ -55,7 +55,12 @@ def test_body_fixed_gimbal_torque_does_not_invent_roll():
 
 def test_suborbital_profile_has_distinct_vehicle_gravity_and_budget():
     from rocket_lab.missions import configure_flight
+    from rocket_lab.propulsion import engine_performance
     cfg,plan=configure_flight(load_config(),dict(profile='suborbital',separation_altitude=100000),'combined')
     assert cfg['vehicle']['fuel_mass']==140000 and cfg['mission']['timeout']>=1000
+    for altitude in (0,100000):
+        thrust,isp=engine_performance(cfg['world'],cfg['vehicle'],1.,altitude)
+        assert thrust==pytest.approx(3200000.)
+        assert isp==pytest.approx(360.)
     assert gravity_at(cfg['world'],100000)<gravity_at(cfg['world'],0)
     assert gravity_at(cfg['world'],100000)==pytest.approx(9.80665*(6371000/6471000)**2)
