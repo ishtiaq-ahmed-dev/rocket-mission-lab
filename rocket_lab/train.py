@@ -56,7 +56,7 @@ class TrainingCallback(BaseCallback):
                     device=str(self.model.device),seed=self.model.seed,difficulty=self.difficulty,
                     episode_count=self.episode_count,recent_successes=sum(self.recent),recent_episodes=len(self.recent),
                     curve=self.curve,episodes=self.history[-400:],error=error or self.stop_reason,pid=os.getpid(),config_hash=self.training_hash,
-                    exploration_std=float(np.exp(self.model.policy.log_std.detach().mean())) if hasattr(self.model.policy,'log_std') else None,
+                    exploration_std=float(self.model.policy.log_std.detach().mean().exp().cpu().item()) if hasattr(self.model.policy,'log_std') else None,
                     stage_probe=self.stage_probe,
                     **self.optimizer_health()))
 
@@ -315,7 +315,7 @@ def train(mission="landing",algorithm="PPO",steps=100000,seed=42,device="auto",j
     atomic_json(folder/'resource-policy.json',resource_policy)
     atomic_json(folder/"config.json",cfg)
     source_folder=folder/"source";source_folder.mkdir(exist_ok=True)
-    source_names=["physics.py","envs.py","train.py","simulation.py","controllers.py","storage.py","config.py","evaluate.py","schemas.py","policies.py","missions.py","atmosphere.py","resources.py"]
+    source_names=["physics.py","envs.py","train.py","simulation.py","controllers.py","storage.py","config.py","evaluate.py","schemas.py","policies.py","missions.py","atmosphere.py","propulsion.py","resources.py"]
     source_hash=hashlib.sha256()
     for name in source_names:
         source=ROOT/"rocket_lab"/name;source_hash.update(source.read_bytes());shutil.copyfile(source,source_folder/name)

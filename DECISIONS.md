@@ -81,3 +81,14 @@
 - Bind new run IDs and current result views to source/configuration identity, retaining earlier measurements as historical records.
 - Treat 100 million steps as a shared upper budget for measured three-mission training. Keep pure learned policies separate from classical control and require a separate nominal qualification gate.
 - A Start-Process worker disappeared during validation. Recover durable checkpoints, account for consumed/lost rollout steps, and use an independent hidden WMI worker on Windows. Real API dispatch and survival across web-server restart were observed; reboot and long unattended qualification remain open.
+
+
+## 2 November 2026 — neural flight policy and physical return profile
+
+- The replay is flown only by a trained network (`frontend/public/flight-policy.js`). The page holds physics, actuator limits and the network; scripted guidance moved to an offline training teacher in `scripts/flight_policy/`. Phase names are read out of the vehicle state and never select behaviour.
+- Train by imitation of a state-feedback teacher with DAgger rather than RL from scratch: earlier sparse-reward RL never qualified on the far simpler subscale task. Reliability is reported as a measured closed-loop rate on unseen dispersed seeds, alongside the teacher on the same seeds.
+- Boostback thrust is horizontal. The earlier -14° pitch pushed the booster toward the ground. The higher apogee this causes is absorbed by a stronger, longer entry burn (3 engines, 80 %), as Falcon 9 does.
+- Stage separation conserves momentum (1.8 m/s relative pusher speed split by mass). An engine must finish its shutdown tail-off before it can relight.
+- Landing burn: ignition and throttle use a closed-form stopping law with v²-drag; side steering uses the signed net side-force gain because an engine-first body's aerodynamic normal force reverses steering at high dynamic pressure. Glide steering targets the predicted touchdown point, not an aim altitude, and adds no baseline lift.
+- Second-stage insertion is closed-loop (altitude and climb rate to zero as speed nears circular) instead of an open-loop pitch table, so dispersed MECO conditions still reach orbit.
+- Stale experiment archives (tracked result/run/evaluation/qualification/probe files from superseded snapshots) were removed from the repository; dated revision notes were merged into `docs/HISTORY.md`. Large local artifacts (`data/checkpoints/`, `data/models/`) stay ignored and untouched.

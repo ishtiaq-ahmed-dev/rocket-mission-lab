@@ -35,7 +35,7 @@ def config_hash(config=None):
     return hashlib.sha256(json.dumps(config,sort_keys=True,separators=(',',':')).encode()).hexdigest()[:16]
 
 def dynamics_hash():
-    names=('physics.py','envs.py','controllers.py','simulation.py','missions.py','atmosphere.py')
+    names=('physics.py','envs.py','controllers.py','simulation.py','missions.py','atmosphere.py','propulsion.py')
     return hashlib.sha256(b''.join((ROOT/'rocket_lab'/name).read_bytes() for name in names)).hexdigest()
 
 def runs():

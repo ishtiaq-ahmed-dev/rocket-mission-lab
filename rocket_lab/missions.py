@@ -17,7 +17,9 @@ def configure_flight(config, flight_plan=None, mission='landing'):
     if plan.profile=='suborbital':
         # A separate generic vehicle sizing, never stretch the 16 t reserve
         # demonstration into a spaceflight by scaling its animation clock.
-        cfg['vehicle'].update(fuel_mass=140000.,max_thrust=3200000.,min_throttle=.06,isp=360.)
+        # This generic vehicle has no specified pressure-dependent engine parameters.
+        cfg['vehicle'].update(fuel_mass=140000.,max_thrust=3200000.,thrust_vacuum=3200000.,
+                              nozzle_exit_area=0.,min_throttle=.06,isp=360.,isp_sea_level=360.,isp_vacuum=360.)
         cfg['world'].update(gravity_model='inverse_square',earth_radius=6371000.,atmosphere_model='layered')
         m.update(takeoff_velocity=min(1500.,(24*plan.separation_altitude)**.5),takeoff_acceleration=18.,timeout=1200.,bounds=500000.,
                  high_altitude_recovery=True,launch=list(plan.launch),pad=[*plan.landing,0.],

@@ -31,4 +31,4 @@ u = -R^-1 B^T P x
 
 ## Evidence and further reading
 
-See [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the actual validation record in [VALIDATION.md](VALIDATION.md).
+See [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the validation history in [HISTORY.md](HISTORY.md).

@@ -52,3 +52,14 @@ Numbers come from saved simulation records or evaluation CSV files. A curve with
 | [ISO 2533:1975](https://www.iso.org/standard/7472.html) | Layered standard-atmosphere temperature and pressure | ISO 2533's lower atmosphere is extended with the U.S. 1976 layer top and upper density table |
 | [U.S. Standard Atmosphere 1976](https://www.ngdc.noaa.gov/stp/space-weather/online-publications/miscellaneous/us-standard-atmosphere-1976/us-standard-atmosphere_st76-1562_noaa.pdf) | Geopotential layers and high-altitude density | A table extension above 84.852 km is for drag only, not a full thermosphere model |
 | [NASA specific impulse](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/specific-impulse/) | `mdot = T / (Isp * g0)` and pressure-dependent thrust | No chamber/nozzle transient or mixture-ratio model |
+
+## Neural flight policy and return profile (2 November 2026)
+
+| Source | Applied decision | Important limit |
+| --- | --- | --- |
+| [NASA Falcon 9 launch and landing sequence](https://www.nasa.gov/wp-content/uploads/2020/08/falcon9_launch_and_landing.pdf) | Phase order: MECO, separation, flip, boostback, coast, entry burn, aerodynamic guidance, single-engine landing burn | Public overview, not GNC data |
+| [Spaceflight101: Falcon 9 / Jason-3 flight data](https://spaceflight101.com/?p=8846) | Entry burn near 60-70 km at a few km/s, about 20 s, removing about 560 m/s | One mission's webcast-derived telemetry |
+| [Spaceflight Now: Falcon 9 timeline](https://spaceflightnow.com/2016/04/07/timeline-for-the-falcon-9-rockets-23rd-flight/) | Boostback with three engines; event timing | Mission-specific |
+| [Ross, Gordon, Bagnell 2011, DAgger](https://arxiv.org/abs/1011.0686) | Aggregate teacher labels on states the learner reaches | Bounded by teacher quality and coverage |
+| [Laskey et al. 2017, DART](https://arxiv.org/abs/1703.09327) | Inject noise into demonstrations so the teacher shows recoveries | Noise level is a tuning choice |
+| Zero-effort-miss / zero-effort-velocity and closed-form drag stopping | Teacher landing burn: ignition and throttle from the v²-drag stopping distance; side steering with the signed thrust-minus-normal-force gain | Point-mass, first-order attitude |

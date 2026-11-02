@@ -35,4 +35,4 @@ A_GAE = sum_l (gamma*lambda)^l * delta_(t+l)
 
 ## Evidence and further reading
 
-See [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the actual validation record in [VALIDATION.md](VALIDATION.md).
+See [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the validation history in [HISTORY.md](HISTORY.md).

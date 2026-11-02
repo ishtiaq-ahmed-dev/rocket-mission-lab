@@ -18,7 +18,7 @@ Phi_v4(s) = Phi_v3(s) - w_horizontal_speed*norm(velocity_xy)
 r_terminal += success_bonus or failure_penalty - terminal_error_cost
 ```
 
-The implementation reads `time_cost` with a 0.3 per-second fallback, preserving old v3 behavior. The v4 snapshot explicitly records 0.3. Its horizontal-speed weight is 12, lateral-position weight is 4 (v3: 2), and terminal-position weight is 2 (v3: 1). Physics, mission thresholds and physical observation scales are unchanged. Training snapshots identify the reward profile; compare actual speed/tilt/offset and success counts across profiles, not raw reward. The first v4 pilot improved easier-stage samples while full-task success remained zero. See [the measured model iteration](MODEL-ITERATION-2026-10-19.md).
+The implementation reads `time_cost` with a 0.3 per-second fallback, preserving old v3 behavior. The v4 snapshot explicitly records 0.3. Its horizontal-speed weight is 12, lateral-position weight is 4 (v3: 2), and terminal-position weight is 2 (v3: 1). Physics, mission thresholds and physical observation scales are unchanged. Training snapshots identify the reward profile; compare actual speed/tilt/offset and success counts across profiles, not raw reward. The first v4 pilot improved easier-stage samples while full-task success remained zero. See [the measured model iteration](HISTORY.md).
 
 The separate v16 experiment adds a dense landing-only physical speed cost below 50 m:
 
@@ -42,7 +42,7 @@ It gives near-surface high-speed states a continuous debit before the terminal e
 
 ## Evidence and further reading
 
-See [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the actual validation record in [VALIDATION.md](VALIDATION.md).
+See [research sources](RESEARCH.md), the relevant implementation in `rocket_lab/`, and the validation history in [HISTORY.md](HISTORY.md).
 
 
 The v17 sibling isolates one terminal-cost change: speed coefficient 8 instead of 2, with terminal-position coefficient still 12. V12 had changed both coefficients, so its results did not isolate the speed term. V17 keeps the same success thresholds and state observations, and uses a separately recorded fresh critic after actor transfer. Its reward magnitude is not comparable to v10; compare physical outcomes instead.
