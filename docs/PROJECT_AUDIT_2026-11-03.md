@@ -114,6 +114,11 @@ The browser Falcon 9 study and the Python subscale RL lab remain distinct.
 - The final browser/model hashes and every source file in the native regression
   manifest were compared with the working tree and match. Compact results:
   [validation-summary.json](evidence/2026-11-03/validation-summary.json).
+- The first GitHub run exposed deprecated action runtime warnings. The workflow
+  now uses the official supported releases:
+  [checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1),
+  [setup-node v7.1.0](https://github.com/actions/setup-node/releases/tag/v7.1.0)
+  and [setup-python v7.1.0](https://github.com/actions/setup-python/releases/tag/v7.1.0).
 
 ## Limits
 
