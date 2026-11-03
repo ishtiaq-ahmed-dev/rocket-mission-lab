@@ -30,7 +30,7 @@ class NativeStart(BaseModel):
     randomized:bool=False
     sensor_noise:bool=False
     gpu_physics:bool=False
-    physics_hz:Literal[50,100,120,240]=120
+    physics_hz:Literal[50,100,120,240]=240
     seed:int=Field(default=42,ge=0,le=2147483647)
     separation_altitude:float=Field(default=600.,ge=100.,le=150000.,allow_inf_nan=False)
     launch:tuple[float,float]=(0.,0.)

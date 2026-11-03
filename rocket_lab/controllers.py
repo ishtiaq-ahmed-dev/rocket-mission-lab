@@ -165,14 +165,15 @@ class ClassicalController:
                 # firm 1.2 m/s with the engine still burning (cutoff at contact) rather than floating.
                 high_recovery=cfg['mission'].get('high_altitude_recovery',False)
                 descent_cap=1800. if high_recovery and h>1500 else 28.
-                braking=3. if not high_recovery or h<1500 else min(48.,max(3.,(max_thrust/s['mass']-g)*1.0))
-                candidates=[descent_cap,np.sqrt(braking*href+.25)] if hover_ok else [descent_cap,max(np.sqrt(braking*href+.25),1.2)]
+                braking=getattr(self,'terminal_braking',3.) if not high_recovery or h<1500 else min(48.,max(3.,(max_thrust/s['mass']-g)*1.0))
+                touchdown_floor=getattr(self,'touchdown_floor',1.2)
+                candidates=[descent_cap,np.sqrt(braking*href+.25)] if hover_ok else [descent_cap,max(np.sqrt(braking*href+.25),touchdown_floor)]
                 if hover_ok:candidates.append(.25*href+.6)
                 which=int(np.argmin(candidates))
                 reference=-candidates[which] if guidance_height>=0 else min(8.,-guidance_height*.5)
                 if transfer and guidance_height<2:reference=np.clip(-guidance_height*.5,-2,8)
                 target_speed=reference
-                derivative=0. if which==0 or (which==1 and braking*href+.25<1.44 and not hover_ok) else (-braking/2/max(np.sqrt(braking*href+.25),.1) if which==1 else -.25)
+                derivative=0. if which==0 or (which==1 and braking*href+.25<touchdown_floor**2 and not hover_ok) else (-braking/2/max(np.sqrt(braking*href+.25),.1) if which==1 else -.25)
                 ceiling=max(12.,max_thrust/s['mass']-g) if high_recovery else 12.
                 az=np.clip(derivative*velocity[2]+2*(reference-velocity[2])-drag[2]/s["mass"],-8,ceiling)
                 if self.divert:
@@ -270,11 +271,18 @@ class ClassicalController:
             # Below the engine floor use velocity hysteresis, with a real off
             # command. Clamping every request to minimum thrust causes a light
             # booster to climb indefinitely as its mass falls.
-            # An engine-out gap costs spool-up time; never accept one close to the ground.
-            if h<=12.:self.engine_on=True
+            # Keep the engine lit near the surface only when it can actually
+            # hover. A light booster whose minimum thrust exceeds weight must
+            # still be allowed to cut off, or it bounces until the tank is dry.
+            if h<=12. and can_hover:self.engine_on=True
             elif velocity[2]>target_speed+.5:self.engine_on=False
             elif velocity[2]<target_speed-.5:self.engine_on=True
             throttle=ph.v['min_throttle'] if self.engine_on else 0.
+        elif throttle>=ph.v['min_throttle']:
+            # A continuous burn overrides an earlier pulse-off decision. If
+            # that stale flag survives until demand falls below the floor,
+            # the controller needlessly cuts the next braking interval.
+            self.engine_on=True
         # Post-separation flip: with the engine off, cold-gas RCS turns the booster to retrograde
         # (opposing its velocity). The gimbal has no thrust to act on during this coast.
         ph.rcs_torque=np.zeros(3)

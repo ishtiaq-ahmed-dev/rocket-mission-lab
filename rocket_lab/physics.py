@@ -22,7 +22,11 @@ class RocketPhysics:
         self.engine_lever = self.v.get("engine_lever", self.half)
         mass = self.v["dry_mass"] + self.v["fuel_mass"]
         inertia = np.array(self.v["inertia"]) * mass / self.v["dry_mass"]
-        xml = f'''<mujoco><option timestep="{self.w['timestep']}" gravity="0 0 -{self.w['gravity']}" integrator="RK4"/>
+        # One unconstrained free body needs only a small stack. MuJoCo's
+        # inferred arena reserves 13 MiB per environment despite using <10 KiB.
+        # Bound it explicitly so vectorized training and repeated probes do
+        # not exhaust Windows commit with unused contact/constraint storage.
+        xml = f'''<mujoco><size memory="256K"/><option timestep="{self.w['timestep']}" gravity="0 0 -{self.w['gravity']}" integrator="RK4"/>
         <worldbody><body name="rocket" pos="0 0 {self.rest}"><freejoint/>
         <inertial pos="0 0 0" mass="{mass}" diaginertia="{' '.join(map(str,inertia))}"/>
         <geom type="cylinder" size="{self.v['radius']} {self.half}" contype="0" conaffinity="0"/>
@@ -145,9 +149,10 @@ class RocketPhysics:
         return float(np.linalg.norm(self.data.qvel[:3] + np.cross(rotation @ self.data.qvel[3:6], feet[index])))
 
     def step(self, action):
-        action = np.clip(np.asarray(action, dtype=float), -1, 1)
+        action = np.asarray(action, dtype=float)
         if action.shape != (3,) or not np.isfinite(action).all():
             raise ValueError("action must contain three finite normalized values")
+        action = np.clip(action, -1, 1)
         raw_throttle = (action[0] + 1) / 2
         commanded = 0 if raw_throttle < 0.02 or self.fuel <= 0 else max(self.v["min_throttle"], raw_throttle)
         limit = np.deg2rad(self.v["gimbal_limit_deg"])

@@ -17,7 +17,7 @@ flying something else.
 | Policy | `frontend/public/flight-policy.js` | two MLPs evaluated at 10 Hz on the vehicle's own state |
 
 **Booster network** (stack during ascent, then the returning first stage):
-45 inputs, 3 × 256 SiLU hidden layers, outputs thrust/attitude direction in the
+48 inputs, 3 × 256 SiLU hidden layers, outputs thrust/attitude direction in the
 local East-North-Up frame, throttle, engine count (0, 1, 3 or 9) and a staging
 command. **Upper-stage network:** 26 inputs, 3 × 128, outputs attitude, throttle,
 engine on/off, fairing jettison and payload deploy.
@@ -78,7 +78,11 @@ launch-and-landing sequence, public webcast telemetry):
   recover.
 - `train.py` — behaviour cloning, exported as base64 float32 weights.
 - `dagger.js` — DAgger: the network flies, the teacher labels the states it
-  actually reaches, data is aggregated and the network retrained.
+  actually reaches, data is aggregated and the network retrained. Training uses
+  file-backed minibatches and resumes the actual incumbent export rather than
+  an unrelated local checkpoint. A separate candidate must pass a matched
+  nominal + 256-seed development comparison before replacing the shipped file.
+  The gate rejects worse speed/offset envelopes even when the success count rises.
 
 ```powershell
 node scripts/flight_policy/dagger.js --fresh --demos 240 --iters 10 --per-iter 200
@@ -98,19 +102,19 @@ and the best one ships. Evidence: `data/flight-policy-validation.json`
 
 | | Full missions | Reached orbit | Worst touchdown | Worst pad offset |
 | --- | --- | --- | --- | --- |
-| Neural policy | **298 / 300** | 300 / 300 | 2.10 m/s | 49.8 m |
-| Classical teacher | 295 / 300 | 300 / 300 | 2.02 m/s | 53.6 m |
+| Neural policy | **298 / 300** | 300 / 300 | 2.17 m/s | 49.8 m |
+| Classical teacher | 295 / 300 | 300 / 300 | 2.06 m/s | 53.6 m |
 
 A full mission means orbit (perigee above 150 km, eccentricity below 0.05),
-payload deployed, and a touchdown slower than 3 m/s vertically and 1.5 m/s
+fairing released, payload deployed, and a touchdown on deployed legs slower than 3 m/s vertically and 1.5 m/s
 sideways, tilted under 5° and inside the 43 m pad radius. The policy's two
 misses were soft touchdowns just outside the pad radius.
 
 **Nominal replay** (what the page shows): liftoff T+0, MECO T+139 s at 71.9 km
 and 1.78 km/s, separation T+142.5, MVac ignition T+147.6, boostback T+159-196,
 booster apogee 184 km at T+294, entry burn T+457-483 (60.6 → 34.7 km),
-landing burn T+550 from 2.1 km, touchdown T+568 at 1.76 m/s vertical,
-0.03 m/s horizontal, 0.10° tilt, 0.2 m from the pad centre; SECO T+509 into a
+landing burn T+550 from 2.1 km, touchdown T+568 at 1.82 m/s vertical,
+0.03 m/s horizontal, 0.11° tilt, 0.2 m from the pad centre; SECO T+509 into a
 270 × 341 km orbit at 39.5°, payload deploy T+569.
 
 Training history (200 dispersed flights per round): round 1 0/200 (the cloned

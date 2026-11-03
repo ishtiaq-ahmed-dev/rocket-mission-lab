@@ -6,6 +6,7 @@
 - [International-standard reference profile](STANDARDS.md): WGS-84, ISO 2533 / US 1976, public Falcon 9 anchors and the default-flight regression.
 - [Research sources](RESEARCH.md)
 - [Project history](HISTORY.md): earlier revisions, merged from the dated notes.
+- [3 November project audit](PROJECT_AUDIT_2026-11-03.md): physics, controls, RL training, replay fixes and current verification evidence.
 
 ## Python laboratory (`rocket_lab/`, 400 m subscale vehicle)
 

@@ -1,5 +1,6 @@
 """Exercise real native pause/step/manual/guidance/retarget/stop over loopback."""
 import json
+import argparse
 from pathlib import Path
 import subprocess
 import sys
@@ -21,14 +22,20 @@ def wait_for(predicate,timeout=60):
     raise TimeoutError('Native control acknowledgement timed out')
 
 
-def command(kind,**values):
-    request=urllib.request.Request('http://127.0.0.1:5180/api/native/command',
+def command(kind,api_url='http://127.0.0.1:5180/api',**values):
+    request=urllib.request.Request(api_url.rstrip('/')+'/native/command',
         data=json.dumps(dict(type=kind,**values)).encode(),headers={'Content-Type':'application/json'},method='POST')
     with urllib.request.urlopen(request,timeout=2) as response:assert json.load(response)['queued']
 
 
 def main():
-    evidence=ROOT/'docs/evidence/2026-10-23';evidence.mkdir(parents=True,exist_ok=True)
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--api-url',default='http://127.0.0.1:5180/api')
+    parser.add_argument('--output-dir',type=Path,default=ROOT/'data/isaac/control-test')
+    args=parser.parse_args()
+    evidence=args.output_dir;evidence.mkdir(parents=True,exist_ok=True)
+    (ROOT/'logs').mkdir(exist_ok=True)
+    send=lambda kind,**values:command(kind,api_url=args.api_url,**values)
     report=dict(status='starting');process=None
     try:
         try:
@@ -42,14 +49,14 @@ def main():
             first=wait_for(lambda value:value.get('paused'))
             t=first['frame']['t'];time.sleep(.3)
             assert wait_for(lambda value:value.get('paused'))['frame']['t']==t
-            command('step');stepped=wait_for(lambda value:value.get('paused') and value['frame']['t']>t)
+            send('step');stepped=wait_for(lambda value:value.get('paused') and value['frame']['t']>t)
             assert abs(stepped['frame']['t']-t-.1)<1e-6
-            command('manual',action=[.4,.1,-.1]);wait_for(lambda value:value.get('control_mode')=='manual')
-            command('retarget',landing=[1300.,-30.]);wait_for(lambda value:value['landing']==[1300.,-30.])
-            command('guidance');wait_for(lambda value:value.get('control_mode')=='guidance')
-            command('resume');running=wait_for(lambda value:not value.get('paused') and value['frame']['t']>stepped['frame']['t'])
-            command('pause');paused=wait_for(lambda value:value.get('paused'))
-            command('stop');exit_code=process.wait(timeout=150)
+            send('manual',action=[.4,.1,-.1]);wait_for(lambda value:value.get('control_mode')=='manual')
+            send('retarget',landing=[1300.,-30.]);wait_for(lambda value:value['landing']==[1300.,-30.])
+            send('guidance');wait_for(lambda value:value.get('control_mode')=='guidance')
+            send('resume');running=wait_for(lambda value:not value.get('paused') and value['frame']['t']>stepped['frame']['t'])
+            send('pause');paused=wait_for(lambda value:value.get('paused'))
+            send('stop');exit_code=process.wait(timeout=150)
             assert exit_code==0,f'Native process exited {exit_code}'
             runner=json.loads((evidence/'isaac-control-runner.json').read_text());assert runner['status']=='stopped'
             report.update(status='passed',http_commands_verified=['pause','resume','step','manual','guidance','retarget','stop'],

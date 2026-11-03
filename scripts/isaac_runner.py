@@ -22,6 +22,7 @@ def source_manifest():
 def arguments():
     parser=argparse.ArgumentParser()
     parser.add_argument('--headless',action='store_true');parser.add_argument('--diagnostic',action='store_true')
+    parser.add_argument('--api-url',default='http://127.0.0.1:5180/api',help='API base URL used to verify the native telemetry bridge')
     parser.add_argument('--renderer',choices=['real-time','path-tracing'],default='real-time')
     parser.add_argument('--flow',action='store_true');parser.add_argument('--follow-camera',action='store_true')
     parser.add_argument('--gpu-physics',action='store_true');parser.add_argument('--mission',choices=['landing','takeoff','combined'],default='combined')
@@ -40,7 +41,7 @@ def arguments():
     parser.add_argument('--full-experience',action='store_true',help='Use NVIDIA full base experience for SDK troubleshooting')
     parser.add_argument('--randomized',action='store_true',help='Use seeded mass, thrust, wind and initial-state variation')
     parser.add_argument('--sensor-noise',action='store_true',help='Use the project navigation noise model')
-    parser.add_argument('--physics-hz',type=int,choices=[50,100,120,240],default=120)
+    parser.add_argument('--physics-hz',type=int,choices=[50,100,120,240],default=240)
     parser.add_argument('--cinematic',action='store_true',help='After the flight, replay the recorded pose track into a frame-exact cinematic MP4 (visual mode)')
     parser.add_argument('--render-track',type=Path,default=None,help='Render a saved .npz pose track into the film without flying (visual mode)')
     parser.add_argument('--cine-limit',type=float,default=None,help='Render only the first N seconds of the film (camera check)')
@@ -236,7 +237,7 @@ def main():
                 report['engine_render_artifact']=visuals.capture(app,args.output.with_name(args.output.stem+'-engine.png'),view='engine')
                 return vehicle
             capture=capture_views if visuals else None
-            report.update(_diagnostic(env,server,publish,exchange,capture));report['status']='passed'
+            report.update(_diagnostic(env,server,publish,exchange,capture,api_url=args.api_url));report['status']='passed'
             if visuals:
                 env.reset(seed=args.seed)
                 report['launch_render_artifact']=visuals.capture(app,args.output.with_name(args.output.stem+'-launch.png'),view='launch')
@@ -306,7 +307,9 @@ def main():
                 if count%10==0 or terminal or truncated:
                     state=env.physics.state()
                     trace.append(dict(t=state['t'],position=state['position'].tolist(),velocity=state['velocity'].tolist(),
-                        tilt=state['tilt'],throttle=state['throttle'],phase=env.phase,pad_distance=info['pad_distance']))
+                        tilt=state['tilt'],throttle=state['throttle'],phase=env.phase,pad_distance=info['pad_distance'],
+                        roll_rate=state['roll_rate'],rcs_fuel=state['rcs_fuel_mass'],rcs_torque=state['rcs_torque'],
+                        roll_command=env.physics.roll_command,contact_speed=state['contact_speed']))
                 if not args.headless:
                     target_wall=flight_started+pause_wall+env.physics.data.time/args.time_scale
                     time.sleep(max(0.,min(.5,target_wall-time.monotonic())))
@@ -347,7 +350,7 @@ def main():
         if app:app.close(wait_for_replicator=False,exit_code=0 if report['status'] in ('passed','finished','stopped','training_finished','qualification_finished') else 1)
 
 
-def _diagnostic(env,server,publish,exchange,capture=None):
+def _diagnostic(env,server,publish,exchange,capture=None,api_url='http://127.0.0.1:5180/api'):
     import numpy as np
     env.reset(seed=7,options={'state':dict(position=[0.,0.,250.],velocity=[0.,0.,0.],quaternion=[1.,0.,0.,0.])})
     assert env.physics.attached,'Diagnostic requires a combined vehicle with a payload'
@@ -374,7 +377,7 @@ def _diagnostic(env,server,publish,exchange,capture=None):
     assert received['ok'] and received['snapshot']['frame']['upper_stage'] is not None
     assert received['snapshot']['frame']['t']>0
     import urllib.request
-    with urllib.request.urlopen('http://127.0.0.1:5180/api/native/status',timeout=2) as response:
+    with urllib.request.urlopen(api_url.rstrip('/')+'/native/status',timeout=5) as response:
         bridged=json.load(response)
     assert bridged['connected'] and bridged['snapshot']['frame']['t']==received['snapshot']['frame']['t']
     unchanged_position=env.physics.position.copy();unchanged_velocity=env.physics.velocity.copy()
@@ -386,10 +389,11 @@ def _diagnostic(env,server,publish,exchange,capture=None):
         payload_joint_disabled=True,payload_moved_after_release=True,telemetry_packets=packets,socket_received=True,dashboard_backend_received=True,retarget_applied=True,retarget_preserved_state=True,render_artifact=artifact,
         note='Native runtime diagnostic; visual quality and mission reliability require separate validation')
     physics=env.physics;drag=physics.v['drag_coefficient'];had_lateral='drag_coefficient_lateral' in physics.v;lateral_drag=physics.v.get('drag_coefficient_lateral');had_center='aero_center' in physics.v;aero_center=physics.v.get('aero_center');gust=physics.w['gust_std']
+    density=physics.w['density_sea_level']
     try:
-        # The axial/lateral model has two coefficients and a centre-of-pressure
-        # moment; zeroing only the axial term would leave broadside drag active
-        # in a diagnostic that claims to remove aerodynamics.
+        # Vacuum removes drag on both bodies, including Mach-table axial drag
+        # (which overrides the constant coefficient) and broadside forces.
+        physics.w['density_sea_level']=0.
         physics.v['drag_coefficient']=0.;physics.v['drag_coefficient_lateral']=0.;physics.v['aero_center']=0.;physics.w['gust_std']=0.
         physics.reset(11,position=[0.,0.,1000.],velocity=[0.,0.,0.],wind_scale=0.)
         g=physics.gravity()
@@ -414,7 +418,7 @@ def _diagnostic(env,server,publish,exchange,capture=None):
         relative=float(payload_velocity[2]-physics.velocity[2]);assert abs(relative-expected)<.01,'Pusher relative velocity does not match its physical impulse'
         momentum=booster_mass*physics.velocity+payload_mass*payload_velocity
         expected_momentum=np.array([0.,0.,-(booster_mass+payload_mass)*physics.gravity()*physics.data.time])
-        error=float(np.linalg.norm(momentum-expected_momentum));assert error<2.,'Separation pusher did not conserve system momentum'
+        error=float(np.linalg.norm(momentum-expected_momentum));assert error<2.,f'Separation pusher momentum error {error:.6g} kg m/s; measured={momentum}, expected={expected_momentum}'
         result.update(separation_pusher_verified=True,pusher_momentum_error_kg_m_s=error,pusher_relative_speed=relative)
         physics.reset(11,position=[0.,0.,500.],velocity=[0.,0.,0.],wind_scale=0.)
         # Establish rotation through actual engine torque, rather than injecting
@@ -458,6 +462,7 @@ def _diagnostic(env,server,publish,exchange,capture=None):
         if had_center:physics.v['aero_center']=aero_center
         else:physics.v.pop('aero_center',None)
         physics.w['gust_std']=gust
+        physics.w['density_sea_level']=density
     return result
 
 
