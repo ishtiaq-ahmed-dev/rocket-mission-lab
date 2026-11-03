@@ -33,5 +33,6 @@ jobs:
         working-directory: frontend
       - run: node scripts/check_standards.js
       - run: node scripts/check_flight.js
+      - run: node --test scripts/check_regressions.js
       - run: npm run build
         working-directory: frontend

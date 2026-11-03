@@ -189,6 +189,8 @@ class RocketEnv(gym.Env):
     def step(self, action):
         old = self.last_state
         action = np.asarray(action, dtype=float).copy()
+        if not np.isfinite(action).all():
+            raise ValueError('Rocket actions must contain only finite values')
         if self.rcs_action:
             if action.shape != (6,):
                 raise ValueError('RCS-controlled environments require six action values')
@@ -214,6 +216,10 @@ class RocketEnv(gym.Env):
                 self.command_landing(np.clip(landing,-9999.,9999.))
         m, r = self.cfg["mission"], self.cfg["reward"]
         speed = float(np.linalg.norm(s["velocity"]))
+        # PhysX may already have resolved the collision. Preserve first-foot
+        # impact speed for the reward and telemetry, just as for acceptance.
+        if s['clearance']<=1e-7 and not self.physics.on_pad:
+            speed=max(speed,float(s['contact_speed']))
         distance = float(np.linalg.norm(s["position"][:2]-self._target()[:2]))
         d = self.episode_difficulty
         # Precision is the last skill a policy learns. The landing speed and

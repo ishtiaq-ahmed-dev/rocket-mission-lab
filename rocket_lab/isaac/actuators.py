@@ -1,15 +1,16 @@
 """Engine units/actions shared with the existing 21-state policy contract."""
 import numpy as np
+from ..propulsion import engine_performance
 
 
 class Engine:
-    def __init__(self,vehicle,g0):
-        self.vehicle=vehicle;self.g0=g0;self.reset()
+    def __init__(self,vehicle,g0,world=None):
+        self.vehicle=vehicle;self.g0=g0;self.world=world;self.reset()
 
     def reset(self):
         self.throttle=0.;self.gimbal=np.zeros(2);self.thrust=0.
 
-    def step(self,action,dt,fuel,thrust_scale=1.):
+    def step(self,action,dt,fuel,thrust_scale=1.,altitude=0.):
         action=np.asarray(action,dtype=float)
         if action.shape!=(3,) or not np.isfinite(action).all():raise ValueError('Expected three finite control actions')
         action=np.clip(action,-1,1);v=self.vehicle
@@ -21,14 +22,15 @@ class Engine:
         rise=v.get('throttle_rate',0.)
         if rise:self.throttle+=np.clip(commanded-self.throttle,-v.get('shutdown_rate',rise)*dt,rise*dt)
         else:self.throttle=commanded
-        available=max(0.,fuel)*v['isp']*self.g0/dt
-        self.thrust=min(self.throttle*v['max_thrust']*thrust_scale,available)
-        self.throttle=float(self.thrust/(v['max_thrust']*thrust_scale)) if thrust_scale>0 else 0.
+        nominal,isp=engine_performance(self.world,v,1.,altitude,thrust_scale) if self.world is not None else (v['max_thrust']*thrust_scale,v['isp'])
+        available=max(0.,fuel)*isp*self.g0/dt
+        self.thrust=min(self.throttle*nominal,available)
+        self.throttle=float(self.thrust/nominal) if nominal>0 else 0.
         direction=np.array([np.tan(self.gimbal[0]),np.tan(self.gimbal[1]),1.])
         body_force=direction/np.linalg.norm(direction)*self.thrust
         lever=v.get('engine_lever',v['length']/2)
         torque=np.array([lever*body_force[1],-lever*body_force[0],0.])
-        return body_force,torque,self.thrust*dt/(v['isp']*self.g0)
+        return body_force,torque,self.thrust*dt/(isp*self.g0)
 
 
 class RollThrusters:

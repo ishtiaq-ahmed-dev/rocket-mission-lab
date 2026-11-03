@@ -15,10 +15,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
 #stage{position:fixed;inset:0}
 #stage canvas{display:block;width:100%;height:100%}
 .panel{background:var(--bg);border:1px solid var(--ln);border-radius:6px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-#title{position:fixed;left:14px;top:12px;font-size:11px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+#title{position:fixed;left:14px;top:12px;max-width:calc(50% - 180px);padding:5px 8px;background:rgba(8,12,18,.88);border-radius:4px;font-size:11px;letter-spacing:.12em;color:var(--tx);text-transform:uppercase}
 #title b{color:var(--cy);font-weight:600}
-#camlabel{position:fixed;left:14px;top:30px;font-size:11px;color:var(--am);letter-spacing:.12em}
-#focuslabel{position:fixed;left:14px;top:46px;font-size:10px;color:var(--dim);letter-spacing:.12em}
+#camlabel{position:fixed;left:14px;top:58px;padding:3px 6px;background:rgba(8,12,18,.88);border-radius:3px;font-size:11px;color:var(--am);letter-spacing:.12em}
+#focuslabel{position:fixed;left:14px;top:82px;padding:3px 6px;background:rgba(8,12,18,.88);border-radius:3px;font-size:10px;color:var(--tx);letter-spacing:.12em}
 #mc{position:fixed;left:50%;top:10px;transform:translateX(-50%);text-align:center;padding:6px 18px 7px;min-width:300px}
 #clock{color:var(--cy);font-size:22px;letter-spacing:.08em;font-variant-numeric:tabular-nums}
 #phase{font-size:12px;font-weight:700;color:var(--am);letter-spacing:.1em;margin-top:2px}
@@ -55,13 +55,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
 #scrub::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:16px;margin-top:-6px;background:var(--cy);border-radius:2px;box-shadow:0 0 10px rgba(127,227,255,.7)}
 #scrub::-moz-range-thumb{width:12px;height:16px;background:var(--cy);border:0;border-radius:2px}
 #ticks{position:absolute;left:6px;right:6px;top:18px;height:26px}
-#ticks i{position:absolute;font-style:normal;font-size:9px;color:var(--dim);transform:translateX(-50%);white-space:nowrap;cursor:pointer;padding-top:5px}
-#ticks i:before{content:"";position:absolute;left:50%;top:0;width:1px;height:4px;background:var(--dim)}
-#ticks i.lo{top:13px}
-#ticks i:hover{color:var(--cy)}
+#ticks button{position:absolute;font:inherit;font-size:9px;color:var(--tx);transform:translateX(-50%);white-space:nowrap;cursor:pointer;top:0;padding:6px 2px 0;border:0;background:none}
+#ticks button:before{content:"";position:absolute;left:50%;top:0;width:1px;height:5px;background:var(--dim)}
+#ticks button.lo{top:13px}
+#ticks button:hover,#ticks button:focus-visible{color:var(--cy)}
+#ticks button.compact{font-size:0;width:12px;height:20px;top:0}
 #tnow{width:150px;text-align:right;color:var(--cy);font-variant-numeric:tabular-nums}
-#hint{position:fixed;left:14px;bottom:150px;font-size:10px;color:var(--dim);letter-spacing:.06em;line-height:1.6;pointer-events:none}
-#notesbtn{position:fixed;left:14px;top:62px;z-index:12;font:inherit;font-size:10px;letter-spacing:.12em;color:var(--dim);background:rgba(8,12,18,.72);border:1px solid var(--ln);border-radius:4px;padding:4px 8px;cursor:pointer}
+#hint{position:fixed;left:14px;bottom:150px;padding:4px 7px;background:rgba(8,12,18,.88);border-radius:3px;font-size:10px;color:var(--tx);letter-spacing:.06em;line-height:1.6;pointer-events:none}
+#notesbtn{position:fixed;left:14px;top:108px;z-index:12;font:inherit;font-size:10px;letter-spacing:.12em;color:var(--tx);background:rgba(8,12,18,.88);border:1px solid var(--ln);border-radius:4px;padding:4px 8px;cursor:pointer}
 #notesbtn:hover,#notesbtn:focus-visible{color:var(--cy);border-color:rgba(127,227,255,.55);outline:none}
 #notes{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(3,6,9,.84)}
 #notes.on{display:flex}
@@ -78,8 +79,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
 @keyframes bl{50%{opacity:.15}}
 #msg,#nojs{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#9fd8ee;font-size:14px;padding:30px;background:#06090d;z-index:20;letter-spacing:.08em}
 @media(max-width:1150px){#cams button span{display:none}#cams #focusname{display:inline}}
-@media(max-width:1150px){#ticks i{font-size:0}}
 @media(max-width:900px){#huds{width:200px}.hud .r b{font-size:11px}#cams button span{display:none}#hint{display:none}#tnow{width:110px}#mc{min-width:0}}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-offset:3px}
+@media(max-width:700px){
+  #title{top:8px;left:8px;right:8px;max-width:none;text-align:center;font-size:9px;letter-spacing:.04em}
+  #mc{top:41px;max-width:calc(100% - 16px);width:calc(100% - 16px);padding:5px 8px}#clock{font-size:18px}#phase{font-size:10px}#next{font-size:9px}
+  #camlabel{left:8px;top:120px;font-size:9px}#focuslabel{left:8px;top:142px;font-size:9px}#notesbtn{top:166px;left:8px;font-size:9px}
+  #huds{right:8px;top:120px;width:158px;max-height:calc(100dvh - 285px);overflow:auto;gap:5px}.hud{padding:6px}.hud .r{padding:1px 0}.hud .r span{font-size:8px;letter-spacing:0}.hud .r b{font-size:10px}.hud .hd{font-size:8px;letter-spacing:.03em}
+  #bottom{left:8px;right:8px;bottom:8px;gap:5px}#cams{width:100%;overflow-x:auto;justify-content:flex-start;flex-shrink:0}#cams button{padding:6px}#cams #focusname{font-size:9px}
+  #play{display:grid;grid-template-columns:34px 1fr;gap:6px;padding:6px}#spd{justify-content:flex-end}#spd button{padding:5px 6px}#pp{width:32px}#tl{grid-column:1/-1;min-width:0;height:42px}#tnow{display:none}
+  #notes{padding:10px}#notes .card{max-height:calc(100dvh - 20px);padding:28px 16px 16px}
+}
+@media(max-height:500px) and (min-width:701px){#huds{max-height:calc(100dvh - 135px);overflow:auto}#hint{display:none}}
 </style>
 </head>
 <body>
@@ -145,9 +156,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx)
     <button id="focusbtn"><kbd>F</kbd><span id="focusname">Focus: AUTO</span></button>
   </div>
   <div id="play" class="panel">
-    <button id="pp" title="Play / pause (Space)">&#10074;&#10074;</button>
+    <button id="pp" title="Play / pause (Space)" aria-label="Pause replay">&#10074;&#10074;</button>
     <div id="spd"><button data-s="0.1">.1x</button><button data-s="0.25">.25x</button><button data-s="1" class="on">1x</button><button data-s="2">2x</button><button data-s="5">5x</button><button data-s="10">10x</button><button data-s="30">30x</button></div>
-    <div id="tl"><input id="scrub" type="range" min="-10" max="660" step="0.01" value="-10"><div id="ticks"></div></div>
+    <div id="tl"><input id="scrub" aria-label="Mission time in seconds" type="range" min="-10" max="660" step="0.01" value="-10"><div id="ticks"></div></div>
     <div id="tnow">T+00.00</div>
   </div>
 </div>
@@ -413,7 +424,9 @@ function boosterStep(S, cmd, t, dt, upper) {
   }
   const vr = relVel(S.r, S.v), sp = nrm(vr);
   S.q = 0.5 * rhoAt(h0) * sp * sp;
-  const T = S.nEng > 0 ? engineThrust(S.nEng, S.thr, V.merTvac, V.merAe, h0) : 0;
+  const requestedFuel = S.nEng * S.thr * V.merMdot * DSP.thrust * dt;
+  const burned = Math.min(S.prop, requestedFuel);
+  const T = S.nEng > 0 ? engineThrust(S.nEng, S.thr, V.merTvac, V.merAe, h0) * (requestedFuel > 0 ? burned / requestedFuel : 0) : 0;
   const m = boosterMass(S) + (S.attached ? upper : 0);
   if (S.onPad) {                                 /* hold-down clamps release at T-0 once thrust exceeds weight */
     if (t >= 0 && T > m * MU / Math.pow(nrm(S.r), 2)) { S.onPad = false; S.tLift = t; }
@@ -427,7 +440,7 @@ function boosterStep(S, cmd, t, dt, upper) {
     S.axis = slewAxis(S.axis, cmd.dir, dt, w[0], w[1]);
     rk4(S.r, S.v, t, dt, { m: m, axis: S.axis, thrust: [S.axis[0] * T, S.axis[1] * T, S.axis[2] * T] });
   }
-  if (S.nEng > 0) S.prop = Math.max(0, S.prop - S.nEng * S.thr * V.merMdot * DSP.thrust * dt);
+  S.prop -= burned;
   S.T = T;
   return S;
 }
@@ -447,9 +460,11 @@ function upperStep(U, cmd, t, dt) {
     U.thr += (clamp(cmd.thr, V.mvacMin, 1) - U.thr) * (1 - Math.exp(-dt / 0.6));
   } else if (U.on) { U.on = false; U.seco = true; U.tSeco = t; U.thr = 0; }   /* single-burn MVac: cutoff is SECO */
   U.axis = slewAxis(U.axis, cmd.dir, dt, (U.on ? 3 : 1) * D2R, 1.0);
-  const T = U.on ? V.mvacT * DSP.mvac * U.thr : 0;
+  const requestedFuel = U.on ? V.mvacMdot * DSP.mvac * U.thr * dt : 0;
+  const burned = Math.min(U.prop, requestedFuel);
+  const T = U.on ? V.mvacT * DSP.mvac * U.thr * (requestedFuel > 0 ? burned / requestedFuel : 0) : 0;
   rk4(U.r, U.v, t, dt, { m: U.m, cdS: 7, thrust: [U.axis[0] * T, U.axis[1] * T, U.axis[2] * T] });
-  if (U.on) U.prop = Math.max(0, U.prop - V.mvacMdot * DSP.mvac * U.thr * dt);
+  U.prop -= burned;
   U.T = T; U.h = h;
   return U;
 }
@@ -523,9 +538,17 @@ function b64f32(s) {
   const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
   return new Float32Array(u.buffer);
 }
-function makeNet(spec) {
+function makeNet(spec, inputs, outputs) {
+  if (!spec || spec.activation !== 'silu' || !Array.isArray(spec.layers) || !spec.layers.length) throw new Error('invalid flight policy network');
   const mean = b64f32(spec.mean), std = b64f32(spec.std);
+  if (mean.length !== inputs || std.length !== inputs || !mean.every(Number.isFinite) || !std.every(x => Number.isFinite(x) && x > 0)) throw new Error('invalid flight policy normalization');
   const layers = spec.layers.map(l => ({ W: b64f32(l.W), b: b64f32(l.b), n: l.out, k: l.in }));
+  let width = inputs;
+  for (const L of layers) {
+    if (L.k !== width || !Number.isInteger(L.n) || L.n < 1 || L.n > 1024 || L.W.length !== L.k * L.n || L.b.length !== L.n || !L.W.every(Number.isFinite) || !L.b.every(Number.isFinite)) throw new Error('invalid flight policy layer');
+    width = L.n;
+  }
+  if (width !== outputs) throw new Error('invalid flight policy output width');
   const buf = [new Float64Array(1024), new Float64Array(1024)];
   return function (x) {
     let a = buf[0], k = x.length;
@@ -544,7 +567,7 @@ function makeNet(spec) {
 }
 function neuralController(P) {
   if (!P || !P.booster || !P.upper) throw new Error('flight policy weights (FLIGHT_POLICY) are not loaded');
-  const nb = makeNet(P.booster), nu = makeNet(P.upper);
+  const nb = makeNet(P.booster, 48, 9), nu = makeNet(P.upper, 26, 7);
   return function (ctx) {
     const B = ctx.B, U = ctx.U, t = ctx.t;
     const yb = nb(boosterFeatures(B, t));
@@ -646,16 +669,18 @@ function run(opts) {
     const cb = cmd.booster, cu = cmd.upper;
 
     /* ---------- booster / stack ---------- */
-    const prevN = B.nEng, prevIgn = B.ign, wasCut = B.cutting, wasPad = B.onPad;
+    const wasSeparated = U.separated;
+    const prevIgn = B.ign, wasCut = B.cutting, wasPad = B.onPad;
     if (!B.landed) {
-      const rB = B.r.slice(), lp0 = lzBase(t), L0 = lzFrame(t), pU0 = dot(sub(B.r, lp0), L0.U);
+      const rB = B.r.slice(), vB = B.v.slice(), axisB = B.axis.slice(), propB = B.prop;
+      const lp0 = lzBase(t), L0 = lzFrame(t), pU0 = dot(sub(B.r, lp0), L0.U);
       boosterStep(B, cb, t, DT, upperMass(U));
       if (wasPad && !B.onPad) ev('LIFTOFF', B.tLift);
       if (B.attached) {
         B.roll = (-70 * D2R) * sstep(0, 1, (t - 5) / 16);          /* cosmetic roll to flight azimuth (point mass) */
         B.X = projX(rotAbout(B.X, B.axis, B.roll - (B.rollPrev || 0)), B.axis); B.rollPrev = B.roll;
         if (!wasCut && B.cutting && B.tMeco === B.tCut) ev('MAX_Q', stats.tMaxQ, { q: stats.maxQ }), ev('MECO', t, { alt: h, v: sp, prop: B.prop, vInertial: nrm(B.v) });
-        if (cb.sep && B.nEng === 0 && B.tMeco > -1e8) { separate(B, U, t + DT); ev('STAGE_SEP', t + DT, { alt: nrm(B.r) - RE }); }
+        if (cb.sep && !B.onPad && B.nEng === 0 && B.tMeco > -1e8) { separate(B, U, t + DT); ev('STAGE_SEP', t + DT, { alt: nrm(B.r) - RE }); }
         else ride();
       } else B.X = projX(B.X, B.axis);
       if (!B.attached) {
@@ -669,55 +694,67 @@ function run(opts) {
         if (pU <= 0) {
           const f = clamp(pU0 / Math.max(pU0 - pU, 1e-9), 0, 1), tT = t + f * DT;
           B.r = add(rB, sc(sub(B.r, rB), f));
+          B.v = add(vB, sc(sub(B.v, vB), f));
+          B.axis = unit(add(sc(axisB, 1 - f), sc(B.axis, f)));
+          B.prop = lerp(propB, B.prop, f);
           const L2 = lzFrame(tT), d = sub(B.r, lzBase(tT)), gv = relVel(B.r, B.v);
           const info = { vV: dot(gv, L2.U), vH: Math.hypot(dot(gv, L2.E), dot(gv, L2.N)), errE: dot(d, L2.E), errN: dot(d, L2.N),
             err: Math.hypot(dot(d, L2.E), dot(d, L2.N)), prop: B.prop, tilt: Math.acos(clamp(dot(B.axis, L2.U), -1, 1)) * R2D };
-          info.success = info.vV > -3 && info.vH < 1.5 && info.tilt < 5 && info.err <= 43;
+          info.success = info.vV <= 0 && info.vV > -3 && info.vH < 1.5 && info.tilt < 5 && info.err <= 43 && B.legs >= 0.99;
           ev('TOUCHDOWN', tT, info); stats.landing = info;
-          B.landed = true; B.nEng = 0; B.thr = 0; B.cutting = false; B.lE = info.errE; B.lN = info.errN; B.legs = 1;
+          B.landed = true; B.touchdownSuccess = info.success; B.nEng = 0; B.thr = 0; B.T = 0; B.cutting = false; B.lE = info.errE; B.lN = info.errN;
+          // The next recorded state is at t+DT, already resting in the Earth frame.
+          const Lend = lzFrame(t1);
+          B.r = add(lzBase(t1), add(sc(Lend.E, B.lE), sc(Lend.N, B.lN)));
+          B.v = [-OMEGA * B.r[1], OMEGA * B.r[0], 0];
         }
       }
     } else {
       /* landed: legs level the airframe, the booster rotates with the Earth */
       const L = lzFrame(t + DT);
-      B.axis = slewAxis(B.axis, L.U, DT, 0.6 * D2R, 0.8); B.X = projX(B.X, B.axis);
+      if (B.touchdownSuccess) B.axis = slewAxis(B.axis, L.U, DT, 0.6 * D2R, 0.8);
+      B.X = projX(B.X, B.axis);
       B.r = add(lzBase(t + DT), add(sc(L.E, B.lE), sc(L.N, B.lN)));
       B.v = [-OMEGA * B.r[1], OMEGA * B.r[0], 0];
     }
 
     /* ---------- second stage ---------- */
-    if (U.separated) {
+    // Existing detached bodies advance once from t to t+DT. Bodies released
+    // at this interval's endpoint must wait for the next interval.
+    [FA, FB].forEach(F => {
+      if (!F) return;
+      rk4(F.r, F.v, t, DT, { m: V.fairing / 2, cdS: 40 });
+      const th = F.w * (t + DT - F.t0);
+      F.axis = rotAbout(F.ax0, F.hinge, th); F.X = rotAbout(F.X0, F.hinge, th);
+    });
+    if (SAT) rk4(SAT.r, SAT.v, t, DT, { m: V.sat + DSP.sat, cdS: 0 });
+    if (wasSeparated) {
       const wasOn = U.on, wasSeco = U.seco;
+      const rU = U.r.slice(), vU = U.v.slice();
       upperStep(U, cu, t, DT);
       U.X = projX(U.X, U.axis);
       const hh = nrm(U.r) - RE;
-      if (!wasOn && U.on) ev('S2_IGNITION', t, { alt: hh });
+      if (!wasOn && U.on) ev('S2_IGNITION', t, { alt: nrm(rU) - RE });
       if (!wasSeco && U.seco) {
-        const oe = orbitElems(U.r, U.v);
-        ev('SECO', t, { alt: hh, perigee: (oe.rp - RE) / 1000, apogee: (oe.ra - RE) / 1000, inc: oe.inc, v: nrm(U.v), prop: U.prop });
+        const oe = orbitElems(rU, vU);
+        ev('SECO', t, { alt: nrm(rU) - RE, perigee: (oe.rp - RE) / 1000, apogee: (oe.ra - RE) / 1000, inc: oe.inc, v: nrm(vU), prop: U.prop });
         stats.orbit = oe;
       }
       if (cu.fair && U.hasFair) {                    /* fairing jettison */
-        U.hasFair = false; U.tFair = t; ev('FAIRING_SEP', t, { alt: hh, q: 0.5 * rhoAt(hh) * dot(relVel(U.r, U.v), relVel(U.r, U.v)) });
+        U.hasFair = false; U.tFair = t + DT; ev('FAIRING_SEP', t + DT, { alt: hh, q: 0.5 * rhoAt(hh) * dot(relVel(U.r, U.v), relVel(U.r, U.v)) });
         const base = add(U.r, sc(U.axis, 11.6));
-        const mk = (sgn) => { const side = sc(U.X, sgn); return { r: base.slice(), v: add(add(U.v, sc(side, 2.6)), sc(U.axis, -0.6)), axis: U.axis.slice(), roll: 0, t0: t, ax0: U.axis.slice(), X0: side.slice(), X: side.slice(), hinge: unit(crs(U.axis, side)), w: (20 + 6 * sgn) * D2R }; };
+        const mk = (sgn) => { const side = sc(U.X, sgn); return { r: base.slice(), v: add(add(U.v, sc(side, 2.6)), sc(U.axis, -0.6)), axis: U.axis.slice(), roll: 0, t0: t + DT, ax0: U.axis.slice(), X0: side.slice(), X: side.slice(), hinge: unit(crs(U.axis, side)), w: (20 + 6 * sgn) * D2R }; };
         FA = mk(1); FB = mk(-1);
+        U.v = add(U.v, sc(U.axis, V.fairing * 0.6 / upperMass(U)));
       }
-      if (cu.deploy && U.hasSat && U.seco) {          /* payload deploy: spring separation, momentum conserving */
-        U.hasSat = false; ev('SAT_DEPLOY', t, { alt: hh, v: nrm(U.v) });
+      if (cu.deploy && U.hasSat && !U.hasFair && U.seco) { /* payload deploy: clear fairing, momentum conserving */
+        U.hasSat = false; ev('SAT_DEPLOY', t + DT, { alt: hh, v: nrm(U.v) });
         const ms = V.sat + DSP.sat, J = 0.9 * ms;
-        SAT = { r: add(U.r, sc(U.axis, 12.4)), v: add(U.v, sc(U.axis, 0.9)), axis: U.axis.slice(), X: U.X.slice(), roll: 0, t0: t, fresh: true };
+        SAT = { r: add(U.r, sc(U.axis, 12.4)), v: add(U.v, sc(U.axis, 0.9)), axis: U.axis.slice(), X: U.X.slice(), roll: 0, t0: t + DT };
         U.v = add(U.v, sc(U.axis, -J / upperMass(U)));
       }
     }
-    [FA, FB].forEach(F => {
-      if (!F) return;
-      rk4(F.r, F.v, t, DT, { m: 450, cdS: 40 });
-      const th = F.w * (t - F.t0);
-      F.axis = rotAbout(F.ax0, F.hinge, th); F.X = rotAbout(F.X0, F.hinge, th);
-    });
-    if (SAT) { if (SAT.fresh) SAT.fresh = false; else rk4(SAT.r, SAT.v, t, DT, { m: V.sat, cdS: 0 }); }
-    if (opts.stopWhen && opts.stopWhen(B, U, t)) break;
+    if (opts.stopWhen && opts.stopWhen(B, U, t + DT)) break;
   }
   events.sort((a, b) => a.t - b.t);
   return { t0: T0, dt: DT * SAMPLE_EVERY, n: TB.n, B: TB, S2: T2, FA: TFA, FB: TFB, SAT: TSAT, events: events, stats: stats,
@@ -730,7 +767,7 @@ root.FlightSim = { lzRender: lzRender, run: run, V: V, T0: T0, DT: DT, SAMPLE_EV
   boosterFeatures: boosterFeatures, upperFeatures: upperFeatures, neuralController: neuralController, ENGINES: ENGINES,
   /* internals shared with the offline training teacher (scripts/flight_policy) */
   _: { dot, crs, nrm, add, sub, sc, unit, clamp, sstep, lerp, rotAbout, localBasis, lzBase, relVel, accel, boosterStep, boosterMass, upperMass,
-       engineThrust, boosterPhase, newBooster, DSP, D2R, R2D } };
+       engineThrust, boosterPhase, newBooster, newUpper, separate, upperStep, rk4, DSP, D2R, R2D } };
 if (typeof module !== 'undefined') module.exports = root.FlightSim;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -2399,7 +2436,8 @@ function resolveFocus(t){
   F.which=w;
   if(w===1){
     tA.set(sB[3],sB[4],sB[5]).normalize();
-    F.ax.copy(tA);F.pos.set(sB[0],sB[1],sB[2]).addScaledVector(tA,12);F.vel.set(sB[22],sB[23],sB[24]);F.size=42;
+    const attached=t<T_SEP;
+    F.ax.copy(tA);F.pos.set(sB[0],sB[1],sB[2]).addScaledVector(tA,attached?34:18);F.vel.set(sB[22],sB[23],sB[24]);F.size=attached?70:42;
     F.alt=Math.hypot(sB[0],sB[1]-EC_Y,sB[2])-RE;
   }else if(w===2){
     tA.set(sS[3],sS[4],sS[5]).normalize();F.ax.copy(tA);
@@ -2429,6 +2467,11 @@ const bE=new V3(),bN=new V3();
 function updateCamera(t,dt,tr){
   let fov=50,showRet=false;
   resolveFocus(t);
+  if(F.which!==lastFocusW){
+    lastFocusW=F.which;camSnap=true;
+    if(camMode===1)orb.dist=orb.distS=defaultDist();
+    if(camMode===7)orb.dist7=undefined;
+  }
   const speed=F.vel.length();
   const dFoc=()=>camPos.distanceTo(F.pos);
   if(camMode===1){
@@ -2441,7 +2484,7 @@ function updateCamera(t,dt,tr){
     tB.copy(F.vel);let sp=tB.length();
     if(sp<25||F.which!==1&&sp<5)tB.copy(F.ax);else tB.divideScalar(sp);
     tC.copy(F.up);tD.crossVectors(tB,tC);if(tD.lengthSq()<1e-6)tD.set(1,0,0);tD.normalize();
-    const dist=(F.which===1?52+Math.min(sp,500)*0.02:F.which===2?60:34);
+    const dist=(F.which===1?(t<T_SEP?130:70)+Math.min(sp,500)*0.02:F.which===2?60:34);
     tA.set(0,0,0).addScaledVector(tB,-dist).addScaledVector(tD,dist*0.32).addScaledVector(F.up,dist*0.17);
     if(camSnap){chOff.copy(tA);chLook.copy(F.pos);}
     chOff.lerp(tA,1-Math.exp(-dt/0.6));
@@ -2520,6 +2563,8 @@ function updateCamera(t,dt,tr){
   const el=renderer.domElement;let drag=false,lx=0,ly=0;
   el.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;el.setPointerCapture(e.pointerId);});
   el.addEventListener('pointerup',e=>{drag=false;});
+  el.addEventListener('pointercancel',()=>{drag=false;});
+  el.addEventListener('lostpointercapture',()=>{drag=false;});
   el.addEventListener('pointermove',e=>{
     if(!drag)return;const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;
     if(camMode===1){orb.yaw-=dx*0.006;orb.pitch=clamp(orb.pitch+dy*0.005,-0.12,1.5);}
@@ -2592,9 +2637,19 @@ el.scrub.min=SIMT0;el.scrub.max=T_END;
 const span=T_END-SIMT0;
 SIM.events.forEach(e=>{
   const L=EVLAB[e.name];if(!L||!L[0])return;
-  const i=document.createElement('i');i.textContent=L[0];i.title=L[0];i.style.left=((e.t-SIMT0)/span*100)+'%';if(L[1])i.className='lo';
+  const i=document.createElement('button');i.type='button';i.textContent=L[0];i.title=L[0]+' · '+e.t.toFixed(1)+' s';i.setAttribute('aria-label','Seek to '+L[0]);i.style.left=((e.t-SIMT0)/span*100)+'%';if(L[1])i.className='lo';
   i.addEventListener('click',()=>{seek(e.t-3);});el.ticks.appendChild(i);
 });
+function layoutTicks(){
+  const right=[-Infinity,-Infinity],width=el.ticks.clientWidth;
+  for(const button of el.ticks.children){
+    button.classList.remove('compact');
+    const lane=button.classList.contains('lo')?1:0,x=parseFloat(button.style.left)/100*width,w=button.offsetWidth;
+    if(x-w/2<right[lane]+6||x-w/2<0||x+w/2>width)button.classList.add('compact');
+    else right[lane]=x+w/2;
+  }
+}
+requestAnimationFrame(layoutTicks);
 function fmtClock(t){const s=Math.abs(t),h=Math.floor(s/3600),m=Math.floor(s%3600/60),sec=Math.floor(s%60);return (t<0?'T-':'T+')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}
 const PHN=['PRE-LAUNCH','FIRST STAGE ASCENT','STAGE SEPARATION','BOOSTER FLIP MANEUVER','BOOSTBACK BURN','BALLISTIC COAST — FREE FALL','ENTRY BURN','AERODYNAMIC DESCENT — GRID FIN GUIDANCE','LANDING BURN','LANDED'];
 const BST=['ON PAD','ASCENT','SEPARATED','FLIP','BOOSTBACK','COASTING','ENTRY BURN','GLIDING','LANDING BURN','LANDED'];
@@ -2621,24 +2676,27 @@ function updateHUD(t){
   const nE=Math.round(B[8]),th=nE>0?B[7]*100:0;
   el.eng.textContent=nE>0&&B[7]>0.01?nE:0;el.thr.textContent=Math.round(th);el.thrb.style.width=th.toFixed(1)+'%';
   el.prop.textContent=(B[9]/1000).toFixed(1);el.propb.style.width=clamp(B[9]/propMax*100,0,100).toFixed(1)+'%';
-  const ph=Math.round(B[25]);el.bst.textContent=BST[ph]||'';
+  const ph=Math.round(B[25]),failedLanding=t>=T_TD&&EV.TOUCHDOWN&&!EV.TOUCHDOWN.success;
+  el.bst.textContent=failedLanding?'FAILED TOUCHDOWN':BST[ph]||'';
   /* stage 2 */
   el.s2alt.textContent=(S[15]/1000).toFixed(1);el.s2v.textContent=Math.round(S[14]);
   tD.set(S[0],S[1]-EC_Y,S[2]).normalize();
   const dr=Math.acos(clamp(tD.y,-1,1))*RE/1000;el.s2dr.textContent=dr.toFixed(dr<100?1:0);
   el.s2p.textContent=(S[9]/1000).toFixed(1);
   const sep=t>=T_SEP;
-  el.s2st.textContent=!sep?'ATTACHED':S[19]>0.5?'ORBIT':S[8]>0.5?'BURNING':'COAST';
+  const orbitOK=SIM.stats.orbit&&(SIM.stats.orbit.rp-RE)>150000&&SIM.stats.orbit.ecc<0.05;
+  el.s2st.textContent=!sep?'ATTACHED':S[19]>0.5?(orbitOK?'ORBIT':'INSERTION FAILED'):S[8]>0.5?'BURNING':'COAST';
   if(t>=T_SECO){const e=EV.SECO;el.orb.textContent=Math.round(e.perigee)+' x '+Math.round(e.apogee)+' km';}else el.orb.textContent='—';
   /* mission clock + phase + next event */
   el.clock.textContent=fmtClock(t);
   let ptxt=PHN[ph]||'';
-  if(t>=T_SEP&&ph>=5&&t<T_SECO&&false)ptxt=ptxt;
-  if(Math.abs(t-EV.MAX_Q.t)<4)ptxt='MAX-Q — MAXIMUM DYNAMIC PRESSURE';
+  if(EV.MAX_Q&&Math.abs(t-EV.MAX_Q.t)<4)ptxt='MAX-Q — MAXIMUM DYNAMIC PRESSURE';
   if(t>=T_MECO&&t<T_SEP)ptxt='MECO — STAGE SEPARATION';
   if(t<-0.01&&t>-3.6)ptxt='MAIN ENGINE START';
   if(t>=T_TD+0.3)ptxt=t<T_SECO?'BOOSTER LANDED — STAGE 2 TO ORBIT':t<T_SATD?'ORBIT INSERTION COMPLETE':'SATELLITE DEPLOYED';
   if(t>=T_SATD+0.0&&t>=T_SATD)ptxt='SATELLITE DEPLOYED — SOLAR ARRAYS UNFOLD';
+  if(failedLanding)ptxt='BOOSTER TOUCHDOWN FAILED';
+  else if(t>=T_SECO&&!orbitOK)ptxt='ORBIT INSERTION FAILED';
   if(el.phase.textContent!==ptxt)el.phase.textContent=ptxt;
   let nxt=null;for(const e of SIM.events){if(e.t>t+0.01&&EVNAME[e.name]){nxt=e;break;}}
   el.next.textContent=nxt?'NEXT  '+EVNAME[nxt.name]+'  ·  '+fmtClock(nxt.t-t).replace('T+','T-').replace('T-','in ')+'':'';
@@ -2647,8 +2705,8 @@ function updateHUD(t){
   focLab.textContent='FOCUS · '+FOCUS_NAMES[F.which]+(focusMode===0?' (auto)':'');
 }
 /* playback */
-let simT=-8,playing=true,speed=1,scrubbing=false,realT=0;
-function setPlaying(p){playing=p;el.pp.innerHTML=p?'&#10074;&#10074;':'&#9654;';}
+let simT=SIMT0,playing=true,speed=1,scrubbing=false,realT=0;
+function setPlaying(p){playing=p;el.pp.innerHTML=p?'&#10074;&#10074;':'&#9654;';el.pp.setAttribute('aria-label',p?'Pause replay':'Play replay');}
 function seek(t){simT=clamp(t,SIMT0,T_END);camSnap=true;}
 document.querySelectorAll('#cams button[data-cam]').forEach(b=>b.addEventListener('click',()=>setCam(+b.dataset.cam)));
 $('focusbtn').addEventListener('click',()=>setFocus((focusMode+1)%4));
@@ -2656,20 +2714,24 @@ document.querySelectorAll('#spd button').forEach(b=>b.addEventListener('click',(
 el.pp.addEventListener('click',()=>{if(simT>=T_END-0.01)seek(SIMT0);setPlaying(!playing);});
 el.scrub.addEventListener('pointerdown',()=>{scrubbing=true;});
 window.addEventListener('pointerup',()=>{scrubbing=false;});
+window.addEventListener('pointercancel',()=>{scrubbing=false;});
 el.scrub.addEventListener('input',()=>{simT=parseFloat(el.scrub.value);camSnap=true;});
 window.addEventListener('keydown',e=>{
-  if(e.target&&e.target.tagName==='INPUT'&&e.code==='Space')e.target.blur();
+  if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.repeat||$('notes').classList.contains('on'))return;
+  if(e.target&&(e.target.matches('input,textarea,select')||e.target.isContentEditable))return;
+  if(e.target&&e.target.matches('button')&&(e.code==='Space'||e.code==='Enter'))return;
   if(e.code==='Space'){e.preventDefault();if(simT>=T_END-0.01)seek(SIMT0);setPlaying(!playing);}
   else if(e.key>='1'&&e.key<='7')setCam(+e.key);
-  else if(e.code==='ArrowRight'){seek(simT+(e.shiftKey?20:3));}
-  else if(e.code==='ArrowLeft'){seek(simT-(e.shiftKey?20:3));}
-  else if(e.key==='r'||e.key==='R'){seek(-8);setPlaying(true);}
+  else if(e.code==='ArrowRight'){e.preventDefault();seek(simT+(e.shiftKey?20:3));}
+  else if(e.code==='ArrowLeft'){e.preventDefault();seek(simT-(e.shiftKey?20:3));}
+  else if(e.key==='r'||e.key==='R'){seek(SIMT0);setPlaying(true);}
   else if(e.key==='f'||e.key==='F'){setFocus((focusMode+1)%4);}
   else if(e.key==='h'||e.key==='H'){const v=$('huds').style.display==='none'?'':'none';$('huds').style.display=v;$('hint').style.display=v;$('mc').style.display=v;}
 });
 window.addEventListener('resize',()=>{
   camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth,window.innerHeight);
+  layoutTicks();
 });
 
 /* ================= main loop ================= */
@@ -2702,7 +2764,8 @@ window.__dbg={renderer,scene,camera};
 performance.mark('ready');performance.measure('boot','start','ready');
 function frame(now){
   requestAnimationFrame(frame);
-  const dt=Math.min(0.1,(now-lastNow)/1000);lastNow=now;
+  const elapsed=Math.max(0,(now-lastNow)/1000),dt=Math.min(0.1,elapsed);lastNow=now;
+  if(document.hidden)return;
   if(window.__manual)return;
   emaDt=emaDt*0.95+dt*0.05;
   if(++frameCount%45===0){
@@ -2711,11 +2774,13 @@ function frame(now){
   }
   realT+=dt;
   if(playing&&!scrubbing){
-    simT+=dt*speed;
+    simT+=elapsed*speed;
     if(simT>=T_END){simT=T_END;setPlaying(false);}
   }
   drawFrame(dt);
 }
+// Hidden tabs pause their mission clock; visible slow frames keep wall time.
+document.addEventListener('visibilitychange',()=>{lastNow=performance.now();});
 window.__sim={PT:PT,PS:PS,draw:function(dt){realT+=dt;drawFrame(dt);},seek:seek,setCam:setCam,setFocus:setFocus,setPlaying:setPlaying,SIM:SIM,scene:scene,renderer:renderer,camera:camera,sB:sB,sS:sS,F:F,orb:orb,get t(){return simT;},THREE:THREE,ORG:ORG};
 /* model notes dialog */
 (function(){
@@ -2729,15 +2794,21 @@ window.__sim={PT:PT,PS:PS,draw:function(dt){realT+=dt;drawFrame(dt);},seek:seek,
     if(orbit)set('n-orb',Math.round((orbit.rp-RE)/1000)+' × '+Math.round((orbit.ra-RE)/1000)+' km at '+orbit.inc.toFixed(1)+'°');
     if(ev.TOUCHDOWN)set('n-td',Math.abs(ev.TOUCHDOWN.vV).toFixed(2)+' m/s vertical, '+ev.TOUCHDOWN.vH.toFixed(2)+' m/s horizontal, '+ev.TOUCHDOWN.tilt.toFixed(2)+'° tilt, '+ev.TOUCHDOWN.err.toFixed(1)+' m from pad centre');
   }
-  function open(){fill();lastFocus=document.activeElement;panel.classList.add('on');close.focus();}
-  function shut(){panel.classList.remove('on');btn.focus();}
+  let wasPlaying=false;
+  function open(){fill();lastFocus=document.activeElement;wasPlaying=playing;setPlaying(false);panel.classList.add('on');close.focus();}
+  function shut(){panel.classList.remove('on');setPlaying(wasPlaying);(lastFocus&&lastFocus.isConnected?lastFocus:btn).focus();}
   btn.addEventListener('click',open);
   close.addEventListener('click',shut);
   panel.addEventListener('click',event=>{if(event.target===panel)shut();});
   document.addEventListener('keydown',event=>{
-    if(event.key==='Escape'&&panel.classList.contains('on')){shut();return;}
-    if(panel.classList.contains('on'))return;
-    if(event.key==='?'||(event.key==='m'&&!event.metaKey&&!event.ctrlKey))open();
+    if(panel.classList.contains('on')){
+      if(event.key==='Escape'){event.preventDefault();shut();}
+      else if(event.key==='Tab'){event.preventDefault();close.focus();}
+      event.stopPropagation();return;
+    }
+    if(event.ctrlKey||event.metaKey||event.altKey||event.repeat)return;
+    if(event.target&&(event.target.matches('input,textarea,select')||event.target.isContentEditable))return;
+    if(event.key==='?'||event.key.toLowerCase()==='m'){event.preventDefault();open();}
   });
 })();
 requestAnimationFrame(frame);

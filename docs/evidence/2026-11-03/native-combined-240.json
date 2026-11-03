@@ -1,0 +1,3087 @@
+{
+  "status": "finished",
+  "started_at": 1793710819.156298,
+  "headless": true,
+  "renderer": "real-time",
+  "gpu_physics": false,
+  "arguments": {
+    "headless": true,
+    "diagnostic": false,
+    "api_url": "http://127.0.0.1:5180/api",
+    "renderer": "real-time",
+    "flow": false,
+    "follow_camera": false,
+    "gpu_physics": false,
+    "mission": "combined",
+    "profile": "research",
+    "separation_altitude": 600.0,
+    "landing": [
+      1200.0,
+      400.0
+    ],
+    "seed": 42,
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "retarget_at": null,
+    "checkpoint": null,
+    "train_steps": 0,
+    "controller": "native",
+    "qualification_runs": 0,
+    "max_seconds": 180.0,
+    "port": 8766,
+    "time_scale": 1.0,
+    "start_paused": false,
+    "lean_headless": false,
+    "lean_visual": false,
+    "full_experience": false,
+    "randomized": false,
+    "sensor_noise": false,
+    "physics_hz": 240,
+    "cinematic": false,
+    "render_track": null,
+    "cine_limit": null,
+    "cine_stills": null,
+    "cine_fps": 60.0,
+    "cine_preset": "cinematic",
+    "cine_size": 1080,
+    "cine_output": "D:\\AI SIDE PROJECTS\\ROCKET LANDER + LAUNCHER\\videos\\rocket_mission_takeoff_detach_landing.mp4",
+    "track_out": null,
+    "output": "docs\\evidence\\2026-11-03\\native-combined-240.json"
+  },
+  "source_manifest": {
+    "scripts\\isaac_runner.py": "5e33787d2aea42360c77a9eae68cf91c99e7b0026d4d13111d3f009360a4ec25",
+    "rocket_lab\\isaac\\__init__.py": "d3bf9d611755b8177826459a336812f3234e5315c94aac8de5c0c4fe9df5cb88",
+    "rocket_lab\\isaac\\actuators.py": "efe5b47c0a35f378be42470b3fe09abe98cefcda1d3893a773af57324207ec0a",
+    "rocket_lab\\isaac\\api.py": "f6ca40124c4747fbce2bfc07c34896fa3b60dc6ee2d381f5976405bf9508bbc6",
+    "rocket_lab\\isaac\\cinematic.py": "002e76127c36fedc22d8bdcc3ba507622f7356f57e38a00ce06cac2db4c5ca20",
+    "rocket_lab\\isaac\\guidance.py": "621f4db8ccc50346730027efd93beac1990a237b29dd7cb0549917cffeb84280",
+    "rocket_lab\\isaac\\launcher.py": "be3e521004d111c65c908878f0b661a77e57f276cf89b1b65a448ab42db384c2",
+    "rocket_lab\\isaac\\physics.py": "170baef71d01642aa1ec339cfb8987b2592a66eef4112c49cf77e779119f00d4",
+    "rocket_lab\\isaac\\policy.py": "4172f336a0a8f6631698cb202c1c5d472e535c3dcdcd9e1795adca2c0f7cf9a0",
+    "rocket_lab\\isaac\\stream.py": "b36c9994096dbdfef32e45a719210b2c9f293f585ba5c1967688e58af2108877",
+    "rocket_lab\\isaac\\visuals.py": "44709b86a23b5330743c2ac829d4bc5b6679ea2c71c78fd7855644fd6af9dbb0",
+    "config\\isaac-headless.kit": "8ac0bd79772e7ab2bfc5193d2f94de5b2c6250ccba0f42b9f791f7a9b611eb0f",
+    "config\\isaac-visual.kit": "149d5d1e362cf787e57ee03a70c00feeed0d41f8cc17363d8217364a22bc6f7f",
+    "rocket_lab\\envs.py": "e0b2a499e3633e441d26e851111408146081a8c5ee74e2f0b23732212edf35cc",
+    "rocket_lab\\controllers.py": "647fd764db37da1be5bb138832a2023d4aa4424c28cc9cf8b2621ab12c1cf094",
+    "rocket_lab\\missions.py": "5bc6e8f2a6219ff930113e6c400b4100ace564b89f4198fdec7486a40377bc63",
+    "rocket_lab\\atmosphere.py": "fa1b74073c32f4399f4dc0fd6137c5778883ce8a4704f473eb02ddd8bd9902c9",
+    "rocket_lab\\schemas.py": "e06fd13d2a300a184b49efcdfc7cf27a3e81d33518b0c7210af275eb371eff47"
+  },
+  "experience": "isaac-headless",
+  "isaac_version": [
+    "6.2.0",
+    "rc.14",
+    "6",
+    "2",
+    "0",
+    "rc",
+    "14",
+    "release.52805.02189a84.gl"
+  ],
+  "torch_version": "2.11.0+cpu",
+  "torch_cuda_available": false,
+  "rendering_enabled": false,
+  "configuration": {
+    "vehicle": {
+      "dry_mass": 22000.0,
+      "fuel_mass": 16000.0,
+      "isp": 311.0,
+      "isp_sea_level": 282.0,
+      "isp_vacuum": 311.0,
+      "max_thrust": 914000.0,
+      "thrust_sea_level": 845000.0,
+      "thrust_vacuum": 914000.0,
+      "nozzle_exit_area": 0.68,
+      "min_throttle": 0.35,
+      "throttle_rate": 2.0,
+      "shutdown_rate": 5.0,
+      "gimbal_limit_deg": 8.0,
+      "gimbal_rate_deg_s": 30.0,
+      "rcs_torque_max": 2000000.0,
+      "length": 40.0,
+      "engine_lever": 17.9,
+      "landing_foot_radius": 6.2,
+      "contact_model": "feet",
+      "hold_down_release_margin": 1.05,
+      "hold_down_release_time": 0.2,
+      "radius": 1.8,
+      "inertia": [
+        5100000.0,
+        5100000.0,
+        61000.0
+      ],
+      "drag_coefficient": 0.5,
+      "area": 10.18,
+      "aero_model": "axial-lateral",
+      "drag_coefficient_lateral": 1.0,
+      "area_lateral": 144.0,
+      "aero_center": 5.0,
+      "drag_coefficient_mach": [
+        [
+          0.0,
+          0.5
+        ],
+        [
+          0.8,
+          0.5
+        ],
+        [
+          1.0,
+          0.85
+        ],
+        [
+          1.2,
+          0.75
+        ],
+        [
+          2.0,
+          0.55
+        ],
+        [
+          4.0,
+          0.4
+        ]
+      ],
+      "upper_stage_mass": 2500.0,
+      "separation_pusher_force": 12000.0,
+      "separation_pusher_seconds": 0.2,
+      "rcs_fuel_mass": 40.0,
+      "rcs_jet_force": 500.0,
+      "rcs_lever": 1.8,
+      "rcs_isp": 60.0
+    },
+    "world": {
+      "gravity": 9.80665,
+      "gravity_model": "inverse_square",
+      "earth_radius": 6371000.0,
+      "atmosphere_model": "layered",
+      "density_sea_level": 1.225,
+      "scale_height": 8500.0,
+      "wind_mean": [
+        2.0,
+        -1.0,
+        0.0
+      ],
+      "gust_std": 0.8,
+      "wind_shear_exponent": 0.14,
+      "wind_reference_height": 10.0,
+      "sensor_noise": 0.005,
+      "position_noise_m": 0.12,
+      "velocity_noise_m_s": 0.04,
+      "timestep": 0.004166666666666667,
+      "control_substeps": 24
+    },
+    "mission": {
+      "landing_altitude": [
+        180.0,
+        240.0
+      ],
+      "landing_vertical_velocity": [
+        -24.0,
+        -16.0
+      ],
+      "horizontal_position": 12.0,
+      "horizontal_velocity": 1.5,
+      "initial_tilt_deg": 2.0,
+      "pad": [
+        1200.0,
+        400.0,
+        0.0
+      ],
+      "launch_stand_height": 3.0,
+      "touchdown_speed": 2.0,
+      "touchdown_tilt_deg": 5.0,
+      "pad_radius": 5.0,
+      "landing_tolerance": 1.0,
+      "separation_shutdown": true,
+      "takeoff_altitude": 600.0,
+      "takeoff_velocity": 25.0,
+      "takeoff_velocity_tolerance": 8.0,
+      "timeout": 180.0,
+      "combined_timeout": 240.0,
+      "bounds": 2500.0,
+      "launch": [
+        0.0,
+        0.0
+      ],
+      "profile": "research"
+    },
+    "reward": {
+      "profile": "state-potential-v3",
+      "potential_height": 0.25,
+      "potential_speed": 6.0,
+      "potential_tilt": 80.0,
+      "potential_rate": 3.0,
+      "potential_lateral": 2.0,
+      "action_cost": 0.01,
+      "progress": 0.15,
+      "velocity": 0.08,
+      "tilt": 2.0,
+      "angular_velocity": 0.2,
+      "position": 0.01,
+      "fuel": 0.001,
+      "alive": 0.05,
+      "success": 200.0,
+      "failure": -100.0,
+      "terminal_speed": 2.0,
+      "terminal_tilt": 0.2,
+      "terminal_position": 1.0
+    },
+    "training": {
+      "seed": 42,
+      "n_envs": 4,
+      "checkpoints": [
+        10000,
+        100000,
+        500000,
+        1000000,
+        5000000,
+        10000000
+      ],
+      "evaluation_episodes": 10000,
+      "curriculum_threshold": 0.75,
+      "curriculum_window": 40,
+      "curriculum_check_interval": 25000,
+      "curriculum_eval_episodes": 24,
+      "previous_stage_probability": 0.35,
+      "initial_difficulty": 0.0,
+      "curriculum_increment": 0.05,
+      "observation_normalization": false,
+      "observation_position_scale": [
+        40.0,
+        40.0,
+        250.0
+      ],
+      "observation_velocity_scale": [
+        10.0,
+        10.0,
+        30.0
+      ],
+      "reward_normalization": true,
+      "policy_log_std": -0.7,
+      "policy_exploration_std": 0.2,
+      "policy_min_std": 0.05,
+      "warm_start_difficulty": 0.1,
+      "ppo_entropy": 0.0005,
+      "ppo_target_kl": 0.02,
+      "ppo_gamma": 0.999,
+      "ppo_gae_lambda": 0.98,
+      "learning_rate": 0.0003,
+      "retarget_probability": 0.35,
+      "retarget_max_offset": 70.0,
+      "retarget_min_altitude": 45.0
+    }
+  },
+  "configuration_sha256": "d2bc089461ed670208f812390232c6601890770e9d393334569406d78b60aa25",
+  "physx_gpu_dynamics_enabled": false,
+  "socket_port": 8766,
+  "engine": "Isaac Sim PhysX",
+  "plan": {
+    "launch": [
+      0.0,
+      0.0
+    ],
+    "landing": [
+      1200.0,
+      400.0
+    ],
+    "separation_altitude": 600.0,
+    "profile": "research"
+  },
+  "steps": 1242,
+  "outcome": "crash_speed",
+  "physical_seconds": 124.11249999996929,
+  "flight_wall_seconds": 32.421000000002095,
+  "real_time_factor": 3.8281515067382643,
+  "final_info": {
+    "outcome": "crash_speed",
+    "failure_reason": "crash_speed",
+    "touchdown_speed": 0.5330185443774286,
+    "tilt": 0.27534707862106306,
+    "pad_distance": 0.5271669241471679,
+    "fuel_used": 13728.86106661456,
+    "phase": "landing",
+    "episode_difficulty": 1.0,
+    "retargets": []
+  },
+  "trace": [
+    {
+      "t": 0.9999999999999977,
+      "position": [
+        0.0,
+        0.0,
+        23.721637725830078
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        2.3434433937072754
+      ],
+      "tilt": 0.0,
+      "throttle": 0.6240638792514801,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 2.3434433937072754
+    },
+    {
+      "t": 1.9999999999999942,
+      "position": [
+        0.0,
+        0.0,
+        27.219154357910156
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        4.3562703132629395
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5308543108403683,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 4.3562703132629395
+    },
+    {
+      "t": 3.000000000000044,
+      "position": [
+        0.0,
+        0.0,
+        32.121402740478516
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        5.367190361022949
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5044070221483707,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 5.367190361022949
+    },
+    {
+      "t": 4.000000000000093,
+      "position": [
+        0.0,
+        0.0,
+        37.879432678222656
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        6.131455898284912
+      ],
+      "tilt": 0.0,
+      "throttle": 0.49776881630532444,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 6.131455898284912
+    },
+    {
+      "t": 5.000000000000036,
+      "position": [
+        0.0,
+        0.0,
+        44.38315200805664
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        6.878058910369873
+      ],
+      "tilt": 0.0,
+      "throttle": 0.49719884200021625,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 6.878058910369873
+    },
+    {
+      "t": 5.99999999999998,
+      "position": [
+        0.0,
+        0.0,
+        51.6581916809082
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        7.680446147918701
+      ],
+      "tilt": 0.0,
+      "throttle": 0.4986863329540938,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 7.680446147918701
+    },
+    {
+      "t": 6.999999999999923,
+      "position": [
+        0.0,
+        0.0,
+        59.776611328125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        8.567112922668457
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5010855747386813,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 8.567112922668457
+    },
+    {
+      "t": 7.999999999999866,
+      "position": [
+        0.0,
+        0.0,
+        68.83052062988281
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        9.554054260253906
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5040927394293249,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 9.554054260253906
+    },
+    {
+      "t": 8.99999999999981,
+      "position": [
+        0.0,
+        0.0,
+        78.92707824707031
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        10.654422760009766
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5076694991439581,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 10.654422760009766
+    },
+    {
+      "t": 9.999999999999753,
+      "position": [
+        0.0,
+        0.0,
+        90.18671417236328
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        11.8818359375
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5118452664464712,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 11.8818359375
+    },
+    {
+      "t": 10.999999999999696,
+      "position": [
+        0.0,
+        0.0,
+        102.74384307861328
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        13.250996589660645
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5166741628199816,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 13.250996589660645
+    },
+    {
+      "t": 11.99999999999964,
+      "position": [
+        0.0,
+        0.0,
+        116.7481689453125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        14.778173446655273
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5222321934998035,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 14.778173446655273
+    },
+    {
+      "t": 12.999999999999583,
+      "position": [
+        0.0,
+        0.0,
+        132.3662567138672
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        16.481645584106445
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5285995304584503,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 16.481645584106445
+    },
+    {
+      "t": 13.999999999999526,
+      "position": [
+        0.0,
+        0.0,
+        149.78521728515625
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        18.381622314453125
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5358591638505459,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 18.381622314453125
+    },
+    {
+      "t": 14.999999999999469,
+      "position": [
+        0.0,
+        0.0,
+        169.21173095703125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        20.500675201416016
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5441241972148418,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 20.500675201416016
+    },
+    {
+      "t": 15.999999999999412,
+      "position": [
+        0.0,
+        0.0,
+        190.87774658203125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        22.8640193939209
+      ],
+      "tilt": 0.0,
+      "throttle": 0.5535102114081383,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 22.8640193939209
+    },
+    {
+      "t": 16.999999999999357,
+      "position": [
+        0.0,
+        0.0,
+        214.6157684326172
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        24.331926345825195
+      ],
+      "tilt": 0.0,
+      "throttle": 0.4775602426379919,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 24.331926345825195
+    },
+    {
+      "t": 17.9999999999993,
+      "position": [
+        0.0,
+        0.0,
+        239.2255401611328
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        24.80091667175293
+      ],
+      "tilt": 0.0,
+      "throttle": 0.45069971308112144,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 24.80091667175293
+    },
+    {
+      "t": 18.999999999999243,
+      "position": [
+        0.0,
+        0.0,
+        264.12335205078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        24.95070457458496
+      ],
+      "tilt": 0.0,
+      "throttle": 0.4408659487962723,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 24.95070457458496
+    },
+    {
+      "t": 19.999999999999186,
+      "position": [
+        0.0,
+        0.0,
+        289.08428955078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        24.996294021606445
+      ],
+      "tilt": 0.0,
+      "throttle": 0.43657688796520233,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 24.996294021606445
+    },
+    {
+      "t": 20.99999999999913,
+      "position": [
+        0.0,
+        0.0,
+        314.04522705078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.008682250976562
+      ],
+      "tilt": 0.0,
+      "throttle": 0.43410931527614594,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.008682250976562
+    },
+    {
+      "t": 21.999999999999073,
+      "position": [
+        0.0,
+        0.0,
+        339.00616455078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.011014938354492
+      ],
+      "tilt": 0.0,
+      "throttle": 0.43222447484731674,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.011014938354492
+    },
+    {
+      "t": 22.999999999999016,
+      "position": [
+        0.0,
+        0.0,
+        363.96710205078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.010900497436523
+      ],
+      "tilt": 0.0,
+      "throttle": 0.430508017539978,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.010900497436523
+    },
+    {
+      "t": 23.99999999999896,
+      "position": [
+        0.0,
+        0.0,
+        388.92803955078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.009855270385742
+      ],
+      "tilt": 0.0,
+      "throttle": 0.42885158210992813,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.009855270385742
+    },
+    {
+      "t": 24.999999999998902,
+      "position": [
+        0.0,
+        0.0,
+        413.88897705078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.008134841918945
+      ],
+      "tilt": 0.0,
+      "throttle": 0.42727407813072205,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.008134841918945
+    },
+    {
+      "t": 25.999999999998845,
+      "position": [
+        0.0,
+        0.0,
+        438.84991455078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.00779914855957
+      ],
+      "tilt": 0.0,
+      "throttle": 0.42564839124679565,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.00779914855957
+    },
+    {
+      "t": 26.99999999999879,
+      "position": [
+        0.0,
+        0.0,
+        463.81085205078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.005817413330078
+      ],
+      "tilt": 0.0,
+      "throttle": 0.42410188168287277,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.005817413330078
+    },
+    {
+      "t": 27.99999999999873,
+      "position": [
+        0.0,
+        0.0,
+        488.7724609375
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.005247116088867
+      ],
+      "tilt": 0.0,
+      "throttle": 0.422539658844471,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.005247116088867
+    },
+    {
+      "t": 28.999999999998675,
+      "position": [
+        0.0,
+        0.0,
+        513.7552490234375
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.0053768157959
+      ],
+      "tilt": 0.0,
+      "throttle": 0.4209378659725189,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.0053768157959
+    },
+    {
+      "t": 29.999999999998618,
+      "position": [
+        0.0,
+        0.0,
+        538.8333740234375
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.0056095123291
+      ],
+      "tilt": 0.0,
+      "throttle": 0.4193267226219177,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.0056095123291
+    },
+    {
+      "t": 30.99999999999856,
+      "position": [
+        0.0,
+        0.0,
+        563.9114990234375
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.00559425354004
+      ],
+      "tilt": 0.0,
+      "throttle": 0.4177403524518013,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.00559425354004
+    },
+    {
+      "t": 31.999999999998504,
+      "position": [
+        0.0,
+        0.0,
+        588.9896240234375
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.005271911621094
+      ],
+      "tilt": 0.0,
+      "throttle": 0.4161731079220772,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.005271911621094
+    },
+    {
+      "t": 32.9999999999993,
+      "position": [
+        0.0,
+        0.0,
+        614.0677490234375
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        25.0052490234375
+      ],
+      "tilt": 0.0,
+      "throttle": 0.41460997611284256,
+      "phase": "takeoff",
+      "pad_distance": 0.0,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 25.0052490234375
+    },
+    {
+      "t": 34.00000000000009,
+      "position": [
+        0.0,
+        0.0,
+        637.5106811523438
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        19.411325454711914
+      ],
+      "tilt": 0.0,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 1264.9110640673518,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 19.411325454711914
+    },
+    {
+      "t": 35.00000000000089,
+      "position": [
+        0.0,
+        0.0,
+        651.9873046875
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        9.587182998657227
+      ],
+      "tilt": 0.0,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 1264.9110640673518,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 9.587182998657227
+    },
+    {
+      "t": 36.000000000001684,
+      "position": [
+        0.0,
+        0.0,
+        656.64990234375
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        -0.2201821655035019
+      ],
+      "tilt": 0.0,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 1264.9110640673518,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 0.2201821655035019
+    },
+    {
+      "t": 37.00000000000248,
+      "position": [
+        0.0,
+        0.0,
+        651.5078125
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        -10.021871566772461
+      ],
+      "tilt": 0.0,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 1264.9110640673518,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 10.021871566772461
+    },
+    {
+      "t": 38.000000000003276,
+      "position": [
+        0.0,
+        0.0,
+        636.5711669921875
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        -19.806272506713867
+      ],
+      "tilt": 0.0,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 1264.9110640673518,
+      "roll_rate": 0.0,
+      "rcs_fuel": 40.0,
+      "rcs_torque": -0.0,
+      "roll_command": -0.0,
+      "contact_speed": 19.806272506713867
+    },
+    {
+      "t": 39.00000000000407,
+      "position": [
+        -0.13206002116203308,
+        -0.13206002116203308,
+        612.8184204101562
+      ],
+      "velocity": [
+        -0.6632028222084045,
+        -0.6632028222084045,
+        -24.71204948425293
+      ],
+      "tilt": 0.8376211221804253,
+      "throttle": 0.5061988825909793,
+      "phase": "landing",
+      "pad_distance": 1265.0781110063588,
+      "roll_rate": -1.518645367565312e-11,
+      "rcs_fuel": 39.9999999999323,
+      "rcs_torque": 7.173393918270976e-07,
+      "roll_command": 3.9852188434838755e-10,
+      "contact_speed": 25.132994495348427
+    },
+    {
+      "t": 40.00000000000487,
+      "position": [
+        -1.3840373754501343,
+        -0.8223887085914612,
+        588.9935302734375
+      ],
+      "velocity": [
+        -1.320739507675171,
+        0.018103333190083504,
+        -23.516252517700195
+      ],
+      "tilt": 8.12544916607487,
+      "throttle": 0.4876200659200549,
+      "phase": "landing",
+      "pad_distance": 1266.4841856693665,
+      "roll_rate": -0.004113569781749755,
+      "rcs_fuel": 39.98404889347728,
+      "rcs_torque": 97.66368131180516,
+      "roll_command": 0.05425760072878064,
+      "contact_speed": 24.297075523206004
+    },
+    {
+      "t": 41.00000000000566,
+      "position": [
+        -1.0457630157470703,
+        0.1938820332288742,
+        566.3499145507812
+      ],
+      "velocity": [
+        1.9167646169662476,
+        1.8467763662338257,
+        -21.69414520263672
+      ],
+      "tilt": 11.734007953544394,
+      "throttle": 0.5004421261837706,
+      "phase": "landing",
+      "pad_distance": 1265.841955704478,
+      "roll_rate": -0.0056079809670261625,
+      "rcs_fuel": 39.5452378894517,
+      "rcs_torque": 324.49651139481205,
+      "roll_command": 0.18027583966378447,
+      "contact_speed": 21.98385713153457
+    },
+    {
+      "t": 42.00000000000646,
+      "position": [
+        2.582167387008667,
+        2.360018491744995,
+        545.5083618164062
+      ],
+      "velocity": [
+        5.494406700134277,
+        2.308835744857788,
+        -20.03550148010254
+      ],
+      "tilt": 11.513328992479474,
+      "throttle": 0.49451092490926385,
+      "phase": "landing",
+      "pad_distance": 1261.7159033449166,
+      "roll_rate": 0.011569979481293506,
+      "rcs_fuel": 39.38085863497889,
+      "rcs_torque": -393.76800820042394,
+      "roll_command": -0.2187600045557911,
+      "contact_speed": 21.14707152052478
+    },
+    {
+      "t": 43.000000000007255,
+      "position": [
+        9.210172653198242,
+        4.566977500915527,
+        526.3603515625
+      ],
+      "velocity": [
+        7.1348395347595215,
+        2.164435625076294,
+        -18.240015029907227
+      ],
+      "tilt": 8.008478745755035,
+      "throttle": 0.47261203452944756,
+      "phase": "landing",
+      "pad_distance": 1254.7301256427168,
+      "roll_rate": -0.0005576313848638691,
+      "rcs_fuel": 38.754500524817615,
+      "rcs_torque": -155.5041749884244,
+      "roll_command": -0.08639120832690245,
+      "contact_speed": 19.931624691764313
+    },
+    {
+      "t": 44.00000000000805,
+      "position": [
+        16.439218521118164,
+        6.931735038757324,
+        508.9438171386719
+      ],
+      "velocity": [
+        7.412003040313721,
+        2.5802252292633057,
+        -16.637773513793945
+      ],
+      "tilt": 6.882162817703863,
+      "throttle": 0.46520187333226204,
+      "phase": "landing",
+      "pad_distance": 1247.1242056726119,
+      "roll_rate": -0.022697435269920397,
+      "rcs_fuel": 38.09777833976551,
+      "rcs_torque": 1069.1673654009373,
+      "roll_command": 0.5939818696671875,
+      "contact_speed": 18.372616888842323
+    },
+    {
+      "t": 45.000000000008846,
+      "position": [
+        24.309301376342773,
+        9.668496131896973,
+        493.083740234375
+      ],
+      "velocity": [
+        8.413352012634277,
+        2.902339220046997,
+        -15.082427024841309
+      ],
+      "tilt": 7.0721322718796085,
+      "throttle": 0.464469276368618,
+      "phase": "landing",
+      "pad_distance": 1238.7926790799654,
+      "roll_rate": -0.01343234752938472,
+      "rcs_fuel": 37.32625846729496,
+      "rcs_torque": 634.3740149556859,
+      "roll_command": 0.3524300083087144,
+      "contact_speed": 17.4762719447623
+    },
+    {
+      "t": 46.00000000000964,
+      "position": [
+        33.350379943847656,
+        12.826709747314453,
+        478.8395080566406
+      ],
+      "velocity": [
+        9.646727561950684,
+        3.423037052154541,
+        -13.31902027130127
+      ],
+      "tilt": 6.97115619155226,
+      "throttle": 0.45256305485963816,
+      "phase": "landing",
+      "pad_distance": 1229.2170242321959,
+      "roll_rate": -0.007243975116289617,
+      "rcs_fuel": 36.87891793958346,
+      "rcs_torque": 344.8952429262452,
+      "roll_command": 0.19160846829235845,
+      "contact_speed": 16.859588069938024
+    },
+    {
+      "t": 47.00000000001044,
+      "position": [
+        43.4162483215332,
+        16.3604736328125,
+        466.43621826171875
+      ],
+      "velocity": [
+        10.412688255310059,
+        3.591625928878784,
+        -11.589449882507324
+      ],
+      "tilt": 6.670458934933906,
+      "throttle": 0.42631783336400986,
+      "phase": "landing",
+      "pad_distance": 1218.5504752934437,
+      "roll_rate": -0.0043373086006637295,
+      "rcs_fuel": 36.63504006365713,
+      "rcs_torque": 202.43600193096566,
+      "roll_command": 0.11246444551720314,
+      "contact_speed": 15.977437611441834
+    },
+    {
+      "t": 48.000000000011234,
+      "position": [
+        54.20532989501953,
+        20.016929626464844,
+        455.88385009765625
+      ],
+      "velocity": [
+        11.228411674499512,
+        3.7550370693206787,
+        -9.340478897094727
+      ],
+      "tilt": 6.951941569948614,
+      "throttle": 0.45548565313220024,
+      "phase": "landing",
+      "pad_distance": 1207.1588792745881,
+      "roll_rate": -0.002597000494037561,
+      "rcs_fuel": 36.489626967092306,
+      "rcs_torque": 120.68923432973509,
+      "roll_command": 0.0670495746276306,
+      "contact_speed": 14.99336197397822
+    },
+    {
+      "t": 49.00000000001203,
+      "position": [
+        65.86962127685547,
+        23.898208618164062,
+        447.5960388183594
+      ],
+      "velocity": [
+        12.069967269897461,
+        4.007172107696533,
+        -7.3251423835754395
+      ],
+      "tilt": 7.225234119198609,
+      "throttle": 0.43398523330688477,
+      "phase": "landing",
+      "pad_distance": 1194.8657972439119,
+      "roll_rate": -0.0015549808453053481,
+      "rcs_fuel": 36.40293809017123,
+      "rcs_torque": 71.95489046787522,
+      "roll_command": 0.03997493914881956,
+      "contact_speed": 14.590910393138246
+    },
+    {
+      "t": 50.000000000012825,
+      "position": [
+        78.31376647949219,
+        28.029733657836914,
+        441.0964660644531
+      ],
+      "velocity": [
+        12.809362411499023,
+        4.253969669342041,
+        -5.743950366973877
+      ],
+      "tilt": 7.593437921576669,
+      "throttle": 0.4176419600844383,
+      "phase": "landing",
+      "pad_distance": 1181.7537330222751,
+      "roll_rate": -0.0009310339451013363,
+      "rcs_fuel": 36.35125028928326,
+      "rcs_torque": 42.905681280833356,
+      "roll_command": 0.023836489600462977,
+      "contact_speed": 14.528540257360802
+    },
+    {
+      "t": 51.00000000001362,
+      "position": [
+        91.4911880493164,
+        32.406837463378906,
+        436.00054931640625
+      ],
+      "velocity": [
+        13.54481029510498,
+        4.499532699584961,
+        -4.502196788787842
+      ],
+      "tilt": 8.093814530557877,
+      "throttle": 0.4047327861189842,
+      "phase": "landing",
+      "pad_distance": 1167.868365577213,
+      "roll_rate": -0.0005574770316635712,
+      "rcs_fuel": 36.32042726218384,
+      "rcs_torque": 25.588281480184396,
+      "roll_command": 0.014215711933435776,
+      "contact_speed": 14.790816996446134
+    },
+    {
+      "t": 52.00000000001442,
+      "position": [
+        105.40994262695312,
+        37.03026580810547,
+        432.0079650878906
+      ],
+      "velocity": [
+        14.290484428405762,
+        4.7464165687561035,
+        -3.5261189937591553
+      ],
+      "tilt": 8.640396747437444,
+      "throttle": 0.3942614197731018,
+      "phase": "landing",
+      "pad_distance": 1153.201813057569,
+      "roll_rate": -0.0003337981726350829,
+      "rcs_fuel": 36.302043733739936,
+      "rcs_torque": 15.261804313674824,
+      "roll_command": 0.008478780174263791,
+      "contact_speed": 15.278207097970165
+    },
+    {
+      "t": 53.00000000001521,
+      "position": [
+        120.07538604736328,
+        41.90058898925781,
+        428.8820495605469
+      ],
+      "velocity": [
+        15.036921501159668,
+        4.993084907531738,
+        -2.7593562602996826
+      ],
+      "tilt": 9.196013329568222,
+      "throttle": 0.38565294444561005,
+      "phase": "landing",
+      "pad_distance": 1137.7488123425978,
+      "roll_rate": -0.00019986144045036817,
+      "rcs_fuel": 36.291078676344284,
+      "rcs_torque": 9.103335183475025,
+      "roll_command": 0.005057408435263902,
+      "contact_speed": 15.889750006995236
+    },
+    {
+      "t": 54.00000000001601,
+      "position": [
+        135.48577880859375,
+        47.01710891723633,
+        426.4368896484375
+      ],
+      "velocity": [
+        15.780380249023438,
+        5.238793849945068,
+        -2.157670736312866
+      ],
+      "tilt": 9.757574854410349,
+      "throttle": 0.37853135168552393,
+      "phase": "landing",
+      "pad_distance": 1121.5112342352584,
+      "roll_rate": -0.00011968724463834008,
+      "rcs_fuel": 36.28453775916432,
+      "rcs_torque": 5.431117233390896,
+      "roll_command": 0.003017287351883831,
+      "contact_speed": 16.568495110706994
+    },
+    {
+      "t": 55.000000000016804,
+      "position": [
+        151.489013671875,
+        52.32899856567383,
+        423.67645263671875
+      ],
+      "velocity": [
+        15.950352668762207,
+        5.294844150543213,
+        -3.987612724304199
+      ],
+      "tilt": 10.351012723484043,
+      "throttle": 0.48230342753231525,
+      "phase": "landing",
+      "pad_distance": 1104.6494528533135,
+      "roll_rate": -7.168691808388561e-05,
+      "rcs_fuel": 36.28063417560429,
+      "rcs_torque": 3.243456238479053,
+      "roll_command": 0.0018019201324883628,
+      "contact_speed": 16.79586816559779
+    },
+    {
+      "t": 56.0000000000176,
+      "position": [
+        168.1321563720703,
+        57.85139465332031,
+        421.0779724121094
+      ],
+      "velocity": [
+        17.61091423034668,
+        5.834794521331787,
+        -1.1171895265579224
+      ],
+      "tilt": 11.48312043764105,
+      "throttle": 0.4526015892624855,
+      "phase": "landing",
+      "pad_distance": 1087.1140302903057,
+      "roll_rate": -4.295474289107302e-05,
+      "rcs_fuel": 36.27830357680085,
+      "rcs_torque": 1.9348407343536562,
+      "roll_command": 0.0010749115190853645,
+      "contact_speed": 18.671747135200953
+    },
+    {
+      "t": 57.000000000018396,
+      "position": [
+        186.2637481689453,
+        63.86500549316406,
+        420.5520935058594
+      ],
+      "velocity": [
+        18.393779754638672,
+        6.107194423675537,
+        -0.22418421506881714
+      ],
+      "tilt": 10.88677914481294,
+      "throttle": 0.36244943737983704,
+      "phase": "landing",
+      "pad_distance": 1068.0111997580298,
+      "roll_rate": -2.5715989087255004e-05,
+      "rcs_fuel": 36.27691363547751,
+      "rcs_torque": 1.1537889055379584,
+      "roll_command": 0.0006409938364099769,
+      "contact_speed": 19.452973213073285
+    },
+    {
+      "t": 58.00000000001919,
+      "position": [
+        204.7849884033203,
+        70.01556396484375,
+        420.4100036621094
+      ],
+      "velocity": [
+        18.697921752929688,
+        6.206270694732666,
+        -0.103885218501091
+      ],
+      "tilt": 11.432260021124314,
+      "throttle": 0.3525502681732178,
+      "phase": "landing",
+      "pad_distance": 1048.4954207495707,
+      "roll_rate": -1.5428131699746793e-05,
+      "rcs_fuel": 36.27608434618389,
+      "rcs_torque": 0.6894496918769479,
+      "roll_command": 0.0003830276065983044,
+      "contact_speed": 19.316980972886856
+    },
+    {
+      "t": 59.00000000001999,
+      "position": [
+        223.6546173095703,
+        76.27996826171875,
+        419.6307067871094
+      ],
+      "velocity": [
+        19.45354652404785,
+        6.451385021209717,
+        -0.47204914689064026
+      ],
+      "tilt": 12.57386095306551,
+      "throttle": 0.40900158137083054,
+      "phase": "landing",
+      "pad_distance": 1028.6131271034583,
+      "roll_rate": -9.265713555001871e-06,
+      "rcs_fuel": 36.275588618390486,
+      "rcs_torque": 0.41326607299643237,
+      "roll_command": 0.00022959226277579576,
+      "contact_speed": 20.382658435067725
+    },
+    {
+      "t": 60.00000000002078,
+      "position": [
+        243.8675079345703,
+        82.97503662109375,
+        419.5481872558594
+      ],
+      "velocity": [
+        20.63135528564453,
+        6.838985919952393,
+        0.16843578219413757
+      ],
+      "tilt": 11.107887073919112,
+      "throttle": 0.35759250819683075,
+      "phase": "landing",
+      "pad_distance": 1007.3202915600608,
+      "roll_rate": -5.4618101179154395e-06,
+      "rcs_fuel": 36.27529336645546,
+      "rcs_torque": 0.24241572206139564,
+      "roll_command": 0.0001346754011452198,
+      "contact_speed": 22.53407959846028
+    },
+    {
+      "t": 61.00000000002158,
+      "position": [
+        264.2576599121094,
+        89.74420166015625,
+        419.1111755371094
+      ],
+      "velocity": [
+        20.225482940673828,
+        6.715759754180908,
+        -0.08687110990285873
+      ],
+      "tilt": 9.787901601132045,
+      "throttle": 0.396392285823822,
+      "phase": "landing",
+      "pad_distance": 985.8358826075745,
+      "roll_rate": -3.2183020161553796e-06,
+      "rcs_fuel": 36.27512051577662,
+      "rcs_torque": 0.14241122445220933,
+      "roll_command": 7.911734691789406e-05,
+      "contact_speed": 21.33333962950062
+    },
+    {
+      "t": 62.000000000022375,
+      "position": [
+        284.5994567871094,
+        96.49261474609375,
+        419.2195739746094
+      ],
+      "velocity": [
+        20.2536563873291,
+        6.716846942901611,
+        -0.951614499092102
+      ],
+      "tilt": 9.483482335006121,
+      "throttle": 0.2,
+      "phase": "landing",
+      "pad_distance": 964.4039026352591,
+      "roll_rate": -1.926267601897308e-06,
+      "rcs_fuel": 36.27501823140898,
+      "rcs_torque": 0.08495108498347784,
+      "roll_command": 4.719504721304324e-05,
+      "contact_speed": 21.569798725796584
+    },
+    {
+      "t": 63.00000000002317,
+      "position": [
+        304.8328552246094,
+        103.20233154296875,
+        418.9851989746094
+      ],
+      "velocity": [
+        20.383676528930664,
+        6.758930683135986,
+        0.33987563848495483
+      ],
+      "tilt": 9.546986298986491,
+      "throttle": 0.36315882205963135,
+      "phase": "landing",
+      "pad_distance": 943.0869912615989,
+      "roll_rate": -1.1586820098807481e-06,
+      "rcs_fuel": 36.27495703995618,
+      "rcs_torque": 0.05095812976976361,
+      "roll_command": 2.831007209431312e-05,
+      "contact_speed": 21.535113666153137
+    },
+    {
+      "t": 64.00000000002396,
+      "position": [
+        325.1072692871094,
+        109.92840576171875,
+        418.7854919433594
+      ],
+      "velocity": [
+        20.201391220092773,
+        6.702086448669434,
+        -0.0288800448179245
+      ],
+      "tilt": 9.41618202167158,
+      "throttle": 0.4029984399676323,
+      "phase": "landing",
+      "pad_distance": 921.7260005219537,
+      "roll_rate": -6.945815257255336e-07,
+      "rcs_fuel": 36.27492048767493,
+      "rcs_torque": 0.030322790130341278,
+      "roll_command": 1.6845994516856267e-05,
+      "contact_speed": 21.153459793893056
+    },
+    {
+      "t": 65.00000000002305,
+      "position": [
+        345.4241638183594,
+        116.66546630859375,
+        418.8650817871094
+      ],
+      "velocity": [
+        20.188190460205078,
+        6.691132545471191,
+        -0.9343783259391785
+      ],
+      "tilt": 9.341196647253822,
+      "throttle": 0.4000000000000005,
+      "phase": "landing",
+      "pad_distance": 900.3212303215319,
+      "roll_rate": -4.080752527237371e-07,
+      "rcs_fuel": 36.27489864786173,
+      "rcs_torque": 0.01789467868685627,
+      "roll_command": 9.941488159364594e-06,
+      "contact_speed": 21.375843383489478
+    },
+    {
+      "t": 66.00000000002214,
+      "position": [
+        365.6751403808594,
+        123.37982177734375,
+        418.8904724121094
+      ],
+      "velocity": [
+        20.393478393554688,
+        6.760876178741455,
+        0.47854405641555786
+      ],
+      "tilt": 9.48108730702306,
+      "throttle": 0.3528492748737335,
+      "phase": "landing",
+      "pad_distance": 878.9861741679631,
+      "roll_rate": -2.496690618147032e-07,
+      "rcs_fuel": 36.27488567172884,
+      "rcs_torque": 0.010862442104697894,
+      "roll_command": 6.034690058165497e-06,
+      "contact_speed": 21.557430431940862
+    },
+    {
+      "t": 67.00000000002123,
+      "position": [
+        385.8997497558594,
+        130.0877685546875,
+        418.6922302246094
+      ],
+      "velocity": [
+        20.320240020751953,
+        6.737339019775391,
+        0.37511444091796875
+      ],
+      "tilt": 9.531958704306211,
+      "throttle": 0.36862002313137054,
+      "phase": "landing",
+      "pad_distance": 857.6781623262658,
+      "roll_rate": -1.4150474149388795e-07,
+      "rcs_fuel": 36.27487809222441,
+      "rcs_torque": 0.00610255137147066,
+      "roll_command": 3.3903063174837e-06,
+      "contact_speed": 21.40019099160581
+    },
+    {
+      "t": 68.00000000002032,
+      "position": [
+        406.1585388183594,
+        136.7960205078125,
+        418.5843200683594
+      ],
+      "velocity": [
+        20.19247055053711,
+        6.6975860595703125,
+        0.08982184529304504
+      ],
+      "tilt": 9.484434001989726,
+      "throttle": 0.39717579632997513,
+      "phase": "landing",
+      "pad_distance": 836.3376114414119,
+      "roll_rate": -8.200722984945386e-08,
+      "rcs_fuel": 36.2748737751877,
+      "rcs_torque": 0.0035543417109311142,
+      "roll_command": 1.974634283850619e-06,
+      "contact_speed": 21.153388876862522
+    },
+    {
+      "t": 69.00000000001941,
+      "position": [
+        426.4085388183594,
+        143.5081787109375,
+        418.5301208496094
+      ],
+      "velocity": [
+        20.12841033935547,
+        6.675276756286621,
+        -0.27885740995407104
+      ],
+      "tilt": 9.475589515975996,
+      "throttle": 0.43243154138326645,
+      "phase": "landing",
+      "pad_distance": 815.0041737324577,
+      "roll_rate": -5.031809002322855e-08,
+      "rcs_fuel": 36.2748711452943,
+      "rcs_torque": 0.0022202061510355796,
+      "roll_command": 1.2334478616864332e-06,
+      "contact_speed": 21.094266263629972
+    },
+    {
+      "t": 70.0000000000185,
+      "position": [
+        446.6639099121094,
+        150.2210693359375,
+        418.6004333496094
+      ],
+      "velocity": [
+        20.154829025268555,
+        6.679531574249268,
+        -0.8345170021057129
+      ],
+      "tilt": 9.475488058215468,
+      "throttle": 0.4000000000000006,
+      "phase": "landing",
+      "pad_distance": 793.6654073553874,
+      "roll_rate": -2.8613199901643014e-08,
+      "rcs_fuel": 36.27486944645415,
+      "rcs_torque": 0.0014524321778322119,
+      "roll_command": 8.069067654623399e-07,
+      "contact_speed": 21.33171251312229
+    },
+    {
+      "t": 71.0000000000176,
+      "position": [
+        466.9021911621094,
+        156.9300537109375,
+        418.7156677246094
+      ],
+      "velocity": [
+        20.282575607299805,
+        6.724160194396973,
+        -0.07264523208141327
+      ],
+      "tilt": 9.559114100654341,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 772.3440917828557,
+      "roll_rate": -1.6420302657262542e-08,
+      "rcs_fuel": 36.27486863342659,
+      "rcs_torque": 0.0007240818116764784,
+      "roll_command": 4.0226767315359915e-07,
+      "contact_speed": 21.474965273785127
+    },
+    {
+      "t": 72.00000000001668,
+      "position": [
+        487.1018981933594,
+        163.6275634765625,
+        418.6272888183594
+      ],
+      "velocity": [
+        20.31929588317871,
+        6.73663854598999,
+        0.5196417570114136
+      ],
+      "tilt": 9.621894424372758,
+      "throttle": 0.35402026772499084,
+      "phase": "landing",
+      "pad_distance": 751.0630015568187,
+      "roll_rate": -6.8071563473984925e-09,
+      "rcs_fuel": 36.274868223091914,
+      "rcs_torque": 0.0003099761617672942,
+      "roll_command": 1.722089787596079e-07,
+      "contact_speed": 21.44195983665697
+    },
+    {
+      "t": 73.00000000001577,
+      "position": [
+        507.2933044433594,
+        170.3240966796875,
+        418.5193786621094
+      ],
+      "velocity": [
+        20.3010311126709,
+        6.730862617492676,
+        0.482525110244751
+      ],
+      "tilt": 9.676749358368705,
+      "throttle": 0.3606068789958954,
+      "phase": "landing",
+      "pad_distance": 729.7900976547996,
+      "roll_rate": -3.010630186120701e-09,
+      "rcs_fuel": 36.274868117156984,
+      "rcs_torque": 0.00014068023471341582,
+      "roll_command": 7.815568595189767e-08,
+      "contact_speed": 21.4103825974577
+    },
+    {
+      "t": 74.00000000001486,
+      "position": [
+        527.4786987304688,
+        177.0211181640625,
+        418.4402770996094
+      ],
+      "velocity": [
+        20.261972427368164,
+        6.718630313873291,
+        0.4279174208641052
+      ],
+      "tilt": 9.681787019447965,
+      "throttle": 0.36735796928405756,
+      "phase": "landing",
+      "pad_distance": 708.5227465692747,
+      "roll_rate": -3.911403198583533e-10,
+      "rcs_fuel": 36.27486805780359,
+      "rcs_torque": -3.4267723170774494e-05,
+      "roll_command": -1.9037623983763607e-08,
+      "contact_speed": 21.333426389189455
+    },
+    {
+      "t": 75.00000000001396,
+      "position": [
+        547.6935424804688,
+        183.7191162109375,
+        418.3924255371094
+      ],
+      "velocity": [
+        20.20868492126465,
+        6.701639652252197,
+        0.33975714445114136
+      ],
+      "tilt": 9.683855814788958,
+      "throttle": 0.37577033042907715,
+      "phase": "landing",
+      "pad_distance": 687.2271350974567,
+      "roll_rate": 5.240471311118087e-09,
+      "rcs_fuel": 36.27486801012179,
+      "rcs_torque": -0.00013807428940024614,
+      "roll_command": -7.67079385556923e-08,
+      "contact_speed": 21.231504868837096
+    },
+    {
+      "t": 76.00000000001305,
+      "position": [
+        567.8663940429688,
+        190.4117431640625,
+        418.3167419433594
+      ],
+      "velocity": [
+        20.214384078979492,
+        6.703104496002197,
+        0.354028582572937
+      ],
+      "tilt": 9.745742265549596,
+      "throttle": 0.37654497474431986,
+      "phase": "landing",
+      "pad_distance": 665.97307241642,
+      "roll_rate": 1.195700381493637e-10,
+      "rcs_fuel": 36.27486783809343,
+      "rcs_torque": -7.859439198819048e-05,
+      "roll_command": -4.366355110455027e-08,
+      "contact_speed": 21.25194804494558
+    },
+    {
+      "t": 77.00000000001214,
+      "position": [
+        588.0499877929688,
+        197.1058349609375,
+        418.2649841308594
+      ],
+      "velocity": [
+        20.21963882446289,
+        6.704960823059082,
+        0.38418149948120117
+      ],
+      "tilt": 9.754633228735607,
+      "throttle": 0.3749946355819702,
+      "phase": "landing",
+      "pad_distance": 644.7083523943862,
+      "roll_rate": -1.191266313566898e-09,
+      "rcs_fuel": 36.27486775856937,
+      "rcs_torque": 7.958495442713707e-05,
+      "roll_command": 4.4213863570631704e-08,
+      "contact_speed": 21.269483068203627
+    },
+    {
+      "t": 78.00000000001123,
+      "position": [
+        608.2355346679688,
+        203.8009033203125,
+        418.2405700683594
+      ],
+      "velocity": [
+        20.208568572998047,
+        6.701284885406494,
+        0.40540993213653564
+      ],
+      "tilt": 9.757903205562657,
+      "throttle": 0.3729947358369828,
+      "phase": "landing",
+      "pad_distance": 623.441471164399,
+      "roll_rate": -1.2898311438926363e-10,
+      "rcs_fuel": 36.274867640077446,
+      "rcs_torque": -8.303972923416692e-05,
+      "roll_command": -4.613318290787051e-08,
+      "contact_speed": 21.251857110876237
+    },
+    {
+      "t": 79.00000000001032,
+      "position": [
+        628.4093627929688,
+        210.4935302734375,
+        418.2347106933594
+      ],
+      "velocity": [
+        20.19638442993164,
+        6.697070598602295,
+        0.41564637422561646
+      ],
+      "tilt": 9.779088882671724,
+      "throttle": 0.37117716670036316,
+      "phase": "landing",
+      "pad_distance": 602.186481591014,
+      "roll_rate": -2.2113691561554018e-09,
+      "rcs_fuel": 36.27486756820713,
+      "rcs_torque": 0.00014285418944176293,
+      "roll_command": 7.936343857875719e-08,
+      "contact_speed": 21.23512329845572
+    },
+    {
+      "t": 80.00000000000941,
+      "position": [
+        648.5656127929688,
+        217.1773681640625,
+        418.2376403808594
+      ],
+      "velocity": [
+        20.1862850189209,
+        6.693644046783447,
+        0.41965365409851074
+      ],
+      "tilt": 9.806574943216651,
+      "throttle": 0.369614914059639,
+      "phase": "landing",
+      "pad_distance": 580.9509429425283,
+      "roll_rate": -1.9843415091125337e-09,
+      "rcs_fuel": 36.274867501542246,
+      "rcs_torque": 5.603220864555012e-05,
+      "roll_command": 3.11290048030834e-08,
+      "contact_speed": 21.22433463141515
+    },
+    {
+      "t": 81.0000000000085,
+      "position": [
+        668.7218627929688,
+        223.8531494140625,
+        418.2444763183594
+      ],
+      "velocity": [
+        20.1770076751709,
+        6.690370082855225,
+        0.4208868145942688
+      ],
+      "tilt": 9.833597777826235,
+      "throttle": 0.3680699020624161,
+      "phase": "landing",
+      "pad_distance": 559.717939720997,
+      "roll_rate": -3.0433123197085656e-09,
+      "rcs_fuel": 36.274867367997786,
+      "rcs_torque": 0.00014184049889346694,
+      "roll_command": 7.880027716303718e-08,
+      "contact_speed": 21.21508749939142
+    },
+    {
+      "t": 82.00000000000759,
+      "position": [
+        688.8253784179688,
+        230.5137939453125,
+        418.2088317871094
+      ],
+      "velocity": [
+        20.230024337768555,
+        6.706698894500732,
+        0.5358226299285889
+      ],
+      "tilt": 9.901076223354499,
+      "throttle": 0.35880613327026367,
+      "phase": "landing",
+      "pad_distance": 538.5397550713827,
+      "roll_rate": -4.214934915413137e-09,
+      "rcs_fuel": 36.27486725009163,
+      "rcs_torque": 0.0001733451237853695,
+      "roll_command": 9.63028465474275e-08,
+      "contact_speed": 21.332573477672973
+    },
+    {
+      "t": 83.00000000000668,
+      "position": [
+        708.9816284179688,
+        237.1812744140625,
+        418.1868591308594
+      ],
+      "velocity": [
+        20.172090530395508,
+        6.687549114227295,
+        -0.030907489359378815
+      ],
+      "tilt": 9.892332425595402,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 517.309364531997,
+      "roll_rate": 9.631445046493124e-10,
+      "rcs_fuel": 36.27486717003927,
+      "rcs_torque": 5.0452597038608884e-05,
+      "roll_command": 2.8029220577004935e-08,
+      "contact_speed": 21.33168169351807
+    },
+    {
+      "t": 84.00000000000577,
+      "position": [
+        729.1378784179688,
+        243.8468017578125,
+        418.1209411621094
+      ],
+      "velocity": [
+        20.07675552368164,
+        6.655768871307373,
+        -0.6534019708633423
+      ],
+      "tilt": 9.861505843613168,
+      "throttle": 0.2,
+      "phase": "landing",
+      "pad_distance": 496.07958924148,
+      "roll_rate": -1.5492568073035667e-09,
+      "rcs_fuel": 36.27486707536957,
+      "rcs_torque": 0.00012200537915400707,
+      "roll_command": 6.77807661966706e-08,
+      "contact_speed": 21.27180130126938
+    },
+    {
+      "t": 85.00000000000486,
+      "position": [
+        749.2443237304688,
+        250.5037841796875,
+        418.0437927246094
+      ],
+      "velocity": [
+        20.02474594116211,
+        6.636604309082031,
+        -0.6794165968894958
+      ],
+      "tilt": 9.853297212264083,
+      "throttle": 0.4000000000000004,
+      "phase": "landing",
+      "pad_distance": 474.8997770412152,
+      "roll_rate": 1.0142373215628743e-09,
+      "rcs_fuel": 36.27486700318548,
+      "rcs_torque": -6.728847707429883e-05,
+      "roll_command": -3.7382487263499353e-08,
+      "contact_speed": 21.160342714409282
+    },
+    {
+      "t": 86.00000000000395,
+      "position": [
+        769.3097534179688,
+        257.1670837402344,
+        417.9934997558594
+      ],
+      "velocity": [
+        20.009923934936523,
+        6.633836269378662,
+        -0.3253207802772522
+      ],
+      "tilt": 9.87818863313656,
+      "throttle": 0.4312274381518364,
+      "phase": "landing",
+      "pad_distance": 453.7569067994008,
+      "roll_rate": 1.8865425909279053e-09,
+      "rcs_fuel": 36.274866948249326,
+      "rcs_torque": -6.941378917643015e-05,
+      "roll_command": -3.856321620912786e-08,
+      "contact_speed": 21.0377442807424
+    },
+    {
+      "t": 87.00000000000304,
+      "position": [
+        789.3644409179688,
+        263.8467712402344,
+        417.9798278808594
+      ],
+      "velocity": [
+        20.01799201965332,
+        6.6400556564331055,
+        -0.029214918613433838
+      ],
+      "tilt": 9.924057029939366,
+      "throttle": 0.41091277450323105,
+      "phase": "landing",
+      "pad_distance": 432.6190750352109,
+      "roll_rate": -2.8106514992742426e-11,
+      "rcs_fuel": 36.27486691609192,
+      "rcs_torque": -4.6745871339394145e-05,
+      "roll_command": -2.5969928521885636e-08,
+      "contact_speed": 20.99584927812124
+    },
+    {
+      "t": 88.00000000000213,
+      "position": [
+        809.4152221679688,
+        270.5264587402344,
+        417.9925231933594
+      ],
+      "velocity": [
+        20.04698371887207,
+        6.6508612632751465,
+        0.19911110401153564
+      ],
+      "tilt": 9.974910604900327,
+      "throttle": 0.38923183828592306,
+      "phase": "landing",
+      "pad_distance": 411.4849530182622,
+      "roll_rate": -2.452236827709092e-09,
+      "rcs_fuel": 36.27486680626703,
+      "rcs_torque": 9.554055301445112e-05,
+      "roll_command": 5.30780850080284e-08,
+      "contact_speed": 21.028032437455792
+    },
+    {
+      "t": 89.00000000000122,
+      "position": [
+        829.4611206054688,
+        277.1856384277344,
+        417.9700622558594
+      ],
+      "velocity": [
+        20.1479549407959,
+        6.681799411773682,
+        0.5118967890739441
+      ],
+      "tilt": 10.078084424156048,
+      "throttle": 0.36233823001384735,
+      "phase": "landing",
+      "pad_distance": 390.3619199555179,
+      "roll_rate": -3.1320205656203565e-09,
+      "rcs_fuel": 36.27486671092629,
+      "rcs_torque": 0.00013571575184657695,
+      "roll_command": 7.539763991476497e-08,
+      "contact_speed": 21.219576073866616
+    },
+    {
+      "t": 90.00000000000031,
+      "position": [
+        849.5363159179688,
+        283.8653259277344,
+        418.0291442871094
+      ],
+      "velocity": [
+        20.082307815551758,
+        6.659179210662842,
+        -0.04511804133653641
+      ],
+      "tilt": 10.036477361721019,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 369.2046267074956,
+      "roll_rate": -3.5526099768176547e-09,
+      "rcs_fuel": 36.274866642925474,
+      "rcs_torque": 0.00014651075329327057,
+      "roll_command": 8.139486294070587e-08,
+      "contact_speed": 21.20551766504963
+    },
+    {
+      "t": 90.9999999999994,
+      "position": [
+        869.5402221679688,
+        290.5147399902344,
+        417.8499450683594
+      ],
+      "velocity": [
+        19.95747947692871,
+        6.613247871398926,
+        -0.6948091387748718
+      ],
+      "tilt": 10.046584419043965,
+      "throttle": 0.4000000000000004,
+      "phase": "landing",
+      "pad_distance": 348.1245278979943,
+      "roll_rate": 1.3405889249580192e-09,
+      "rcs_fuel": 36.274866582703226,
+      "rcs_torque": 5.031662796096992e-05,
+      "roll_command": 2.7953682200538847e-08,
+      "contact_speed": 21.071548390911513
+    },
+    {
+      "t": 91.9999999999985,
+      "position": [
+        889.5431518554688,
+        297.1563415527344,
+        417.7434997558594
+      ],
+      "velocity": [
+        20.000282287597656,
+        6.629775047302246,
+        0.016714535653591156
+      ],
+      "tilt": 10.079549480420372,
+      "throttle": 0.41065867245197296,
+      "phase": "landing",
+      "pad_distance": 327.0478140007274,
+      "roll_rate": -5.3694353807829894e-09,
+      "rcs_fuel": 36.27486650331252,
+      "rcs_torque": 0.00012057859565885583,
+      "roll_command": 6.698810869936435e-08,
+      "contact_speed": 20.99101423796867
+    },
+    {
+      "t": 92.99999999999758,
+      "position": [
+        909.7013549804688,
+        303.8457946777344,
+        417.7615661621094
+      ],
+      "velocity": [
+        20.403661727905273,
+        6.759739875793457,
+        0.43177640438079834
+      ],
+      "tilt": 9.606079601053342,
+      "throttle": 0.372070848941803,
+      "phase": "landing",
+      "pad_distance": 305.8086566814815,
+      "roll_rate": 3.5307471485059348e-09,
+      "rcs_fuel": 36.274866320615274,
+      "rcs_torque": -0.0004113452859417656,
+      "roll_command": -2.2852515885653645e-07,
+      "contact_speed": 22.045400325549878
+    },
+    {
+      "t": 93.99999999999667,
+      "position": [
+        929.9542846679688,
+        310.5552673339844,
+        417.8343200683594
+      ],
+      "velocity": [
+        20.143388748168945,
+        6.675529479980469,
+        0.024673983454704285
+      ],
+      "tilt": 7.691198304335798,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 284.4732827013522,
+      "roll_rate": 1.9914369801318093e-08,
+      "rcs_fuel": 36.27486573419088,
+      "rcs_torque": -0.0008104073023966165,
+      "roll_command": -4.502262791092314e-07,
+      "contact_speed": 21.943726514694045
+    },
+    {
+      "t": 94.99999999999577,
+      "position": [
+        949.7042846679688,
+        317.1065368652344,
+        417.7312927246094
+      ],
+      "velocity": [
+        19.370723724365234,
+        6.416146278381348,
+        -0.6146425008773804
+      ],
+      "tilt": 6.220272494893635,
+      "throttle": 0.40000000000000036,
+      "phase": "landing",
+      "pad_distance": 263.6650741832296,
+      "roll_rate": 1.95869412882586e-08,
+      "rcs_fuel": 36.27486513530482,
+      "rcs_torque": -0.0008493796193056911,
+      "roll_command": -4.7187756628093947e-07,
+      "contact_speed": 20.836450463794502
+    },
+    {
+      "t": 95.99999999999486,
+      "position": [
+        968.7658081054688,
+        323.4112243652344,
+        417.6761169433594
+      ],
+      "velocity": [
+        18.714786529541016,
+        6.197880744934082,
+        0.048816099762916565
+      ],
+      "tilt": 5.396894818632541,
+      "throttle": 0.4038611799478531,
+      "phase": "landing",
+      "pad_distance": 243.58795547881545,
+      "roll_rate": 2.3867603403928203e-08,
+      "rcs_fuel": 36.27486426355006,
+      "rcs_torque": -0.0010528709732125787,
+      "roll_command": -5.849283184514326e-07,
+      "contact_speed": 19.925620679575577
+    },
+    {
+      "t": 96.99999999999395,
+      "position": [
+        987.1994018554688,
+        329.5186462402344,
+        417.7268981933594
+      ],
+      "velocity": [
+        18.130298614501953,
+        6.005000591278076,
+        0.4753480553627014
+      ],
+      "tilt": 4.709825897822172,
+      "throttle": 0.36601047217845917,
+      "phase": "landing",
+      "pad_distance": 224.16894476818038,
+      "roll_rate": 2.321895291236073e-08,
+      "rcs_fuel": 36.27486340020141,
+      "rcs_torque": -0.000863751829632448,
+      "roll_command": -4.798621275735822e-07,
+      "contact_speed": 19.32406738278242
+    },
+    {
+      "t": 97.99999999999304,
+      "position": [
+        1004.9611206054688,
+        335.4014587402344,
+        417.4451599121094
+      ],
+      "velocity": [
+        17.36501693725586,
+        5.752079486846924,
+        -2.1911067962646484
+      ],
+      "tilt": 4.000053575243293,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 205.45835589813365,
+      "roll_rate": 3.236189226226272e-08,
+      "rcs_fuel": 36.27486251988279,
+      "rcs_torque": -0.0011206996907932231,
+      "roll_command": -6.226109393295684e-07,
+      "contact_speed": 18.739488698206486
+    },
+    {
+      "t": 98.99999999999213,
+      "position": [
+        1021.8156127929688,
+        340.9776306152344,
+        410.4578552246094
+      ],
+      "velocity": [
+        16.24178123474121,
+        5.285755157470703,
+        -10.654736518859863
+      ],
+      "tilt": 2.489059625490943,
+      "throttle": 0.370976060628891,
+      "phase": "landing",
+      "pad_distance": 187.70539665160658,
+      "roll_rate": 3.512542666271731e-08,
+      "rcs_fuel": 36.274861433528315,
+      "rcs_torque": -0.001206416458186773,
+      "roll_command": -6.702313656593183e-07,
+      "contact_speed": 20.43151050189725
+    },
+    {
+      "t": 99.99999999999122,
+      "position": [
+        1037.312744140625,
+        345.9947204589844,
+        398.1136169433594
+      ],
+      "velocity": [
+        14.772787094116211,
+        4.882678508758545,
+        -14.524212837219238
+      ],
+      "tilt": 2.940474520101135,
+      "throttle": 0.2,
+      "phase": "landing",
+      "pad_distance": 171.41678283457833,
+      "roll_rate": 2.0947113786069652e-08,
+      "rcs_fuel": 36.27486046433546,
+      "rcs_torque": -0.0009019172627706756,
+      "roll_command": -5.010651459837086e-07,
+      "contact_speed": 20.980066306050425
+    },
+    {
+      "t": 100.99999999999031,
+      "position": [
+        1051.779541015625,
+        351.0005798339844,
+        383.6541442871094
+      ],
+      "velocity": [
+        14.555414199829102,
+        5.015625953674316,
+        -15.165124893188477
+      ],
+      "tilt": 4.649002228842274,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 156.1097294794419,
+      "roll_rate": -1.8723315712188167e-08,
+      "rcs_fuel": 36.27486006296027,
+      "rcs_torque": 0.0006887629156418699,
+      "roll_command": 3.826460642454833e-07,
+      "contact_speed": 21.588994335133762
+    },
+    {
+      "t": 101.9999999999894,
+      "position": [
+        1066.310791015625,
+        355.9351501464844,
+        367.6360778808594
+      ],
+      "velocity": [
+        14.487743377685547,
+        4.826388359069824,
+        -16.708370208740234
+      ],
+      "tilt": 3.700418418225671,
+      "throttle": 0.0,
+      "phase": "landing",
+      "pad_distance": 140.76404225327138,
+      "roll_rate": 1.0412533010595087e-08,
+      "rcs_fuel": 36.27485975302238,
+      "rcs_torque": -0.00019684627356829465,
+      "roll_command": -1.0935904087127481e-07,
+      "contact_speed": 22.912803328624335
+    },
+    {
+      "t": 102.99999999998849,
+      "position": [
+        1080.511962890625,
+        360.6246032714844,
+        350.2044372558594
+      ],
+      "velocity": [
+        13.837177276611328,
+        4.573416709899902,
+        -17.298494338989258
+      ],
+      "tilt": 2.4187774385612695,
+      "throttle": 0.35319420695304865,
+      "phase": "landing",
+      "pad_distance": 125.80863595071435,
+      "roll_rate": 2.283383485125089e-08,
+      "rcs_fuel": 36.27485916221468,
+      "rcs_torque": -0.0008070623192428226,
+      "roll_command": -4.4836795513490146e-07,
+      "contact_speed": 22.767114845534806
+    },
+    {
+      "t": 103.99999999998758,
+      "position": [
+        1094.004150390625,
+        365.0948181152344,
+        331.8396911621094
+      ],
+      "velocity": [
+        13.213813781738281,
+        4.36854362487793,
+        -18.7550106048584
+      ],
+      "tilt": 1.4961950919162357,
+      "throttle": 0.3997591510415077,
+      "phase": "landing",
+      "pad_distance": 111.59521430967285,
+      "roll_rate": 1.4946766784398335e-08,
+      "rcs_fuel": 36.27485848870151,
+      "rcs_torque": -0.0005873074569317253,
+      "roll_command": -3.262819205176252e-07,
+      "contact_speed": 23.47121195700801
+    },
+    {
+      "t": 104.99999999998667,
+      "position": [
+        1106.914306640625,
+        369.3677673339844,
+        312.7581481933594
+      ],
+      "velocity": [
+        12.617432594299316,
+        4.1667399406433105,
+        -20.027786254882812
+      ],
+      "tilt": 0.603116524829467,
+      "throttle": 0.2,
+      "phase": "landing",
+      "pad_distance": 97.9963263918628,
+      "roll_rate": 1.2750874798273071e-08,
+      "rcs_fuel": 36.274857994950935,
+      "rcs_torque": -0.0004927875242571573,
+      "roll_command": -2.7377084680953183e-07,
+      "contact_speed": 24.143953135105345
+    },
+    {
+      "t": 105.99999999998576,
+      "position": [
+        1119.228759765625,
+        373.4214782714844,
+        292.9109802246094
+      ],
+      "velocity": [
+        11.945168495178223,
+        3.9377987384796143,
+        -19.528512954711914
+      ],
+      "tilt": 0.3038585717301194,
+      "throttle": 0.3667307496070862,
+      "phase": "landing",
+      "pad_distance": 85.03182384420727,
+      "roll_rate": 7.276159741982584e-09,
+      "rcs_fuel": 36.274857648093246,
+      "rcs_torque": -0.0002774901455063866,
+      "roll_command": -1.5416119194799256e-07,
+      "contact_speed": 23.459742371780603
+    },
+    {
+      "t": 106.99999999998485,
+      "position": [
+        1130.785400390625,
+        377.2432556152344,
+        272.6434020996094
+      ],
+      "velocity": [
+        11.274784088134766,
+        3.7133355140686035,
+        -20.848520278930664
+      ],
+      "tilt": 1.1745675833886688,
+      "throttle": 0.4000000000000004,
+      "phase": "landing",
+      "pad_distance": 72.85966108951959,
+      "roll_rate": 1.8877411436104495e-09,
+      "rcs_fuel": 36.27485748804088,
+      "rcs_torque": -7.558162489033168e-05,
+      "roll_command": -4.198979160573982e-08,
+      "contact_speed": 24.21817785337041
+    },
+    {
+      "t": 107.99999999998394,
+      "position": [
+        1141.687744140625,
+        380.8340759277344,
+        252.20272827148438
+      ],
+      "velocity": [
+        10.502716064453125,
+        3.456855058670044,
+        -20.127544403076172
+      ],
+      "tilt": 2.0236200520461156,
+      "throttle": 0.3690730184316635,
+      "phase": "landing",
+      "pad_distance": 61.38120094094824,
+      "roll_rate": -6.026532333387643e-09,
+      "rcs_fuel": 36.27485740966978,
+      "rcs_torque": 0.00018739029271121505,
+      "roll_command": 1.0410571817289725e-07,
+      "contact_speed": 23.167606209076354
+    },
+    {
+      "t": 108.99999999998303,
+      "position": [
+        1151.799072265625,
+        384.1670837402344,
+        231.63363647460938
+      ],
+      "velocity": [
+        9.76616382598877,
+        3.212954521179199,
+        -21.269351959228516
+      ],
+      "tilt": 2.849432786785185,
+      "throttle": 0.2,
+      "phase": "landing",
+      "pad_distance": 50.734708747988215,
+      "roll_rate": -5.39020814807749e-09,
+      "rcs_fuel": 36.27485726136916,
+      "rcs_torque": 0.0002181998863757276,
+      "roll_command": 1.2122215909762644e-07,
+      "contact_speed": 23.812577011210443
+    },
+    {
+      "t": 109.99999999998212,
+      "position": [
+        1161.148681640625,
+        387.2339782714844,
+        210.83212280273438
+      ],
+      "velocity": [
+        8.90102481842041,
+        2.9264049530029297,
+        -20.522153854370117
+      ],
+      "tilt": 3.6852513176664434,
+      "throttle": 0.4009901434183121,
+      "phase": "landing",
+      "pad_distance": 40.89494160693278,
+      "roll_rate": -1.5020876068723793e-08,
+      "rcs_fuel": 36.27485696846179,
+      "rcs_torque": 0.0004820761774509626,
+      "roll_command": 2.6782009858386813e-07,
+      "contact_speed": 22.75004899624269
+    },
+    {
+      "t": 110.99999999998121,
+      "position": [
+        1169.334228515625,
+        389.9258728027344,
+        190.31991577148438
+      ],
+      "velocity": [
+        7.2519989013671875,
+        2.3881711959838867,
+        -19.794471740722656
+      ],
+      "tilt": 3.2415653341757573,
+      "throttle": 0.3567839562892914,
+      "phase": "landing",
+      "pad_distance": 32.278128500868725,
+      "roll_rate": -3.1970487450913815e-09,
+      "rcs_fuel": 36.27485637870865,
+      "rcs_torque": 0.00025629485576007853,
+      "roll_command": 1.4238603097782142e-07,
+      "contact_speed": 20.687374392745273
+    },
+    {
+      "t": 111.9999999999803,
+      "position": [
+        1176.365478515625,
+        392.2696228027344,
+        170.08944702148438
+      ],
+      "velocity": [
+        7.064083576202393,
+        2.3173742294311523,
+        -20.662673950195312
+      ],
+      "tilt": 1.0227568769117428,
+      "throttle": 0.19999999999999998,
+      "phase": "landing",
+      "pad_distance": 24.86663100235711,
+      "roll_rate": 2.581078051564694e-08,
+      "rcs_fuel": 36.27485571592848,
+      "rcs_torque": -0.0009954732740582047,
+      "roll_command": -5.530407078101138e-07,
+      "contact_speed": 21.686071849827695
+    },
+    {
+      "t": 112.9999999999794,
+      "position": [
+        1183.734619140625,
+        394.6861267089844,
+        150.15292358398438
+      ],
+      "velocity": [
+        7.4183197021484375,
+        2.4378044605255127,
+        -19.885847091674805
+      ],
+      "tilt": 1.7446127058470686,
+      "throttle": 0.42225680500268936,
+      "phase": "landing",
+      "pad_distance": 17.11139573072553,
+      "roll_rate": 1.2668869817773197e-08,
+      "rcs_fuel": 36.27485506108411,
+      "rcs_torque": -0.00053443083201316,
+      "roll_command": -2.969060177850889e-07,
+      "contact_speed": 21.844326781640348
+    },
+    {
+      "t": 113.99999999997848,
+      "position": [
+        1191.058837890625,
+        397.0894470214844,
+        130.63461303710938
+      ],
+      "velocity": [
+        6.987544059753418,
+        2.2929656505584717,
+        -18.72476577758789
+      ],
+      "tilt": 4.828004441097299,
+      "throttle": 0.38174253702163696,
+      "phase": "landing",
+      "pad_distance": 9.40296221979379,
+      "roll_rate": -1.9243714102588956e-08,
+      "rcs_fuel": 36.274854701643676,
+      "rcs_torque": -0.0005847819663173137,
+      "roll_command": -3.248788701762854e-07,
+      "contact_speed": 20.890663543285502
+    },
+    {
+      "t": 114.99999999997758,
+      "position": [
+        1197.429931640625,
+        399.1831970214844,
+        112.52133178710938
+      ],
+      "velocity": [
+        5.6771931648254395,
+        1.8855781555175781,
+        -18.101367950439453
+      ],
+      "tilt": 8.557981452892156,
+      "throttle": 0.4542681612074375,
+      "phase": "landing",
+      "pad_distance": 2.6967421970912424,
+      "roll_rate": -7.490808000011053e-08,
+      "rcs_fuel": 36.27485315644242,
+      "rcs_torque": 0.002555657728799551,
+      "roll_command": 1.4198098493330838e-06,
+      "contact_speed": 19.642463361415217
+    },
+    {
+      "t": 115.99999999997667,
+      "position": [
+        1201.775634765625,
+        400.5743103027344,
+        96.05722045898438
+      ],
+      "velocity": [
+        2.68276309967041,
+        0.8318443894386292,
+        -15.361822128295898
+      ],
+      "tilt": 10.701149293374728,
+      "throttle": 0.36176732182502747,
+      "phase": "landing",
+      "pad_distance": 1.8662023322038257,
+      "roll_rate": -1.2531160969861876e-07,
+      "rcs_fuel": 36.27484902202963,
+      "rcs_torque": 0.0046899438974720405,
+      "roll_command": 2.6055243874844668e-06,
+      "contact_speed": 15.55465250887662
+    },
+    {
+      "t": 116.99999999997576,
+      "position": [
+        1203.041259765625,
+        400.9537048339844,
+        81.09518432617188
+      ],
+      "velocity": [
+        0.34026116132736206,
+        0.08723911643028259,
+        -14.985788345336914
+      ],
+      "tilt": 7.585366152949032,
+      "throttle": 0.45168877765536314,
+      "phase": "landing",
+      "pad_distance": 3.1872894240050735,
+      "roll_rate": -4.6037198905596495e-08,
+      "rcs_fuel": 36.274846319171445,
+      "rcs_torque": 0.0008888328960264193,
+      "roll_command": 4.937960533480107e-07,
+      "contact_speed": 14.809942909404233
+    },
+    {
+      "t": 117.99999999997485,
+      "position": [
+        1202.756103515625,
+        400.8243103027344,
+        67.64218139648438
+      ],
+      "velocity": [
+        -0.704063355922699,
+        -0.23412486910820007,
+        -13.701549530029297
+      ],
+      "tilt": 3.538380107514402,
+      "throttle": 0.20000000000000004,
+      "phase": "landing",
+      "pad_distance": 2.876733227818409,
+      "roll_rate": 5.4629734493395787e-08,
+      "rcs_fuel": 36.27484537146114,
+      "rcs_torque": -0.0016356759496528944,
+      "roll_command": -9.087088609182746e-07,
+      "contact_speed": 13.560187686131917
+    },
+    {
+      "t": 118.99999999997394,
+      "position": [
+        1202.267822265625,
+        400.5899353027344,
+        55.620880126953125
+      ],
+      "velocity": [
+        -0.6948713064193726,
+        -0.2191305011510849,
+        -10.564712524414062
+      ],
+      "tilt": 1.0271279069159984,
+      "throttle": 0.3513060063123703,
+      "phase": "landing",
+      "pad_distance": 2.3432971407563334,
+      "roll_rate": 4.0445624156600275e-08,
+      "rcs_fuel": 36.27484375318801,
+      "rcs_torque": -0.0014245192621818474,
+      "roll_command": -7.913995901010263e-07,
+      "contact_speed": 10.487733964880034
+    },
+    {
+      "t": 119.99999999997303,
+      "position": [
+        1201.799072265625,
+        400.4014587402344,
+        45.085418701171875
+      ],
+      "velocity": [
+        -0.4941394329071045,
+        -0.15197467803955078,
+        -9.051653861999512
+      ],
+      "tilt": 0.055579786087477934,
+      "throttle": 0.3613898456096649,
+      "phase": "landing",
+      "pad_distance": 1.8433204108487602,
+      "roll_rate": 2.532351843838314e-08,
+      "rcs_fuel": 36.274842664456855,
+      "rcs_torque": -0.0009149904135995757,
+      "roll_command": -5.083280075553198e-07,
+      "contact_speed": 9.098221609318148
+    },
+    {
+      "t": 120.99999999997212,
+      "position": [
+        1201.330322265625,
+        400.2842712402344,
+        36.234954833984375
+      ],
+      "velocity": [
+        -0.36100339889526367,
+        -0.0989324077963829,
+        -7.582396030426025
+      ],
+      "tilt": 0.3300251579235035,
+      "throttle": 0.37867117673158646,
+      "phase": "landing",
+      "pad_distance": 1.3603556404271726,
+      "roll_rate": 1.5133817127327296e-08,
+      "rcs_fuel": 36.27484200453222,
+      "rcs_torque": -0.0005455720920813953,
+      "roll_command": -3.0309560671188625e-07,
+      "contact_speed": 7.601222467046067
+    },
+    {
+      "t": 121.99999999997121,
+      "position": [
+        1200.861572265625,
+        400.1670837402344,
+        29.05472183227539
+      ],
+      "velocity": [
+        -0.2787664532661438,
+        -0.06476479023694992,
+        -6.006011009216309
+      ],
+      "tilt": 0.3486942696828253,
+      "throttle": 0.39486808329820633,
+      "phase": "landing",
+      "pad_distance": 0.8776239201075274,
+      "roll_rate": 9.026570029577829e-09,
+      "rcs_fuel": 36.27484161378209,
+      "rcs_torque": -0.000323881421660703,
+      "roll_command": -1.7993412314483498e-07,
+      "contact_speed": 6.012649687799619
+    },
+    {
+      "t": 122.9999999999703,
+      "position": [
+        1200.508056640625,
+        400.1441345214844,
+        23.661624908447266
+      ],
+      "velocity": [
+        -0.21521498262882233,
+        -0.04303042218089104,
+        -4.356502056121826
+      ],
+      "tilt": 0.32996050939932536,
+      "throttle": 0.42040273547172546,
+      "phase": "landing",
+      "pad_distance": 0.5281063438046263,
+      "roll_rate": 5.391490540480106e-09,
+      "rcs_fuel": 36.27484138073714,
+      "rcs_torque": -0.0001924041371569132,
+      "roll_command": -1.0689118730939623e-07,
+      "contact_speed": 4.3622950351904635
+    },
+    {
+      "t": 123.99999999996939,
+      "position": [
+        1200.508056640625,
+        400.1441345214844,
+        20.32767105102539
+      ],
+      "velocity": [
+        -0.14059944450855255,
+        -0.026024214923381805,
+        -2.9637279510498047
+      ],
+      "tilt": 0.28736174800716885,
+      "throttle": 0.5086373910307884,
+      "phase": "landing",
+      "pad_distance": 0.5281063438046263,
+      "roll_rate": 3.3468604899001184e-09,
+      "rcs_fuel": 36.27484124193916,
+      "rcs_torque": -0.00011759024690695697,
+      "roll_command": -6.532791494830943e-08,
+      "contact_speed": 2.959544735947034
+    },
+    {
+      "t": 124.11249999996929,
+      "position": [
+        1200.507080078125,
+        400.1441345214844,
+        20.028514862060547
+      ],
+      "velocity": [
+        -0.49462124705314636,
+        -0.008359287865459919,
+        -0.19846589863300323
+      ],
+      "tilt": 0.27534707862106306,
+      "throttle": 0.35891199111938477,
+      "phase": "landing",
+      "pad_distance": 0.5271669241471679,
+      "roll_rate": -0.020587579481198902,
+      "rcs_fuel": 36.27484123002193,
+      "rcs_torque": -0.00010692819598474676,
+      "roll_command": -5.940455332485931e-08,
+      "contact_speed": 2.5175608109218635
+    }
+  ],
+  "impact": {
+    "t": 124.11249999996929,
+    "position": [
+      1200.508056640625,
+      400.1441345214844,
+      20.03366470336914
+    ],
+    "velocity": [
+      -0.13110153377056122,
+      -0.02459351345896721,
+      -2.5229461193084717
+    ],
+    "angular_velocity": [
+      0.0006530766955461095,
+      -0.001252114301863838,
+      3.162757512284817e-09
+    ],
+    "center_speed": 2.526469784896492,
+    "contact_speed": 2.5175608109218635
+  },
+  "release_time": 0.4416666666666663,
+  "payload_released": true,
+  "engine_scale_estimate": 0.9864938021720843,
+  "source_changed_during_run": false,
+  "finished_at": 1793710855.0256956
+}

@@ -10,10 +10,14 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def main():
     npm="npm.cmd" if os.name=="nt" else "npm"
-    commands=[([sys.executable,"-m","pytest","-q"],ROOT)]
     node=shutil.which("node")
-    if node:commands.append(([node,"scripts/check_standards.js"],ROOT))
-    if node:commands.append(([node,"scripts/check_flight.js"],ROOT))
+    if not node or not shutil.which(npm):
+        print('Node.js and npm are required to validate the shipped flight and build.',file=sys.stderr)
+        return 1
+    commands=[([sys.executable,"-m","pytest","-q"],ROOT)]
+    commands.append(([node,"scripts/check_standards.js"],ROOT))
+    commands.append(([node,"scripts/check_flight.js"],ROOT))
+    commands.append(([node,"--test","scripts/check_regressions.js"],ROOT))
     commands.append(([npm,"run","build"],ROOT/"frontend"))
     for command,cwd in commands:
         if subprocess.run(command,cwd=cwd).returncode:return 1

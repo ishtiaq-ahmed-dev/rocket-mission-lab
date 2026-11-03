@@ -15,6 +15,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const { runSeeds, report } = require('./parallel');
 const { ROOT, POLICY_FILE } = require('./sim');
+const { qualify } = require('./qualify');
 
 const arg = (name, dflt) => { const i = process.argv.indexOf('--' + name); return i > 0 ? +process.argv[i + 1] : dflt; };
 const DATA = path.join(ROOT, 'data', 'flight-policy', 'datasets');
@@ -27,8 +28,22 @@ function moveData(tag) {
   for (const f of fs.readdirSync(WORK)) if (f.startsWith(tag + '-') && f.endsWith('.f32')) fs.renameSync(path.join(WORK, f), path.join(DATA, f));
 }
 function train(extra) {
-  const r = spawnSync(PY, [path.join(__dirname, 'train.py'), ...extra], { stdio: 'inherit', cwd: ROOT });
+  const candidate = path.join(WORK, 'candidate.js'), checkpoint = path.join(WORK, 'candidate.pt');
+  const resume = fs.existsSync(POLICY_FILE) ? ['--init-policy', POLICY_FILE] : [];
+  const r = spawnSync(PY, [path.join(__dirname, 'train.py'), '--output', candidate, '--checkpoint', checkpoint, ...resume, ...extra.filter(x => x !== '--init')], { stdio: 'inherit', cwd: ROOT });
   if (r.status !== 0) throw new Error('training failed');
+  return candidate;
+}
+
+async function trainAndGate(extra) {
+  const candidate = train(extra);
+  if (fs.existsSync(POLICY_FILE)) {
+    const gate = await qualify(candidate);
+    if (!gate.accepted) { console.log('Candidate did not improve the incumbent; shipped policy preserved.'); return; }
+  }
+  // Same-directory atomic replacement: the browser can never read half a model.
+  const temporary = POLICY_FILE + '.tmp';
+  fs.copyFileSync(candidate, temporary); fs.renameSync(temporary, POLICY_FILE);
 }
 
 (async () => {
@@ -43,8 +58,8 @@ function train(extra) {
     await runSeeds(WORK, 'demonom', range(20000, Math.round(n / 6)), { fly: 'teacher', record: true, noise: 1, nominal: true });
     await runSeeds(WORK, 'demoexact', [0], { fly: 'teacher', record: true, noise: 0, nominal: true }, 1);
     moveData('demo'); moveData('demonom'); moveData('demoexact');
-    train(['--epochs', String(arg('epochs', 40)), '--tag', 'bc']);
-  } else if (!fs.existsSync(POLICY_FILE)) train(['--epochs', String(arg('epochs', 40)), '--tag', 'bc']);
+    await trainAndGate(['--epochs', String(arg('epochs', 40)), '--tag', 'bc']);
+  } else if (!fs.existsSync(POLICY_FILE)) await trainAndGate(['--epochs', String(arg('epochs', 40)), '--tag', 'bc']);
 
   const iters = arg('iters', 6), per = arg('per-iter', 200), start = arg('start', 1);
   for (let it = start; it < start + iters; it++) {
@@ -56,6 +71,6 @@ function train(extra) {
     report(`iteration ${it} policy (nominal)`, nom);
     moveData(tag); moveData(tag + 'nom');
     fs.writeFileSync(path.join(ROOT, 'data', 'flight-policy', `progress-${it}.json`), JSON.stringify({ it, ok, n: per, nominal: nom[0] }, null, 1));
-    train(['--epochs', String(arg('dagger-epochs', 25)), '--init', '--lr', '1e-3', '--tag', tag]);
+    await trainAndGate(['--epochs', String(arg('dagger-epochs', 25)), '--lr', '1e-3', '--tag', tag]);
   }
 })().catch(e => { console.error(e); process.exit(1); });

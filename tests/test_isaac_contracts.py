@@ -131,7 +131,8 @@ def test_native_engine_identifier_learns_from_motion_without_reading_true_thrust
     from rocket_lab.isaac.guidance import NativeGuidance
     config=load_config();vehicle={**config['vehicle'],'drag_coefficient':0.,'drag_coefficient_mach':[[0.,0.]]}
     physics=SimpleNamespace(v=vehicle,w=config['world'],half=20.,rest=23.,rotation=lambda:np.eye(3),gravity=lambda:9.80665)
-    controller=NativeGuidance();acceleration=.97*.6*vehicle['max_thrust']/40000.-9.80665
+    from rocket_lab.propulsion import engine_performance
+    controller=NativeGuidance();acceleration=.97*engine_performance(config['world'],vehicle,.6,97.)[0]/40000.-9.80665
     for index in range(101):
         t=index*.1
         controller.identify(SimpleNamespace(physics=physics),dict(t=t,throttle=.6,gimbal=np.zeros(2),hold_down=False,

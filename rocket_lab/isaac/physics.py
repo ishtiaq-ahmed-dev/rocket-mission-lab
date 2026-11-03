@@ -25,7 +25,7 @@ class IsaacRocketPhysics:
         self.stand=float(config['mission'].get('launch_stand_height',0.));self.rest=self.half+self.stand
         self.landing_rest=self.half  # feet touch the remote, ground-level pad
         self.engine_lever=self.v.get('engine_lever',self.half);self.headless=headless;self.visuals=visuals
-        self.engine=Engine(self.v,self.w['gravity']);self.rcs=RollThrusters(self.v);self.roll_command=0.;self.data=SimpleNamespace(time=0.)
+        self.engine=Engine(self.v,self.w['gravity'],self.w);self.rcs=RollThrusters(self.v);self.roll_command=0.;self.data=SimpleNamespace(time=0.)
         # Optional flight-history sink (rocket_lab.isaac.cinematic.FlightTrack);
         # called every physical substep with the physics object itself.
         self.track_hook=None
@@ -178,6 +178,11 @@ class IsaacRocketPhysics:
         if self.on_pad:
             self.hold_joint=self._joint('/World/LaunchHoldDown',None,'/World/Booster',p,[0,0,0])
         self._sync()
+        # Timeline reset restores the USD simulation layer, including gravity.
+        # Reapply the current episode's field instead of trusting a cached
+        # value left over from the previous episode's final altitude.
+        self._last_gravity=self.gravity()
+        self.world.get_physics_context().set_gravity(-self._last_gravity)
         if self.visuals:self.visuals.update(self)
         return self.state()
 
@@ -246,7 +251,7 @@ class IsaacRocketPhysics:
     def step(self,action,stop_on_impact=True):
         dt=self.w['timestep']
         for _ in range(self.w['control_substeps']):
-            rotation=self.rotation();force,torque,burn=self.engine.step(action,dt,self.fuel,self.thrust_scale)
+            rotation=self.rotation();force,torque,burn=self.engine.step(action,dt,self.fuel,self.thrust_scale,self.position[2]-self.rest)
             torque[2]+=self.rcs.step(self.roll_command if not self.on_pad and not self._impacted else 0.,dt)
             self._mass_update()
             target_wind=wind_at(self.w,self.w['wind_mean'],self.position[2]-self.rest,self.wind_scale)

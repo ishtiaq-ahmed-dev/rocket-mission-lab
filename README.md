@@ -17,9 +17,9 @@ Every command in the flight comes from the network: engine ignition, cutoff and 
 | Landing burn | One engine, lit at the last feasible moment; touchdown on LZ-1 |
 | Orbit | Closed-loop insertion to about 270 × 340 km at 39.5°, payload deploy 60 s after SECO |
 
-Default flight, as flown by the shipped policy: MECO at 71.9 km and 1.78 km/s, booster apogee 184 km, insertion 270 × 341 km at 39.5°, touchdown at 1.76 m/s vertical and 0.03 m/s horizontal, 0.10° tilt, 0.2 m from the pad centre.
+Default flight, as flown by the shipped policy: MECO at 71.9 km and 1.78 km/s, booster apogee 184 km, insertion 270 × 341 km at 39.5°, touchdown at 1.82 m/s vertical and 0.03 m/s horizontal, 0.11° tilt, 0.2 m from the pad centre.
 
-**Reliability.** On 300 dispersed flights the network never saw — wind 0–100 % in any direction, engine thrust ±1 %, drag ±5 %, booster dry mass ±300 kg, payload ±1,000 kg — it completed **298** full missions (orbit, deploy and a landing within 3 m/s, 1.5 m/s sideways, 5° and the 43 m pad radius). The classical teacher it learned from completed 295 of the same flights. All 300 reached orbit; the worst touchdown was 2.1 m/s. This is a simulated study, not a flight-certification claim. Details: [docs/FLIGHT-POLICY.md](docs/FLIGHT-POLICY.md).
+**Reliability.** On 300 dispersed flights the network never saw — wind 0–100 % in any direction, engine thrust ±1 %, drag ±5 %, booster dry mass ±300 kg, payload ±1,000 kg — it completed **298** full missions (orbit, fairing release, deploy and a landing on deployed legs within 3 m/s, 1.5 m/s sideways, 5° and the 43 m pad radius). The classical teacher it learned from completed 295 of the same flights. All 300 reached orbit; the worst touchdown was 2.17 m/s. This is a simulated study, not a flight-certification claim. Details: [docs/FLIGHT-POLICY.md](docs/FLIGHT-POLICY.md).
 
 **Model limits:** point-mass dynamics with a rate-limited first-order attitude response; public Falcon 9 figures anchor the vehicle, but dry masses and aerodynamic coefficients are modelled. Plume, smoke, legs and fins are illustrative. The **MODEL NOTES** panel (top left, or `M`) lists the assumptions and this run's figures.
 
@@ -28,6 +28,7 @@ Default flight, as flown by the shipped policy: MECO at 71.9 km and 1.78 km/s, b
 - `1` Orbit, `2` Chase, `3` Launch Tower, `4` Booster Top Cam, `5` Landing Pad, `6` Overview, `7` Orbital View.
 - `F` cycle focus between the stack and the booster, `Space` play/pause, `←`/`→` seek, `H` hide the HUD.
 - Speed presets 0.1× to 30×; the timeline marks liftoff, max-Q, MECO, separation, boostback, entry burn, landing burn, touchdown, SECO and payload deploy.
+- Visible playback follows wall time even during slow frames. Hidden tabs pause their clock; model notes pause playback and restore its previous state when closed. Timeline events are keyboard-accessible; crowded labels collapse to markers with tooltips.
 
 ## Run locally
 
@@ -51,18 +52,21 @@ node scripts/flight_policy/parallel.js policy 900000 300                        
 node scripts/flight_policy/parallel.js teacher 900000 300                            # the teacher on the same seeds
 ```
 
-Training writes `frontend/public/flight-policy.js`. Datasets and checkpoints stay under ignored `data/flight-policy/`.
+Training streams file-backed minibatches and writes a separate candidate. The DAgger driver compares it with the incumbent on the nominal mission and 256 matched development seeds before atomically replacing `frontend/public/flight-policy.js`. Nominal regressions, lost missions and worse speed/offset envelopes are rejected. Datasets, candidate weights and checkpoints stay under ignored `data/flight-policy/`.
 
 ## Validation
 
 ```powershell
 node scripts/check_flight.js
 node scripts/check_standards.js
+node --test scripts/check_regressions.js
 .venv\Scripts\python.exe -m pytest tests -q
 cd frontend; npm run build
 ```
 
 `check_flight.js` flies the shipped page with the shipped weights and checks every frame and the 60 Hz interpolation: event order, propellant, throttle and engine bounds, phase consistency, vis-viva at insertion, touchdown limits, that the booster's thrust never points toward the ground after separation, that the return burns run boostback → entry → landing, and that the page contains no scripted guidance. `check_standards.js` checks the WGS-84, ISO 2533 / US 1976, Merlin/MVac and mass-closure anchors and the default-flight regression ([docs/STANDARDS.md](docs/STANDARDS.md)). `make test` and CI (`.github/workflows/ci.yml`) run these together.
+
+The [3 November audit](docs/PROJECT_AUDIT_2026-11-03.md) records the physics, native controls, training, rendering and verification changes and the remaining model limits.
 
 ## Python laboratory
 
