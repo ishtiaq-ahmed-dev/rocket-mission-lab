@@ -129,8 +129,15 @@ class ClassicalController:
             target_speed=-0.25*h if env.phase=="landing" else 20
             az = 0.12*(target_speed-velocity[2])
         elif env.phase=="takeoff":
-            target_speed=min(env.takeoff_velocity, 5+0.12*h)
-            az=np.clip(1.1*(target_speed-velocity[2]), -5, cfg['mission'].get('takeoff_acceleration',6))
+            # Reach the separation velocity as early as the vehicle can and hold
+            # it. A ramp that only meets the goal near the configured altitude
+            # misses the goal-speed gate at low separation altitudes (the ramp
+            # value is below the goal) and overshoots nothing at high ones. The
+            # kinematic ramp sqrt(2 a h) is the fastest profile that can still
+            # be tracked, so the goal speed is achieved and held everywhere.
+            accel=cfg['mission'].get('takeoff_acceleration',6)
+            target_speed=min(env.takeoff_velocity, np.sqrt(2.*accel*max(h,0.)+1.))
+            az=np.clip(1.1*(target_speed-velocity[2]), -5, accel)
         else:
             target_speed=-min(28., np.sqrt(max(0., 3.0*h)), 0.5*max(h,0)+0.65)
             az=np.clip((0.75 if self.level==2 else 1.5)*(target_speed-velocity[2]), -8., 12.)
@@ -252,9 +259,16 @@ class ClassicalController:
             # The position term fades out beyond the capture radius, so it cannot fight the braking profile.
             error_command=lateral_error*float(np.clip((self.fade_radius-distance)/(self.fade_radius-capture),0.,1.))
             desired_gimbal=[]
+            # The LQR output is a demanded body tilt in radians. A large lateral
+            # velocity error asks for tens of degrees, which the gimbal rails and
+            # the attitude loop then overshoots: the tilt costs the vertical
+            # braking authority the descent profile assumes. Bound the demand to
+            # a 10 degree envelope that still delivers the lateral acceleration
+            # the transfer profile needs (tan 10 deg * g = 1.7 m/s^2).
+            tilt_envelope=np.deg2rad(10.)
             for axis in range(2):
                 state=[error_command[axis],np.clip(velocity[axis]-reference[axis],-self.velocity_clip,self.velocity_clip),n[axis],n_dot[axis]]
-                desired_gimbal.append(-float(self.lqr_gain@state))
+                desired_gimbal.append(float(np.clip(-float(self.lqr_gain@state),-tilt_envelope,tilt_envelope)))
             body_gimbal=rot.T@np.array([*desired_gimbal,0.])
             gx,gy=body_gimbal[:2]
             if cfg['mission'].get('high_altitude_recovery') and (h>800 or s['tilt']>8):
@@ -266,6 +280,13 @@ class ClassicalController:
                 torque=.5*np.cross([0.,0.,1.],desired_body)*inertia[0]-1.4*omega*inertia
                 torque+=np.cross(omega,inertia*omega)
                 gx,gy=-torque[1]/denom,torque[0]/denom
+        if self.level>=3 and env.phase=='landing' and h<=6. and can_hover:
+            # Guard altitude. A one-step thrust dropout in the last metres cannot
+            # be recovered before contact: it turns a controlled 1.2 m/s descent
+            # into a free fall. Keep the engine lit at its floor there, but only
+            # when the floor can actually hold the vehicle. A light booster whose
+            # floor thrust exceeds its weight must be allowed to cut off.
+            throttle=max(throttle,ph.v['min_throttle'])
         limit=np.deg2rad(ph.v["gimbal_limit_deg"])
         if self.level>=3 and 0<throttle<ph.v['min_throttle']:
             # Below the engine floor use velocity hysteresis, with a real off

@@ -133,7 +133,6 @@ def main():
         # Native extension imports must come after SimulationApp initialization.
         import numpy as np
         from rocket_lab.isaac.physics import IsaacRocketPhysics
-        from rocket_lab.isaac.stream import TelemetryServer,exchange
         from rocket_lab.config import load_config
         from rocket_lab.missions import configure_flight
         from rocket_lab.envs import RocketEnv
@@ -190,7 +189,7 @@ def main():
         report.update(status='running',socket_port=server.port,engine='Isaac Sim PhysX',plan=plan.model_dump(mode='json'))
         last_heartbeat=time.monotonic()
         def publish(outcome=None):
-            nonlocal count,last_heartbeat
+            nonlocal last_heartbeat
             if time.monotonic()-last_heartbeat>15:
                 last_heartbeat=time.monotonic();faulthandler.dump_traceback_later(90,repeat=True)
                 print(f'NATIVE: t={env.physics.data.time:.2f} s, altitude={env.physics.position[2]-env.physics.rest:.1f} m, phase={env.phase}',flush=True)

@@ -1,13 +1,11 @@
-import json
 import sys
 import time
-from pathlib import Path
 import threading
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from typing import Literal
-from .config import DATA, ROOT, load_config
+from .config import DATA, load_config
 from .schemas import SimRequest, TrainRequest, RunMeta, Telemetry
 from .storage import runs, read_json, training_jobs, checkpoints, atomic_json, config_hash,dynamics_hash,select_checkpoint
 from .simulation import simulate

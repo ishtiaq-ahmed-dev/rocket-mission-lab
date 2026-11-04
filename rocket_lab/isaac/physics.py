@@ -6,7 +6,7 @@ gravity and both rigid bodies. Fuel exhaust uses F = mdot Isp g0.
 from types import SimpleNamespace
 import numpy as np
 from scipy.spatial.transform import Rotation
-from pxr import Gf,PhysxSchema,Sdf,UsdGeom,UsdPhysics,UsdShade
+from pxr import Gf,PhysxSchema,Sdf,UsdGeom,UsdPhysics
 import omni.usd
 from isaacsim.core.api import World
 from isaacsim.core.api.objects import GroundPlane

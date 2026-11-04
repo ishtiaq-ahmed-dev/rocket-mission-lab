@@ -1,7 +1,6 @@
 """One cross-platform launcher. python scripts/dev.py; Ctrl+C shuts down servers."""
 from pathlib import Path
 import os
-import signal
 import subprocess
 import sys
 import time

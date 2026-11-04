@@ -44,7 +44,6 @@ def native_command(command:dict):
     return result
 
 
-from pathlib import Path
 from fastapi.responses import FileResponse
 from ..config import ROOT
 

@@ -43,6 +43,9 @@ class RocketPhysics:
         self.gimbal = np.zeros(2)
         self.rcs_torque = np.zeros(3)
         self.throttle = 0.0
+        # Valve position the engine actually sees; `throttle` is the resulting
+        # thrust fraction of max_thrust and is not a command.
+        self.valve = 0.0
         self.command_throttle = 0.0
         self.thrust = 0.0
         self.isp = self.v.get('isp_vacuum', self.v['isp'])
@@ -176,10 +179,14 @@ class RocketPhysics:
                     effective = target_throttle
                 # Turbopump/valve spool: thrust follows the command at a bounded rate, so ignition
                 # and shutdown ramp over a few tenths of a second instead of stepping instantly.
-                delta = effective - self.throttle
-                self.throttle += np.clip(delta, -rate_down*dt, rate_up*dt)
-                self.thrust, self.isp = engine_performance(self.w, self.v, self.throttle, self.data.qpos[2]-self.rest, self.thrust_scale)
+                # Spool the valve itself. Ramping `throttle` and then re-deriving
+                # it as thrust/max_thrust shrank every increment by the sea-level
+                # exit-area loss, so the valve asymptoted just below half open and
+                # a low-altitude descent had no braking headroom above hover.
+                self.valve += np.clip(effective - self.valve, -rate_down*dt, rate_up*dt)
+                self.thrust, self.isp = engine_performance(self.w, self.v, self.valve, self.data.qpos[2]-self.rest, self.thrust_scale)
             else:
+                self.valve = commanded if self.fuel > 0 else 0.
                 self.thrust, self.isp = engine_performance(self.w, self.v, commanded, self.data.qpos[2]-self.rest, self.thrust_scale) if self.fuel > 0 else (0., self.isp)
             # F = mdot * Isp * g0. Cap the final substep to available fuel.
             self.thrust = min(self.thrust, self.fuel * self.isp * self.w["gravity"] / dt)

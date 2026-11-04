@@ -1,5 +1,4 @@
 """Standalone plots derived only from measured JSON/CSV artifacts."""
-import json
 from pathlib import Path
 import sys
 import re

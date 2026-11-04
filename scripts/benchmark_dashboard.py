@@ -7,7 +7,7 @@ import sys
 import time
 import urllib.request
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from rocket_lab.config import ROOT,DATA
+from rocket_lab.config import ROOT
 from rocket_lab.storage import atomic_json,read_json
 
 

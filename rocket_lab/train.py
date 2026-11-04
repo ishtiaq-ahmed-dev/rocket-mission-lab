@@ -400,7 +400,6 @@ if __name__=="__main__":
         train(args.mission,args.algorithm,args.steps,args.seed,args.device,args.job_id,args.eval_episodes,args.resume,args.warm_start,args.config,args.adapt_optimizer_from)
     except BaseException:
         if args.job_id:
-            from .storage import read_json
             path=DATA/"jobs"/args.job_id/"status.json"
             status=read_json(path,{"id":args.job_id,"mission":args.mission,"algorithm":args.algorithm,"steps":0,"total_steps":args.steps,"started_at":time.time(),"curve":[],"episodes":[],"device":args.device})
             status.update(status="failed",error=traceback.format_exc(),updated_at=time.time())

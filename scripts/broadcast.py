@@ -22,7 +22,6 @@ import argparse
 import json
 import math
 import random
-import shutil
 import struct
 import subprocess
 import sys
@@ -317,15 +316,15 @@ def narration_lines(film, telemetry):
 
 def build_narration(lines, workdir: Path, out: Path):
     workdir.mkdir(parents=True, exist_ok=True)
-    placed, blobs, rate = [], [], RATE
+    placed, blobs = [], []
     use_kokoro = (ROOT / 'data/models/kokoro/kokoro-v1.0.fp16.onnx').exists()
     for i, (t, text) in enumerate(lines):
         wav = workdir / f'line{i}.wav'
         try:
-            rate = speak_kokoro(text, wav) if use_kokoro else speak_sapi(text, wav)
+            speak_kokoro(text, wav) if use_kokoro else speak_sapi(text, wav)
         except Exception as error:
             print(f'announcer fallback to SAPI ({type(error).__name__}: {error})', flush=True)
-            rate = speak_sapi(text, wav)
+            speak_sapi(text, wav)
         sample_rate, blob = read_wav(wav)
         if sample_rate != RATE:
             # Kokoro is 24 kHz; SAPI is 22.05 kHz. Resample is avoided by
@@ -393,7 +392,7 @@ def main():
     build_overlay(film, telemetry, ass)
     lines = narration_lines(film, telemetry)
     voice = args.work / 'voice.wav'
-    placed = build_narration(lines, args.work / 'lines', voice)
+    build_narration(lines, args.work / 'lines', voice)
     bed = args.work / 'bed.wav'
     build_bed(film, telemetry, bed)
     print('announcer:')

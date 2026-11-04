@@ -13,6 +13,8 @@ from pxr import Gf,Sdf,UsdGeom,UsdLux,UsdShade
 import carb
 import omni.kit.app
 import omni.usd
+from ..atmosphere import air_density,pressure_at
+from ..plume import expansion,flame_length
 
 
 def attribute(prim,name,kind,value):
@@ -73,7 +75,6 @@ class NativeVisuals:
         for contour in contours:inside^=Outline(contour).contains_points(samples.reshape(-1,2)).reshape(inside.shape)
         triangles=triangles[inside.all(axis=1)]
         vertices[:,0]-=(vertices[:,0].min()+vertices[:,0].max())*.5
-        theta=np.deg2rad(azimuth_deg)
         rim_pos=15.*np.array([np.cos(np.deg2rad(azimuth_deg+90.)),np.sin(np.deg2rad(azimuth_deg+90.))])
         sign=UsdGeom.Mesh.Define(self.stage,path)
         sign.CreatePointsAttr([Gf.Vec3f(float(x),0.,float(y)+z_base) for x,y in vertices])
@@ -835,10 +836,12 @@ class NativeVisuals:
         rotation=Gf.Rotation(Gf.Vec3d(0,0,1),Gf.Vec3d(*direction)).GetQuat()
         self.nozzle_rotation.Set(Gf.Quatf(float(rotation.GetReal()),Gf.Vec3f(*rotation.GetImaginary())))
 
-        # Kerolox plume: throttle length with combustion flicker; the veil
-        # overexpands with altitude like a real low-pressure exhaust plume.
-        # Flicker is correlated smooth noise (1-13 Hz band from flame studies):
-        # slow envelope + fast chop, never strobing.
+        # Kerolox plume: throttle sets chamber pressure and the ISA ambient
+        # pressure sets the expansion, so the flame blooms as the air thins
+        # (rocket_lab.plume derives both from the isentropic area ratio).
+        # Luminosity flicker is band-limited presentation noise below the
+        # 60 Hz render Nyquist (3-13 Hz): slow envelope plus fast chop, never
+        # strobing. It is not a solved combustion instability.
         throttle=float(physics.throttle)
         alt_agl=max(0.,physics.position[2]-physics.rest)
         t=physics.data.time
@@ -846,18 +849,23 @@ class NativeVisuals:
         fast=1.+.06*np.sin(21.*t)+.04*np.sin(47.*t+1.3)+.03*np.sin(83.*t+.6)  # fine chop
         flicker=slow*fast
         if throttle>.01:
-            plume_len=float(np.clip(throttle*flicker*(13.5+.55*min(alt_agl/220.,2.2)),.1,17.))
+            world=self.physics.w
+            pressure=pressure_at(world,alt_agl)
+            diameter_gain,_=expansion(throttle,pressure)
             # Never tunnel through the ground: at pad height the plume stops
             # just above the surface (the ground flare sells the splash).
-            plume_len=min(plume_len,max(.35*alt_agl,1.2))
-            # Ground-level kerolox exhaust is wide and turbulent; in near-vacuum
-            # it balloons out even further (no ambient pressure to contain it).
-            plume_width=max(.1,throttle*flicker*(1.9+.7*min(alt_agl/300.,1.6)))
+            plume_len=flame_length(throttle,pressure,alt_agl,modulation=flicker)
+            # Bounded to the previous on-screen envelope so the framing stays
+            # safe while the growth law is now pressure-driven.
+            plume_width=min(max(.1,throttle*flicker*1.9*diameter_gain),3.05)
             self.plume_scale.Set(Gf.Vec3f(plume_width,plume_width,plume_len))
-            veil_width=float(np.clip(.9*throttle*(1.+alt_agl/380.),.1,9.))
+            veil_width=float(np.clip(.9*throttle*diameter_gain*diameter_gain,.1,9.))
             self.veil_scale.Set(Gf.Vec3f(veil_width,veil_width,plume_len*1.3))
             self.sheath_shader.GetInput('opacity').Set(float(np.clip(.55*throttle*slow,0.,.7)))
-            self.veil_shader.GetInput('opacity').Set(float(np.clip(.16*throttle*(1.+alt_agl/900.)*fast,0.,.45)))
+            # Vacuum plumes are wide but faint: optical depth follows the
+            # ambient density, so the veil dims as the air thins.
+            thin=float(np.clip(air_density(world,alt_agl)/max(1e-9,air_density(world,0.)),0.,1.))
+            self.veil_shader.GetInput('opacity').Set(float(np.clip(.16*throttle*(.35+.65*thin)*fast,0.,.45)))
             # Shock cells: out-of-phase brightness noise; fade along the plume
             fade=1.-.06*np.sin(29.*t)
             self.diamond_shader.GetInput('opacity').Set(float(np.clip(.65*throttle*fade*fast,0.,.75)))
