@@ -14,7 +14,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from rocket_lab.config import DATA, ROOT, load_config
 from rocket_lab.controllers import ClassicalController
 from rocket_lab.envs import RocketEnv
-from rocket_lab.physics import RocketPhysics
 from rocket_lab.simulation import LearnedPolicy
 from rocket_lab.storage import atomic_json
 

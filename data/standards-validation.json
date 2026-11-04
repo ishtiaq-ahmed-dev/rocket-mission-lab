@@ -429,7 +429,7 @@
     },
     {
       "name": "touchdown vertical speed",
-      "actual": -1.8151785413058827,
+      "actual": -1.8158020545925344,
       "expected": -1.7626,
       "tolerance": 0.2,
       "unit": " m/s",
@@ -437,7 +437,7 @@
     },
     {
       "name": "touchdown horizontal speed",
-      "actual": 0.03206427280126201,
+      "actual": 0.0320496812353394,
       "expected": 0.032,
       "tolerance": 0.1,
       "unit": " m/s",
@@ -445,7 +445,7 @@
     },
     {
       "name": "touchdown tilt",
-      "actual": 0.1079292702733457,
+      "actual": 0.10718579244809805,
       "expected": 0.103,
       "tolerance": 0.5,
       "unit": " deg",
@@ -453,7 +453,7 @@
     },
     {
       "name": "touchdown pad offset",
-      "actual": 0.22221643751970535,
+      "actual": 0.22214008877974895,
       "expected": 0.2222,
       "tolerance": 3,
       "unit": " m",
@@ -467,9 +467,9 @@
     "insertion_apogee_km": 341.0115223890515,
     "insertion_inclination_deg": 39.54160980999693,
     "insertion_eccentricity": 0.00532251323212729,
-    "touchdown_vertical_m_s": -1.8151785413058827,
-    "touchdown_horizontal_m_s": 0.03206427280126201,
-    "touchdown_tilt_deg": 0.1079292702733457,
-    "touchdown_offset_m": 0.22221643751970535
+    "touchdown_vertical_m_s": -1.8158020545925344,
+    "touchdown_horizontal_m_s": 0.0320496812353394,
+    "touchdown_tilt_deg": 0.10718579244809805,
+    "touchdown_offset_m": 0.22214008877974895
   }
 }

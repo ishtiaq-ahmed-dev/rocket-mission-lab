@@ -26,6 +26,8 @@ import time
 
 import numpy as np
 from scipy.spatial.transform import Rotation
+from ..atmosphere import pressure_at
+from ..plume import flame_length
 
 
 class FlightTrack:
@@ -115,10 +117,10 @@ class FlightTrack:
         touchdown=None;landing_burn=None
         if separation is not None:
             min_z=float(self.position[:,2].min())
-            near_ground=self.position[:,2]<min_z+1.2
-            settled=near_ground&(np.linalg.norm(self.velocity,axis=1)<8.)
-            if settled.any():touchdown=float(t[np.where(settled)[0][-1]])
-            elif near_ground.any():touchdown=float(t[np.where(near_ground)[0][-1]])
+            # Contact is the first sample at the lowest recorded height (within
+            # 5 cm): the instant the legs meet the ground, not a speed cut-off.
+            near_ground=self.position[:,2]<min_z+.05
+            if near_ground.any():touchdown=float(t[np.flatnonzero(near_ground)[0]])
             if touchdown is not None:
                 # The landing burn is the last throttle block before touchdown;
                 # the first post-separation burn is the boostback.
@@ -249,7 +251,7 @@ class CameraDirector:
     """
 
     def __init__(self,cfg,track,half):
-        self.track=track;self.half=half
+        self.track=track;self.half=half;self.world=cfg['world']
         self.launch=np.array([*cfg['mission'].get('launch',[0,0])[:2],0.],dtype=float)
         # Landing coordinates are not in config.yaml (the runner injects them);
         # the recovered booster's own final position is the pad.
@@ -379,7 +381,7 @@ class CameraDirector:
         clearance=max(0.,float(base[2]))
         plume=0.
         if state['throttle']>.03:
-            plume=min(13.5*float(state['throttle']),max(.35*clearance,1.2))
+            plume=flame_length(state['throttle'],pressure_at(self.world,clearance),clearance)
         plume_tip=base-up*plume
         payload_quaternion=state['payload_quaternion']
         payload_rotation=Rotation.from_quat([payload_quaternion[1],payload_quaternion[2],

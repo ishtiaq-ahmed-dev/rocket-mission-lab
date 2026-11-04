@@ -1,6 +1,5 @@
 """Export actual classical runs, schema and runtime provenance."""
 import importlib.metadata
-import json
 import platform
 import sys
 from pathlib import Path

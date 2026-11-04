@@ -21,7 +21,7 @@ Default flight, as flown by the shipped policy: MECO at 71.9 km and 1.78 km/s, b
 
 **Reliability.** On 300 dispersed flights the network never saw — wind 0–100 % in any direction, engine thrust ±1 %, drag ±5 %, booster dry mass ±300 kg, payload ±1,000 kg — it completed **298** full missions (orbit, fairing release, deploy and a landing on deployed legs within 3 m/s, 1.5 m/s sideways, 5° and the 43 m pad radius). The classical teacher it learned from completed 295 of the same flights. All 300 reached orbit; the worst touchdown was 2.17 m/s. This is a simulated study, not a flight-certification claim. Details: [docs/FLIGHT-POLICY.md](docs/FLIGHT-POLICY.md).
 
-**Model limits:** point-mass dynamics with a rate-limited first-order attitude response; public Falcon 9 figures anchor the vehicle, but dry masses and aerodynamic coefficients are modelled. Plume, smoke, legs and fins are illustrative. The **MODEL NOTES** panel (top left, or `M`) lists the assumptions and this run's figures.
+**Model limits:** point-mass dynamics with a rate-limited first-order attitude response; public Falcon 9 figures anchor the vehicle, but dry masses and aerodynamic coefficients are modelled. Plume length and width follow the nozzle exit pressure against the ISA ambient profile; turbulence, smoke, legs and fins are illustrative. The **MODEL NOTES** panel (top left, or `M`) lists the assumptions and this run's figures.
 
 ### Cameras and playback
 

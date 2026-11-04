@@ -137,7 +137,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-off
     <h3>FLIGHT CONTROL &middot; NEURAL POLICY</h3>
     <ul><li>Every command in this flight comes from a trained neural network evaluated at 10 Hz on the vehicle's own state: engine ignition, cutoff and count, throttle, attitude, stage separation, second-stage burn, fairing jettison and payload deploy. There is no scripted guidance and no fallback controller in this page.</li><li>The network was trained by imitation of a classical teacher with DAgger (<code>scripts/flight_policy/</code>). On 300 unseen dispersed flights (wind, thrust, drag and mass) it completed 298 missions; the teacher completed 295 of the same flights.</li><li>Return profile after Falcon 9 RTLS practice: cold-gas flip, three-engine boostback with horizontal thrust (never toward the ground), unpowered ballistic coast with engines leading, three-engine entry burn near 60 km, unpowered grid-fin glide, single-engine landing burn lit at the last feasible moment.</li><li>After separation the booster still climbs on its own momentum while gravity slows it, and falls after apogee. Stage separation conserves momentum; an engine finishes its shutdown before it can relight.</li></ul>
     <h3>NOT MODELLED / NOT CERTIFIED</h3>
-    <ul><li>6-DOF rigid-body dynamics (attitude is a rate-limited first-order response), propellant slosh, aeroelasticity, sensor noise, abort modes, weather, FAA/range safety and structural or thermal limits.</li><li>Plume, soot, grid-fin and leg motion are illustrative. This is not a validated real-world flight model.</li></ul>
+    <ul><li>6-DOF rigid-body dynamics (attitude is a rate-limited first-order response), propellant slosh, aeroelasticity, sensor noise, abort modes, weather, FAA/range safety and structural or thermal limits.</li><li>Plume length and width follow the ambient pressure ratio; soot, grid-fin and leg motion are illustrative. This is not a validated real-world flight model.</li></ul>
     <h3>THIS RUN</h3>
     <ul><li>Main engine cutoff at <b id="n-meco">&mdash;</b>; booster apogee <b id="n-apo">&mdash;</b>.</li><li>Insertion orbit <b id="n-orb">&mdash;</b>.</li><li>Touchdown <b id="n-td">&mdash;</b>.</li></ul>
     <p>Values are read from the flight currently loaded in this page. Reference checks: <code>node scripts/check_standards.js</code>.</p>
@@ -667,6 +667,9 @@ function run(opts) {
     /* ---------- policy (10 Hz, zero-order hold) ---------- */
     if (step % CTRL_EVERY === 0 || !cmd) cmd = control({ t: t, B: B, U: U, phase: phase });
     const cb = cmd.booster, cu = cmd.upper;
+    /* Stage separation: the booster drops clear with no engine burn and no attitude command
+       for the first 4 s after the push, so it falls straight; the policy resumes after that. */
+    if (!B.attached && B.ign === 0 && t - B.tSep < 4) { cb.n = 0; cb.thr = 0; cb.dir = B.axis.slice(); }
 
     /* ---------- booster / stack ---------- */
     const wasSeparated = U.separated;
@@ -790,6 +793,7 @@ loadScript(['/three.min.js'])
 .catch(function(e){MSG.textContent='Could not start: '+e.message;console.error(e);});
 
 function start(){
+if(window.__started)return;window.__started=true;   /* a throttled resume timer must not boot a second renderer */
 performance.mark('start');
 const SIM=FlightSim.run({});
 const SIMT0=SIM.t0,SIMDT=SIM.dt,SIMN=SIM.n,T_END=SIMT0+(SIMN-1)*SIMDT;
@@ -1381,7 +1385,7 @@ const launchGroup=new THREE.Group();launchGroup.position.set(0,0,0);WG.add(launc
   aprn.position.y=PAD_Y/2;aprn.receiveShadow=true;launchGroup.add(aprn);
   /* stencilled takeoff pad, matching the original launch site markings */
   const takeoff=new THREE.Mesh(new THREE.CircleGeometry(40,96),new THREE.MeshStandardMaterial({map:padTexture('TAKEOFF'),roughness:0.9,metalness:0}));
-  takeoff.rotation.x=-Math.PI/2;takeoff.position.y=PAD_Y+0.005;takeoff.receiveShadow=true;launchGroup.add(takeoff);
+  takeoff.rotation.set(-Math.PI/2,0,Math.PI);takeoff.position.y=PAD_Y+0.005;takeoff.receiveShadow=true;launchGroup.add(takeoff);
   /* flame trench */
   const tr=new THREE.Mesh(new THREE.PlaneGeometry(10,38),new THREE.MeshStandardMaterial({color:0x151412,roughness:1,polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3}));
   tr.geometry.rotateX(-Math.PI/2);tr.rotation.y=Math.atan2(-DIRH.x,-DIRH.z);tr.position.set(-DIRH.x*10,PAD_Y+0.01,-DIRH.z*10);launchGroup.add(tr);
@@ -1472,7 +1476,9 @@ const glowTex=(function(){
 /* ================= lattice launch tower ================= */
 const TOWER_POS=new V3(-30,0,22),TOWER_H=66;
 /* just outside the tower's top face, clear of the columns and the deck rails */
-const TOWER_CAM=new V3(TOWER_POS.x+3.4,63.0,TOWER_POS.z-2.5);
+/* Lift a camera off the tower's outer side, on the pad side of it: mounted in the lattice the
+   structure fills the sky the moment the vehicle climbs above the top node. */
+const TOWER_CAM=new V3(-72,20,20);
 const towerGroup=new THREE.Group();towerGroup.position.copy(TOWER_POS);WG.add(towerGroup);
 (function(){
   const list=[];     /* {a,b,r,c} */
@@ -1711,18 +1717,20 @@ const bodyTex=(function(){
   })();
   /* aerothermal soot gradient on the aft section */
   (function(){
-    const y0=Y(2.0),y1=Y(15.5);
+    /* Keep this to the last few metres of tank. A 15 m soot skirt turned the whole aft end
+       black on the pad, which no fresh first stage looks like. */
+    const y0=Y(0.6),y1=Y(5.2);
     const gr=g.createLinearGradient(0,y0,0,y1);
-    gr.addColorStop(0,'rgba(8,7,6,.97)');gr.addColorStop(0.25,'rgba(14,12,10,.88)');gr.addColorStop(0.55,'rgba(40,34,28,.48)');gr.addColorStop(1,'rgba(60,52,44,0)');
+    gr.addColorStop(0,'rgba(10,9,8,.90)');gr.addColorStop(0.35,'rgba(22,19,16,.52)');gr.addColorStop(0.7,'rgba(48,42,35,.22)');gr.addColorStop(1,'rgba(60,52,44,0)');
     g.fillStyle=gr;g.fillRect(0,y1,CW,y0-y1);
-    for(let i=0;i<2200;i++){
-      const x=r()*CW,len=120+r()*1500,w=1+r()*6,a=0.04+r()*0.13;
+    for(let i=0;i<900;i++){
+      const x=r()*CW,len=40+r()*320,w=1+r()*5,a=0.03+r()*0.08;
       const sg=g.createLinearGradient(0,y0,0,y0-len);sg.addColorStop(0,'rgba(8,7,6,'+a+')');sg.addColorStop(1,'rgba(8,7,6,0)');
       g.fillStyle=sg;g.fillRect(x,y0-len,w,len);
     }
     /* brown thermal blush */
-    const bg=g.createLinearGradient(0,Y(7),0,Y(19));bg.addColorStop(0,'rgba(120,84,50,.20)');bg.addColorStop(1,'rgba(120,84,50,0)');
-    g.fillStyle=bg;g.fillRect(0,Y(19),CW,Y(7)-Y(19));
+    const bg=g.createLinearGradient(0,Y(1.6),0,Y(8.5));bg.addColorStop(0,'rgba(120,84,50,.13)');bg.addColorStop(1,'rgba(120,84,50,0)');
+    g.fillStyle=bg;g.fillRect(0,Y(8.5),CW,Y(1.6)-Y(8.5));
   })();
   /* bump */
   const B=mkCanvas(1024,2048),b=B.getContext('2d'),BY=h=>Y(h)/2;
@@ -1931,7 +1939,9 @@ const MAT2={
   s2:new THREE.MeshStandardMaterial({map:s2Tex,roughness:0.62,metalness:0.25,emissive:new THREE.Color(0,0,0)}),
   fair:new THREE.MeshStandardMaterial({color:0xeef0f2,roughness:0.42,metalness:0.12,side:THREE.DoubleSide}),
   fairIn:new THREE.MeshStandardMaterial({color:0x6b6e72,roughness:0.9,metalness:0.1,side:THREE.DoubleSide}),
-  mvac:new THREE.MeshStandardMaterial({color:0x3a3430,roughness:0.4,metalness:0.9,side:THREE.DoubleSide,emissive:new THREE.Color(1,0.28,0.04),emissiveIntensity:0}),
+  /* Niobium nozzle extension: matte dark grey, not a polished metal (there is no environment
+     map in this scene, so a high metalness just reads as flat brown). */
+  mvac:new THREE.MeshStandardMaterial({color:0x2c2a28,roughness:0.55,metalness:0.45,side:THREE.DoubleSide,emissive:new THREE.Color(1,0.30,0.05),emissiveIntensity:0}),
   gold:new THREE.MeshStandardMaterial({map:foilTex,color:new THREE.Color(1.9,1.9,1.9),roughness:0.34,metalness:0.7}),
   panel:new THREE.MeshStandardMaterial({map:cellTex,roughness:0.28,metalness:0.55,side:THREE.DoubleSide}),
   silver:new THREE.MeshStandardMaterial({color:0xc4c8cd,roughness:0.3,metalness:0.9})
@@ -2037,7 +2047,7 @@ function updateS2(Sx,t,tr){
   const vis=poseFrom(s2,Sx,0,3,20,0);
   s2.visible=vis;
   /* stateless: a seek must never leave the nozzle glowing after SECO */
-  MAT2.mvac.emissiveIntensity=Sx[8]>0.5?Math.min(1,Sx[7])*0.35:0;
+  MAT2.mvac.emissiveIntensity=Sx[8]>0.5?Math.min(1,Sx[7])*0.06:0;
 }
 function updateFair(FAv,FBv,Sx,t){
   /* attached until the halves exist, then free flying from the sim */
@@ -2128,7 +2138,57 @@ void main(){
   #include <tonemapping_fragment>
   #include <encodings_fragment>
 }`;
+/* Vacuum plume: with no ambient air there is no barrel shock, no shock diamonds and no
+   hard cone lip. The exhaust leaves the bell as a wide, almost transparent blue-white fan
+   that simply thins out downstream, so it gets its own material. */
+const vacVS=`
+uniform float uThr,uXp,uLen,uR0;
+varying vec3 vN; varying vec3 vV; varying vec2 vS;
+void main(){
+  float s=1.0-uv.y;
+  float grow=1.0+1.30*uXp*pow(s,0.80);
+  float rad=uR0*(0.86+0.14*uThr)*grow*(1.0-0.35*pow(s,3.0));
+  vec3 p=vec3(position.x*rad,-s*uLen,position.z*rad);
+  vN=normalize(normalMatrix*normal);
+  vec4 mv=modelViewMatrix*vec4(p,1.0);
+  vV=-mv.xyz;
+  vS=vec2(s,atan(position.z,position.x));
+  gl_Position=projectionMatrix*mv;
+}`;
+const vacFS=`
+uniform float uThr,uTime,uSeed,uXp,uLen,uGain,uR0;
+varying vec3 vN; varying vec3 vV; varying vec2 vS;
+float h13(vec3 p){p=fract(p*.1031);p+=dot(p,p.zyx+31.32);return fract((p.x+p.y)*p.z);}
+float vn(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+  return mix(mix(mix(h13(i),h13(i+vec3(1,0,0)),f.x),mix(h13(i+vec3(0,1,0)),h13(i+vec3(1,1,0)),f.x),f.y),
+             mix(mix(h13(i+vec3(0,0,1)),h13(i+vec3(1,0,1)),f.x),mix(h13(i+vec3(0,1,1)),h13(i+vec3(1,1,1)),f.x),f.y),f.z);}
+void main(){
+  vec3 N=normalize(vN),V=normalize(vV);
+  float ndv=abs(dot(N,V));
+  float s=vS.x,ang=vS.y;
+  float fl=vn(vec3(cos(ang)*2.0+uSeed,sin(ang)*2.0,s*uLen*0.10-uTime*22.0))*0.60
+          +vn(vec3(cos(ang)*4.5,sin(ang)*4.5+uSeed,s*uLen*0.26-uTime*44.0))*0.40;
+  /* soft body: bright through the middle, nothing at the silhouette */
+  float profile=pow(ndv,3.2);
+  float body=(1.0-smoothstep(0.10,1.0,s))*smoothstep(0.0,0.04,s);
+  /* Vacuum exhaust is optically thin: it thins out fast downstream instead of forming a
+     solid cone, so the axial falloff carries most of the shape. */
+  float dens=profile*body*(0.30+0.90*fl)*exp(-s*3.6);
+  /* hottest right behind the bell, gone within a few metres */
+  float core=exp(-s*9.0)*pow(ndv,2.4);
+  vec3 pale=vec3(0.42,0.58,1.0),hot=vec3(0.92,0.96,1.0);
+  vec3 col=mix(pale,hot,clamp(core*1.4+smoothstep(0.28,0.0,s)*0.50,0.0,1.0));
+  gl_FragColor=vec4(col*(dens*0.85+core*1.10)*uGain,1.0);
+  #include <tonemapping_fragment>
+  #include <encodings_fragment>
+}`;
 const plumeGeo=new THREE.CylinderGeometry(1,1,1,36,40,true);
+function mkVacMat(PUx,seed){
+  return new THREE.ShaderMaterial({
+    uniforms:{uTime:PUx.uTime,uThr:PUx.uThr,uXp:PUx.uXp,uLen:PUx.uLen,uGain:PUx.uGain,uR0:PUx.uR0,uSeed:{value:seed}},
+    vertexShader:vacVS,fragmentShader:vacFS,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.FrontSide,fog:false
+  });
+}
 function mkPlumeMat(PUx,seed){
   return new THREE.ShaderMaterial({
     uniforms:{uTime:PUx.uTime,uThr:PUx.uThr,uAmb:PUx.uAmb,uXp:PUx.uXp,uLen:PUx.uLen,uDiam:PUx.uDiam,uGain:PUx.uGain,uR0:PUx.uR0,uSeed:{value:seed}},
@@ -2140,12 +2200,12 @@ ENGINES.forEach((eng,i)=>{
   const m=new THREE.Mesh(plumeGeo,mkPlumeMat(PUB,i*3.17));m.position.y=-1.1;m.frustumCulled=false;m.renderOrder=10;m.visible=false;
   eng.add(m);PLUMES.push(m);
 });
-const plume2=new THREE.Mesh(plumeGeo,mkPlumeMat(PU2,9.1));plume2.position.y=-2.7;plume2.frustumCulled=false;plume2.renderOrder=10;plume2.visible=false;s2.add(plume2);
+const plume2=new THREE.Mesh(plumeGeo,mkVacMat(PU2,9.1));plume2.position.y=-2.7;plume2.frustumCulled=false;plume2.renderOrder=10;plume2.visible=false;s2.add(plume2);
 /* glows */
 const glowTexL=glowTex;
 function mkGlow(col,parent,y,order){const m=new THREE.SpriteMaterial({map:glowTexL,color:col,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false});const s=new THREE.Sprite(m);s.position.set(0,y,0);s.renderOrder=order||11;parent.add(s);return s;}
 const bloom=mkGlow(0xffa24a,rocket,0.2),bloomCore=mkGlow(0xcfe3ff,rocket,0.1),reGlow=mkGlow(0xff6a1c,rocket,0.4);
-const bloom2=mkGlow(0xffb060,s2,-2.9);
+const bloom2=mkGlow(0xbcd6ff,s2,-2.9);
 const padGlow=new THREE.PointLight(0xff8a3a,0,160,1.4);scene.add(padGlow);
 
 /* RCS cold-gas jets: tiny, short, crisp cones at the ports; only while the booster is rotating */
@@ -2186,6 +2246,9 @@ function updatePlume(B,Sx,t,tr,camPos){
   PUB.uDiam.value=clamp(pr*1.5,0,1)*(thr>0.99?1.0:0.85);
   for(let i=0;i<9;i++)PLUMES[i].visible=nE>0&&thr>0.01&&engineActive(i,nE)&&rocket.visible;
   const k=nE>0?thr:0,share=Math.min(1,nE/3);
+  /* Additive plumes overlap on screen, so split the energy between lit engines instead of summing
+     nine full-strength cones into a featureless white column. */
+  PUB.uGain.value=nE>1?0.96/nE:0.6;
   bloom.material.opacity=clamp(k*0.6,0,1);bloom.scale.setScalar((5+5*k)*(0.7+0.3*share)*(1+0.3*(Xp-1)));
   bloomCore.material.opacity=clamp(k*0.55,0,1);bloomCore.scale.setScalar(2.4+1.8*k);
   reGlow.material.opacity=clamp(B[20]*0.9,0,0.9);reGlow.scale.setScalar(8+22*B[20]);
@@ -2193,7 +2256,7 @@ function updatePlume(B,Sx,t,tr,camPos){
   const hS=Sx[15];
   const prS=clamp(FlightSim.pressAt(Math.max(hS,0))/pr0,0,1.2),XpS=1/(0.14+0.86*Math.sqrt(prS)),thS=Sx[7],onS=Sx[8]>0.5&&thS>0.01;
   PU2.uTime.value=tr;PU2.uThr.value=thS;PU2.uAmb.value=prS;PU2.uXp.value=XpS;
-  let s2Length=lerp(18,48,thS)*(0.6+0.4*Math.min(XpS,3));
+  let s2Length=lerp(11,22,thS)*(0.85+0.15*Math.min(XpS,3));
   /* Visual plume only: keep it outside the nearby booster's bounding sphere. */
   plumeAxis.set(Sx[3],Sx[4],Sx[5]).normalize();
   plumeOffset.set(B[0]+B[3]*19.6-Sx[0]+plumeAxis.x*2.7,
@@ -2203,17 +2266,19 @@ function updatePlume(B,Sx,t,tr,camPos){
   if(along>0&&side2<radius*radius)s2Length=Math.min(s2Length,Math.max(0,along-Math.sqrt(radius*radius-side2)-2));
   /* A clipped vacuum plume must not become a short, fat, opaque blob: shrink its expansion and
      fade it in proportion to how much of it is shown, as it grows clear of the booster. */
-  const shown=clamp(s2Length/Math.max(lerp(18,48,thS)*(0.6+0.4*Math.min(XpS,3)),1),0,1);
-  PU2.uXp.value=1+(XpS-1)*shown*shown;
-  PU2.uLen.value=s2Length;PU2.uDiam.value=clamp(prS*1.5,0,1);PU2.uGain.value=0.5*shown*(0.22+0.78*clamp(prS*4,0,1));   /* vacuum plumes are wide but faint */
+  const shown=clamp(s2Length/Math.max(lerp(11,22,thS)*(0.85+0.15*Math.min(XpS,3)),1),0,1);
+  /* the vacuum material expands the cone from the nozzle radius, so cap how far it flares */
+  PU2.uXp.value=Math.min(1+(XpS-1)*shown*shown,2.6);
+  PU2.uLen.value=s2Length;PU2.uDiam.value=clamp(prS*1.5,0,1);
+  PU2.uGain.value=0.42*shown*(0.55+0.45*Math.min(1,thS));
   plume2.visible=onS&&s2.visible&&s2Length>3;
-  bloom2.material.opacity=onS?clamp(thS*0.5,0,1):0;bloom2.scale.setScalar(9+5*thS);
+  bloom2.material.opacity=onS?clamp(thS*0.22,0,0.6):0;bloom2.scale.setScalar(4.0+3.0*thS);
   /* lights */
   const dB=camPos.distanceTo(_a.set(B[0]-ORG.x,B[1]-ORG.y,B[2]-ORG.z));
   const dS=camPos.distanceTo(_b.set(Sx[0]-ORG.x,Sx[1]-ORG.y,Sx[2]-ORG.z));
   const useB=k>0&&(!onS||dB<dS);
-  if(useB){nozzleWorld(B,engLight.position,1.0).sub(ORG);engLight.intensity=k*(nE>=9?46:18)*(0.5+0.5*Math.min(1,pr*2+0.3));}
-  else if(onS){nozzleWorld(Sx,engLight.position,2.5).sub(ORG);engLight.intensity=thS*10;}
+  if(useB){nozzleWorld(B,engLight.position,1.0).sub(ORG);engLight.color.setHex(0xffa04a);engLight.intensity=k*(nE>=9?46:18)*(0.5+0.5*Math.min(1,pr*2+0.3));}
+  else if(onS){nozzleWorld(Sx,engLight.position,6.0).sub(ORG);engLight.color.setHex(0xa8c4ff);engLight.intensity=thS*3.2;}
   else engLight.intensity=0;
   /* pad bounce */
   const near=clamp(1-hB/140,0,1);
@@ -2411,7 +2476,7 @@ FRAME.push(function(S,dt,tr){
 
 /* ================= focus vehicle, cameras ================= */
 const LZ_CAM=new V3(LZW[0]-110,0,LZW[2]+120);LZ_CAM.y=curv(LZ_CAM.x,LZ_CAM.z)+2.4;
-const CAMS=[null,'ORBIT','CHASE','LAUNCH TOWER','BOOSTER TOP CAM','LANDING PAD','OVERVIEW','ORBITAL VIEW'];
+const CAMS=[null,'ORBIT','CHASE','LAUNCH TOWER','BOOSTER ENGINE CAM','LANDING PAD','OVERVIEW','ORBITAL VIEW'];
 const FOCUS_NAMES=['AUTO','BOOSTER','STAGE 2','SATELLITE'];
 let camMode=1,focusMode=0,camSnap=true;
 const F={pos:new V3(),ax:new V3(0,1,0),vel:new V3(),alt:0,which:1,up:new V3(0,1,0),size:40};
@@ -2437,19 +2502,20 @@ function resolveFocus(t){
   if(w===1){
     tA.set(sB[3],sB[4],sB[5]).normalize();
     const attached=t<T_SEP;
-    F.ax.copy(tA);F.pos.set(sB[0],sB[1],sB[2]).addScaledVector(tA,attached?34:18);F.vel.set(sB[22],sB[23],sB[24]);F.size=attached?70:42;
+    F.ax.copy(tA);F.pos.set(sB[0],sB[1],sB[2]).addScaledVector(tA,attached?17:18);F.vel.set(sB[22],sB[23],sB[24]);F.size=attached?70:42;
     F.alt=Math.hypot(sB[0],sB[1]-EC_Y,sB[2])-RE;
   }else if(w===2){
     tA.set(sS[3],sS[4],sS[5]).normalize();F.ax.copy(tA);
     F.pos.set(sS[0],sS[1],sS[2]).addScaledVector(tA,5);F.vel.set(sS[11],sS[12],sS[13]);F.size=14;F.alt=sS[15];
   }else{
     tA.set(sSAT[3],sSAT[4],sSAT[5]).normalize();F.ax.copy(tA);
-    F.pos.set(sSAT[0],sSAT[1],sSAT[2]).addScaledVector(tA,1.7);F.vel.set(sS[11],sS[12],sS[13]);F.size=6;F.alt=sSAT[10];
+    F.pos.set(sSAT[0],sSAT[1],sSAT[2]).addScaledVector(tA,1.7);F.vel.set(sS[11],sS[12],sS[13]);F.size=6;
+    F.alt=Math.hypot(sSAT[0],sSAT[1]-EC_Y,sSAT[2])-RE;
   }
   upAt(F.pos,F.up);
 }
 let lastFocusW=-1;
-function defaultDist(){return F.which===1?120:F.which===2?55:30;}
+function defaultDist(){return F.which===1?(F.size>50?175:100):F.which===2?55:30;}
 function setCam(n){
   camMode=n;camSnap=true;
   document.querySelectorAll('#cams button[data-cam]').forEach(b=>b.classList.toggle('on',+b.dataset.cam===n));
@@ -2484,7 +2550,11 @@ function updateCamera(t,dt,tr){
     tB.copy(F.vel);let sp=tB.length();
     if(sp<25||F.which!==1&&sp<5)tB.copy(F.ax);else tB.divideScalar(sp);
     tC.copy(F.up);tD.crossVectors(tB,tC);if(tD.lengthSq()<1e-6)tD.set(1,0,0);tD.normalize();
-    const dist=(F.which===1?(t<T_SEP?130:70)+Math.min(sp,500)*0.02:F.which===2?60:34);
+    /* keep the camera on the sunlit side: on the dark side the hull is a black silhouette
+       against black sky, which is what a real tracking team avoids */
+    if(tD.dot(SUN)<0)tD.negate();
+    /* stage 2 burns in vacuum, where the plume is long: keep the chase camera well outside it */
+    const dist=(F.which===1?(t<T_SEP?130:70)+Math.min(sp,500)*0.02:F.which===2?95:34);
     tA.set(0,0,0).addScaledVector(tB,-dist).addScaledVector(tD,dist*0.32).addScaledVector(F.up,dist*0.17);
     if(camSnap){chOff.copy(tA);chLook.copy(F.pos);}
     chOff.lerp(tA,1-Math.exp(-dt/0.6));
@@ -2492,8 +2562,13 @@ function updateCamera(t,dt,tr){
     camLook.copy(F.pos).addScaledVector(tB,dist*0.1);
     camUp.copy(F.up);fov=lerp(52,60,clamp(sp/500,0,1));
   }else if(camMode===3){
-    camPos.copy(TOWER_CAM);camLook.copy(F.pos);camUp.set(0,1,0);
-    const dist=dFoc();fov=clamp(2*Math.atan(F.size*0.8/Math.max(dist,1))/DEG,0.25,52);showRet=true;
+    /* Fixed vantage bolted to the tower. Do NOT push the camera back along the sight line:
+       the pad sits on the far side of the tower, so backing off runs the eye straight through
+       the lattice and the vehicle ends up hidden behind the structure. The rocket is alongside
+       at liftoff, then climbs out of the top of frame, exactly like a real tower camera. */
+    camLook.copy(F.pos).addScaledVector(F.up,F.which===1?4:1);
+    camPos.copy(TOWER_CAM);camUp.set(0,1,0);
+    fov=58;showRet=true;
   }else if(camMode===4){
     /* onboard camera on top of the booster looking down at the engines */
     const Y=tA.set(sB[3],sB[4],sB[5]).normalize();
@@ -2501,11 +2576,14 @@ function updateCamera(t,dt,tr){
     const Z=tC.crossVectors(X,Y);
     const foot=tD.set(sB[0],sB[1],sB[2]).addScaledVector(Y,-H_BASE);
     const shake=0.018*sB[7]+0.004;
-    camPos.copy(foot).addScaledVector(Y,40.7).addScaledVector(X,2.5);
+    /* engine cam: 40 m off the shoulder and 22 m up, looking down at the octaweb and the
+       plume. A lens ON the skin only sees hull from this range, and looking straight down
+       the axis wastes the frame on the pad. */
+    camPos.copy(foot).addScaledVector(Y,22).addScaledVector(X,40);
     camPos.x+=(Math.sin(tr*61)+Math.sin(tr*37.3))*shake;camPos.y+=Math.sin(tr*53.1)*shake;camPos.z+=Math.sin(tr*47.7)*shake;
-    camLook.copy(foot).addScaledVector(Y,2.8).addScaledVector(X,0.6);
-    camUp.copy(Z);fov=78;
-    obl.textContent='BOOSTER TOP CAM';
+    camLook.copy(foot).addScaledVector(Y,-4).addScaledVector(X,2);
+    camUp.set(0,1,0);fov=58;
+    obl.textContent='BOOSTER ENGINE CAM';
   }else if(camMode===5){
     camPos.copy(LZ_CAM);camLook.copy(F.pos);camUp.set(0,1,0);
     const dist=dFoc();fov=clamp(2*Math.atan(F.size*0.8/Math.max(dist,1))/DEG,0.25,40);showRet=true;
@@ -2525,7 +2603,8 @@ function updateCamera(t,dt,tr){
     if(!isFinite(camLook.y))camLook.copy(F.pos);
     camUp.set(0,1,0);fov=58;showRet=true;
   }else if(camMode===7){
-    if(orb.dist7===undefined)orb.dist7=clamp(3*Math.max(F.alt,5000)+40000,70000,1.5e6);
+    /* Frame the tracked subject: a fixed 70 km standoff left a 6 m payload sub-pixel. */
+    if(orb.dist7===undefined)orb.dist7=F.which===3?F.size*5:clamp(F.size*3.2,14,4000);   /* deployed arrays span ~3 bus widths */
     tB.copy(F.vel);if(tB.lengthSq()<1)tB.copy(F.ax);tB.addScaledVector(F.up,-tB.dot(F.up)).normalize();
     tD.crossVectors(tB,F.up).normalize();
     tA.set(0,0,0).addScaledVector(tB,-0.74).addScaledVector(tD,0.5).addScaledVector(F.up,0.26).normalize().multiplyScalar(orb.dist7);
@@ -2572,7 +2651,7 @@ function updateCamera(t,dt,tr){
   el.addEventListener('wheel',e=>{
     e.preventDefault();const f=Math.exp(e.deltaY*0.0012);
     if(camMode===1)orb.dist=clamp(orb.dist*f,5,4e6);
-    else if(camMode===7)orb.dist7=clamp((orb.dist7||1e5)*f,2000,3e6);
+    else if(camMode===7)orb.dist7=clamp((orb.dist7||1e5)*f,Math.max(6,F.size*0.6),3e6);
   },{passive:false});
 })();
 

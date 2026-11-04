@@ -5,7 +5,7 @@ import sys
 import time
 import urllib.request
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from rocket_lab.config import DATA,ROOT
+from rocket_lab.config import DATA
 from rocket_lab.schemas import Telemetry,FlightPlan
 from rocket_lab.storage import atomic_json,dynamics_hash
 

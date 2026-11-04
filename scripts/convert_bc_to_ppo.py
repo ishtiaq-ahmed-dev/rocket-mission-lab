@@ -21,7 +21,6 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
-from rocket_lab.config import load_config
 from rocket_lab.envs import RocketEnv
 from rocket_lab.missions import configure_flight
 from rocket_lab.policies import BoundedMeanPolicy
