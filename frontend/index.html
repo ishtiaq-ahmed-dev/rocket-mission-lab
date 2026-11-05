@@ -203,7 +203,8 @@ const V = {
   baseAboveFoot: 2.0,                               /* airframe base plane above the foot plane (legs out) */
   mountH: 2.5,
   azimuth: 40.0 * D2R,                              /* launch azimuth used by the training teacher */
-  sepDv: 1.8                                        /* pneumatic pusher relative separation speed (m/s) */
+  sepDv: 1.8,                                       /* pneumatic pusher relative separation speed (m/s) */
+  sepInhibit: 4.0                                   /* s after separation before booster thrusters/engines are armed */
 };
 /* Run-to-run dispersions (training/evaluation only; the replay flies nominal). */
 const DSP_NOMINAL = { wind: 1, windRot: 0, thrust: 1, mvac: 1, drag: 1, s1Dry: 0, sat: 0 };
@@ -411,8 +412,11 @@ function boosterRate(S) {
 /* One integration step of the first stage (alone, or carrying `upper` kg as the stack). */
 function boosterStep(S, cmd, t, dt, upper) {
   const h0 = nrm(S.r) - RE;
-  /* an engine finishing its shutdown transient must reach zero thrust before it can relight */
-  const want = S.landed || S.prop <= 0 || S.cutting ? 0 : (cmd.n | 0);
+  /* Separation safety inhibit: until the stages are clear the booster's cold-gas thrusters and
+     engines are not armed, whatever is commanded. An engine finishing its shutdown transient must
+     reach zero thrust before it can relight. */
+  const inhibited = !S.attached && S.ign === 0 && t - S.tSep < V.sepInhibit;
+  const want = S.landed || S.prop <= 0 || S.cutting || inhibited ? 0 : (cmd.n | 0);
   if (want > 0) {
     if (S.nEng === 0) { S.thr = S.onPad ? 0 : V.merMin; S.tIgn = t; if (!S.attached) S.ign++; }
     S.nEng = want;
@@ -437,7 +441,7 @@ function boosterStep(S, cmd, t, dt, upper) {
   }
   if (!S.onPad && !S.landed) {
     const w = boosterRate(S);
-    S.axis = slewAxis(S.axis, cmd.dir, dt, w[0], w[1]);
+    if (!inhibited) S.axis = slewAxis(S.axis, cmd.dir, dt, w[0], w[1]);
     rk4(S.r, S.v, t, dt, { m: m, axis: S.axis, thrust: [S.axis[0] * T, S.axis[1] * T, S.axis[2] * T] });
   }
   S.prop -= burned;
@@ -667,9 +671,6 @@ function run(opts) {
     /* ---------- policy (10 Hz, zero-order hold) ---------- */
     if (step % CTRL_EVERY === 0 || !cmd) cmd = control({ t: t, B: B, U: U, phase: phase });
     const cb = cmd.booster, cu = cmd.upper;
-    /* Stage separation: the booster drops clear with no engine burn and no attitude command
-       for the first 4 s after the push, so it falls straight; the policy resumes after that. */
-    if (!B.attached && B.ign === 0 && t - B.tSep < 4) { cb.n = 0; cb.thr = 0; cb.dir = B.axis.slice(); }
 
     /* ---------- booster / stack ---------- */
     const wasSeparated = U.separated;
