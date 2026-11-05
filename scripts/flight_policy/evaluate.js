@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { createHash } = require('crypto');
 const { runSeeds, report } = require('./parallel');
-const { ROOT, POLICY_FILE, loadPolicy } = require('./sim');
+const { ROOT, POLICY_FILE, loadPolicy, flightHashes } = require('./sim');
 
 (async () => {
   const first = +(process.argv[2] || 900000), count = +(process.argv[3] || 300);
@@ -24,7 +24,7 @@ const { ROOT, POLICY_FILE, loadPolicy } = require('./sim');
   };
   const out = {
     schema: 'rocket-lab.flight-policy-validation/1', policy_tag: loadPolicy().tag, seeds: [first, first + count - 1],
-    policy_sha256: createHash('sha256').update(fs.readFileSync(POLICY_FILE)).digest('hex'),
+    ...flightHashes(),
     replay_sha256: createHash('sha256').update(fs.readFileSync(path.join(ROOT,'frontend/index.html'))).digest('hex'),
     success: 'orbit (perigee > 150 km, e < 0.05), fairing released, payload deployed, deployed landing legs, touchdown vertical <= 0 and > -3 m/s, horizontal < 1.5 m/s, tilt < 5 deg, within 43 m of LZ-1',
     dispersions: 'wind 0-100% any direction, Merlin and MVac thrust +/-1%, drag +/-5%, booster dry mass +/-300 kg, payload +/-1000 kg',

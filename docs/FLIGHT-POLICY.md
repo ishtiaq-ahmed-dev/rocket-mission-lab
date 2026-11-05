@@ -13,7 +13,7 @@ flying something else.
 | Part | Where | Role |
 | --- | --- | --- |
 | Physics | `frontend/index.html` (simulator block) | WGS-84 gravity and rotation, ISO 2533 / US 1976 atmosphere, Mach-dependent drag and normal force, Merlin/MVac thrust with nozzle back-pressure, propellant flow, staging masses |
-| Actuators | same block | engine spool-up and tail-off, minimum throttle 40 % (Merlin) / 39 % (MVac), no relight until a shutdown completes, gimbal / cold-gas / grid-fin slew limits, hold-down release, pneumatic stage separation that conserves momentum |
+| Actuators | same block | engine spool-up and tail-off, minimum throttle 40 % (Merlin) / 39 % (MVac), no relight until a shutdown completes, gimbal / cold-gas / grid-fin slew limits, hold-down release, pneumatic stage separation that conserves momentum, a 4 s post-separation safety inhibit during which booster thrusters and engines cannot fire |
 | Policy | `frontend/public/flight-policy.js` | two MLPs evaluated at 10 Hz on the vehicle's own state |
 
 **Booster network** (stack during ascent, then the returning first stage):
@@ -103,7 +103,7 @@ and the best one ships. Evidence: `data/flight-policy-validation.json`
 | | Full missions | Reached orbit | Worst touchdown | Worst pad offset |
 | --- | --- | --- | --- | --- |
 | Neural policy | **298 / 300** | 300 / 300 | 2.17 m/s | 49.8 m |
-| Classical teacher | 295 / 300 | 300 / 300 | 2.06 m/s | 53.6 m |
+| Classical teacher | 295 / 300 | 300 / 300 | 2.05 m/s | 43.3 m |
 
 A full mission means orbit (perigee above 150 km, eccentricity below 0.05),
 fairing released, payload deployed, and a touchdown on deployed legs slower than 3 m/s vertically and 1.5 m/s

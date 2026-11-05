@@ -232,6 +232,22 @@ check('contact altitude at leg span',tdRow.alt>1.5&&tdRow.alt<2.05,tdRow.alt);
 /* --- physical logic: the model flies, the booster never thrusts toward the ground --- */
 const html=fs.readFileSync(path.join(root,'frontend','index.html'),'utf8');
 check('no scripted guidance in the shipped page',!/boosterGuide|planBoostback|s2Guide|predictMiss|solveSteer/.test(html));
+/* The simulator may limit what a command can do (actuator physics) but must never rewrite one. */
+{
+  const s0=html.indexOf('(function (root) {'),runAt=html.indexOf('function run(opts)',s0);
+  const runBody=html.slice(runAt,html.indexOf("function lzRender()",runAt));
+  const rewrite=runBody.match(/\b(cb|cu|cmd\.booster|cmd\.upper)\.[A-Za-z]+\s*=(?!=)/);
+  check('run loop never overrides policy commands',runAt>0&&!rewrite,rewrite&&rewrite[0]);
+}
+/* Published reliability must describe the shipped simulator and weights. */
+{
+  const recorded=JSON.parse(fs.readFileSync(path.join(root,'data','flight-policy-validation.json'),'utf8'));
+  const current=require('./flight_policy/sim').flightHashes();
+  check('held-out validation matches the shipped simulator',recorded.simulator_sha256===current.simulator_sha256,
+    'rerun node scripts/flight_policy/evaluate.js');
+  check('held-out validation matches the shipped policy',recorded.policy_sha256===current.policy_sha256,
+    'rerun node scripts/flight_policy/evaluate.js');
+}
 check('neural policy weights loaded',!!(globalThis.FLIGHT_POLICY&&globalThis.FLIGHT_POLICY.booster&&globalThis.FLIGHT_POLICY.upper));
 let lowestThrustAxis=1;
 for(let i=frame(sep.t);i<sim.n;i++){

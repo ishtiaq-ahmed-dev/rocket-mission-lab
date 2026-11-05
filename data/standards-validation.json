@@ -398,23 +398,23 @@
     {
       "name": "insertion perigee",
       "actual": 269.9401666599,
-      "expected": 269.9404,
-      "tolerance": 8.098212,
+      "expected": 269.9402,
+      "tolerance": 8.098206,
       "unit": " km",
       "ok": true
     },
     {
       "name": "insertion apogee",
       "actual": 341.0115223890515,
-      "expected": 340.9019,
-      "tolerance": 10.227057,
+      "expected": 341.0115,
+      "tolerance": 10.230345,
       "unit": " km",
       "ok": true
     },
     {
       "name": "insertion inclination",
       "actual": 39.54160980999693,
-      "expected": 39.5414,
+      "expected": 39.5416,
       "tolerance": 0.5,
       "unit": " deg",
       "ok": true
@@ -429,31 +429,31 @@
     },
     {
       "name": "touchdown vertical speed",
-      "actual": -1.8158020545925344,
-      "expected": -1.7626,
+      "actual": -1.815640140962695,
+      "expected": -1.8156,
       "tolerance": 0.2,
       "unit": " m/s",
       "ok": true
     },
     {
       "name": "touchdown horizontal speed",
-      "actual": 0.0320496812353394,
-      "expected": 0.032,
+      "actual": 0.03205307193298931,
+      "expected": 0.0321,
       "tolerance": 0.1,
       "unit": " m/s",
       "ok": true
     },
     {
       "name": "touchdown tilt",
-      "actual": 0.10718579244809805,
-      "expected": 0.103,
+      "actual": 0.10734811835413044,
+      "expected": 0.1073,
       "tolerance": 0.5,
       "unit": " deg",
       "ok": true
     },
     {
       "name": "touchdown pad offset",
-      "actual": 0.22214008877974895,
+      "actual": 0.22216601620213666,
       "expected": 0.2222,
       "tolerance": 3,
       "unit": " m",
@@ -467,9 +467,9 @@
     "insertion_apogee_km": 341.0115223890515,
     "insertion_inclination_deg": 39.54160980999693,
     "insertion_eccentricity": 0.00532251323212729,
-    "touchdown_vertical_m_s": -1.8158020545925344,
-    "touchdown_horizontal_m_s": 0.0320496812353394,
-    "touchdown_tilt_deg": 0.10718579244809805,
-    "touchdown_offset_m": 0.22214008877974895
+    "touchdown_vertical_m_s": -1.815640140962695,
+    "touchdown_horizontal_m_s": 0.03205307193298931,
+    "touchdown_tilt_deg": 0.10734811835413044,
+    "touchdown_offset_m": 0.22216601620213666
   }
 }

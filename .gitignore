@@ -45,3 +45,6 @@ videos/
 # Other tools' local state
 .freebuff/
 .cloud-attachments/
+# Local editor/agent settings and scratch captures
+.claude/
+screenshots/

@@ -1,6 +1,6 @@
 {
   "schema": "rocket-lab.international-standard/1",
-  "revision": "2026-11-02",
+  "revision": "2026-11-05",
   "scope": "Public-data anchors for the browser Falcon 9-class RTLS replay. This is a modeled educational simulator, not flight certification and not official SpaceX flight data.",
   "units": "SI; WGS-84 geographic coordinates; geopotential layer altitudes in metres",
   "earth": {
@@ -123,14 +123,14 @@
     "model_output": {
       "meco_altitude_m": 71934.8875,
       "meco_speed_m_s": 1781.1037,
-      "booster_apogee_m": 183893.9516,
-      "insertion_perigee_km": 269.9404,
-      "insertion_apogee_km": 340.9019,
-      "insertion_inclination_deg": 39.5414,
+      "booster_apogee_m": 183894.0581,
+      "insertion_perigee_km": 269.9402,
+      "insertion_apogee_km": 341.0115,
+      "insertion_inclination_deg": 39.5416,
       "insertion_eccentricity": 0.0053,
-      "touchdown_vertical_m_s": -1.7626,
-      "touchdown_horizontal_m_s": 0.032,
-      "touchdown_tilt_deg": 0.103,
+      "touchdown_vertical_m_s": -1.8156,
+      "touchdown_horizontal_m_s": 0.0321,
+      "touchdown_tilt_deg": 0.1073,
       "touchdown_offset_m": 0.2222
     }
   },
