@@ -50,6 +50,63 @@ def test_light_booster_can_cut_off_below_twelve_metres_instead_of_bouncing():
     assert action[0] == -1.
 
 
+def test_light_terminal_descent_anticipates_engine_restart_lag():
+    from rocket_lab.controllers import ClassicalController
+    env = RocketEnv(noise=False, randomize=False)
+    try:
+        env.reset(seed=42, options={'state': dict(position=[0., 0., 23.2], velocity=[0., 0., -.4])})
+        env.physics.fuel = 1305.
+        env.physics._mass_update()
+        env._obs(env.physics.state())
+        controller = ClassicalController(4)
+        controller.touchdown_floor = .8
+        controller.engine_on = False
+        assert controller.action(env)[0] > -1.
+    finally:
+        env.close()
+
+
+def test_separation_coast_does_not_restart_during_later_divert_climbs():
+    from rocket_lab.config import load_config
+    from rocket_lab.controllers import ClassicalController
+    cfg = load_config()
+    cfg['mission']['pad'] = [700., 700., 0.]
+    cfg['mission']['launch'] = [0., 0.]
+    env = RocketEnv('combined', config=cfg, noise=False, randomize=False)
+    try:
+        env.reset(seed=7, options={'state': dict(position=[0., 0., 323.], velocity=[0., 0., 0.])})
+        env.physics.separate()
+        env.phase, env.separated = 'landing', True
+        controller = ClassicalController(4)
+        env._obs(env.physics.state())
+        controller.action(env)
+        env.physics.data.qvel[2] = 3.
+        env._obs(env.physics.state())
+        action = controller.action(env)
+        assert action[0] > -1.
+        np.testing.assert_array_equal(env.physics.rcs_torque, np.zeros(3))
+    finally:
+        env.close()
+
+
+def test_aligned_coasting_booster_does_not_receive_a_spurious_flip_torque():
+    from rocket_lab.config import load_config
+    from rocket_lab.controllers import ClassicalController
+    cfg = load_config()
+    cfg['mission']['high_altitude_recovery'] = True
+    env = RocketEnv('combined', config=cfg, noise=False, randomize=False)
+    try:
+        env.reset(seed=7, options={'state': dict(position=[0., 0., 20023.], velocity=[0., 0., -10.])})
+        env.physics.separate()
+        env.phase, env.separated = 'landing', True
+        env._obs(env.physics.state())
+        action = ClassicalController(4).action(env)
+        assert action[0] == -1.
+        np.testing.assert_allclose(env.physics.rcs_torque, np.zeros(3), atol=1e-8)
+    finally:
+        env.close()
+
+
 @pytest.mark.parametrize('altitude', [0., 100000.])
 def test_native_engine_uses_the_same_pressure_and_isp_model_as_guidance(altitude):
     from rocket_lab.config import load_config

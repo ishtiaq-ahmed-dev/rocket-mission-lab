@@ -1,0 +1,1562 @@
+{
+ "scope": "classical controller sweep over the published flight-plan envelope",
+ "elapsed_seconds": 83.5,
+ "cases": 64,
+ "failures": 6,
+ "results": [
+  {
+   "case": "same-pad/80m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 33.19004985690076,
+   "touchdown_speed": 0.6025417108437745,
+   "pad_distance": 0.4168007862043093,
+   "fuel_used": 4548.092111560762,
+   "frames": 333,
+   "problems": [],
+   "seconds": 0.34
+  },
+  {
+   "case": "same-pad/80m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 12.399999999999824,
+   "touchdown_speed": 13.375673070934333,
+   "pad_distance": 0.22422592478515666,
+   "fuel_used": 1840.537735904356,
+   "frames": 125,
+   "problems": [],
+   "seconds": 0.12
+  },
+  {
+   "case": "same-pad/80m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 13.99999999999979,
+   "touchdown_speed": 13.335970301483156,
+   "pad_distance": 0.2618335158213846,
+   "fuel_used": 2182.0087663600552,
+   "frames": 141,
+   "problems": [
+    "combined flight never separated",
+    "combined phases ['takeoff']"
+   ],
+   "seconds": 0.13
+  },
+  {
+   "case": "same-pad/400m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 33.19004985690076,
+   "touchdown_speed": 0.6025417108437745,
+   "pad_distance": 0.4168007862043093,
+   "fuel_used": 4548.092111560762,
+   "frames": 333,
+   "problems": [],
+   "seconds": 0.29
+  },
+  {
+   "case": "same-pad/400m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 26.69999999999952,
+   "touchdown_speed": 25.002045975617865,
+   "pad_distance": 0.7300090755387352,
+   "fuel_used": 3831.338026258887,
+   "frames": 268,
+   "problems": [],
+   "seconds": 0.3
+  },
+  {
+   "case": "same-pad/400m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 72.29758698344506,
+   "touchdown_speed": 1.039318614540257,
+   "pad_distance": 0.67581802918053,
+   "fuel_used": 9021.103854765897,
+   "frames": 724,
+   "problems": [],
+   "seconds": 0.77
+  },
+  {
+   "case": "same-pad/900m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 33.19004985690076,
+   "touchdown_speed": 0.6025417108437745,
+   "pad_distance": 0.4168007862043093,
+   "fuel_used": 4548.092111560762,
+   "frames": 333,
+   "problems": [],
+   "seconds": 0.35
+  },
+  {
+   "case": "same-pad/900m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 46.7000000000017,
+   "touchdown_speed": 25.002215888137872,
+   "pad_distance": 0.6577613489964255,
+   "fuel_used": 6237.027988942078,
+   "frames": 468,
+   "problems": [],
+   "seconds": 0.56
+  },
+  {
+   "case": "same-pad/900m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 94.64796557903121,
+   "touchdown_speed": 0.9818253094043575,
+   "pad_distance": 0.2829518105212411,
+   "fuel_used": 11427.647130952948,
+   "frames": 948,
+   "problems": [],
+   "seconds": 1.28
+  },
+  {
+   "case": "same-pad/1500m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 33.19004985690076,
+   "touchdown_speed": 0.6025417108437745,
+   "pad_distance": 0.4168007862043093,
+   "fuel_used": 4548.092111560762,
+   "frames": 333,
+   "problems": [],
+   "seconds": 0.45
+  },
+  {
+   "case": "same-pad/1500m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 70.70000000000307,
+   "touchdown_speed": 25.00745589045821,
+   "pad_distance": 1.3011740540200643,
+   "fuel_used": 8892.402873356546,
+   "frames": 708,
+   "problems": [],
+   "seconds": 0.88
+  },
+  {
+   "case": "same-pad/1500m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     0.0,
+     0.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "missed_pad",
+   "duration": 137.9503252148596,
+   "touchdown_speed": 0.7808898652489388,
+   "pad_distance": 1.0799590848072445,
+   "fuel_used": 15469.111915778454,
+   "frames": 1381,
+   "problems": [],
+   "seconds": 1.96
+  },
+  {
+   "case": "short-hop/80m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 64.35463801145987,
+   "touchdown_speed": 0.8247423458301505,
+   "pad_distance": 0.6382570075367905,
+   "fuel_used": 8176.564382826888,
+   "frames": 645,
+   "problems": [],
+   "seconds": 0.81
+  },
+  {
+   "case": "short-hop/80m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 12.399999999999824,
+   "touchdown_speed": 13.375673070934333,
+   "pad_distance": 0.22422592478515666,
+   "fuel_used": 1840.537735904356,
+   "frames": 125,
+   "problems": [],
+   "seconds": 0.17
+  },
+  {
+   "case": "short-hop/80m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 13.99999999999979,
+   "touchdown_speed": 13.335970301483156,
+   "pad_distance": 0.2618335158213846,
+   "fuel_used": 2182.0087663600552,
+   "frames": 141,
+   "problems": [
+    "combined flight never separated",
+    "combined phases ['takeoff']"
+   ],
+   "seconds": 0.21
+  },
+  {
+   "case": "short-hop/400m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 64.35463801145987,
+   "touchdown_speed": 0.8247423458301505,
+   "pad_distance": 0.6382570075367905,
+   "fuel_used": 8176.564382826888,
+   "frames": 645,
+   "problems": [],
+   "seconds": 0.89
+  },
+  {
+   "case": "short-hop/400m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 26.69999999999952,
+   "touchdown_speed": 25.002045975617865,
+   "pad_distance": 0.7300090755387352,
+   "fuel_used": 3831.338026258887,
+   "frames": 268,
+   "problems": [],
+   "seconds": 0.38
+  },
+  {
+   "case": "short-hop/400m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 96.89636678814675,
+   "touchdown_speed": 105.49098687106377,
+   "pad_distance": 53.03535118745744,
+   "fuel_used": 12693.114483144109,
+   "frames": 970,
+   "problems": [],
+   "seconds": 1.38
+  },
+  {
+   "case": "short-hop/900m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 64.35463801145987,
+   "touchdown_speed": 0.8247423458301505,
+   "pad_distance": 0.6382570075367905,
+   "fuel_used": 8176.564382826888,
+   "frames": 645,
+   "problems": [],
+   "seconds": 0.86
+  },
+  {
+   "case": "short-hop/900m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 46.7000000000017,
+   "touchdown_speed": 25.002215888137872,
+   "pad_distance": 0.6577613489964255,
+   "fuel_used": 6237.027988942078,
+   "frames": 468,
+   "problems": [],
+   "seconds": 0.61
+  },
+  {
+   "case": "short-hop/900m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 95.5357857036572,
+   "touchdown_speed": 98.95488309262002,
+   "pad_distance": 408.55076363400025,
+   "fuel_used": 12600.457528622752,
+   "frames": 957,
+   "problems": [],
+   "seconds": 1.27
+  },
+  {
+   "case": "short-hop/1500m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 64.35463801145987,
+   "touchdown_speed": 0.8247423458301505,
+   "pad_distance": 0.6382570075367905,
+   "fuel_used": 8176.564382826888,
+   "frames": 645,
+   "problems": [],
+   "seconds": 0.85
+  },
+  {
+   "case": "short-hop/1500m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 70.70000000000307,
+   "touchdown_speed": 25.00745589045821,
+   "pad_distance": 1.3011740540200643,
+   "fuel_used": 8892.402873356546,
+   "frames": 708,
+   "problems": [],
+   "seconds": 1.0
+  },
+  {
+   "case": "short-hop/1500m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     700.0,
+     700.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 126.3073579466263,
+   "touchdown_speed": 130.29891177367907,
+   "pad_distance": 445.9485579316611,
+   "fuel_used": 15797.646497500535,
+   "frames": 1265,
+   "problems": [],
+   "seconds": 1.77
+  },
+  {
+   "case": "cross-field/80m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 134.8670963704538,
+   "touchdown_speed": 0.668961221962935,
+   "pad_distance": 0.5917944640518883,
+   "fuel_used": 14682.790947073769,
+   "frames": 1350,
+   "problems": [],
+   "seconds": 1.78
+  },
+  {
+   "case": "cross-field/80m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 12.399999999999824,
+   "touchdown_speed": 13.375673070934333,
+   "pad_distance": 0.22422592478515666,
+   "fuel_used": 1840.537735904356,
+   "frames": 125,
+   "problems": [],
+   "seconds": 0.19
+  },
+  {
+   "case": "cross-field/80m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 13.99999999999979,
+   "touchdown_speed": 13.335970301483156,
+   "pad_distance": 0.2618335158213846,
+   "fuel_used": 2182.0087663600552,
+   "frames": 141,
+   "problems": [
+    "combined flight never separated",
+    "combined phases ['takeoff']"
+   ],
+   "seconds": 0.21
+  },
+  {
+   "case": "cross-field/400m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 134.8670963704538,
+   "touchdown_speed": 0.668961221962935,
+   "pad_distance": 0.5917944640518883,
+   "fuel_used": 14682.790947073769,
+   "frames": 1350,
+   "problems": [],
+   "seconds": 1.8
+  },
+  {
+   "case": "cross-field/400m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 26.69999999999952,
+   "touchdown_speed": 25.002045975617865,
+   "pad_distance": 0.7300090755387352,
+   "fuel_used": 3831.338026258887,
+   "frames": 268,
+   "problems": [],
+   "seconds": 0.39
+  },
+  {
+   "case": "cross-field/400m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 155.4000000000057,
+   "touchdown_speed": 7.927705838140123,
+   "pad_distance": 901.763328793594,
+   "fuel_used": 16441.09710439231,
+   "frames": 1555,
+   "problems": [],
+   "seconds": 2.08
+  },
+  {
+   "case": "cross-field/900m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 134.8670963704538,
+   "touchdown_speed": 0.668961221962935,
+   "pad_distance": 0.5917944640518883,
+   "fuel_used": 14682.790947073769,
+   "frames": 1350,
+   "problems": [],
+   "seconds": 1.82
+  },
+  {
+   "case": "cross-field/900m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 46.7000000000017,
+   "touchdown_speed": 25.002215888137872,
+   "pad_distance": 0.6577613489964255,
+   "fuel_used": 6237.027988942078,
+   "frames": 468,
+   "problems": [],
+   "seconds": 0.61
+  },
+  {
+   "case": "cross-field/900m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 153.40000000000467,
+   "touchdown_speed": 5.612100846412431,
+   "pad_distance": 1457.870149472682,
+   "fuel_used": 16441.09710439231,
+   "frames": 1535,
+   "problems": [],
+   "seconds": 2.02
+  },
+  {
+   "case": "cross-field/1500m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 134.8670963704538,
+   "touchdown_speed": 0.668961221962935,
+   "pad_distance": 0.5917944640518883,
+   "fuel_used": 14682.790947073769,
+   "frames": 1350,
+   "problems": [],
+   "seconds": 1.82
+  },
+  {
+   "case": "cross-field/1500m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 70.70000000000307,
+   "touchdown_speed": 25.00745589045821,
+   "pad_distance": 1.3011740540200643,
+   "fuel_used": 8892.402873356546,
+   "frames": 708,
+   "problems": [],
+   "seconds": 0.88
+  },
+  {
+   "case": "cross-field/1500m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     -1800.0,
+     2400.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 149.70000000000277,
+   "touchdown_speed": 13.924231906345254,
+   "pad_distance": 2152.619556310737,
+   "fuel_used": 16441.09710439231,
+   "frames": 1498,
+   "problems": [],
+   "seconds": 2.13
+  },
+  {
+   "case": "far-site/80m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 157.60000000000682,
+   "touchdown_speed": 33.06305612191087,
+   "pad_distance": 2283.440826967984,
+   "fuel_used": 16475.311086003272,
+   "frames": 1577,
+   "problems": [],
+   "seconds": 2.07
+  },
+  {
+   "case": "far-site/80m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 12.399999999999824,
+   "touchdown_speed": 13.375673070934333,
+   "pad_distance": 0.22422592478515666,
+   "fuel_used": 1840.537735904356,
+   "frames": 125,
+   "problems": [],
+   "seconds": 0.19
+  },
+  {
+   "case": "far-site/80m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 13.99999999999979,
+   "touchdown_speed": 13.335970301483156,
+   "pad_distance": 0.2618335158213846,
+   "fuel_used": 2182.0087663600552,
+   "frames": 141,
+   "problems": [
+    "combined flight never separated",
+    "combined phases ['takeoff']"
+   ],
+   "seconds": 0.18
+  },
+  {
+   "case": "far-site/400m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 157.60000000000682,
+   "touchdown_speed": 33.06305612191087,
+   "pad_distance": 2283.440826967984,
+   "fuel_used": 16475.311086003272,
+   "frames": 1577,
+   "problems": [],
+   "seconds": 2.1
+  },
+  {
+   "case": "far-site/400m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 26.69999999999952,
+   "touchdown_speed": 25.002045975617865,
+   "pad_distance": 0.7300090755387352,
+   "fuel_used": 3831.338026258887,
+   "frames": 268,
+   "problems": [],
+   "seconds": 0.39
+  },
+  {
+   "case": "far-site/400m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 154.70000000000533,
+   "touchdown_speed": 15.374656041300259,
+   "pad_distance": 4635.909227475936,
+   "fuel_used": 16441.09710439231,
+   "frames": 1548,
+   "problems": [],
+   "seconds": 2.01
+  },
+  {
+   "case": "far-site/900m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 157.60000000000682,
+   "touchdown_speed": 33.06305612191087,
+   "pad_distance": 2283.440826967984,
+   "fuel_used": 16475.311086003272,
+   "frames": 1577,
+   "problems": [],
+   "seconds": 1.93
+  },
+  {
+   "case": "far-site/900m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 46.7000000000017,
+   "touchdown_speed": 25.002215888137872,
+   "pad_distance": 0.6577613489964255,
+   "fuel_used": 6237.027988942078,
+   "frames": 468,
+   "problems": [],
+   "seconds": 0.56
+  },
+  {
+   "case": "far-site/900m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 152.7000000000043,
+   "touchdown_speed": 7.4059733338106915,
+   "pad_distance": 5353.277553960658,
+   "fuel_used": 16441.09710439231,
+   "frames": 1528,
+   "problems": [],
+   "seconds": 1.94
+  },
+  {
+   "case": "far-site/1500m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 157.60000000000682,
+   "touchdown_speed": 33.06305612191087,
+   "pad_distance": 2283.440826967984,
+   "fuel_used": 16475.311086003272,
+   "frames": 1577,
+   "problems": [],
+   "seconds": 2.17
+  },
+  {
+   "case": "far-site/1500m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 70.70000000000307,
+   "touchdown_speed": 25.00745589045821,
+   "pad_distance": 1.3011740540200643,
+   "fuel_used": 8892.402873356546,
+   "frames": 708,
+   "problems": [],
+   "seconds": 0.94
+  },
+  {
+   "case": "far-site/1500m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 150.50000000000318,
+   "touchdown_speed": 10.270083688943528,
+   "pad_distance": 6108.751701464068,
+   "fuel_used": 16441.09710439231,
+   "frames": 1506,
+   "problems": [],
+   "seconds": 2.1
+  },
+  {
+   "case": "envelope-edge/80m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 158.50000000000728,
+   "touchdown_speed": 31.640382029025922,
+   "pad_distance": 4839.6916617142915,
+   "fuel_used": 16475.311086003272,
+   "frames": 1586,
+   "problems": [],
+   "seconds": 2.21
+  },
+  {
+   "case": "envelope-edge/80m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 12.399999999999824,
+   "touchdown_speed": 13.375673070934333,
+   "pad_distance": 0.22422592478515666,
+   "fuel_used": 1840.537735904356,
+   "frames": 125,
+   "problems": [],
+   "seconds": 0.19
+  },
+  {
+   "case": "envelope-edge/80m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 80.0,
+    "profile": "research"
+   },
+   "outcome": "crash_speed",
+   "duration": 13.99999999999979,
+   "touchdown_speed": 13.335970301483156,
+   "pad_distance": 0.2618335158213846,
+   "fuel_used": 2182.0087663600552,
+   "frames": 141,
+   "problems": [
+    "combined flight never separated",
+    "combined phases ['takeoff']"
+   ],
+   "seconds": 0.21
+  },
+  {
+   "case": "envelope-edge/400m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 158.50000000000728,
+   "touchdown_speed": 31.640382029025922,
+   "pad_distance": 4839.6916617142915,
+   "fuel_used": 16475.311086003272,
+   "frames": 1586,
+   "problems": [],
+   "seconds": 2.2
+  },
+  {
+   "case": "envelope-edge/400m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 26.69999999999952,
+   "touchdown_speed": 25.002045975617865,
+   "pad_distance": 0.7300090755387352,
+   "fuel_used": 3831.338026258887,
+   "frames": 268,
+   "problems": [],
+   "seconds": 0.37
+  },
+  {
+   "case": "envelope-edge/400m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 400.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 155.10000000000554,
+   "touchdown_speed": 13.296480943548332,
+   "pad_distance": 7251.09181553469,
+   "fuel_used": 16441.09710439231,
+   "frames": 1552,
+   "problems": [],
+   "seconds": 2.09
+  },
+  {
+   "case": "envelope-edge/900m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 158.50000000000728,
+   "touchdown_speed": 31.640382029025922,
+   "pad_distance": 4839.6916617142915,
+   "fuel_used": 16475.311086003272,
+   "frames": 1586,
+   "problems": [],
+   "seconds": 2.17
+  },
+  {
+   "case": "envelope-edge/900m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 46.7000000000017,
+   "touchdown_speed": 25.002215888137872,
+   "pad_distance": 0.6577613489964255,
+   "fuel_used": 6237.027988942078,
+   "frames": 468,
+   "problems": [],
+   "seconds": 0.65
+  },
+  {
+   "case": "envelope-edge/900m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 900.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 152.9000000000044,
+   "touchdown_speed": 13.583142859317212,
+   "pad_distance": 7951.958668733384,
+   "fuel_used": 16441.09710439231,
+   "frames": 1530,
+   "problems": [],
+   "seconds": 2.12
+  },
+  {
+   "case": "envelope-edge/1500m/landing",
+   "mission": "landing",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 158.50000000000728,
+   "touchdown_speed": 31.640382029025922,
+   "pad_distance": 4839.6916617142915,
+   "fuel_used": 16475.311086003272,
+   "frames": 1586,
+   "problems": [],
+   "seconds": 2.23
+  },
+  {
+   "case": "envelope-edge/1500m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "success",
+   "duration": 70.70000000000307,
+   "touchdown_speed": 25.00745589045821,
+   "pad_distance": 1.3011740540200643,
+   "fuel_used": 8892.402873356546,
+   "frames": 708,
+   "problems": [],
+   "seconds": 0.99
+  },
+  {
+   "case": "envelope-edge/1500m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     7000.0,
+     7000.0
+    ],
+    "separation_altitude": 1500.0,
+    "profile": "research"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 150.20000000000303,
+   "touchdown_speed": 5.58663481511653,
+   "pad_distance": 8723.135438909729,
+   "fuel_used": 16441.09710439231,
+   "frames": 1503,
+   "problems": [],
+   "seconds": 2.07
+  },
+  {
+   "case": "suborbital/10000m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 10000.0,
+    "profile": "suborbital"
+   },
+   "outcome": "crash_speed",
+   "duration": 61.400000000004,
+   "touchdown_speed": 481.75597928581504,
+   "pad_distance": 0.6963553021527839,
+   "fuel_used": 45793.65494419333,
+   "frames": 615,
+   "problems": [],
+   "seconds": 0.89
+  },
+  {
+   "case": "suborbital/10000m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 10000.0,
+    "profile": "suborbital"
+   },
+   "outcome": "crash_speed",
+   "duration": 61.80000000000406,
+   "touchdown_speed": 477.4916218080394,
+   "pad_distance": 0.6991027250240749,
+   "fuel_used": 46442.08928486092,
+   "frames": 619,
+   "problems": [
+    "combined flight never separated",
+    "combined phases ['takeoff']"
+   ],
+   "seconds": 0.84
+  },
+  {
+   "case": "suborbital/150000m/takeoff",
+   "mission": "takeoff",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 150000.0,
+    "profile": "suborbital"
+   },
+   "outcome": "success",
+   "duration": 175.10000000001577,
+   "touchdown_speed": 1500.014473632917,
+   "pad_distance": 0.01826539349563396,
+   "fuel_used": 100896.70281326678,
+   "frames": 1752,
+   "problems": [],
+   "seconds": 2.34
+  },
+  {
+   "case": "suborbital/150000m/combined",
+   "mission": "combined",
+   "plan": {
+    "launch": [
+     0.0,
+     0.0
+    ],
+    "landing": [
+     6000.0,
+     -4500.0
+    ],
+    "separation_altitude": 150000.0,
+    "profile": "suborbital"
+   },
+   "outcome": "out_of_fuel",
+   "duration": 755.5999999996028,
+   "touchdown_speed": 20.944271241008412,
+   "pad_distance": 3148.1245841530454,
+   "fuel_used": 143859.59966343272,
+   "frames": 7557,
+   "problems": [],
+   "seconds": 12.0
+  }
+ ]
+}

@@ -14,9 +14,11 @@ import sys
 import time
 import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from rocket_lab.config import DATA
+from rocket_lab.config import DATA, load_config
 from rocket_lab.simulation import simulate
 from rocket_lab.schemas import Outcome
+from rocket_lab.missions import configure_flight
+from rocket_lab.storage import config_hash, dynamics_hash
 
 # Distances are measured launch -> landing and stay inside the published
 # +/- 10000 m coordinate envelope. Research plans are gated below 1500 m by the
@@ -51,10 +53,17 @@ def invariants(result, mission, plan):
     frames = result.frames
     if len(frames) < 20:
         problems.append(f"only {len(frames)} frames")
-    for index in (0, len(frames) // 2, len(frames) - 1):
-        frame = frames[index]
-        values = np.array([*frame.position, *frame.velocity, *frame.quaternion, *frame.angular_velocity,
-                           frame.throttle, frame.fuel_mass, frame.mass, frame.t])
+    if not frames:
+        return problems
+    for index, frame in enumerate(frames):
+        values = [*frame.position, *frame.velocity, *frame.quaternion, *frame.angular_velocity,
+                  *frame.gimbal, *frame.wind, frame.throttle, frame.fuel_mass, frame.mass, frame.t]
+        values += [value for value in (frame.clearance, frame.contact_speed, frame.reward, frame.release_time) if value is not None]
+        if frame.upper_stage is not None:
+            values += [*frame.upper_stage.position, *frame.upper_stage.velocity, *frame.upper_stage.quaternion]
+        if index and frame.t <= frames[index - 1].t:
+            problems.append(f"non-increasing time at frame {index}")
+        values = np.array(values)
         if not np.isfinite(values).all():
             problems.append(f"non-finite telemetry at frame {index}")
         if not 0. <= frame.throttle <= 1.:
@@ -65,7 +74,12 @@ def invariants(result, mission, plan):
             problems.append(f"clearance {frame.clearance:.3f} below the surface at frame {index}")
     if result.run.outcome not in Outcome.__args__:
         problems.append(f"unknown outcome {result.run.outcome!r}")
-    if result.run.duration > plan.get("_timeout", float("inf")):
+    cfg, _ = configure_flight(load_config(), plan, mission)
+    timeout = cfg['mission']['timeout']
+    if mission == 'combined':
+        timeout = max(timeout, cfg['mission'].get('combined_timeout', 240.))
+    control_dt = cfg['world']['timestep'] * cfg['world']['control_substeps']
+    if result.run.duration > timeout + control_dt + 1e-8:
         problems.append(f"ran {result.run.duration:.1f} s past the timeout")
     # A plan whose limits are wrong fails on the first step, before flying.
     if frames[0].clearance is not None and frames[0].clearance < -0.01:
@@ -106,6 +120,7 @@ def main():
               f"miss={run.pad_distance:7.2f}m fuel={run.fuel_used:8.0f}kg {'; '.join(problems)}", flush=True)
         rows[-1]["seconds"] = round(time.time() - t0, 2)
     report = dict(scope="classical controller sweep over the published flight-plan envelope",
+                  config_hash=config_hash(), dynamics_hash=dynamics_hash(), seed=7,
                   elapsed_seconds=round(time.time() - started, 1), cases=len(rows), failures=failures, results=rows)
     (DATA / "scenario-validation.json").write_text(json.dumps(report, indent=1))
     print(f"\n{len(rows)} scenarios, {failures} structural failures, {report['elapsed_seconds']}s")

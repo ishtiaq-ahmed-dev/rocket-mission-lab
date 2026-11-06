@@ -145,13 +145,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-off
 </div>
 <div id="bottom">
   <div id="cams" class="panel">
-    <button data-cam="1"><kbd>1</kbd><span>Orbit</span></button>
-    <button data-cam="2"><kbd>2</kbd><span>Chase</span></button>
-    <button data-cam="3"><kbd>3</kbd><span>Launch Tower</span></button>
-    <button data-cam="4"><kbd>4</kbd><span>Booster Top Cam</span></button>
-    <button data-cam="5"><kbd>5</kbd><span>Landing Pad</span></button>
-    <button data-cam="6"><kbd>6</kbd><span>Overview</span></button>
-    <button data-cam="7"><kbd>7</kbd><span>Orbital View</span></button>
+    <button data-cam="1" aria-label="Orbit camera (1)" title="Orbit (1)"><kbd>1</kbd><span>Orbit</span></button>
+    <button data-cam="2" aria-label="Chase camera (2)" title="Chase (2)"><kbd>2</kbd><span>Chase</span></button>
+    <button data-cam="3" aria-label="Launch Tower camera (3)" title="Launch Tower (3)"><kbd>3</kbd><span>Launch Tower</span></button>
+    <button data-cam="4" aria-label="Booster Top camera (4)" title="Booster Top Cam (4)"><kbd>4</kbd><span>Booster Top Cam</span></button>
+    <button data-cam="5" aria-label="Landing Pad camera (5)" title="Landing Pad (5)"><kbd>5</kbd><span>Landing Pad</span></button>
+    <button data-cam="6" aria-label="Overview camera (6)" title="Overview (6)"><kbd>6</kbd><span>Overview</span></button>
+    <button data-cam="7" aria-label="Orbital View camera (7)" title="Orbital View (7)"><kbd>7</kbd><span>Orbital View</span></button>
     <div class="sep"></div>
     <button id="focusbtn"><kbd>F</kbd><span id="focusname">Focus: AUTO</span></button>
   </div>
@@ -2519,7 +2519,7 @@ let lastFocusW=-1;
 function defaultDist(){return F.which===1?(F.size>50?175:100):F.which===2?55:30;}
 function setCam(n){
   camMode=n;camSnap=true;
-  document.querySelectorAll('#cams button[data-cam]').forEach(b=>b.classList.toggle('on',+b.dataset.cam===n));
+  document.querySelectorAll('#cams button[data-cam]').forEach(b=>{const selected=+b.dataset.cam===n;b.classList.toggle('on',selected);b.setAttribute('aria-pressed',String(selected));});
   labEl.textContent='CAM '+n+' · '+CAMS[n];
   obEl.style.display=n===4?'block':'none';
   if(n===1){orb.dist=orb.distS=defaultDist();}

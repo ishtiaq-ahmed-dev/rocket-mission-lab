@@ -1,3 +1,4 @@
+import pytest
 from rocket_lab.storage import atomic_json,read_json
 from rocket_lab.schemas import FlightPlan
 
@@ -36,8 +37,30 @@ def test_failed_campaign_recovers_only_compatible_saved_steps(monkeypatch,tmp_pa
     assert status['recovery']['restored_steps']==4096
 
 
+def test_campaign_preserves_requested_seed_through_training_and_resume(monkeypatch, tmp_path):
+    import rocket_lab.campaign as campaign
+    import rocket_lab.train as training
+    monkeypatch.setattr(campaign, 'DATA', tmp_path)
+    seeds = []
+    def train(**kwargs):
+        seeds.append(kwargs['seed'])
+        raise RuntimeError('training probe')
+    monkeypatch.setattr(training, 'train', train)
+    with pytest.raises(RuntimeError, match='training probe'):
+        campaign.run_campaign('seed-test', steps=4096, block_steps=4096, seed=123)
+    path = tmp_path / 'campaigns' / 'seed-test' / 'status.json'
+    state = read_json(path)
+    assert state['seed'] == 123 and seeds == [123]
+    state.update(status='stopped', active_job=None)
+    atomic_json(path, state)
+    with pytest.raises(ValueError, match='seed'):
+        campaign.run_campaign('seed-test', steps=4096, block_steps=4096, resume=True, seed=456)
+    with pytest.raises(RuntimeError, match='training probe'):
+        campaign.run_campaign('seed-test', steps=4096, block_steps=4096, resume=True)
+    assert seeds == [123, 123]
+
+
 def test_failed_campaign_rejects_changed_dynamics(monkeypatch,tmp_path):
-    import pytest
     import rocket_lab.campaign as campaign
     monkeypatch.setattr(campaign,'DATA',tmp_path)
     atomic_json(tmp_path/'campaigns'/'obsolete'/'status.json',dict(status='failed',dynamics_hash='obsolete'))

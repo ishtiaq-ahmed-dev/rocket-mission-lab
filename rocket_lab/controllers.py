@@ -23,6 +23,7 @@ class ClassicalController:
         self.max_shelf=120. # m
         self.divert=False
         self.recovery_burn=False
+        self.ascent_coast_complete=False
         self.terminal_captured=False
 
     def on_retarget(self):
@@ -212,16 +213,20 @@ class ClassicalController:
         torque_body=rot.T@torque_world
         # Vertical acceleration divided by actual body-axis vertical projection.
         thrust=np.clip(s["mass"]*(g+az)/max(n[2],0.3),0,max_thrust)
-        if env.phase=="landing" and env.separated and velocity[2]>2 and h>100:
-            thrust=0 # ballistic coast after combined mission separation
+        coasting=False
+        if env.phase=='landing' and env.separated:
+            if velocity[2]<=2 or h<=100:self.ascent_coast_complete=True
+            if not self.ascent_coast_complete:
+                thrust=0.
+                coasting=True
         if env.phase=='landing' and cfg['mission'].get('high_altitude_recovery',False) and h>1500:
-            # Coast until a stopping-distance envelope calls for an entry burn.
-            # No forces, attitude corrections or coordinate changes are hidden
-            # in this coast. Ignition/valve lag is included in the margin.
+            # Ignition/valve lag is included in the stopping-distance margin.
             deceleration=max(1.,max_thrust/s['mass']-g)
             stopping=velocity[2]**2/(2*deceleration*.60)+abs(velocity[2])*1.5+900.
             if velocity[2]<0 and h<=stopping:self.recovery_burn=True
-            if not self.recovery_burn:thrust=0.
+            if not self.recovery_burn:
+                thrust=0.
+                coasting=True
         throttle=thrust/max_thrust
         if self.level==1: throttle*=0.72
         denom=max(thrust*ph.engine_lever,1)
@@ -295,9 +300,18 @@ class ClassicalController:
             # Keep the engine lit near the surface only when it can actually
             # hover. A light booster whose minimum thrust exceeds weight must
             # still be allowed to cut off, or it bounces until the tank is dry.
+            switch_velocity=velocity[2]
+            if env.phase=='landing' and h<=12. and not can_hover:
+                dt=cfg['world']['timestep']*cfg['world']['control_substeps']
+                vertical_acceleration=ph.thrust*n[2]/s['mass']-g
+                switch_velocity+=vertical_acceleration*dt
+                rise=max_thrust*max(n[2],0.)*ph.v.get('throttle_rate',0.)/s['mass']
+                # Anticipate the speed lost before an off engine spools back up to weight-supporting thrust.
+                if not self.engine_on and rise>0:
+                    switch_velocity-=max(0.,-vertical_acceleration)**2/(2*rise)
             if h<=12. and can_hover:self.engine_on=True
-            elif velocity[2]>target_speed+.5:self.engine_on=False
-            elif velocity[2]<target_speed-.5:self.engine_on=True
+            elif switch_velocity>target_speed+.5:self.engine_on=False
+            elif switch_velocity<target_speed-.5:self.engine_on=True
             throttle=ph.v['min_throttle'] if self.engine_on else 0.
         elif throttle>=ph.v['min_throttle']:
             # A continuous burn overrides an earlier pulse-off decision. If
@@ -307,12 +321,11 @@ class ClassicalController:
         # Post-separation flip: with the engine off, cold-gas RCS turns the booster to retrograde
         # (opposing its velocity). The gimbal has no thrust to act on during this coast.
         ph.rcs_torque=np.zeros(3)
-        if env.phase=='landing' and env.separated and throttle<=0 and h>100 and np.linalg.norm(velocity)>1.:
+        if coasting and env.separated and throttle<=0 and h>100 and np.linalg.norm(velocity)>1.:
             retrograde=-velocity/np.linalg.norm(velocity)
             error=np.cross(n,retrograde)
-            if np.linalg.norm(error)<1e-3:
-                # Booster axis exactly along the velocity (180 degrees off retrograde): the cross product
-                # vanishes, so pick a fixed perpendicular axis to start the flip.
+            if np.linalg.norm(error)<1e-3 and np.dot(n,retrograde)<0:
+                # Only the antiparallel axis needs a kick; an aligned booster must not start another flip.
                 error=np.cross(n,[1.,0.,0.] if abs(n[0])<.9 else [0.,1.,0.])
             # Damp only the tilt rates. Damping the roll rate about the booster axis chatters
             # against the RCS clip and leaves a residual roll spin that breaks the touchdown.

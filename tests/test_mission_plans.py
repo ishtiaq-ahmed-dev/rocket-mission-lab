@@ -65,6 +65,59 @@ def test_full_flight_to_separate_site_and_recorded_plan(mission):
     assert np.linalg.norm(np.array(replay.frames[-1].position[:2])-(plan['launch'] if mission=='takeoff' else plan['landing']))<=5
 
 
+@pytest.mark.parametrize('mission', ['takeoff', 'combined'])
+@pytest.mark.parametrize('profile,altitude', [('research', 80.), ('suborbital', 10000.)])
+@pytest.mark.parametrize('seed', [7, 42, 2026])
+def test_ascent_reaches_goal_speed_before_separation(mission, profile, altitude, seed):
+    from rocket_lab.controllers import ClassicalController
+    plan = dict(launch=[0., 0.], landing=[0., 0.], separation_altitude=altitude, profile=profile)
+    cfg, _ = configure_flight(load_config(), plan, mission)
+    env = RocketEnv(mission, config=cfg)
+    controller = ClassicalController(4)
+    try:
+        env.reset(seed=seed)
+        for _ in range(1000):
+            _, _, terminated, truncated, info = env.step(controller.action(env))
+            if terminated or truncated or env.separated:
+                break
+        if mission == 'combined':
+            assert env.separated, info
+            assert env.phase == 'landing'
+            assert env.physics.state()['throttle'] == 0.
+        else:
+            assert info['outcome'] == 'success', info
+        assert abs(env.last_state['velocity'][2] - env.takeoff_velocity) <= cfg['mission']['takeoff_velocity_tolerance']
+    finally:
+        env.close()
+
+
+@pytest.mark.parametrize('altitude', [80., 400., 900.])
+def test_combined_short_hop_completes_without_restarting_separation_coast(altitude):
+    replay = simulate('combined', seed=7, save=False,
+                      flight_plan=dict(launch=[0., 0.], landing=[700., 700.], separation_altitude=altitude))
+    assert replay.run.separation is not None
+    assert replay.run.outcome == 'success', replay.run.model_dump()
+    assert replay.run.touchdown_speed < 2.
+    assert replay.run.pad_distance <= 1.
+
+
+@pytest.mark.parametrize('defect', ['empty', 'nonfinite', 'below_surface', 'timeout'])
+def test_scenario_sweep_detects_invalid_telemetry(defect):
+    from scripts.validate_scenarios import invariants
+    plan = dict(launch=[0., 0.], landing=[0., 0.], separation_altitude=400.)
+    replay = simulate('takeoff', save=False, flight_plan=plan)
+    assert invariants(replay, 'takeoff', plan) == []
+    if defect == 'empty':
+        replay.frames = []
+    elif defect == 'nonfinite':
+        replay.frames[1] = replay.frames[1].model_copy(update={'mass': float('nan')})
+    elif defect == 'below_surface':
+        replay.frames[1] = replay.frames[1].model_copy(update={'clearance': -1.})
+    else:
+        replay.run.duration = 241.
+    assert invariants(replay, 'takeoff', plan)
+
+
 def test_custom_flight_is_retrievable_and_validation_runs_through_api(monkeypatch,tmp_path):
     import rocket_lab.api as api
     import rocket_lab.simulation as simulation
@@ -109,9 +162,12 @@ def test_campaign_dispatch_uses_saved_plan_and_conflict_guard(monkeypatch,tmp_pa
     def launch(command,folder):commands.append(command);return 1
     monkeypatch.setattr(module,'launch_job',launch)
     client=TestClient(module.app)
-    response=client.post('/campaigns',json={'steps':100000000,'flight_plan':{'launch':[10,20],'landing':[1210,420],'separation_altitude':400}})
+    response=client.post('/campaigns',json={'steps':100000000,'seed':123,'flight_plan':{'launch':[10,20],'landing':[1210,420],'separation_altitude':400}})
     assert response.status_code==202
     assert commands[0][1:3]==['-m','rocket_lab.campaign'] and '100000000' in commands[0]
+    assert commands[0][commands[0].index('--seed')+1]=='123'
+    from rocket_lab.storage import read_json
+    assert read_json(tmp_path/'campaigns'/response.json()['id']/'status.json')['seed']==123
     assert client.post('/training',json={'steps':1000}).status_code==409
     identifier=response.json()['id']
     assert client.get('/campaigns').json()[0]['status']=='starting'

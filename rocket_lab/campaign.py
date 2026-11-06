@@ -28,7 +28,7 @@ def campaign_config(mission,plan):
     return cfg
 
 
-def run_campaign(identifier,steps=100000000,block_steps=1000000,plan=None,max_rounds_without_improvement=12,resume=False):
+def run_campaign(identifier,steps=100000000,block_steps=1000000,plan=None,max_rounds_without_improvement=12,resume=False,seed=None):
     from .train import train
     from .evaluate import evaluate,save_result
     plan=FlightPlan.model_validate(plan or {}).model_dump(mode='json')
@@ -36,6 +36,11 @@ def run_campaign(identifier,steps=100000000,block_steps=1000000,plan=None,max_ro
     state=dict(id=identifier,status='running',budget=steps,steps=0,started_at=time.time(),updated_at=time.time(),
                active_job=None,flight_plan=plan,pid=os.getpid(),dynamics_hash=dynamics_hash(),missions={m:dict(steps=0,best_successes=-1,plateau=0,qualified=False,checkpoint_id=None) for m in ('landing','takeoff','combined')})
     previous=read_json(folder/'status.json')
+    recorded_seed=previous.get('seed',42) if previous else 42
+    if seed is None:seed=recorded_seed
+    if not isinstance(seed,int) or not 0<=seed<=2147483647:raise ValueError('Invalid campaign seed')
+    if previous and seed!=recorded_seed:raise ValueError('Cannot change the seed of an existing campaign')
+    state['seed']=seed
     dispatched=bool(previous and previous.get('status')=='starting' and previous.get('missions')=={} and previous.get('steps')==0)
     if dispatched and (previous.get('budget')!=steps or read_json(folder/'plan.json')!=plan):
         raise ValueError('Dispatched campaign plan or budget changed before worker startup')
@@ -53,7 +58,7 @@ def run_campaign(identifier,steps=100000000,block_steps=1000000,plan=None,max_ro
             task.update(steps=latest['steps'],latest_checkpoint_id=latest['id'])
             previous['recovery']=dict(failed_job=failed_job,checkpoint=latest['id'],restored_steps=latest['steps'],
                                       note='Optimizer/normalization recovered; environment and RNG restart from the recorded seed policy')
-        state=previous;state.update(status='running',pid=os.getpid(),budget=steps,active_job=None,error=None)
+        state=previous;state.update(status='running',pid=os.getpid(),budget=steps,seed=seed,active_job=None,error=None)
         plan=state['flight_plan'];(folder/'stop').unlink(missing_ok=True)
         for task in state['missions'].values():
             match=re.search(r'-r(\d+)__',task.get('latest_checkpoint_id') or '')
@@ -82,7 +87,7 @@ def run_campaign(identifier,steps=100000000,block_steps=1000000,plan=None,max_ro
                 cfg=campaign_config(mission,plan);path=folder/f'{mission}.json';atomic_json(path,cfg)
                 # Resuming the latest snapshot preserves optimizer and normalizer.
                 previous=task.get('latest_checkpoint_id')
-                train(mission=mission,steps=amount,job_id=job,device='cpu',seed=42+round_index,
+                train(mission=mission,steps=amount,job_id=job,device='cpu',seed=seed+round_index,
                       eval_episodes=20,resume=previous,config_path=path)
                 candidates=[c for c in checkpoints(mission) if c['job_id']==job]
                 latest=max(candidates,key=lambda c:(c['steps'],c.get('snapshot_phase')=='post-update final'))
@@ -124,7 +129,8 @@ def run_campaign(identifier,steps=100000000,block_steps=1000000,plan=None,max_ro
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--id',default=f'mission-campaign-{int(time.time())}')
     parser.add_argument('--steps',type=int,default=100000000);parser.add_argument('--block-steps',type=int,default=1000000);parser.add_argument('--plan',type=Path);parser.add_argument('--resume',action='store_true')
+    parser.add_argument('--seed',type=int)
     args=parser.parse_args()
     if not args.id.replace('-','').isalnum():raise ValueError('Invalid campaign ID')
     if not 4096<=args.steps<=100000000 or not 4096<=args.block_steps<=10000000:raise ValueError('Invalid training budget')
-    run_campaign(args.id,args.steps,args.block_steps,read_json(args.plan) if args.plan else None,resume=args.resume)
+    run_campaign(args.id,args.steps,args.block_steps,read_json(args.plan) if args.plan else None,resume=args.resume,seed=args.seed)

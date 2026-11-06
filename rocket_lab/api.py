@@ -1,7 +1,11 @@
 import sys
 import time
 import threading
-from fastapi import FastAPI, HTTPException
+import math
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from typing import Literal
@@ -16,9 +20,25 @@ from .isaac.api import router as native_router
 app=FastAPI(title="Rocket Mission Lab",version="1.0.0")
 app.include_router(native_router)
 app.add_middleware(GZipMiddleware,minimum_size=2048,compresslevel=3)
-app.add_middleware(CORSMiddleware,allow_origins=["http://localhost:5180","http://127.0.0.1:5180"],allow_methods=["GET","POST"],allow_headers=["Content-Type"])
+LOCAL_ORIGINS=["http://localhost:5180","http://127.0.0.1:5180"]
+app.add_middleware(CORSMiddleware,allow_origins=LOCAL_ORIGINS,allow_methods=["GET","POST"],allow_headers=["Content-Type"])
 job_lock=threading.Lock()
 LOADED_DYNAMICS_HASH=dynamics_hash()
+
+@app.middleware('http')
+async def guard_browser_mutations(request:Request, call_next):
+    if request.method not in ('GET','HEAD','OPTIONS'):
+        origin=request.headers.get('origin')
+        same_origin=f'{request.url.scheme}://{request.url.netloc}'
+        if ((origin is not None and origin not in (*LOCAL_ORIGINS,same_origin)) or
+                (origin is None and request.headers.get('sec-fetch-site')=='cross-site')):
+            return JSONResponse(status_code=403,content={'detail':'Untrusted browser origin'})
+    return await call_next(request)
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_error(request:Request, error:RequestValidationError):
+    detail=jsonable_encoder(error.errors(),custom_encoder={float:lambda value:value if math.isfinite(value) else str(value)})
+    return JSONResponse(status_code=422,content={'detail':detail})
 
 def campaign_list():
     values=[value for path in (DATA/'campaigns').glob('*/status.json') if (value:=read_json(path))]
@@ -138,9 +158,9 @@ def start_campaign(request:TrainRequest):
         folder=DATA/'campaigns'/identifier;folder.mkdir(parents=True)
         from .schemas import FlightPlan
         atomic_json(folder/'plan.json',(request.flight_plan or FlightPlan()).model_dump(mode='json'))
-        atomic_json(folder/'status.json',dict(id=identifier,status='starting',budget=request.steps,steps=0,missions={},active_job=None,started_at=time.time(),updated_at=time.time()))
+        atomic_json(folder/'status.json',dict(id=identifier,status='starting',budget=request.steps,seed=request.seed,steps=0,missions={},active_job=None,started_at=time.time(),updated_at=time.time()))
         block=min(1000000,max(4096,request.steps//3//4096*4096))
-        pid=launch_job([sys.executable,'-m','rocket_lab.campaign','--id',identifier,'--steps',str(request.steps),'--block-steps',str(block),'--plan',str(folder/'plan.json')],folder)
+        pid=launch_job([sys.executable,'-m','rocket_lab.campaign','--id',identifier,'--steps',str(request.steps),'--seed',str(request.seed),'--block-steps',str(block),'--plan',str(folder/'plan.json')],folder)
         return dict(id=identifier,pid=pid,status='running')
 
 @app.post('/campaigns/{identifier}/stop')

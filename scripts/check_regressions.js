@@ -168,3 +168,25 @@ test('camera/focus shortcuts work after clicking buttons without double-activati
   listener({target:{matches:()=>false},key:' ',code:'Space',preventDefault(){}});
   assert.equal(played,1);
 });
+
+test('camera controls retain names and selection when compact labels are hidden', () => {
+  const markup = [...html.matchAll(/<button data-cam="(\d)"([^>]*)>/g)];
+  assert.equal(markup.length, 7);
+  for (const [, number, attributes] of markup) {
+    assert.match(attributes, /aria-label="[^"]*[A-Za-z][^"]*"/);
+    assert.match(attributes, /title="[^"]+"/);
+  }
+  const buttons = markup.map(([, number]) => ({
+    dataset: {cam: number}, attributes: {},
+    classList: {toggle() {}}, setAttribute(name, value) {this.attributes[name] = String(value);}
+  }));
+  const context = {document: {querySelectorAll: () => buttons}, camMode: 1, camSnap: false,
+    labEl: {}, obEl: {style: {}}, CAMS: {1:'Orbit', 4:'Booster Top Cam'}, orb: {}, defaultDist: () => 100};
+  vm.createContext(context);
+  vm.runInContext(html.slice(html.indexOf('function setCam(n){'), html.indexOf('function setFocus(m){')), context);
+  context.setCam(4);
+  assert.deepEqual(buttons.map(b => b.attributes['aria-pressed']), ['false','false','false','true','false','false','false']);
+  context.setCam(1);
+  assert.equal(buttons[0].attributes['aria-pressed'], 'true');
+  assert.equal(buttons[3].attributes['aria-pressed'], 'false');
+});

@@ -45,6 +45,54 @@ def test_unknown_and_validation():
     assert client.post("/training",json={"algorithm":"shell"}).status_code==422
     assert client.post("/training/nonexistent/stop").status_code==404
 
+@pytest.mark.parametrize('mounted', [False, True])
+@pytest.mark.parametrize('path,body', [
+    ('/simulate', '{"seed":1e309}'),
+    ('/simulate', '{"flight_plan":{"landing":[1e309,0]}}'),
+    ('/simulate', '{"retarget":{"time":1e309,"landing":[1200,0]}}'),
+    ('/training', '{"steps":NaN}'),
+])
+def test_nonfinite_request_numbers_return_validation_errors(mounted, path, body):
+    from rocket_lab.preview import create_preview
+    target = TestClient(create_preview() if mounted else app, raise_server_exceptions=False)
+    response = target.post(('/api' if mounted else '') + path, content=body, headers={'Content-Type': 'application/json'})
+    assert response.status_code == 422, response.text
+    assert response.json()['detail']
+
+
+@pytest.mark.parametrize('mounted', [False, True])
+@pytest.mark.parametrize('resource,folder', [('training', 'jobs'), ('campaigns', 'campaigns')])
+@pytest.mark.parametrize('origin,allowed', [
+    (None, True), ('http://testserver', True),
+    ('http://localhost:5180', True), ('http://127.0.0.1:5180', True),
+    ('https://untrusted.example', False), ('null', False),
+])
+def test_job_stops_reject_untrusted_browser_origins(monkeypatch, tmp_path, mounted, resource, folder, origin, allowed):
+    import rocket_lab.api as module
+    from rocket_lab.preview import create_preview
+    monkeypatch.setattr(module, 'DATA', tmp_path)
+    monkeypatch.setattr(module, 'training_jobs', lambda: [{'id': 'test-job'}])
+    monkeypatch.setattr(module, 'campaign_list', lambda: [{'id': 'test-job'}])
+    job = tmp_path / folder / 'test-job'
+    job.mkdir(parents=True)
+    target = TestClient(create_preview() if mounted else app)
+    response = target.post(f"{'/api' if mounted else ''}/{resource}/test-job/stop", headers={'Origin': origin} if origin else {})
+    assert response.status_code == (200 if allowed else 403)
+    assert (job / 'stop').exists() is allowed
+
+
+def test_cross_site_request_without_origin_is_blocked_before_dispatch():
+    response = client.post('/training/nonexistent/stop', headers={'Sec-Fetch-Site': 'cross-site'})
+    assert response.status_code == 403
+    assert client.get('/health', headers={'Origin': 'https://untrusted.example'}).status_code == 200
+    preflight = client.options('/training', headers={
+        'Origin': 'http://localhost:5180', 'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'Content-Type',
+    })
+    assert preflight.status_code == 200
+    assert preflight.headers['access-control-allow-origin'] == 'http://localhost:5180'
+
+
 def test_live_simulation():
     response=client.post("/simulate",json={"mission":"landing","method":"classical","level":4,"seed":43})
     assert response.status_code==200
