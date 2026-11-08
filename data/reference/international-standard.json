@@ -118,21 +118,21 @@
     },
     "default_orbit": {
       "semi_major_axis_altitude_km": 300,
-      "inclination_deg": 39.9,
+      "inclination_deg": 42.9,
       "payload_kg": 7000
     },
     "model_output": {
-      "meco_altitude_m": 70857.4092,
-      "meco_speed_m_s": 1792.5124,
-      "booster_apogee_m": 177040.1675,
-      "insertion_perigee_km": 269.9107,
-      "insertion_apogee_km": 332.3106,
-      "insertion_inclination_deg": 39.926,
-      "insertion_eccentricity": 0.0047,
-      "touchdown_vertical_m_s": -2.0034,
-      "touchdown_horizontal_m_s": 0.047,
-      "touchdown_tilt_deg": 0.1461,
-      "touchdown_offset_m": 2.0596
+      "meco_altitude_m": 60608.8253,
+      "meco_speed_m_s": 1799.7496,
+      "booster_apogee_m": 127596.2794,
+      "insertion_perigee_km": 268.7831,
+      "insertion_apogee_km": 333.5321,
+      "insertion_inclination_deg": 42.9488,
+      "insertion_eccentricity": 0.0049,
+      "touchdown_vertical_m_s": -1.9471,
+      "touchdown_horizontal_m_s": 0.0175,
+      "touchdown_tilt_deg": 0.1211,
+      "touchdown_offset_m": 1.4362
     }
   },
   "sources": [

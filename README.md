@@ -8,18 +8,18 @@ Every command in the flight comes from the network: engine ignition, cutoff and 
 
 | Phase | What happens (after Falcon 9 RTLS practice) |
 | --- | --- |
-| Ascent | Hold-down until thrust exceeds weight at T-0, pitch kick, gravity turn, max-Q throttle bucket |
+| Ascent | Hold-down until thrust exceeds weight at T-0, pitch kick, gravity turn, max-Q throttle bucket; MECO near 60 km with the return propellant kept |
 | MECO and separation | Nine engines cut and finish their tail-off; pneumatic pushers separate the stages with equal and opposite impulse; the upper stage lights about five seconds later |
 | Flip and boostback | Cold-gas flip, then three engines with **horizontal** thrust toward the landing zone. Thrust never points toward the ground; the booster keeps climbing on its own momentum while gravity slows it |
 | Ballistic coast | Engines off, nose up, engines leading |
-| Entry burn | Three engines near 60 km, against the airflow |
+| Entry burn | Three engines near 66 km for about ten seconds, against the airflow |
 | Aerodynamic glide | Engines off, grid fins steer toward the pad |
 | Landing burn | One engine, lit at the last feasible moment; touchdown on LZ-1 |
-| Orbit | Closed-loop insertion to about 270 × 340 km at 39.5°, payload deploy 60 s after SECO |
+| Orbit | Closed-loop insertion to about 270 × 335 km at 43°, payload deploy 60 s after SECO |
 
-Default flight, as flown by the shipped policy: MECO at 70.9 km and 1.79 km/s, booster apogee 177 km, insertion 270 × 332 km at 39.9°, touchdown at 2.00 m/s vertical and 0.05 m/s horizontal, 0.15° tilt, 2.1 m from the pad centre.
+Default flight, as flown by the shipped policy: MECO at T+2:16, 60.6 km and 1.80 km/s; boostback T+2:36-3:31; booster apogee 128 km; entry burn T+6:10-6:20; landing burn T+7:24; touchdown T+7:49 at 1.95 m/s vertical, 0.02 m/s horizontal, 0.12° tilt, 1.4 m from the pad centre; insertion 269 × 334 km at 42.9°. The return follows the public Falcon 9 RTLS timeline (Ax-4: boostback T+2:42-3:28, entry burn T+6:18, landing burn T+7:22, touchdown T+7:39).
 
-**Reliability.** On 300 dispersed flights the network never saw — wind 0–100 % in any direction, engine thrust ±1 %, drag ±5 %, booster dry mass ±300 kg, payload ±1,000 kg — it completed **298** full missions (orbit, fairing release, deploy and a landing on deployed legs within 3 m/s, 1.5 m/s sideways, 5° and the 43 m pad radius). The classical teacher it learned from completed 295 of the same flights. All 300 reached orbit; the worst touchdown was 2.17 m/s. This is a simulated study, not a flight-certification claim. Details: [docs/FLIGHT-POLICY.md](docs/FLIGHT-POLICY.md).
+**Reliability.** On 300 dispersed flights the network never saw — wind 0–100 % in any direction, engine thrust ±1 %, drag ±5 %, booster dry mass ±300 kg, payload ±1,000 kg — it completed **297** full missions (orbit, fairing release, deploy and a landing on deployed legs within 3 m/s, 1.5 m/s sideways, 5° and the 43 m pad radius). The classical teacher it learned from completed all 300. All 300 reached orbit; of the three misses, two were hard touchdowns on the pad and one a short boostback. This is a simulated study, not a flight-certification claim. Details: [docs/FLIGHT-POLICY.md](docs/FLIGHT-POLICY.md).
 
 **Model limits:** point-mass dynamics with a rate-limited first-order attitude response; public Falcon 9 figures anchor the vehicle, but dry masses and aerodynamic coefficients are modelled. Plume length and width follow the nozzle exit pressure against the ISA ambient profile; turbulence, smoke, legs and fins are illustrative. The **MODEL NOTES** panel (top left, or `M`) lists the assumptions and this run's figures.
 

@@ -15,15 +15,23 @@ function score(rows) {
   return {
     nominal: !!(complete(nominal) && nominal.vV > -2.1 && nominal.vV < 0 && nominal.vH < 0.5 && nominal.err <= 5 && nominal.tilt < 5),
     successes: dispersed.filter(complete).length,
+    orbits: dispersed.filter(r => r.orbit).length,
     mean_offset: dispersed.reduce((sum, r) => sum + (Number.isFinite(r.err) ? r.err : 1e6), 0) / dispersed.length,
     worst_offset: Math.max(...dispersed.map(r => Number.isFinite(r.err) ? r.err : 1e6)),
     worst_speed: Math.max(...dispersed.map(r => Number.isFinite(r.vV) ? Math.abs(r.vV) : 1e6))
   };
 }
 function improves(candidate, incumbent) {
+  /* bootstrap (training from scratch): until the incumbent flies the nominal mission, ship any
+     candidate that is further along: full missions, then orbits, then landing offset */
+  if (!incumbent.nominal) {
+    return candidate.nominal || candidate.successes > incumbent.successes ||
+      (candidate.successes === incumbent.successes && (candidate.orbits > incumbent.orbits ||
+      (candidate.orbits === incumbent.orbits && candidate.mean_offset < incumbent.mean_offset)));
+  }
   return candidate.nominal && candidate.worst_speed <= Math.max(3, incumbent.worst_speed) &&
     candidate.worst_offset <= Math.max(43, incumbent.worst_offset) &&
-    (!incumbent.nominal || candidate.successes > incumbent.successes ||
+    (candidate.successes > incumbent.successes ||
     (candidate.successes === incumbent.successes && candidate.mean_offset < incumbent.mean_offset));
 }
 

@@ -18,12 +18,12 @@ module.exports = function makeTeacher(FS, settings) {
   const { V, RE, MU, G0, lzFrame, pressAt, orbitElems } = FS;
   const BP = Object.assign({
     tFlipAfterSep: 4.0, bbAfterMeco: 20.0, bbThr: 0.80, bbN: 3, bbPitch: 0, bbTol: 120,
-    hEntry: 62000, entryThr: 0.80, entryN: 3, entryVend: 400, entryMax: 40, entryKeep: 9500, entryReserve: 5200, entryTiltMax: 14 * D2R,
+    hEntry: 66000, entryThr: 0.80, entryN: 3, entryVend: 1000, entryMax: 40, entryKeep: 13000, entryReserve: 5200, entryTiltMax: 14 * D2R,
     aeroTiltMax: 16 * D2R, hAim: 1000, landTiltMax: 32 * D2R, vTd: 1.8,
     landThr: 0.85, landMargin: 15, aLat: 3, kLat: 0.35, fadeH: 200, aGate: 2.5, cnAlpha: 3.2, aoaBase: 0
   }, settings && settings.bp);
-  const ASC = { ignT: -3.6, kick: 1.6 * D2R, tKick0: 8.0, kickDur: 5, gLim: 3.65, propMeco: 54000, sepDelay: 3.0 };
-  const S2 = Object.assign({ ignDelay: 5.0, tFair: 200, deployDelay: 60, hTarget: 300000, hIns: 270000, hMin: 150000, gLim: 3.7 },
+  const ASC = Object.assign({ ignT: -3.6, kick: 2.6 * D2R, tKick0: 8.0, kickDur: 5, gLim: 3.65, propMeco: 60000, sepDelay: 3.0 }, settings && settings.asc);
+  const S2 = Object.assign({ ignDelay: 5.0, tFair: 200, deployDelay: 60, hTarget: 300000, hIns: 270000, hMin: 150000, gLim: 3.7, tgoMin: 40 },
     settings && settings.s2);
   const cache = settings && settings.cache ? {} : null;
 
@@ -195,14 +195,23 @@ module.exports = function makeTeacher(FS, settings) {
     }
     return s;
   }
-  /* landing burn: light the engine only when waiting longer would make the profile infeasible */
-  /* landing burn: light the engine at the last moment one engine at landThr can still stop at the pad */
+  /* landing burn: light the engine at the last moment one engine at landThr can still stop at the
+     pad. The stopping distance is integrated with drag growing as the air thickens on the way down
+     (a constant-density estimate lights far too high after a fast entry burn). */
   function landingIgnition(S, t) {
     const h = nrm(S.r) - RE, L = lzFrame(t), gv = relVel(S.r, S.v), vU = dot(gv, L.U);
-    if (h > 12000 || vU >= 0) return false;
+    if (h > 14000 || vU >= 0) return false;
     const pU = dot(sub(S.r, lzBase(t)), L.U) - BP.landMargin;
-    const aMax = BP.landThr * engineThrust(1, 1, V.merTvac, V.merAe, h) / boosterMass(S) - MU / Math.pow(RE + h, 2);
-    return stopAccel(S, pU, -vU, L) >= aMax;
+    const v0 = -vU, D0 = Math.max(0, dot(dragAcc(S), L.U)), rho0 = Math.max(FS.rhoAt(h), 1e-9), m = boosterMass(S);
+    let v = v0, hh = h, d = 0;
+    for (let i = 0; i < 2000 && v > BP.vTd; i++) {
+      const dt = 0.05, g = MU / Math.pow(RE + hh, 2);
+      const aT = BP.landThr * engineThrust(1, 1, V.merTvac, V.merAe, hh) / m;
+      const aD = D0 * (FS.rhoAt(hh) / rho0) * (v * v) / (v0 * v0);
+      v += (g - aT - aD) * dt; d += v * dt; hh -= v * dt;
+      if (d >= pU) return true;
+    }
+    return d >= pU;
   }
   const cached = (key, t, period, fn) => {
     if (!cache) return fn();
@@ -242,7 +251,11 @@ module.exports = function makeTeacher(FS, settings) {
        acceleration so altitude reaches hIns with zero climb rate (linear-tangent-like) */
     const rr = nrm(U.r), h = rr - RE, Ub = unit(U.r), vz = dot(U.v, Ub), vhv = sub(U.v, sc(Ub, vz)), vh = nrm(vhv);
     const aT = Math.max(U.T, 0.5 * V.mvacT * thr) / upperMass(U), g = MU / (rr * rr);
-    const tgo = clamp((Math.sqrt(MU / (RE + S2.hIns)) - vh) / aT, 8, 600);
+    /* time to go from the rocket equation (acceleration grows as propellant burns off), no shorter
+       than the g-limited constant-acceleration time. The floor keeps the last seconds gentle: as
+       tgo -> 0 the altitude term 6*dh/tgo^2 would whip the pitch to its limit. */
+    const dv = Math.max(0, Math.sqrt(MU / (RE + S2.hIns)) - vh), ve = V.mvacT / V.mvacMdot;
+    const tgo = clamp(Math.max(upperMass(U) / (V.mvacMdot * thr) * (1 - Math.exp(-dv / ve)), dv / (S2.gLim * G0)), S2.tgoMin, 600);
     const az = 6 * (S2.hIns - h) / (tgo * tgo) - 4 * vz / tgo;
     const pitch = Math.asin(clamp((az + g - vh * vh / rr) / aT, -0.2, 0.8));
     const Bs = localBasis(U.r), hdir = unit(vh > 80 ? vhv : add(sc(Bs.E, Math.sin(V.azimuth)), sc(Bs.N, Math.cos(V.azimuth))));

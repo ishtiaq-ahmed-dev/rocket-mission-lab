@@ -33,8 +33,10 @@ of that state (staged? which burn? engines on?); they never select behaviour.
 Anchored to Falcon 9 return-to-launch-site practice (SpaceX user's guide, NASA
 launch-and-landing sequence, public webcast telemetry):
 
-1. **Ascent.** Hold-down until thrust exceeds weight at T-0, pitch kick, gravity
-   turn, max-Q throttle bucket, 3.65 g acceleration limit.
+1. **Ascent.** Hold-down until thrust exceeds weight at T-0, a 2.6° pitch kick,
+   gravity turn, max-Q throttle bucket, 3.65 g acceleration limit. MECO comes
+   with about 60 t of propellant left for the return, at about 60 km and
+   1.8 km/s, so the booster coasts to about 126 km, as on RTLS flights.
 2. **MECO and separation.** All nine engines cut, the engines finish their
    tail-off, then pneumatic pushers separate the stages with an equal and
    opposite impulse (1.8 m/s relative; the lighter booster recoils more). The
@@ -46,15 +48,16 @@ launch-and-landing sequence, public webcast telemetry):
    climb into a fall.
 4. **Ballistic coast.** Engines off, nose kept above the horizon with the
    engines leading, so the booster is already in its entry attitude.
-5. **Entry burn.** Three engines at about 62 km, against the airflow, until the
-   speed is below 400 m/s with only the landing budget left. Spare propellant is
-   spent here rather than at the bottom, where one engine cannot throttle low
-   enough to hover.
+5. **Entry burn.** Three engines at about 66 km, against the airflow, for about
+   ten seconds: it sheds roughly 600 m/s and stops once only the landing budget
+   (13 t) is left, as on Falcon 9 where the entry burn lasts 10-20 s. The booster
+   then falls fast through the glide instead of drifting down slowly.
 6. **Aerodynamic glide.** Engines off; grid fins trim the descent. The steering
    is chosen so the predicted touchdown lands on the pad.
 7. **Landing burn.** One engine, lit at the last moment a burn at 85 % throttle
-   can still stop at the pad (drag and mass loss included: with drag
-   proportional to v², the constant-thrust stopping distance has a closed form).
+   can still stop at the pad. The ignition test integrates the stopping
+   distance with drag rising as the air thickens on the way down; the burn
+   itself holds the constant thrust that ends the descent at touchdown speed.
    Side steering accounts for the aerodynamic normal force of an engine-first
    body, which at high dynamic pressure is larger than the engine's own side
    force and reverses the steering sense.
@@ -92,36 +95,54 @@ node scripts/flight_policy/parallel.js teacher 900000 200  # same seeds, teacher
 
 ## Results
 
-Shipped policy: `dagger21` (behaviour cloning on 240 dispersed and 40 nominal noisy
-teacher demonstrations, then DAgger rounds of 200 policy-flown dispersed flights;
-rounds 20-21 retrained it after LZ-1 moved 145 m east to the imagery-measured pad
-centre, which dropped the previous network to 49/200). Each candidate is compared
-with the incumbent on the same development seeds before it ships. Evidence: `data/flight-policy-validation.json`
+Shipped policy: `dagger8` of the real-timeline training run. The teacher was
+retuned to the Falcon 9 RTLS timeline (flatter ascent, MECO with the return
+propellant kept, short entry burn, drag-aware landing-burn ignition, smooth
+terminal insertion guidance) and the network trained from scratch: behaviour
+cloning on teacher demonstrations, then DAgger rounds of 200-300 policy-flown
+dispersed flights. Each candidate is compared with the incumbent on the same 256
+development seeds before it ships; while no network can yet fly the nominal
+mission, the gate ships whichever is further along (missions, then orbits, then
+pad offset). Evidence: `data/flight-policy-validation.json`
 (`node scripts/flight_policy/evaluate.js`).
 
 **Held-out dispersed flights** (seeds 900000-900299, never used in training):
 
 | | Full missions | Reached orbit | Worst touchdown | Worst pad offset |
 | --- | --- | --- | --- | --- |
-| Neural policy | **300 / 300** | 300 / 300 | 2.16 m/s | 38.4 m |
-| Classical teacher | 295 / 300 | 300 / 300 | 2.05 m/s | 65.1 m |
+| Neural policy | **297 / 300** | 300 / 300 | 6.24 m/s | 94 km |
+| Classical teacher | 300 / 300 | 300 / 300 | 2.05 m/s | 27.3 m |
 
 A full mission means orbit (perigee above 150 km, eccentricity below 0.05),
-fairing released, payload deployed, and a touchdown on deployed legs slower than 3 m/s vertically and 1.5 m/s
-sideways, tilted under 5° and inside the 43 m pad radius. The teacher's five
-misses were soft touchdowns outside the pad radius; the network landed all 300.
+fairing released, payload deployed, and a touchdown on deployed legs slower than
+3 m/s vertically and 1.5 m/s sideways, tilted under 5° and inside the 43 m pad
+radius. The network's misses: two touchdowns on the pad that were too hard
+(3.7 and 6.2 m/s), one 44 m out, and one low-thrust, strong-wind flight whose
+boostback fell short (94 km). Later candidates traded these for more misses
+elsewhere and were rejected by the gate.
 
-**Nominal replay** (what the page shows): liftoff T+0, MECO T+139 s at 70.9 km
-and 1.79 km/s, separation T+142.3, MVac ignition T+147.5, boostback T+159-198,
-booster apogee 177 km at T+290, entry burn T+448-471 (61.0 → 37.7 km),
-landing burn T+539 from 2.2 km, touchdown T+559 at 2.00 m/s vertical,
-0.05 m/s horizontal, 0.15° tilt, 2.1 m from the pad centre; SECO T+507 into a
-270 × 332 km orbit at 39.9°, payload deploy T+567.
+**Nominal replay compared with Falcon 9 RTLS** (Ax-4, 25 June 2025, public
+webcast timeline; booster apogee from CRS-10 webcast reconstructions):
 
-Training history (200 dispersed flights per round): round 1 0/200 (the cloned
-policy flew every phase but crashed), round 6 165/200 after adding fine height
-and sink-rate inputs for the last metres, rounds 8-13 between 188 and 197/200; after the LZ-1 correction round 20 flew
-49/200 and round 21 200/200.
+| Event | This replay | Falcon 9 RTLS |
+| --- | --- | --- |
+| MECO | T+2:16, 60.6 km, 1.80 km/s | T+2:17-2:33, ~60-65 km, ~1.7 km/s |
+| Boostback | T+2:36-3:31 | T+2:42-3:28 |
+| Booster apogee | 128 km at T+4:16 | ~130 km |
+| Entry burn | T+6:10-6:20 (66 → 57 km) | T+6:18-6:30 |
+| Landing burn | T+7:24 from 4.2 km | T+7:22 |
+| Touchdown | T+7:49 | T+7:39 |
+| SECO | T+8:24 | T+8:48 |
+
+Touchdown at 1.95 m/s vertical, 0.02 m/s horizontal, 0.12° tilt, 1.4 m from
+the pad centre; insertion 269 × 334 km at 42.9°; payload deploy T+9:24.
+
+Training history: from scratch, round 1 flew 0/200 and reached no orbits;
+round 5 found that the teacher's terminal insertion steering whipped the pitch
+to its limit in the last seconds (time-to-go collapsing to zero), which the
+network could not imitate, so upper-stage labels were regenerated with a
+time-to-go floor; round 7 flew 86/200 and round 8 195/200; later rounds flew 197/200 to 300/300
+with the round-8 network, and no later candidate beat it on the gate.
 
 ## Limits
 
@@ -130,9 +151,7 @@ and sink-rate inputs for the last metres, rounds 8-13 between 188 and 197/200; a
 - Point-mass translational dynamics with first-order attitude response; no
   rigid-body rotation, slosh, structural or thermal loads.
 - The dispersion set is a simulation study, not a range-safety analysis.
-- The return is slower than a real Falcon 9 RTLS. Public webcasts (for example
-  Ax-4, June 2025) show the boostback around T+2:42-3:28, the entry burn at
-  T+6:18 and touchdown near T+7:40, with a booster apogee of roughly 120-170 km.
-  Here the simulated booster climbs to about 177 km and lands near T+9:19,
-  because the teacher spends its boostback on horizontal thrust only and keeps a
-  larger landing reserve. The phases and their order match; the timing does not.
+- Max-Q comes at T+55 s, earlier than the T+1:10 typical of Falcon 9
+  webcasts: with the lighter default payload the stack accelerates faster off
+  the pad. Moving the throttle bucket earlier collapses the gravity turn in
+  this point-mass model, so the bucket stays where it is.

@@ -71,6 +71,6 @@ async function trainAndGate(extra) {
     report(`iteration ${it} policy (nominal)`, nom);
     moveData(tag); moveData(tag + 'nom');
     fs.writeFileSync(path.join(ROOT, 'data', 'flight-policy', `progress-${it}.json`), JSON.stringify({ it, ok, n: per, nominal: nom[0] }, null, 1));
-    await trainAndGate(['--epochs', String(arg('dagger-epochs', 25)), '--lr', '1e-3', '--tag', tag]);
+    await trainAndGate(['--epochs', String(arg('dagger-epochs', 25)), '--lr', String(arg('lr', 1e-3)), '--tag', tag]);
   }
 })().catch(e => { console.error(e); process.exit(1); });
