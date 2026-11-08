@@ -1,0 +1,105 @@
+{
+ "source": "USGS The National Map, USGS Imagery Only (NAIP / Landsat / Blue Marble). Public domain.",
+ "service": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer",
+ "projection": "Web Mercator image; bounds are geographic (WGS-84) degrees, rows linear in Mercator y",
+ "site": {
+  "lat": 28.5619,
+  "lon": -80.5773
+ },
+ "layers": {
+  "globe": {
+   "file": "globe.jpg",
+   "lat": [
+    12.523865,
+    44.523865
+   ],
+   "lon": [
+    -98.56087,
+    -62.560869999999994
+   ],
+   "size": [
+    2048,
+    2048
+   ],
+   "mask": "globe-mask.png"
+  },
+  "wide": {
+   "file": "wide.jpg",
+   "lat": [
+    25.923865,
+    31.123865000000002
+   ],
+   "lon": [
+    -83.56087,
+    -77.56087
+   ],
+   "size": [
+    2048,
+    2048
+   ],
+   "mask": "wide-mask.png"
+  },
+  "region": {
+   "file": "region.jpg",
+   "lat": [
+    28.123865000000002,
+    28.923865
+   ],
+   "lon": [
+    -81.01087,
+    -80.11086999999999
+   ],
+   "size": [
+    2048,
+    2048
+   ],
+   "mask": "region-mask.png"
+  },
+  "local": {
+   "file": "local.jpg",
+   "lat": [
+    28.461865000000003,
+    28.593865
+   ],
+   "lon": [
+    -80.63287,
+    -80.50887
+   ],
+   "size": [
+    3072,
+    3584
+   ],
+   "mask": "local-mask.png"
+  },
+  "slc40": {
+   "file": "slc40.jpg",
+   "lat": [
+    28.5557,
+    28.5681
+   ],
+   "lon": [
+    -80.58439999999999,
+    -80.5702
+   ],
+   "size": [
+    1536,
+    1536
+   ]
+  },
+  "lz1": {
+   "file": "lz1.jpg",
+   "lat": [
+    28.47963,
+    28.49203
+   ],
+   "lon": [
+    -80.55153999999999,
+    -80.53734
+   ],
+   "size": [
+    1536,
+    1536
+   ]
+  }
+ }
+}

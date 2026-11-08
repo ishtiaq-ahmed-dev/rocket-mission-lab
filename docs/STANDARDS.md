@@ -24,7 +24,7 @@ flight-certification record.
 | Atmosphere | ISO 2533:1975 and U.S. Standard Atmosphere 1976 | layered geopotential model to 84.852 km; temperature, pressure, density and speed of sound; tabulated density extension above it |
 | Propulsion | NASA specific-impulse relation | `mdot = T / (Isp * g0)`; pressure-dependent Merlin sea-level thrust through nozzle exit area |
 | Vehicle anchors | Public SpaceX Falcon 9 figures | height, diameter, liftoff mass, payload class, nine Merlin 1D engines and one MVac |
-| Mission geometry | Public launch/landing site coordinates | SLC-40 at 28.5619 N, 80.5773 W; LZ-1 at 28.48583 N, 80.54444 W |
+| Mission geometry | Public launch/landing site coordinates | SLC-40 at 28.5619 N, 80.5773 W; LZ-1 pad centre at 28.485727 N, 80.542961 W, measured on USGS NAIP imagery (the often quoted 28.48583 N, 80.54444 W is the old Launch Complex 13 position, about 145 m west of the pad) |
 
 The replay uses a **spherical mean-radius Earth** with WGS-84 GM and rotation.
 It does not integrate the WGS-84 ellipsoid, geoid undulations, tides or
@@ -64,11 +64,11 @@ These are simulated outputs, not measured SpaceX data:
 
 | Quantity | Result |
 | --- | --- |
-| MECO | 71.9 km at 1.781 km/s |
-| Booster apogee | 183.9 km |
-| Second-stage insertion | 269.9 x 340.9 km at 39.54 deg |
-| Touchdown | 1.82 m/s vertical, 0.03 m/s horizontal, 0.11 deg tilt |
-| Pad offset | 0.2 m from LZ-1 centre on an 86 m pad |
+| MECO | 70.9 km at 1.793 km/s |
+| Booster apogee | 177.0 km |
+| Second-stage insertion | 269.9 x 332.3 km at 39.93 deg |
+| Touchdown | 2.00 m/s vertical, 0.05 m/s horizontal, 0.15 deg tilt |
+| Pad offset | 2.1 m from LZ-1 centre on an 86 m pad |
 
 The flight is flown by the neural policy ([FLIGHT-POLICY.md](FLIGHT-POLICY.md)).
 The booster apogee is higher than in the earlier scripted replay (138.6 km)
@@ -111,7 +111,7 @@ flight, or establish landing reliability.
 - FAA/range-safety analysis, airspace coordination, flight-termination systems
   and operational launch constraints.
 - SpaceX guidance, navigation and control. The neural policy imitates an
-  educational teacher; its 298/300 held-out rate is a simulation result.
+  educational teacher; its 300/300 held-out rate is a simulation result.
 - The Python laboratory's subscale RL policies, which did not qualify and are
   not the browser Falcon 9 mission.
 

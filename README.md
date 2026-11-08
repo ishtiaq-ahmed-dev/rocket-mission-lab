@@ -17,7 +17,7 @@ Every command in the flight comes from the network: engine ignition, cutoff and 
 | Landing burn | One engine, lit at the last feasible moment; touchdown on LZ-1 |
 | Orbit | Closed-loop insertion to about 270 × 340 km at 39.5°, payload deploy 60 s after SECO |
 
-Default flight, as flown by the shipped policy: MECO at 71.9 km and 1.78 km/s, booster apogee 184 km, insertion 270 × 341 km at 39.5°, touchdown at 1.82 m/s vertical and 0.03 m/s horizontal, 0.11° tilt, 0.2 m from the pad centre.
+Default flight, as flown by the shipped policy: MECO at 70.9 km and 1.79 km/s, booster apogee 177 km, insertion 270 × 332 km at 39.9°, touchdown at 2.00 m/s vertical and 0.05 m/s horizontal, 0.15° tilt, 2.1 m from the pad centre.
 
 **Reliability.** On 300 dispersed flights the network never saw — wind 0–100 % in any direction, engine thrust ±1 %, drag ±5 %, booster dry mass ±300 kg, payload ±1,000 kg — it completed **298** full missions (orbit, fairing release, deploy and a landing on deployed legs within 3 m/s, 1.5 m/s sideways, 5° and the 43 m pad radius). The classical teacher it learned from completed 295 of the same flights. All 300 reached orbit; the worst touchdown was 2.17 m/s. This is a simulated study, not a flight-certification claim. Details: [docs/FLIGHT-POLICY.md](docs/FLIGHT-POLICY.md).
 

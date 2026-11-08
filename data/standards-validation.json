@@ -365,111 +365,111 @@
     },
     {
       "name": "LZ-1 latitude",
-      "actual": 28.48583,
-      "expected": 28.48583,
+      "actual": 28.485727,
+      "expected": 28.485727,
       "tolerance": 0.001,
       "unit": " deg",
       "ok": true
     },
     {
       "name": "LZ-1 longitude offset",
-      "actual": 0.03286,
-      "expected": 0.032859999999999445,
+      "actual": 0.03433899999998857,
+      "expected": 0.03433899999998857,
       "tolerance": 0.001,
       "unit": " deg",
       "ok": true
     },
     {
       "name": "MECO altitude",
-      "actual": 71934.88752407208,
-      "expected": 71934.8875,
-      "tolerance": 1438.69775,
+      "actual": 70857.40916573908,
+      "expected": 70857.4092,
+      "tolerance": 1417.148184,
       "unit": " m",
       "ok": true
     },
     {
       "name": "MECO speed",
-      "actual": 1781.1036846298614,
-      "expected": 1781.1037,
-      "tolerance": 35.622074,
+      "actual": 1792.5124073651,
+      "expected": 1792.5124,
+      "tolerance": 35.850248,
       "unit": " m/s",
       "ok": true
     },
     {
       "name": "insertion perigee",
-      "actual": 269.9401666599,
-      "expected": 269.9402,
-      "tolerance": 8.098206,
+      "actual": 269.91068221932557,
+      "expected": 269.9107,
+      "tolerance": 8.097321,
       "unit": " km",
       "ok": true
     },
     {
       "name": "insertion apogee",
-      "actual": 341.0115223890515,
-      "expected": 341.0115,
-      "tolerance": 10.230345,
+      "actual": 332.31058684955724,
+      "expected": 332.3106,
+      "tolerance": 9.969318,
       "unit": " km",
       "ok": true
     },
     {
       "name": "insertion inclination",
-      "actual": 39.54160980999693,
-      "expected": 39.5416,
+      "actual": 39.92600657881166,
+      "expected": 39.926,
       "tolerance": 0.5,
       "unit": " deg",
       "ok": true
     },
     {
       "name": "insertion eccentricity",
-      "actual": 0.00532251323212729,
-      "expected": 0.0053,
+      "actual": 0.0046761681383619145,
+      "expected": 0.0047,
       "tolerance": 0.01,
       "unit": "",
       "ok": true
     },
     {
       "name": "touchdown vertical speed",
-      "actual": -1.815640140962695,
-      "expected": -1.8156,
+      "actual": -2.0034322429631235,
+      "expected": -2.0034,
       "tolerance": 0.2,
       "unit": " m/s",
       "ok": true
     },
     {
       "name": "touchdown horizontal speed",
-      "actual": 0.03205307193298931,
-      "expected": 0.0321,
+      "actual": 0.04700303117322131,
+      "expected": 0.047,
       "tolerance": 0.1,
       "unit": " m/s",
       "ok": true
     },
     {
       "name": "touchdown tilt",
-      "actual": 0.10734811835413044,
-      "expected": 0.1073,
+      "actual": 0.14606732270440329,
+      "expected": 0.1461,
       "tolerance": 0.5,
       "unit": " deg",
       "ok": true
     },
     {
       "name": "touchdown pad offset",
-      "actual": 0.22216601620213666,
-      "expected": 0.2222,
+      "actual": 2.0596350460948396,
+      "expected": 2.0596,
       "tolerance": 3,
       "unit": " m",
       "ok": true
     }
   ],
   "model": {
-    "meco_altitude_m": 71934.88752407208,
-    "meco_speed_m_s": 1781.1036846298614,
-    "insertion_perigee_km": 269.9401666599,
-    "insertion_apogee_km": 341.0115223890515,
-    "insertion_inclination_deg": 39.54160980999693,
-    "insertion_eccentricity": 0.00532251323212729,
-    "touchdown_vertical_m_s": -1.815640140962695,
-    "touchdown_horizontal_m_s": 0.03205307193298931,
-    "touchdown_tilt_deg": 0.10734811835413044,
-    "touchdown_offset_m": 0.22216601620213666
+    "meco_altitude_m": 70857.40916573908,
+    "meco_speed_m_s": 1792.5124073651,
+    "insertion_perigee_km": 269.91068221932557,
+    "insertion_apogee_km": 332.31058684955724,
+    "insertion_inclination_deg": 39.92600657881166,
+    "insertion_eccentricity": 0.0046761681383619145,
+    "touchdown_vertical_m_s": -2.0034322429631235,
+    "touchdown_horizontal_m_s": 0.04700303117322131,
+    "touchdown_tilt_deg": 0.14606732270440329,
+    "touchdown_offset_m": 2.0596350460948396
   }
 }

@@ -48,3 +48,5 @@ videos/
 # Local editor/agent settings and scratch captures
 .claude/
 screenshots/
+# Raw imagery tile cache for scripts/fetch_imagery.py
+data/geo-cache/

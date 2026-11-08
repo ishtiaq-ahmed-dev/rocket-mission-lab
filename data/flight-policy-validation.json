@@ -1,24 +1,24 @@
 {
  "schema": "rocket-lab.flight-policy-validation/1",
- "policy_tag": "dagger8",
+ "policy_tag": "dagger20",
  "seeds": [
   900000,
   900299
  ],
- "simulator_sha256": "623ce60711f07b7d7318425f41636fd534491f8f4c160d676e333678b1ec3058",
- "policy_sha256": "5fd2b4dc7e5812b2cdb7b79d9d71cf485865d68039205cd19e5753b1087c3238",
- "replay_sha256": "6ced1d24bf528f58e80ff9c114eee94a393e205d281ed45c28e1ba14a77ba6d6",
+ "simulator_sha256": "f2aeded43d5fec78036048ce173b7bc43d1a480030a9c9aca64bcef411781cb4",
+ "policy_sha256": "38d256cc5cee32c9feae7cbb0192489e41f42f2da98dd47970693a4ced1da8a0",
+ "replay_sha256": "2c2a8d7f7db89f45ef110ebf56714be6cc2f1fe1185f5e16bf3d988ac9abcab7",
  "success": "orbit (perigee > 150 km, e < 0.05), fairing released, payload deployed, deployed landing legs, touchdown vertical <= 0 and > -3 m/s, horizontal < 1.5 m/s, tilt < 5 deg, within 43 m of LZ-1",
  "dispersions": "wind 0-100% any direction, Merlin and MVac thrust +/-1%, drag +/-5%, booster dry mass +/-300 kg, payload +/-1000 kg",
  "policy": {
   "flights": 300,
-  "full_mission": 298,
-  "landing": 298,
+  "full_mission": 300,
+  "landing": 300,
   "orbit": 300,
   "deploy": 300,
   "fairing": 300,
-  "worst_touchdown_m_s": 2.172099365698711,
-  "worst_pad_offset_m": 49.81581612980174
+  "worst_touchdown_m_s": 2.1627953413599124,
+  "worst_pad_offset_m": 38.410453419993516
  },
  "teacher": {
   "flights": 300,
@@ -27,8 +27,8 @@
   "orbit": 300,
   "deploy": 300,
   "fairing": 300,
-  "worst_touchdown_m_s": 2.0471074506175913,
-  "worst_pad_offset_m": 43.34112400945102
+  "worst_touchdown_m_s": 2.049811624273425,
+  "worst_pad_offset_m": 65.12066828411423
  },
  "nominal": {
   "seed": 0,
@@ -36,13 +36,13 @@
   "landed": true,
   "success": true,
   "orbit": true,
-  "vV": -1.815640140962695,
-  "vH": 0.03205307193298931,
-  "err": 0.22216601620213666,
-  "tilt": 0.10734811835413044,
-  "prop": 4816.249024204967,
-  "perigee": 269.9401666599,
-  "apogee": 341.0115223890515,
+  "vV": -2.0034322429631235,
+  "vH": 0.04700303117322131,
+  "err": 2.0596350460948396,
+  "tilt": 0.14606732270440329,
+  "prop": 4650.671360529646,
+  "perigee": 269.91068221932557,
+  "apogee": 332.31058684955724,
   "fairing": true,
   "deploy": true,
   "events": [
@@ -63,72 +63,5 @@
    "SAT_DEPLOY"
   ]
  },
- "failures": [
-  {
-   "seed": 900051,
-   "fly": "policy",
-   "landed": true,
-   "success": false,
-   "orbit": true,
-   "vV": -1.7543169976065465,
-   "vH": 0.24121075802319078,
-   "err": 49.81581612980174,
-   "tilt": 1.6872098529165604,
-   "prop": 5886.718206694736,
-   "perigee": 268.1681475426499,
-   "apogee": 340.1063327101292,
-   "fairing": true,
-   "deploy": true,
-   "events": [
-    "LIFTOFF",
-    "MAX_Q",
-    "MECO",
-    "STAGE_SEP",
-    "S2_IGNITION",
-    "BOOSTBACK_START",
-    "BB_END",
-    "FAIRING_SEP",
-    "APOGEE",
-    "ENTRY_BURN",
-    "SECO",
-    "ENTRY_END",
-    "SAT_DEPLOY",
-    "LANDING_BURN",
-    "TOUCHDOWN"
-   ]
-  },
-  {
-   "seed": 900259,
-   "fly": "policy",
-   "landed": true,
-   "success": false,
-   "orbit": true,
-   "vV": -1.8357989637994,
-   "vH": 0.2380521054491023,
-   "err": 43.95282939925499,
-   "tilt": 1.6579002768116733,
-   "prop": 5524.866606858055,
-   "perigee": 269.2491352761602,
-   "apogee": 339.9878054591762,
-   "fairing": true,
-   "deploy": true,
-   "events": [
-    "LIFTOFF",
-    "MAX_Q",
-    "MECO",
-    "STAGE_SEP",
-    "S2_IGNITION",
-    "BOOSTBACK_START",
-    "BB_END",
-    "FAIRING_SEP",
-    "APOGEE",
-    "ENTRY_BURN",
-    "SECO",
-    "ENTRY_END",
-    "SAT_DEPLOY",
-    "LANDING_BURN",
-    "TOUCHDOWN"
-   ]
-  }
- ]
+ "failures": []
 }

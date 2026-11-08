@@ -19,6 +19,7 @@ those earlier snapshots, not the current flight.
 | 30 Oct 2026 | Falcon 9 RTLS replay | Single-page Three.js replay of a full orbital mission with WGS-84 / ISO 2533 anchors, scripted predictor-corrector guidance. |
 | 1 Nov 2026 | International-standard profile | Public Falcon 9 Block 5 anchors, `scripts/check_standards.js`. |
 | 2 Nov 2026 | **Neural flight policy** | Scripted guidance removed from the page. A trained network flies the whole mission; the boostback no longer thrusts toward the ground; the return was rebuilt around real RTLS practice. See [FLIGHT-POLICY.md](FLIGHT-POLICY.md). |
+| 8 Nov 2026 | **Real ground imagery** | The procedural coastline was replaced by public-domain USGS imagery (NAIP, Landsat, Blue Marble) in six nested layers from the pad apron to the Gulf of Mexico, with land/water masks. LZ-1 was moved to the pad centre measured on that imagery (145 m east of the old coordinate) and the policy retrained with DAgger on the corrected geometry. |
 
 ## Lessons carried forward
 

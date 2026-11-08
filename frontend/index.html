@@ -135,7 +135,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-off
     <h3>REFERENCE ANCHORS</h3>
     <ul><li>Public Falcon 9 Block 5 figures: 549,054 kg published liftoff mass, nine Merlin 1D engines at 845 kN sea level / 914 kN vacuum, 282/311 s, and one MVac at 981 kN / 348 s. The model's no-payload mass closes to 546.6 t, 0.45% below the published figure; dry mass and drag coefficients are modeled.</li><li>WGS-84 GM and rotation, a spherical mean Earth radius, ISO 2533:1975 / U.S. Standard Atmosphere 1976 layers, and Mach-dependent drag. The reference profile is <code>data/reference/international-standard.json</code>.</li></ul>
     <h3>FLIGHT CONTROL &middot; NEURAL POLICY</h3>
-    <ul><li>Every command in this flight comes from a trained neural network evaluated at 10 Hz on the vehicle's own state: engine ignition, cutoff and count, throttle, attitude, stage separation, second-stage burn, fairing jettison and payload deploy. There is no scripted guidance and no fallback controller in this page.</li><li>The network was trained by imitation of a classical teacher with DAgger (<code>scripts/flight_policy/</code>). On 300 unseen dispersed flights (wind, thrust, drag and mass) it completed 298 missions; the teacher completed 295 of the same flights.</li><li>Return profile after Falcon 9 RTLS practice: cold-gas flip, three-engine boostback with horizontal thrust (never toward the ground), unpowered ballistic coast with engines leading, three-engine entry burn near 60 km, unpowered grid-fin glide, single-engine landing burn lit at the last feasible moment.</li><li>After separation the booster still climbs on its own momentum while gravity slows it, and falls after apogee. Stage separation conserves momentum; an engine finishes its shutdown before it can relight.</li></ul>
+    <ul><li>Every command in this flight comes from a trained neural network evaluated at 10 Hz on the vehicle's own state: engine ignition, cutoff and count, throttle, attitude, stage separation, second-stage burn, fairing jettison and payload deploy. There is no scripted guidance and no fallback controller in this page.</li><li>The network was trained by imitation of a classical teacher with DAgger (<code>scripts/flight_policy/</code>). On 300 unseen dispersed flights (wind, thrust, drag and mass) it completed all 300 missions; the teacher completed 295 of the same flights.</li><li>Return profile after Falcon 9 RTLS practice: cold-gas flip, three-engine boostback with horizontal thrust (never toward the ground), unpowered ballistic coast with engines leading, three-engine entry burn near 60 km, unpowered grid-fin glide, single-engine landing burn lit at the last feasible moment.</li><li>After separation the booster still climbs on its own momentum while gravity slows it, and falls after apogee. Stage separation conserves momentum; an engine finishes its shutdown before it can relight.</li></ul>
     <h3>NOT MODELLED / NOT CERTIFIED</h3>
     <ul><li>6-DOF rigid-body dynamics (attitude is a rate-limited first-order response), propellant slosh, aeroelasticity, sensor noise, abort modes, weather, FAA/range safety and structural or thermal limits.</li><li>Plume length and width follow the ambient pressure ratio; soot, grid-fin and leg motion are illustrative. This is not a validated real-world flight model.</li></ul>
     <h3>THIS RUN</h3>
@@ -187,7 +187,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-off
 const PI = Math.PI, D2R = PI / 180, R2D = 180 / PI;
 const MU = 3.986004418e14, RE = 6371008.8, OMEGA = 7.292115e-5, G0 = 9.80665;
 const LAT_S = 28.5619 * D2R;                       /* SLC-40 */
-const LAT_L = 28.48583 * D2R, DLON_L = 0.03286 * D2R; /* LZ-1: 28.48583 N, 80.54444 W */
+/* LZ-1 landing pad centre, measured on USGS NAIP imagery: 28.485727 N, 80.542961 W. (The often
+   quoted 28.48583 N, 80.54444 W is the Launch Complex 13 site, ~145 m west of the pad.) */
+const LAT_L = 28.485727 * D2R, DLON_L = (80.5773 - 80.542961) * D2R;
 const T0 = -10;                                    /* timeline start (s) */
 const DT = 0.02;                                   /* integration step */
 const SAMPLE_EVERY = 2;                            /* 25 Hz tracks */
@@ -787,7 +789,24 @@ function loadScript(urls){
   });
 }
 const MSG=document.getElementById('msg');
+/* Ground imagery: public-domain USGS orthoimagery of Cape Canaveral (scripts/fetch_imagery.py). */
+function loadGeo(){
+  const base='/assets/geo/';
+  const img=src=>new Promise(function(res,rej){const i=new Image();i.onload=function(){res(i);};i.onerror=function(){rej(new Error('missing imagery '+src));};i.src=base+src;});
+  return fetch(base+'geo.json').then(function(r){if(!r.ok)throw new Error('missing imagery index');return r.json();}).then(function(meta){
+    const names=Object.keys(meta.layers),jobs=[];
+    names.forEach(function(n){const L=meta.layers[n];jobs.push(img(L.file).then(function(i){L.image=i;}));
+      if(L.mask)jobs.push(img(L.mask).then(function(i){
+        const c=document.createElement('canvas');c.width=i.width;c.height=i.height;const g=c.getContext('2d');g.drawImage(i,0,0);
+        const d=g.getImageData(0,0,i.width,i.height).data,m=new Uint8Array(i.width*i.height);
+        for(let k=0;k<m.length;k++)m[k]=d[k*4];
+        L.maskData={w:i.width,h:i.height,data:m,image:i};
+      }));});
+    return Promise.all(jobs).then(function(){return meta;});
+  });
+}
 loadScript(['/three.min.js'])
+.then(function(){MSG.textContent='LOADING CAPE CANAVERAL IMAGERY...';return loadGeo().then(function(g){window.__geo=g;});})
 .then(function(){MSG.textContent='LOADING FLIGHT POLICY...';return loadScript(['/flight-policy.js']);})
 .then(function(){MSG.textContent='NEURAL POLICY FLYING THE MISSION...';return new Promise(function(r){setTimeout(r,30);});})
 .then(function(){start();})
@@ -842,7 +861,7 @@ function sampleTrack(tr,t,out){
 const sB=new Float64Array(33),sS=new Float64Array(25),sFA=new Float64Array(15),sFB=new Float64Array(15),sSAT=new Float64Array(15);
 const EV={};SIM.events.forEach(e=>{EV[e.name]=e;});
 const tEv=n=>EV[n]?EV[n].t:1e9;
-const T_SEP=tEv('STAGE_SEP'),T_FAIR=tEv('FAIRING_SEP'),T_TD=tEv('TOUCHDOWN'),T_SATD=tEv('SAT_DEPLOY'),T_SECO=tEv('SECO'),T_MECO=tEv('MECO');
+const T_ENT=tEv('ENTRY_BURN'),T_SEP=tEv('STAGE_SEP'),T_FAIR=tEv('FAIRING_SEP'),T_TD=tEv('TOUCHDOWN'),T_SATD=tEv('SAT_DEPLOY'),T_SECO=tEv('SECO'),T_MECO=tEv('MECO');
 const FLOW={};
 
 /* ================= renderer / scene ================= */
@@ -950,23 +969,101 @@ vec3 ${name}(float h0,vec3 rd,float maxD,vec3 sd,out vec3 tr){
 const ATM_SKY=ATM_COMMON+atmosFn('atmosSky',12,4);
 
 /* shared uniforms: camera-local frame (up, east-ish, south-ish) + sun */
+/* ================= geography: USGS imagery layers and land/water masks ================= */
+/* Positions are converted exactly to latitude/longitude (double precision on the CPU); layers are
+   Web Mercator images, so their rows are linear in Mercator y, not in latitude. */
+const GEO=(function(){
+  const meta=window.__geo,lat0=FlightSim.LAT_S,lon0=meta.site.lon*DEG,sl0=Math.sin(lat0),cl0=Math.cos(lat0);
+  const mercY=lat=>Math.log(Math.tan(Math.PI/4+lat/2)),my0=mercY(lat0);
+  /* world point (x east, y up, z south, origin at SLC-40 on the surface) -> [lat, lon] radians */
+  function ll(x,y,z){const py=y+RE,n=Math.hypot(x,py,z);return [Math.asin((py*sl0-z*cl0)/n),lon0+Math.atan2(x,py*cl0+z*sl0)];}
+  /* small site-relative coordinates for the GPU: [degrees east of site, Mercator y above site] */
+  function rel(x,y,z){const q=ll(x,y,z);return [(q[1]-lon0)/DEG,mercY(q[0])-my0];}
+  const layers={},ORDER=['globe','wide','region','local','slc40','lz1'];
+  ORDER.forEach(n=>{
+    const L=meta.layers[n];
+    const b=new THREE.Vector4(L.lon[0]-meta.site.lon,L.lon[1]-meta.site.lon,mercY(L.lat[0]*DEG)-my0,mercY(L.lat[1]*DEG)-my0);
+    const tex=new THREE.Texture(L.image);tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.anisotropy=maxAniso;tex.needsUpdate=true;
+    let mtex=null;if(L.maskData){mtex=new THREE.Texture(L.maskData.image);mtex.wrapS=mtex.wrapT=THREE.ClampToEdgeWrapping;mtex.needsUpdate=true;}
+    layers[n]={b,tex,mtex,mask:L.maskData||null};
+  });
+  /* bilinear land fraction from a mask (1 land, 0 water), or -1 outside it */
+  function maskAt(n,r){
+    const Ly=layers[n];if(!Ly.mask)return -1;
+    const u=(r[0]-Ly.b.x)/(Ly.b.y-Ly.b.x),v=(r[1]-Ly.b.z)/(Ly.b.w-Ly.b.z);
+    if(u<0.002||u>0.998||v<0.002||v>0.998)return -1;
+    const M=Ly.mask,fx=u*(M.w-1),fy=(1-v)*(M.h-1),ix=Math.floor(fx),iy=Math.floor(fy),ax=fx-ix,ay=fy-iy;
+    const at=(i,j)=>M.data[Math.min(M.h-1,j)*M.w+Math.min(M.w-1,i)]/255;
+    return lerp(lerp(at(ix,iy),at(ix+1,iy),ax),lerp(at(ix,iy+1),at(ix+1,iy+1),ax),ay);
+  }
+  function land(x,z){
+    const r=rel(x,0,z);
+    for(const n of ['local','region','wide','globe']){const m=maskAt(n,r);if(m>=0)return m;}
+    return 0;
+  }
+  const U={uLLsite:{value:new THREE.Vector2(lat0,lon0)}};
+  ORDER.forEach(n=>{U['uGeo_'+n]={value:layers[n].tex};U['uGeoB_'+n]={value:layers[n].b};});
+  ['globe','wide','region','local'].forEach(n=>{U['uMask_'+n]={value:layers[n].mtex};});
+  return {ll,rel,land,layers,uniforms:U,mercY,my0,lat0,lon0};
+})();
+const GEO_GLSL=`
+uniform vec2 uLLsite;
+uniform sampler2D uGeo_globe,uGeo_wide,uGeo_region,uGeo_local,uGeo_slc40,uGeo_lz1,uMask_globe,uMask_wide,uMask_region,uMask_local;
+uniform vec4 uGeoB_globe,uGeoB_wide,uGeoB_region,uGeoB_local,uGeoB_slc40,uGeoB_lz1;
+vec2 geoUV(vec2 r,vec4 b){return vec2((r.x-b.x)/(b.y-b.x),(r.y-b.z)/(b.w-b.z));}
+float geoIn(vec2 uv,float e){vec2 a=smoothstep(vec2(0.0),vec2(e),uv)*smoothstep(vec2(0.0),vec2(e),1.0-uv);return a.x*a.y;}
+vec3 geoLin(vec3 c){return pow(c,vec3(2.2));}
+/* Earth-centred site-frame point -> site-relative [deg east, Mercator y] (sky dome: float precision is enough) */
+vec2 geoRel(vec3 P){
+  float n=length(P),sl=sin(uLLsite.x),cl=cos(uLLsite.x);
+  float lat=asin(clamp((P.y*sl-P.z*cl)/n,-1.0,1.0));
+  float lon=atan(P.x,P.y*cl+P.z*sl);
+  return vec2(degrees(lon),log(tan(0.7853982+lat*0.5))-log(tan(0.7853982+uLLsite.x*0.5)));
+}
+/* imagery colour (linear) and how much of it is real data rather than open-sea fill */
+vec3 geoColor(vec2 r,out float cover){
+  vec3 c=vec3(0.0);cover=0.0;float w;vec2 uv;
+  uv=geoUV(r,uGeoB_globe);w=geoIn(uv,0.01);c=mix(c,texture2D(uGeo_globe,uv).rgb,w);cover=max(cover,w);
+  uv=geoUV(r,uGeoB_wide);w=geoIn(uv,0.03);c=mix(c,texture2D(uGeo_wide,uv).rgb,w);cover=max(cover,w);
+  uv=geoUV(r,uGeoB_region);w=geoIn(uv,0.03);c=mix(c,texture2D(uGeo_region,uv).rgb,w);cover=max(cover,w);
+  uv=geoUV(r,uGeoB_local);w=geoIn(uv,0.04);c=mix(c,texture2D(uGeo_local,uv).rgb,w);
+  uv=geoUV(r,uGeoB_slc40);w=geoIn(uv,0.12);c=mix(c,texture2D(uGeo_slc40,uv).rgb,w);
+  uv=geoUV(r,uGeoB_lz1);w=geoIn(uv,0.12);c=mix(c,texture2D(uGeo_lz1,uv).rgb,w);
+  /* the service fills open ocean with flat (16,48,70): treat that as no data */
+  float fill=1.0-smoothstep(0.02,0.06,distance(c,vec3(16.0,48.0,70.0)/255.0));
+  cover*=1.0-fill;
+  return geoLin(c);
+}
+/* water colour near land from the high-resolution layers only (the wide layer's sea is mosaic fill) */
+vec3 geoWater(vec2 r,out float cover){
+  vec3 c=vec3(0.0);cover=0.0;float w;vec2 uv;
+  uv=geoUV(r,uGeoB_region);w=geoIn(uv,0.03);c=mix(c,texture2D(uGeo_region,uv).rgb,w);cover=max(cover,w);
+  uv=geoUV(r,uGeoB_local);w=geoIn(uv,0.04);c=mix(c,texture2D(uGeo_local,uv).rgb,w);cover=max(cover,w);
+  cover*=smoothstep(0.02,0.06,distance(c,vec3(16.0,48.0,70.0)/255.0));
+  return geoLin(c);
+}
+/* land fraction (1 land, 0 water); bias>0 reads a blurred mip for "near land" */
+float geoLand(vec2 r,float bias){
+  float m=0.0;vec2 uv;float w;
+  uv=geoUV(r,uGeoB_globe);w=geoIn(uv,0.01);m=mix(m,texture2D(uMask_globe,uv,bias).r,w);
+  uv=geoUV(r,uGeoB_wide);w=geoIn(uv,0.03);m=mix(m,texture2D(uMask_wide,uv,bias).r,w);
+  uv=geoUV(r,uGeoB_region);w=geoIn(uv,0.03);m=mix(m,texture2D(uMask_region,uv,bias).r,w);
+  uv=geoUV(r,uGeoB_local);w=geoIn(uv,0.04);m=mix(m,texture2D(uMask_local,uv,bias).r,w);
+  return m;
+}
+`;
 const ATU={
   uSun:{value:SUN.clone()},uUp:{value:new V3(0,1,0)},uE1:{value:new V3(1,0,0)},uE3:{value:new V3(0,0,1)},
-  uCamE:{value:new V3(0,RE,0)},uCamH:{value:50},uTime:{value:0},uSunCol:{value:SUN_COL.clone()}
+  uCamE:{value:new V3(0,RE,0)},uCamH:{value:50},uTime:{value:0},uSunCol:{value:SUN_COL.clone()},
+  ...GEO.uniforms
 };
 const FRAME_GLSL=`
 uniform vec3 uSun,uUp,uE1,uE3,uCamE,uSunCol; uniform float uCamH,uTime;
 vec3 toL(vec3 d){return vec3(dot(d,uE1),dot(d,uUp),dot(d,uE3));}
 `;
-/* Earth surface: coast, land, ocean (shared by the sky-dome ground and the ocean mesh) */
-const EARTH_GLSL=`
-float coastX(float z){return 900.0+0.38*z+180.0*sin(z/1300.0+1.0)+90.0*sin(z/430.0+2.0)+40.0*sin(z/170.0)+2500.0*sin(z/61000.0+0.5);}
-float landMask(vec2 xz){
-  float c=coastX(xz.y);
-  float m=smoothstep(c+80.0,c-80.0,xz.x)*smoothstep(-175000.0,-160000.0,xz.x);
-  m*=1.0-smoothstep(380000.0,420000.0,xz.y);
-  return m;
-}
+/* Earth surface: real Cape Canaveral imagery, land/water masks, ocean optics (shared by the
+   sky-dome ground and the ocean mesh) */
+const EARTH_GLSL=GEO_GLSL+`
 vec3 skyRefl(vec3 Pw,vec3 R,vec3 sunW){
   vec3 up=normalize(Pw);
   vec3 e1=normalize(cross(up,vec3(0.0,0.0,1.0)));
@@ -982,28 +1079,28 @@ vec3 earthSurface(vec3 Pw,vec3 N,vec3 V,float dist,float cloudAmt){
   float mu=dot(N,uSun);
   vec3 st=sunTrans(mu);
   float ndl=max(mu,0.0);
-  vec2 xz=Pw.xz;
-  float lm=landMask(xz);
-  float d=xz.x-coastX(xz.y);
-  /* land */
-  float n1=fbm3(N*900.0),n2=fbm3(N*7000.0+3.0);
-  vec3 landC=mix(vec3(0.045,0.075,0.03),vec3(0.10,0.095,0.05),n1);
-  landC=mix(landC,vec3(0.16,0.15,0.11),smoothstep(0.55,0.75,n2)*0.5);
-  landC=mix(vec3(0.20,0.185,0.14),landC,smoothstep(0.0,2500.0,-d));          /* sandy strip along the coast */
+  vec2 r=geoRel(Pw);
+  float lm=smoothstep(0.35,0.65,geoLand(r,0.0));
+  float cover;vec3 img=geoColor(r,cover);
+  /* land: the aerial photograph is the albedo; procedural fallback beyond the imagery */
+  float n1=fbm3(N*900.0);
+  vec3 landC=mix(mix(vec3(0.045,0.075,0.03),vec3(0.10,0.095,0.05),n1),img,cover);
   /* ocean */
   vec3 H=normalize(V+uSun);
   float nv=clamp(dot(N,V),0.0,1.0);
   float F=0.02+0.98*pow(1.0-nv,5.0);
   vec3 refl=skyRefl(Pw,reflect(-V,N),uSun);
   vec3 deep=vec3(0.004,0.022,0.045);
-  float shelf=exp(-max(d,0.0)/9000.0);
-  vec3 body=mix(deep,vec3(0.02,0.11,0.12),shelf*0.8)*(0.4+0.9*ndl);
+  /* shallow shelf, lagoons and surf take their colour from the photograph near land */
+  float nearLand=smoothstep(0.08,0.4,geoLand(r,3.0));
+  float wCover;vec3 wImg=geoWater(r,wCover);
+  vec3 body=mix(deep*(0.4+0.9*ndl),wImg,wCover*nearLand);
   vec3 ocean=mix(body,refl,F);
   float nh=max(dot(N,H),0.0);
   float glint=exp(-(1.0-nh)/0.0016)*F*20.0*smoothstep(0.0,0.05,mu);
   ocean+=uSunCol*glint;
   vec3 land=landC*SUNI*0.55*ndl/PI*st+landC*SUNI*0.06;
-  vec3 col=mix(ocean*vec3(1.0),land,lm);
+  vec3 col=mix(ocean,land,lm);
   /* clouds */
   if(cloudAmt>0.001){
     float c1=fbm3(N*55.0+vec3(1.3,2.1,0.7));
@@ -1053,7 +1150,9 @@ const skyMat=new THREE.ShaderMaterial({
       float disc=smoothstep(0.999980,0.999988,mu);
       col+=tr*vec3(1.0,0.92,0.78)*disc*60.0*uDisc;
       float lum=dot(col,vec3(0.3,0.59,0.11));
-      float vis=pow(clamp(1.0-lum*5.0,0.0,1.0),3.0);
+      /* A camera exposed for a sunlit vehicle (or Earth) records no stars, even in space; they
+         only come out when the sun is below this viewpoint's horizon. */
+      float vis=pow(clamp(1.0-lum*5.0,0.0,1.0),3.0)*(1.0-smoothstep(-0.12,0.02,sl.y));
       if(vis>0.001){
         float s=starLayer(rd,90.0,0.968)+starLayer(rd,210.0,0.985)*0.8+starLayer(rd,460.0,0.992)*0.7;
         vec3 ax=normalize(vec3(0.35,0.78,0.52));
@@ -1123,7 +1222,7 @@ const concreteC=tileConcrete(512,11);
 const concreteTex=toTex(concreteC,1,1);
 const darkConcreteTex=toTex(tileConcrete(512,5,[0.62,0.62,0.64]),1,1);
 
-function padTexture(label){
+function padTexture(){
   const S=1024,c=mkCanvas(S,S),g=c.getContext('2d'),R=S/2,pat=g.createPattern(concreteC,'repeat');
   g.fillStyle=pat;g.fillRect(0,0,S,S);
   g.save();g.beginPath();g.arc(R,R,R-1,0,6.2832);g.clip();
@@ -1140,28 +1239,14 @@ function padTexture(label){
     g.strokeStyle='rgba(20,18,16,'+(0.05+rr()*0.1)+')';g.lineWidth=2+rr()*6;
     g.beginPath();g.moveTo(R+Math.cos(a)*r0,R+Math.sin(a)*r0);g.lineTo(R+Math.cos(a)*r1,R+Math.sin(a)*r1);g.stroke();
   }
-  /* paint */
+  /* paint: LZ-1 is a plain concrete circle with an outer ring and a large target cross */
   const ring=(r0,r1,col)=>{g.strokeStyle=col;g.lineWidth=(r1-r0)*R;g.beginPath();g.arc(R,R,(r0+r1)/2*R,0,6.2832);g.stroke();};
-  ring(0.895,0.965,'#f1f1ea');
-  ring(0.55,0.585,'#f1f1ea');
-  ring(0.30,0.335,'#f1f1ea');
-  ring(0.135,0.20,'#f2f0e6');
-  ring(0.20,0.235,'#e8661a');
-  /* hazard dashes between outer ring and pad edge */
-  for(let i=0;i<72;i++){
-    const a=i/72*6.2832;g.save();g.translate(R,R);g.rotate(a);
-    g.fillStyle=i%2?'#e8c21a':'#1c1c1c';g.fillRect(R*0.972,-R*0.015,R*0.022,R*0.03);g.restore();
-  }
-  /* spokes */
-  g.strokeStyle='#efefe6';g.lineWidth=5;
-  for(let i=0;i<8;i++){const a=i*Math.PI/4;g.beginPath();g.moveTo(R+Math.cos(a)*R*0.235,R+Math.sin(a)*R*0.235);g.lineTo(R+Math.cos(a)*R*0.895,R+Math.sin(a)*R*0.895);g.stroke();}
-  /* centre target */
-  g.fillStyle='#e8661a';g.beginPath();g.arc(R,R,R*0.045,0,6.2832);g.fill();
-  g.strokeStyle='#f2f0e6';g.lineWidth=7;
-  g.beginPath();g.moveTo(R-R*0.13,R);g.lineTo(R+R*0.13,R);g.moveTo(R,R-R*0.13);g.lineTo(R,R+R*0.13);g.stroke();
-  /* pad name */
-  g.fillStyle='#f1f1ea';g.font='bold '+Math.round(R*0.1)+'px Arial, Helvetica, sans-serif';g.textAlign='center';g.textBaseline='middle';
-  for(let i=0;i<4;i++){g.save();g.translate(R,R);g.rotate(i*Math.PI/2+Math.PI/4);g.translate(0,-R*0.72);g.fillText(label||'LZ-1',0,0);g.restore();}
+  ring(0.925,0.955,'#ecebe4');
+  g.save();g.translate(R,R);g.rotate(Math.PI/4);g.fillStyle='#ecebe4';
+  const arm=R*0.62,w=R*0.085;
+  g.fillRect(-arm,-w/2,arm*2,w);g.fillRect(-w/2,-arm,w,arm*2);
+  g.restore();
+  ring(0.20,0.235,'#ecebe4');
   /* weathering over everything */
   g.globalAlpha=0.38;g.fillStyle=pat;g.fillRect(0,0,S,S);g.globalAlpha=1;
   g.restore();
@@ -1194,17 +1279,15 @@ const groundMaps=(function(){
 const PAD_Y=0.25,MOUNT_H=2.5,OCEAN_Y=-0.9;
 const WG=new THREE.Group();scene.add(WG);          /* static world content, positioned at -ORG each frame */
 const DIRH=new V3(LZW[0],0,LZW[2]).normalize();
-function coastX(z){return 900+0.38*z+180*Math.sin(z/1300+1)+90*Math.sin(z/430+2)+40*Math.sin(z/170)+2500*Math.sin(z/61000+0.5);}
-function landMaskJS(x,z){const c=coastX(z);return sstep(c+90,c-90,x)*sstep(-175000,-160000,x)*(1-sstep(380000,420000,z));}
 const PADS=[[0,0],[LZW[0],LZW[2]]];
 function landH(x,z){
-  const m=landMaskJS(x,z);
+  const m=sstep(0.35,0.65,GEO.land(x,z));                /* real coastline and lagoons from the imagery */
   if(m<=0.0005)return -8;
   let dp=1e9;for(let i=0;i<2;i++)dp=Math.min(dp,Math.hypot(x-PADS[i][0],z-PADS[i][1]));
   const flat=sstep(180,520,dp);
   const bump=(NZ.fbm((x+9000)/1900,(z+9000)/1900,6,4)-0.45)*3.2*flat+(NZ.fbm((x+7000)/230,(z+3000)/230,16,3)-0.5)*0.9*flat;
   const inland=Math.max(bump,-0.3*flat);
-  return lerp(-8,inland,sstep(0,0.9,m));
+  return m>0.02?inland:-8;
 }
 /* non-uniform grid axis: fine in the middle, growing outwards */
 function axis(lo,hi,fLo,fHi,cs,gr,eLo,eHi){
@@ -1217,17 +1300,11 @@ function axis(lo,hi,fLo,fHi,cs,gr,eLo,eHi){
 const land=(function(){
   const xs=axis(0,0,-3600,5300,50,1.09,-70000,9000),zs=axis(0,0,-3600,13800,50,1.09,-80000,85000);
   const W=xs.length,H=zs.length,N=W*H;
-  const pos=new Float32Array(N*3),col=new Float32Array(N*3),uv=new Float32Array(N*2),hh=new Float32Array(N);
+  const pos=new Float32Array(N*3),geo=new Float32Array(N*2),uv=new Float32Array(N*2),hh=new Float32Array(N);
   for(let j=0;j<H;j++)for(let i=0;i<W;i++){
     const x=xs[i],z=zs[j],h=landH(x,z),k=j*W+i;
     hh[k]=h;pos[k*3]=x;pos[k*3+1]=h+curv(x,z);pos[k*3+2]=z;uv[k*2]=x/90;uv[k*2+1]=z/90;
-    /* deep-water vertices are culled or shaded under the ocean mesh: skip their detail noise */
-    const inland=clamp((coastX(z)-x-65)/100,0,1);
-    const n=h>-3?NZ.fbm((x+5000)/520,(z+5000)/520,8,4):0.5;
-    const variation=(0.94+0.06*Math.sin(x*0.043+Math.cos(z*0.029)*2)*Math.cos(z*0.037))*(0.94+0.06*(n-0.5));
-    const dry=clamp((h+1.2)/1.45,0,1),wet=0.68+0.32*dry*dry*(3-2*dry);
-    const cr=(0.92-inland*0.17)*variation*wet,cg=(0.88-inland*0.09)*variation*wet,cb=(0.72-inland*0.18)*variation*wet;
-    col[k*3]=cr;col[k*3+1]=cg;col[k*3+2]=cb;
+    const r=GEO.rel(x,0,z);geo[k*2]=r[0];geo[k*2+1]=r[1];
   }
   const idx=[];
   for(let j=0;j<H-1;j++)for(let i=0;i<W-1;i++){
@@ -1235,11 +1312,32 @@ const land=(function(){
     if(hh[a]<-2.4&&hh[b]<-2.4&&hh[c]<-2.4&&hh[d]<-2.4)continue;
     idx.push(a,c,b,b,c,d);
   }
-  const geo=new THREE.BufferGeometry();
-  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('color',new THREE.BufferAttribute(col,3));geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));
-  geo.setIndex(idx);geo.computeVertexNormals();
-  const m=new THREE.MeshStandardMaterial({map:groundMaps.color,normalMap:groundMaps.normal,roughnessMap:groundMaps.rough,vertexColors:true,roughness:1,metalness:0});
-  const mesh=new THREE.Mesh(geo,m);mesh.receiveShadow=true;mesh.frustumCulled=false;
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aGeo',new THREE.BufferAttribute(geo,2));g.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+  g.setIndex(idx);g.computeVertexNormals();
+  /* The aerial photograph is the ground colour; a tiled ground texture only adds fine grain at close range. */
+  const m=new THREE.MeshStandardMaterial({normalMap:groundMaps.normal,normalScale:new THREE.Vector2(0.35,0.35),roughness:1,metalness:0});
+  m.onBeforeCompile=function(sh){
+    Object.assign(sh.uniforms,GEO.uniforms,{uDet:{value:groundMaps.color}});
+    sh.vertexShader=`attribute vec2 aGeo;
+varying vec2 vGeo;
+varying vec2 vDet;
+`+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+  vGeo=aGeo;vDet=uv;`);
+    sh.fragmentShader=GEO_GLSL+`uniform sampler2D uDet;
+varying vec2 vGeo;
+varying vec2 vDet;
+`+sh.fragmentShader.replace('#include <map_fragment>',
+      `#include <map_fragment>
+  float geoCover;vec3 geoAlb=geoColor(vGeo,geoCover);
+`+
+      `  float detL=dot(texture2D(uDet,vDet*3.0).rgb,vec3(0.3333))/0.40;
+`+
+      `  if(geoLand(vGeo,0.0)<0.5)discard;
+`+   /* coastline at photograph resolution; the ocean shows below */
+      '  diffuseColor.rgb=geoAlb*0.52*mix(1.0,clamp(detL,0.65,1.4),0.45*exp(-length(vViewPosition)/300.0));');
+  };
+  const mesh=new THREE.Mesh(g,m);mesh.receiveShadow=true;mesh.frustumCulled=false;
   WG.add(mesh);return mesh;
 })();
 
@@ -1265,9 +1363,10 @@ const normTex=(function(){
 const oceanUniforms=Object.assign({uNorm:{value:normTex},uCam:{value:new V3()},uOrg:{value:new V3()}},ATU);
 const oceanMat=new THREE.ShaderMaterial({
   uniforms:oceanUniforms,fog:false,
-  vertexShader:`varying vec3 vW;
-  void main(){vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`,
+  vertexShader:`attribute vec2 aGeo; varying vec3 vW; varying vec2 vGeo;
+  void main(){vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;vGeo=aGeo;gl_Position=projectionMatrix*viewMatrix*w;}`,
   fragmentShader:ATM_COMMON+atmosFn('atmosRefl',6,3)+atmosFn('atmosAP',6,2)+FRAME_GLSL+EARTH_GLSL+`
+  varying vec2 vGeo;
   uniform sampler2D uNorm; uniform vec3 uCam,uOrg;
   varying vec3 vW;
   vec3 wn(vec2 uv){vec2 s=texture2D(uNorm,uv).rg*2.0-1.0;return vec3(s.x,0.0,s.y);}
@@ -1292,12 +1391,11 @@ const oceanMat=new THREE.ShaderMaterial({
     float F=0.02+0.98*pow(1.0-cosT,5.0);
     F=mix(F,min(F+0.08,1.0),smoothstep(0.0,3000.0,dist));
     vec3 refl=skyRefl(Pw,R,uSun);
-    float d=W.x-coastX(W.z);
-    float shelf=exp(-max(d,0.0)/9000.0);
     float sd=max(dot(N0,uSun),0.0);
-    vec3 body=(vec3(0.006,0.035,0.055)+vec3(0.0,0.03,0.035)*pow(1.0-cosT,2.0)*0.4);
-    body=mix(body,vec3(0.02,0.11,0.10),shelf*0.7*smoothstep(0.0,200.0,d+250.0));
-    body*=0.4+0.9*sd;
+    vec3 body=(vec3(0.006,0.035,0.055)+vec3(0.0,0.03,0.035)*pow(1.0-cosT,2.0)*0.4)*(0.4+0.9*sd);
+    /* surf, shelf and lagoon water take their colour from the aerial photograph near land */
+    float wCover;vec3 wImg=geoWater(vGeo,wCover);
+    body=mix(body,wImg*0.9,wCover*smoothstep(0.05,0.35,geoLand(vGeo,3.0)));
     vec3 col=mix(body,refl,F);
     vec3 H=normalize(V+uSun);
     float mu=max(dot(R,uSun),0.0);
@@ -1306,6 +1404,10 @@ const oceanMat=new THREE.ShaderMaterial({
     float sunSpec=lobe*1.1+pow(mu,420.0)*2.2*fadeB+pow(mu,36.0)*0.05*exp(-dist/20000.0);
     float Rup=dot(R,N0);
     col+=uSunCol*sunSpec*F*7.0*smoothstep(0.0,0.05,Rup);
+    /* land the coarse far-field land mesh does not cover: draw the photograph, so the coastline
+       follows the imagery mask instead of the mesh cells */
+    float lmO=smoothstep(0.35,0.65,geoLand(vGeo,0.0));
+    if(lmO>0.001){float cv;vec3 im=geoColor(vGeo,cv);col=mix(col,im*SUNI*0.55*sd/PI*sunTrans(dot(N0,uSun))+im*SUNI*0.06,lmO);}
     vec3 rdv=-V; vec3 trA; vec3 ins=atmosAP(max(uCamH,2.0),toL(rdv),dist,toL(uSun),trA);
     col=col*trA+ins;
     col+=(hash12(gl_FragCoord.xy)-0.5)*0.003;
@@ -1316,12 +1418,13 @@ const oceanMat=new THREE.ShaderMaterial({
 });
 const ocean=(function(){
   const RINGS=170,SEG=288,R0=60,R1=250000,q=Math.pow(R1/R0,1/(RINGS-1));
-  const pos=new Float32Array((RINGS+1)*SEG*3);
+  const pos=new Float32Array((RINGS+1)*SEG*3),gpos=new Float32Array((RINGS+1)*SEG*2);
   for(let r=0;r<=RINGS;r++){
     const rad=r===0?0.01:R0*Math.pow(q,r-1);
     for(let s=0;s<SEG;s++){
       const a=s/SEG*Math.PI*2,x=Math.cos(a)*rad,z=Math.sin(a)*rad,k=(r*SEG+s)*3;
       pos[k]=x;pos[k+1]=OCEAN_Y+curv(x,z);pos[k+2]=z;
+      const gr=GEO.rel(x,0,z);gpos[(r*SEG+s)*2]=gr[0];gpos[(r*SEG+s)*2+1]=gr[1];
     }
   }
   const idx=[];
@@ -1329,7 +1432,7 @@ const ocean=(function(){
     const s2=(s+1)%SEG,a=r*SEG+s,b=r*SEG+s2,c=(r+1)*SEG+s,d=(r+1)*SEG+s2;
     idx.push(a,c,b,b,c,d);
   }
-  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setIndex(idx);
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aGeo',new THREE.BufferAttribute(gpos,2));g.setIndex(idx);
   const m=new THREE.Mesh(g,oceanMat);m.frustumCulled=false;m.renderOrder=-50;
   WG.add(m);return m;
 })();
@@ -1353,30 +1456,13 @@ const ocean=(function(){
 const LZ_R=43;
 const lzGroup=new THREE.Group();lzGroup.position.set(LZW[0],LZW[1],LZW[2]);lzGroup.quaternion.setFromUnitVectors(new V3(0,1,0),new V3(LZW[0],LZW[1]+RE,LZW[2]).normalize());WG.add(lzGroup);
 (function(){
-  const top=new THREE.Mesh(new THREE.CircleGeometry(LZ_R,96),new THREE.MeshStandardMaterial({map:padTexture('LANDING'),roughness:0.9,metalness:0}));
+  const top=new THREE.Mesh(new THREE.CircleGeometry(LZ_R,96),new THREE.MeshStandardMaterial({map:padTexture(),roughness:0.9,metalness:0}));
   top.rotation.x=-Math.PI/2;top.position.y=PAD_Y+0.004;top.receiveShadow=true;lzGroup.add(top);
   const side=new THREE.Mesh(new THREE.CylinderGeometry(LZ_R,LZ_R+0.35,PAD_Y+0.1,96,1,true),new THREE.MeshStandardMaterial({map:concreteTex,roughness:0.95}));
   side.position.y=(PAD_Y-0.1)/2;side.material.map=toTex(concreteC,40,1);lzGroup.add(side);
   /* apron skirt around pad */
   const apr=new THREE.Mesh(new THREE.RingGeometry(LZ_R,LZ_R+14,96,1),new THREE.MeshStandardMaterial({map:toTex(tileConcrete(256,17,[0.8,0.8,0.82]),16,16),roughness:0.95,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
   apr.rotation.x=-Math.PI/2;apr.position.y=0.06;apr.receiveShadow=true;lzGroup.add(apr);
-  /* blast deflectors: sloped concrete shields ringing the pad */
-  const prof=new THREE.Shape();
-  prof.moveTo(0,0);prof.lineTo(6.5,0);prof.lineTo(6.5,1.1);prof.lineTo(1.4,3.6);prof.lineTo(0,3.6);prof.lineTo(0,0);
-  const dg=new THREE.ExtrudeGeometry(prof,{depth:15,bevelEnabled:false});dg.translate(0,0,-7.5);
-  const dm=new THREE.MeshStandardMaterial({map:toTex(concreteC,1.5,1.5),roughness:0.93});
-  const yel=new THREE.MeshStandardMaterial({color:0xe9bb18,roughness:0.6}),blk=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:0.7});
-  const sg=new THREE.BoxGeometry(0.9,0.12,1.5);
-  for(let k=0;k<6;k++){
-    const a=k/6*Math.PI*2+Math.PI/6;
-    const d=new THREE.Group();
-    const m=new THREE.Mesh(dg,dm);m.castShadow=true;m.receiveShadow=true;
-    d.add(m);
-    for(let s=0;s<10;s++){const q=new THREE.Mesh(sg,s%2?blk:yel);q.position.set(0.7,3.66,-6.75+s*1.5);d.add(q);}
-    d.position.set(Math.cos(a)*(LZ_R+9),0,-Math.sin(a)*(LZ_R+9));
-    d.rotation.y=a+Math.PI;
-    lzGroup.add(d);
-  }
 })();
 
 /* ================= launch complex ================= */
@@ -1384,9 +1470,6 @@ const launchGroup=new THREE.Group();launchGroup.position.set(0,0,0);WG.add(launc
 (function(){
   const aprn=new THREE.Mesh(new THREE.BoxGeometry(84,PAD_Y,84),new THREE.MeshStandardMaterial({map:toTex(concreteC,10,10),roughness:0.93}));
   aprn.position.y=PAD_Y/2;aprn.receiveShadow=true;launchGroup.add(aprn);
-  /* stencilled takeoff pad, matching the original launch site markings */
-  const takeoff=new THREE.Mesh(new THREE.CircleGeometry(40,96),new THREE.MeshStandardMaterial({map:padTexture('TAKEOFF'),roughness:0.9,metalness:0}));
-  takeoff.rotation.set(-Math.PI/2,0,Math.PI);takeoff.position.y=PAD_Y+0.005;takeoff.receiveShadow=true;launchGroup.add(takeoff);
   /* flame trench */
   const tr=new THREE.Mesh(new THREE.PlaneGeometry(10,38),new THREE.MeshStandardMaterial({color:0x151412,roughness:1,polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3}));
   tr.geometry.rotateX(-Math.PI/2);tr.rotation.y=Math.atan2(-DIRH.x,-DIRH.z);tr.position.set(-DIRH.x*10,PAD_Y+0.01,-DIRH.z*10);launchGroup.add(tr);
@@ -1488,7 +1571,7 @@ const towerGroup=new THREE.Group();towerGroup.position.copy(TOWER_POS);WG.add(to
   const sg=[[1,1],[-1,1],[-1,-1],[1,-1]];
   for(let i=0;i<LV;i++){
     const y0=i*dy,y1=y0+dy;
-    const col=(i>=LV-4&&i%2===0)?0xc9341f:0xcfd3d8;
+    const col=0x868c92;                         /* galvanised grey steel, like the SLC-40 access tower */
     for(let k=0;k<4;k++){
       const A=sg[k],B=sg[(k+1)%4];
       list.push({a:cor(A[0],A[1],y0),b:cor(A[0],A[1],y1),r:0.3,c:col});
@@ -1551,16 +1634,65 @@ const towerGroup=new THREE.Group();towerGroup.position.copy(TOWER_POS);WG.add(to
   const eq=new THREE.Mesh(new THREE.BoxGeometry(5,3.2,5),new THREE.MeshStandardMaterial({color:0x9aa1a8,roughness:0.6,metalness:0.3}));
   eq.position.set(7,1.6+PAD_Y,3);eq.castShadow=eq.receiveShadow=true;towerGroup.add(eq);
   const bc=new THREE.Mesh(new THREE.SphereGeometry(0.28,10,8),new THREE.MeshBasicMaterial({color:0xff2a1a}));bc.position.y=TOWER_H+PAD_Y+9.2;towerGroup.add(bc);
-  const bs=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xff3a22,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));bs.scale.set(7,7,1);bs.position.copy(bc.position);towerGroup.add(bs);
+  const bs=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xff3a22,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));bs.scale.set(2.5,2.5,1);bs.position.copy(bc.position);towerGroup.add(bs);
   FRAME.push(function(S,dt,tr){const k=0.55+0.45*Math.sin(tr*3.1);bs.material.opacity=k;});
 })();
 
-/* ================= boundary floodlights ================= */
-const poolTex=(function(){
-  const c=mkCanvas(128,128),g=c.getContext('2d'),gr=g.createRadialGradient(64,64,0,64,64,64);
-  gr.addColorStop(0,'rgba(255,240,205,.50)');gr.addColorStop(0.5,'rgba(255,230,180,.16)');gr.addColorStop(1,'rgba(255,225,170,0)');
-  g.fillStyle=gr;g.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);
+/* ================= transporter-erector strongback and lightning protection ================= */
+/* Falcon 9 stands against a black truss strongback that pivots at its base and is pulled back a
+   few degrees before launch; four tall masts carry overhead lightning catenary wires. */
+(function(){
+  const awayTower=new V3(TOWER_POS.x,0,TOWER_POS.z).normalize().negate();
+  const teH=70,teW=3.2,teD=2.6,lean=3.2*Math.PI/180;
+  const te=new THREE.Group();te.position.set(awayTower.x*(1.83+1.9),MOUNT_H,awayTower.z*(1.83+1.9));   /* 1.83 m: booster radius */
+  te.quaternion.setFromUnitVectors(new V3(0,0,1),new V3(awayTower.x,0,awayTower.z));
+  const lean0=new THREE.Group();lean0.rotation.x=lean;te.add(lean0);
+  const list=[],LV=28,dy=teH/LV;
+  const P=(sx,sz,y)=>new V3(sx*teW/2,y,teD*0.15+sz*teD/2);
+  const C=[[1,1],[-1,1],[-1,-1],[1,-1]];
+  for(let i=0;i<LV;i++){
+    const y0=i*dy,y1=y0+dy;
+    for(let k=0;k<4;k++){
+      const A=C[k],Bc=C[(k+1)%4];
+      list.push({a:P(A[0],A[1],y0),b:P(A[0],A[1],y1),r:0.16});
+      list.push({a:P(A[0],A[1],y1),b:P(Bc[0],Bc[1],y1),r:0.08});
+      list.push({a:(i+k)%2?P(A[0],A[1],y0):P(Bc[0],Bc[1],y0),b:(i+k)%2?P(Bc[0],Bc[1],y1):P(A[0],A[1],y1),r:0.06});
+    }
+  }
+  const geo=new THREE.CylinderGeometry(1,1,1,5,1),mat=new THREE.MeshStandardMaterial({color:0x1d1f22,roughness:0.62,metalness:0.5});
+  const im=new THREE.InstancedMesh(geo,mat,list.length),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),up=new V3(0,1,0),sc=new V3(),pos=new V3(),dir=new V3();
+  list.forEach((bb,i)=>{dir.subVectors(bb.b,bb.a);const L=dir.length();dir.divideScalar(L);q.setFromUnitVectors(up,dir);pos.addVectors(bb.a,bb.b).multiplyScalar(0.5);sc.set(bb.r,L,bb.r);m4.compose(pos,q,sc);im.setMatrixAt(i,m4);});
+  im.castShadow=true;im.receiveShadow=true;lean0.add(im);
+  /* open clamp arms at three levels, swung back from the tank */
+  [16,38,60].forEach(y=>{
+    for(const sx of [-1,1]){
+      const arm=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.35,2.4),mat);arm.position.set(sx*(teW/2+0.6),y,-0.9);arm.rotation.y=sx*0.55;arm.castShadow=true;lean0.add(arm);
+    }
+  });
+  WG.add(te);
+  /* lightning masts and catenary */
+  const mastM=new THREE.MeshStandardMaterial({color:0xb7bcc1,roughness:0.5,metalness:0.6});
+  const H=92,tops=[];
+  [[-62,-58],[66,-60],[64,62],[-60,64]].forEach(p=>{
+    const m=new THREE.Mesh(new THREE.CylinderGeometry(0.45,1.25,H,10),mastM);m.position.set(p[0],H/2,p[1]);m.castShadow=true;WG.add(m);
+    const tip=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.18,6,6),mastM);tip.position.set(p[0],H+3,p[1]);WG.add(tip);
+    tops.push(new V3(p[0],H-0.5,p[1]));
+  });
+  const wire=[],sag=7;
+  for(let k=0;k<4;k++)for(const [a,b] of [[k,(k+1)%4],[k,(k+2)%4]]){
+    if(b<a&&(b+2)%4===a)continue;
+    const A=tops[a],Bt=tops[b];
+    for(let i=0;i<24;i++){
+      const f0=i/24,f1=(i+1)/24;
+      const pt=f=>new V3(lerp(A.x,Bt.x,f),lerp(A.y,Bt.y,f)-sag*4*f*(1-f),lerp(A.z,Bt.z,f));
+      const p0=pt(f0),p1=pt(f1);wire.push(p0.x,p0.y,p0.z,p1.x,p1.y,p1.z);
+    }
+  }
+  const wg=new THREE.BufferGeometry();wg.setAttribute('position',new THREE.Float32BufferAttribute(wire,3));
+  WG.add(new THREE.LineSegments(wg,new THREE.LineBasicMaterial({color:0x2a2c2f,transparent:true,opacity:0.7})));
 })();
+
+/* ================= boundary floodlight masts (lamps off: the launch is in daylight, sun ~25 deg up) ================= */
 function floodMast(parent,x,z,tx,tz,H){
   const g=new THREE.Group();g.position.set(x,PAD_Y*0,z);
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.28,H,8),new THREE.MeshStandardMaterial({color:0x8b9097,roughness:0.5,metalness:0.6}));
@@ -1568,15 +1700,10 @@ function floodMast(parent,x,z,tx,tz,H){
   const head=new THREE.Group();head.position.y=H+0.3;g.add(head);
   const arm=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.18,0.18),pole.material);head.add(arm);
   for(let i=0;i<3;i++){
-    const lamp=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.5,0.34),new THREE.MeshBasicMaterial({color:0xfff4d8}));
+    const lamp=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.5,0.34),new THREE.MeshStandardMaterial({color:0xd9dccf,roughness:0.25,metalness:0.1}));
     lamp.position.set(-0.7+i*0.7,-0.05,0.18);head.add(lamp);
   }
   head.rotation.y=Math.atan2(tx-x,tz-z);
-  const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xffe9bd,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:0.9}));
-  gl.scale.set(11,11,1);gl.position.y=H+0.3;g.add(gl);
-  const dx=tx-x,dz=tz-z,dd=Math.hypot(dx,dz),k=Math.min(0.55,34/dd);
-  const pool=new THREE.Mesh(new THREE.PlaneGeometry(64,64),new THREE.MeshBasicMaterial({map:poolTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,polygonOffset:true,polygonOffsetFactor:-6,polygonOffsetUnits:-6}));
-  pool.rotation.x=-Math.PI/2;pool.position.set(dx*k,PAD_Y+0.09,dz*k);g.add(pool);
   parent.add(g);
   return g;
 }
@@ -1787,6 +1914,38 @@ const MAT={
   raceway:new THREE.MeshStandardMaterial({color:0xc6c9cc,roughness:0.5,metalness:0.55})
 };
 
+/* Entry-burn soot. A Falcon 9 booster leaves the pad white and comes back with the RP-1 tank and
+   aft end blackened and long soot streaks above, laid down when it flies through its own
+   fuel-rich exhaust during the entry burn. Build a streak mask and blend it in from that burn on. */
+const sootTex=(function(){
+  const W=512,Hc=1024,c=mkCanvas(W,Hc),g=c.getContext('2d'),r=mulberry32(777);
+  const Yh=h=>(1-(h-H_BASE)/H_SPAN)*Hc;
+  g.fillStyle='#000';g.fillRect(0,0,W,Hc);
+  const base=g.createLinearGradient(0,Yh(1),0,Yh(24));
+  base.addColorStop(0,'rgba(255,255,255,.92)');base.addColorStop(0.45,'rgba(255,255,255,.70)');base.addColorStop(0.75,'rgba(255,255,255,.32)');base.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle=base;g.fillRect(0,Yh(24),W,Yh(1)-Yh(24));
+  for(let i=0;i<520;i++){
+    const x=r()*W,h0=8+r()*14,len=(4+r()*20)/H_SPAN*Hc,w=1+r()*7,a=0.08+r()*0.35;
+    const sg=g.createLinearGradient(0,Yh(h0),0,Yh(h0)-len);sg.addColorStop(0,'rgba(255,255,255,'+a+')');sg.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle=sg;g.fillRect(x,Yh(h0)-len,w,len);
+  }
+  /* streaks blown down the tank from the interstage */
+  for(let i=0;i<160;i++){
+    const x=r()*W,len=(3+r()*10)/H_SPAN*Hc,w=1+r()*4;
+    const sg=g.createLinearGradient(0,Yh(37.6),0,Yh(37.6)+len);sg.addColorStop(0,'rgba(255,255,255,'+(0.15+r()*0.3)+')');sg.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle=sg;g.fillRect(x,Yh(37.6),w,len);
+  }
+  const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;t.anisotropy=4;return t;
+})();
+const sootU={value:0};
+MAT.body.onBeforeCompile=function(sh){
+  sh.uniforms.uSoot=sootU;sh.uniforms.uSootMap={value:sootTex};
+  sh.fragmentShader=`uniform float uSoot; uniform sampler2D uSootMap;
+`+sh.fragmentShader.replace('#include <map_fragment>',
+    `#include <map_fragment>
+  diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.035,0.032,0.03),uSoot*texture2D(uSootMap,vUv).r*0.95);`);
+};
+
 /* ================= booster ================= */
 const rocket=new THREE.Group();scene.add(rocket);
 const ENGINES=[];                       /* 0 centre, 1..8 outer */
@@ -1838,8 +1997,19 @@ const FINS=[],LEGS=[],RCS_PORTS=[];
   /* landing legs */
   const LEG_HY=3.3,LEG_END=new THREE.Vector2(8.2,-3.2),LEG_L=LEG_END.length();
   const thDep=Math.atan2(LEG_END.x,LEG_END.y);     /* angle from +up toward +x */
-  const strutGeo=new THREE.CylinderGeometry(0.11,0.19,LEG_L,12);strutGeo.translate(0,LEG_L/2,0);
-  const fairGeo=new THREE.BoxGeometry(0.32,LEG_L*0.84,0.5);fairGeo.translate(0,LEG_L*0.5,0);
+  /* Falcon 9 legs are broad carbon-fibre panels that taper toward the foot (stowed they form
+     part of the outer skin), each pushed out by a single telescoping strut. */
+  const strutGeo=(function(){
+    const g=new THREE.BoxGeometry(1,LEG_L,1,1,8,1);g.translate(0,LEG_L/2,0);
+    const P=g.attributes.position;
+    for(let i=0;i<P.count;i++){
+      const f=clamp(P.getY(i)/LEG_L,0,1);
+      P.setX(i,P.getX(i)*lerp(0.46,0.26,f)-0.06);          /* panel depth, outer face kept flush */
+      P.setZ(i,P.getZ(i)*lerp(1.30,0.46,f));               /* panel width */
+    }
+    g.computeVertexNormals();return g;
+  })();
+  const fairGeo=new THREE.BoxGeometry(0.06,LEG_L*0.9,0.9);fairGeo.translate(0.12,LEG_L*0.47,0);
   const footGeo=new THREE.CylinderGeometry(0.42,0.62,0.2,20);
   const footArmGeo=new THREE.BoxGeometry(0.6,0.2,0.6);
   for(let k=0;k<4;k++){
@@ -1859,6 +2029,7 @@ const FINS=[],LEGS=[],RCS_PORTS=[];
     for(let p=0;p<3;p++){
       const o=new THREE.Mesh(UNIT_CYL,p===0?MAT.steel:MAT.dark),inn=new THREE.Mesh(UNIT_CYL,MAT.chrome);
       o.castShadow=inn.castShadow=true;G.add(o);G.add(inn);pistons.push({o,inn,A:anchors[p],f:along[p],z:p===0?0:(p===1?0.2:-0.2)});
+      if(p>0)o.visible=inn.visible=false;                  /* one telescoping strut per leg */
     }
     LEGS.push({G,piv,strut,foot,pistons,thDep,L:LEG_L,hy:LEG_HY});
   }
@@ -2041,6 +2212,7 @@ function updateBooster(B,t,tr){
     E.rotation.z=(0.9*Math.cos(tr*2.0+i*1.3))*DEG*k;
   }
   MAT.body.emissiveIntensity=heat*2.6;
+  sootU.value=sstep(T_ENT,T_ENT+14,t);
   MAT.titan.emissiveIntensity=heat*1.6;
   MAT.bell.emissiveIntensity=Math.min(1,thr*0.4+heat*0.5)*0.35;
 }
@@ -2119,11 +2291,14 @@ void main(){
   float dens=pow(ndv,1.1);
   dens*=mix(1.0,0.35+1.25*fl,smoothstep(0.04,0.75,s));
   dens*=1.0-smoothstep(0.50,1.0,s);
-  vec3 red=vec3(1.0,0.20,0.03),amber=vec3(1.0,0.58,0.15),yel=vec3(1.0,0.82,0.42),blue=vec3(0.30,0.55,1.0),white=vec3(1.0,0.97,0.9);
+  /* RP-1/LOX: incandescent soot, not a blue hydrogen flame. White-yellow core, amber body,
+     deep orange fringe; the fringe darkens with soot in dense air and the whole plume reddens
+     and thins as ambient pressure falls and the soot cools faster than it can glow. */
+  vec3 fringe=mix(vec3(1.0,0.42,0.10),vec3(0.70,0.26,0.08),sqrt(uAmb)*0.55);
+  vec3 amber=vec3(1.0,0.56,0.16),yel=vec3(1.0,0.80,0.44),white=vec3(1.0,0.95,0.82);
   float edge=rho+s*0.45+(fl-0.5)*0.30;
-  vec3 col=mix(red,amber,smoothstep(1.0,0.60,edge));
-  col=mix(col,yel,smoothstep(0.66,0.30,edge)*0.8);
-  col=mix(col,blue,smoothstep(0.55,0.22,rho+s*0.25)*0.55);
+  vec3 col=mix(fringe,amber,smoothstep(1.0,0.60,edge));
+  col=mix(col,yel,smoothstep(0.66,0.30,edge)*0.85);
   col=mix(col,white,smoothstep(0.34,0.03,rho+s*0.36));
   float lam=6.4*uR0*uXp;
   float ph=fract(s*uLen/lam+0.12);
@@ -2132,8 +2307,9 @@ void main(){
   float core=smoothstep(0.34*tri+0.03,0.0,rho);
   float disk=smoothstep(0.10,0.0,abs(ph-0.5)*2.0-0.82)*smoothstep(0.30,0.0,rho);
   float dm=(core*0.9+disk*1.6)*win*uDiam;
-  col+=vec3(0.85,0.93,1.0)*dm;
-  float I=dens*1.3*(0.55+0.65*uThr)*mix(0.30,1.0,sqrt(uAmb));
+  col+=vec3(1.0,0.92,0.74)*dm;                 /* Mach disks glow yellow-white in a kerosene plume */
+  /* the afterburning plume stays bright well into the stratosphere, then fades as it balloons */
+  float I=dens*1.3*(0.55+0.65*uThr)*mix(0.55,1.0,sqrt(uAmb));
   I+=dm*0.9;
   gl_FragColor=vec4(col*I*uGain,1.0);
   #include <tonemapping_fragment>
@@ -2243,7 +2419,8 @@ function updatePlume(B,Sx,t,tr,camPos){
   const nE=Math.round(B[8]),thr=B[7];
   const Xp=1/(0.14+0.86*Math.sqrt(pr));
   PUB.uTime.value=tr;PUB.uThr.value=thr;PUB.uAmb.value=pr;PUB.uXp.value=Xp;
-  PUB.uLen.value=lerp(6,19,thr)*(0.78+0.22*Xp)*(1+0.32*(Xp-1))*(nE===1?0.8:1);
+  /* luminous length: about half a vehicle length at liftoff for nine engines, longer as it rises */
+  PUB.uLen.value=lerp(9,30,thr)*(0.78+0.22*Xp)*(1+0.32*(Xp-1))*(nE===1?0.7:1);
   PUB.uDiam.value=clamp(pr*1.5,0,1)*(thr>0.99?1.0:0.85);
   for(let i=0;i<9;i++)PLUMES[i].visible=nE>0&&thr>0.01&&engineActive(i,nE)&&rocket.visible;
   const k=nE>0?thr:0,share=Math.min(1,nE/3);
@@ -2372,7 +2549,7 @@ function makePS(N,order){
   P.clear();return P;
 }
 const PS=makePS(26000,8);       /* dense puffs: pad steam, dust, near-nozzle smoke */
-const PT=makePS(16000,7);       /* long-lived exhaust trail */
+const PT=makePS(40000,7);       /* long-lived exhaust trail */
 
 /* ---- deterministic spawner: every event is a pure function of the fixed step index ---- */
 const STEP=1/50;
@@ -2417,9 +2594,15 @@ function spawnStep(k){
       const al=1.0*clamp(0.4+Math.sqrt(rhoF)*0.9,0.35,1)*(0.55+0.45*thr)*fade;
       const life=lowAlt?42+30*R():24+16*R();
       const back=1.4+R()*1.2;
-      PT.emit(B[0]+_X.x*ex+_Z.x*ez-_ax.x*back,B[1]+_X.y*ex+_Z.y*ez-_ax.y*back,B[2]+_X.z*ex+_Z.z*ez-_ax.z*back,
-        -_ax.x*26+(R()-0.5)*4+vgx*0.10,-_ax.y*26+(R()-0.5)*4+vgy*0.10,-_ax.z*26+(R()-0.5)*4+vgz*0.10,
-        t+R()*STEP,life,s0,s1,al,0.025+0.05*R(),1.1,1.1,1.12,0.5,0.32,R());
+      /* A real exhaust trail is a continuous column. At hundreds of m/s the vehicle moves tens of
+         metres per emission, so lay several puffs along the path flown since the last one. */
+      const span=spd*STEP*every,nSub=Math.min(8,Math.max(1,Math.ceil(span/(s0*0.55))));
+      for(let q=0;q<nSub;q++){
+        const f=q/nSub,dt=f*STEP*every;
+        PT.emit(B[0]+_X.x*ex+_Z.x*ez-_ax.x*back-vgx*dt,B[1]+_X.y*ex+_Z.y*ez-_ax.y*back-vgy*dt,B[2]+_X.z*ex+_Z.z*ez-_ax.z*back-vgz*dt,
+          -_ax.x*26+(R()-0.5)*4+vgx*0.10,-_ax.y*26+(R()-0.5)*4+vgy*0.10,-_ax.z*26+(R()-0.5)*4+vgz*0.10,
+          t-dt+R()*STEP*0.2,life,s0,s1,al/Math.sqrt(nSub),0.025+0.05*R(),1.1,1.1,1.12,0.5,0.32,R());
+      }
     }
   }
   /* ---- ground blast: launch pad (steam / exhaust) and LZ-1 (dust) ---- */
@@ -2428,12 +2611,12 @@ function spawnStep(k){
     const dh=Math.hypot(B[0]-P.x,B[2]-P.z),hA=B[1]-P.y;
     if(dh<70&&hA<P.altMax&&nE>0&&thr>0.05){
       const I=thr*Math.pow(clamp(1-hA/P.altMax,0,1),0.8)*(nE>=9?1:0.85);
-      let n=Math.floor(I*6+R());
+      let n=Math.floor(I*(P.dust?2.2:6)+R());
       while(n-->0){
         const th=R()*6.2832,r0=(1.5+R()*6)*(1+hA/55),vr=(9+R()*30)*(0.4+0.6*I);
         const dust=P.dust;
         PS.emit(B[0]+Math.cos(th)*r0,P.y+0.4+R()*1.5,B[2]+Math.sin(th)*r0,Math.cos(th)*vr,1+R()*5,Math.sin(th)*vr,
-          t+R()*STEP,5+R()*6,3+R()*3,11+R()*13,0.06+0.06*R(),0.28,lerp(0.96,0.74,dust),lerp(0.96,0.69,dust),lerp(0.97,0.62,dust),0.0,0.62+R()*0.4,R());
+          t+R()*STEP,dust?3.5+R()*3.5:5+R()*6,3+R()*3,11+R()*13,0.06+0.06*R(),0.28,lerp(0.96,0.74,dust),lerp(0.96,0.69,dust),lerp(0.97,0.62,dust),0.0,0.62+R()*0.4,R());
       }
       if(I>0.45&&R()<0.5){
         const nn=3+((R()*4)|0);
@@ -2447,7 +2630,7 @@ function spawnStep(k){
     const P=PADLIST[1];
     for(let i=0;i<24;i++){
       const th=R()*6.2832,r0=3+R()*6,vr=16+R()*38;
-      PS.emit(B[0]+Math.cos(th)*r0,P.y+0.5,B[2]+Math.sin(th)*r0,Math.cos(th)*vr,1+R()*6,Math.sin(th)*vr,t+R()*STEP,8+R()*6,5,26+R()*14,0.20+0.08*R(),0.22,0.80,0.76,0.70,0.0,0.78+R()*0.3,R());
+      PS.emit(B[0]+Math.cos(th)*r0,P.y+0.5,B[2]+Math.sin(th)*r0,Math.cos(th)*vr,1+R()*6,Math.sin(th)*vr,t+R()*STEP,5+R()*4,5,22+R()*12,0.10+0.06*R(),0.22,0.80,0.76,0.70,0.0,0.78+R()*0.3,R());
     }
     for(let i=0;i<9;i++){
       const th=R()*6.2832,vr=62+R()*34;
@@ -2497,7 +2680,9 @@ const obEl=document.getElementById('ob'),obl=document.getElementById('obl'),labE
 function upAt(p,out){return out.set(p.x,p.y-EC_Y,p.z).normalize();}
 function resolveFocus(t){
   let w=focusMode;
-  if(w===0){ if(t<T_TD+7)w=1; else if(t<T_SATD-1)w=2; else w=3; }
+  /* Ground cameras (launch tower, landing pad) watch the booster; only free cameras hand over to
+     the upper stage and payload, which are hundreds of kilometres away by then. */
+  if(w===0){ if(t<T_TD+7||camMode===3||camMode===5)w=1; else if(t<T_SATD-1)w=2; else w=3; }
   if(w===3&&!(sSAT[7]>0.5))w=2;
   F.which=w;
   if(w===1){
@@ -2861,7 +3046,7 @@ function frame(now){
 }
 // Hidden tabs pause their mission clock; visible slow frames keep wall time.
 document.addEventListener('visibilitychange',()=>{lastNow=performance.now();});
-window.__sim={PT:PT,PS:PS,draw:function(dt){realT+=dt;drawFrame(dt);},seek:seek,setCam:setCam,setFocus:setFocus,setPlaying:setPlaying,SIM:SIM,scene:scene,renderer:renderer,camera:camera,sB:sB,sS:sS,F:F,orb:orb,get t(){return simT;},THREE:THREE,ORG:ORG};
+window.__sim={PT:PT,PS:PS,draw:function(dt){realT+=dt;drawFrame(dt);},seek:seek,setCam:setCam,setFocus:setFocus,setPlaying:setPlaying,SIM:SIM,scene:scene,renderer:renderer,camera:camera,sB:sB,sS:sS,F:F,orb:orb,get t(){return simT;},THREE:THREE,ORG:ORG,GEO:GEO};
 /* model notes dialog */
 (function(){
   const btn=document.getElementById('notesbtn'),panel=document.getElementById('notes'),close=document.getElementById('notesclose');

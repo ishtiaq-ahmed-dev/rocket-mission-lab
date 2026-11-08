@@ -92,34 +92,36 @@ node scripts/flight_policy/parallel.js teacher 900000 200  # same seeds, teacher
 
 ## Results
 
-Shipped policy: `dagger8` (behaviour cloning on 240 dispersed and 40 nominal noisy
-teacher demonstrations, then eight DAgger rounds of 200 policy-flown dispersed
-flights). Candidates from later rounds were compared on the same held-out seeds
-and the best one ships. Evidence: `data/flight-policy-validation.json`
+Shipped policy: `dagger21` (behaviour cloning on 240 dispersed and 40 nominal noisy
+teacher demonstrations, then DAgger rounds of 200 policy-flown dispersed flights;
+rounds 20-21 retrained it after LZ-1 moved 145 m east to the imagery-measured pad
+centre, which dropped the previous network to 49/200). Each candidate is compared
+with the incumbent on the same development seeds before it ships. Evidence: `data/flight-policy-validation.json`
 (`node scripts/flight_policy/evaluate.js`).
 
 **Held-out dispersed flights** (seeds 900000-900299, never used in training):
 
 | | Full missions | Reached orbit | Worst touchdown | Worst pad offset |
 | --- | --- | --- | --- | --- |
-| Neural policy | **298 / 300** | 300 / 300 | 2.17 m/s | 49.8 m |
-| Classical teacher | 295 / 300 | 300 / 300 | 2.05 m/s | 43.3 m |
+| Neural policy | **300 / 300** | 300 / 300 | 2.16 m/s | 38.4 m |
+| Classical teacher | 295 / 300 | 300 / 300 | 2.05 m/s | 65.1 m |
 
 A full mission means orbit (perigee above 150 km, eccentricity below 0.05),
 fairing released, payload deployed, and a touchdown on deployed legs slower than 3 m/s vertically and 1.5 m/s
-sideways, tilted under 5° and inside the 43 m pad radius. The policy's two
-misses were soft touchdowns just outside the pad radius.
+sideways, tilted under 5° and inside the 43 m pad radius. The teacher's five
+misses were soft touchdowns outside the pad radius; the network landed all 300.
 
-**Nominal replay** (what the page shows): liftoff T+0, MECO T+139 s at 71.9 km
-and 1.78 km/s, separation T+142.5, MVac ignition T+147.6, boostback T+159-196,
-booster apogee 184 km at T+294, entry burn T+457-483 (60.6 → 34.7 km),
-landing burn T+550 from 2.1 km, touchdown T+568 at 1.82 m/s vertical,
-0.03 m/s horizontal, 0.11° tilt, 0.2 m from the pad centre; SECO T+509 into a
-270 × 341 km orbit at 39.5°, payload deploy T+569.
+**Nominal replay** (what the page shows): liftoff T+0, MECO T+139 s at 70.9 km
+and 1.79 km/s, separation T+142.3, MVac ignition T+147.5, boostback T+159-198,
+booster apogee 177 km at T+290, entry burn T+448-471 (61.0 → 37.7 km),
+landing burn T+539 from 2.2 km, touchdown T+559 at 2.00 m/s vertical,
+0.05 m/s horizontal, 0.15° tilt, 2.1 m from the pad centre; SECO T+507 into a
+270 × 332 km orbit at 39.9°, payload deploy T+567.
 
 Training history (200 dispersed flights per round): round 1 0/200 (the cloned
 policy flew every phase but crashed), round 6 165/200 after adding fine height
-and sink-rate inputs for the last metres, rounds 8-13 between 188 and 197/200.
+and sink-rate inputs for the last metres, rounds 8-13 between 188 and 197/200; after the LZ-1 correction round 20 flew
+49/200 and round 21 200/200.
 
 ## Limits
 
@@ -128,3 +130,9 @@ and sink-rate inputs for the last metres, rounds 8-13 between 188 and 197/200.
 - Point-mass translational dynamics with first-order attitude response; no
   rigid-body rotation, slosh, structural or thermal loads.
 - The dispersion set is a simulation study, not a range-safety analysis.
+- The return is slower than a real Falcon 9 RTLS. Public webcasts (for example
+  Ax-4, June 2025) show the boostback around T+2:42-3:28, the entry burn at
+  T+6:18 and touchdown near T+7:40, with a booster apogee of roughly 120-170 km.
+  Here the simulated booster climbs to about 177 km and lands near T+9:19,
+  because the teacher spends its boostback on horizontal thrust only and keeps a
+  larger landing reserve. The phases and their order match; the timing does not.
