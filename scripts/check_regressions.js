@@ -105,8 +105,8 @@ test('candidate gate rejects nominal regressions and lost missions', () => {
   const baseline = score([good(0),good(800000),good(800001)]);
   assert.equal(improves(score([good(0),good(800000),{...good(800001),success:false}]),baseline),false);
   assert.equal(improves(score([{...good(0),vV:-4},good(800000),good(800001)]),baseline),false);
-  assert.equal(improves(score([good(0),{...good(800000),vV:-4},good(800001)]),{...baseline,successes:1}),false);
-  assert.equal(improves(score([good(0),{...good(800000),err:150},good(800001)]),{...baseline,successes:1}),false);
+  assert.equal(improves(score([good(0),{...good(800000),vV:-6},good(800001)]),{...baseline,successes:1}),false);
+  assert.equal(improves(score([good(0),{...good(800000),err:300},good(800001)]),{...baseline,successes:1}),false);
   assert.equal(improves(score([good(0),{...good(800000),err:0.2},good(800001)]),baseline),true);
   assert.throws(()=>score([]),/empty/);
   assert.throws(()=>score([good(0)]),/nominal and dispersed/);

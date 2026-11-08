@@ -33,8 +33,9 @@ of that state (staged? which burn? engines on?); they never select behaviour.
 Anchored to Falcon 9 return-to-launch-site practice (SpaceX user's guide, NASA
 launch-and-landing sequence, public webcast telemetry):
 
-1. **Ascent.** Hold-down until thrust exceeds weight at T-0, a 2.6° pitch kick,
-   gravity turn, max-Q throttle bucket, 3.65 g acceleration limit. MECO comes
+1. **Ascent.** Hold-down until thrust exceeds weight at T-0, a 2.2° pitch kick,
+   gravity turn, a throttle bucket centred on T+48 s that caps dynamic pressure
+   (max-Q falls at T+1:11, as on Falcon 9), 3.65 g acceleration limit. MECO comes
    with about 60 t of propellant left for the return, at about 60 km and
    1.8 km/s, so the booster coasts to about 126 km, as on RTLS flights.
 2. **MECO and separation.** All nine engines cut, the engines finish their
@@ -95,54 +96,60 @@ node scripts/flight_policy/parallel.js teacher 900000 200  # same seeds, teacher
 
 ## Results
 
-Shipped policy: `dagger8` of the real-timeline training run. The teacher was
-retuned to the Falcon 9 RTLS timeline (flatter ascent, MECO with the return
-propellant kept, short entry burn, drag-aware landing-burn ignition, smooth
-terminal insertion guidance) and the network trained from scratch: behaviour
-cloning on teacher demonstrations, then DAgger rounds of 200-300 policy-flown
-dispersed flights. Each candidate is compared with the incumbent on the same 256
-development seeds before it ships; while no network can yet fly the nominal
-mission, the gate ships whichever is further along (missions, then orbits, then
-pad offset). Evidence: `data/flight-policy-validation.json`
-(`node scripts/flight_policy/evaluate.js`).
+Shipped policy: `dagger9` of the final training run. The teacher flies the
+Falcon 9 RTLS timeline (throttle bucket before max-Q, flatter ascent with MECO
+keeping the return propellant, short entry burn, drag-aware landing-burn
+ignition, smooth terminal insertion guidance). The network was warm-started
+from the previous real-timeline network, then trained by behaviour cloning on
+300 noisy teacher demonstrations and DAgger rounds of 300 policy-flown dispersed
+flights. Each candidate is compared with the incumbent on the same 256
+development seeds; the gate blocks crashes (touchdown above 5 m/s) and landings
+off the pad complex (beyond 250 m) unless the incumbent already has them, and
+while no network flies the nominal mission it ships whichever is further along.
+When the development gate saturated, saved candidates were compared on a
+separate 500-flight validation set (seeds 600000-600499) and the best shipped;
+the held-out seeds were run once, for the shipped network. Evidence:
+`data/flight-policy-validation.json` (`node scripts/flight_policy/evaluate.js`).
 
-**Held-out dispersed flights** (seeds 900000-900299, never used in training):
-
-| | Full missions | Reached orbit | Worst touchdown | Worst pad offset |
-| --- | --- | --- | --- | --- |
-| Neural policy | **297 / 300** | 300 / 300 | 6.24 m/s | 94 km |
-| Classical teacher | 300 / 300 | 300 / 300 | 2.05 m/s | 27.3 m |
+| Dispersed flights | Neural policy | Classical teacher |
+| --- | --- | --- |
+| Validation, seeds 600000-600499 | 495 / 500 | 494 / 500 |
+| **Held-out, seeds 900000-900299** | **297 / 300** | 298 / 300 |
+| Held-out reached orbit | 300 / 300 | 300 / 300 |
+| Held-out worst touchdown | 3.31 m/s | 2.02 m/s |
+| Held-out worst pad offset | 59 m | 83 m |
 
 A full mission means orbit (perigee above 150 km, eccentricity below 0.05),
 fairing released, payload deployed, and a touchdown on deployed legs slower than
 3 m/s vertically and 1.5 m/s sideways, tilted under 5° and inside the 43 m pad
-radius. The network's misses: two touchdowns on the pad that were too hard
-(3.7 and 6.2 m/s), one 44 m out, and one low-thrust, strong-wind flight whose
-boostback fell short (94 km). Later candidates traded these for more misses
-elsewhere and were rejected by the gate.
+radius. The network's three held-out misses all touched down upright on or
+next to the pad: two at 3.3 m/s (limit 3 m/s) on the centre, one 59 m out. The
+teacher's misses are of the same kind, so the network has reached the teacher's
+level; going further needs a better teacher, not more imitation.
 
-**Nominal replay compared with Falcon 9 RTLS** (Ax-4, 25 June 2025, public
-webcast timeline; booster apogee from CRS-10 webcast reconstructions):
+**Nominal replay compared with Falcon 9 RTLS** (Ax-4, 25 June 2025, and Dragon
+cargo webcast timelines; booster apogee from CRS-10 webcast reconstructions):
 
 | Event | This replay | Falcon 9 RTLS |
 | --- | --- | --- |
-| MECO | T+2:16, 60.6 km, 1.80 km/s | T+2:17-2:33, ~60-65 km, ~1.7 km/s |
-| Boostback | T+2:36-3:31 | T+2:42-3:28 |
-| Booster apogee | 128 km at T+4:16 | ~130 km |
-| Entry burn | T+6:10-6:20 (66 → 57 km) | T+6:18-6:30 |
-| Landing burn | T+7:24 from 4.2 km | T+7:22 |
-| Touchdown | T+7:49 | T+7:39 |
-| SECO | T+8:24 | T+8:48 |
+| Max-Q | T+1:11, 25.5 kPa | T+1:12 |
+| MECO | T+2:15, 59.1 km, 1.81 km/s | T+2:17-2:33, ~60-65 km, ~1.7 km/s |
+| Boostback | T+2:35-3:29 | T+2:42-3:28 |
+| Booster apogee | 128 km | ~130 km |
+| Entry burn | T+6:11-6:23 (66 → 56 km) | T+6:18-6:30 |
+| Landing burn | T+7:28 from 3.9 km | T+7:22-7:33 |
+| Touchdown | T+7:53 | T+7:39 |
+| SECO | T+8:23 | T+8:48 |
 
-Touchdown at 1.95 m/s vertical, 0.02 m/s horizontal, 0.12° tilt, 1.4 m from
-the pad centre; insertion 269 × 334 km at 42.9°; payload deploy T+9:24.
+Touchdown at 2.03 m/s vertical, 0.05 m/s horizontal, 0.16° tilt, 0.6 m from
+the pad centre; insertion 269 × 342 km at 42.5°; payload deploy T+9:23.
 
-Training history: from scratch, round 1 flew 0/200 and reached no orbits;
-round 5 found that the teacher's terminal insertion steering whipped the pitch
-to its limit in the last seconds (time-to-go collapsing to zero), which the
-network could not imitate, so upper-stage labels were regenerated with a
-time-to-go floor; round 7 flew 86/200 and round 8 195/200; later rounds flew 197/200 to 300/300
-with the round-8 network, and no later candidate beat it on the gate.
+Training history: a from-scratch run on the RTLS-timeline teacher reached
+297/300 held-out; it found that the teacher's terminal insertion steering whipped
+the pitch to its limit as time-to-go collapsed, which the network could not
+imitate (fixed with a time-to-go floor). The ascent was then given a throttle
+bucket before max-Q, and the final network was warm-started from that run:
+round 1 flew 11/300, round 3 253/300, round 7 298/300, round 9 298/300.
 
 ## Limits
 
@@ -151,7 +158,3 @@ with the round-8 network, and no later candidate beat it on the gate.
 - Point-mass translational dynamics with first-order attitude response; no
   rigid-body rotation, slosh, structural or thermal loads.
 - The dispersion set is a simulation study, not a range-safety analysis.
-- Max-Q comes at T+55 s, earlier than the T+1:10 typical of Falcon 9
-  webcasts: with the lighter default payload the stack accelerates faster off
-  the pad. Moving the throttle bucket earlier collapses the gravity turn in
-  this point-mass model, so the bucket stays where it is.

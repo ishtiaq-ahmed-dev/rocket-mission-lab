@@ -29,8 +29,10 @@ function improves(candidate, incumbent) {
       (candidate.successes === incumbent.successes && (candidate.orbits > incumbent.orbits ||
       (candidate.orbits === incumbent.orbits && candidate.mean_offset < incumbent.mean_offset)));
   }
-  return candidate.nominal && candidate.worst_speed <= Math.max(3, incumbent.worst_speed) &&
-    candidate.worst_offset <= Math.max(43, incumbent.worst_offset) &&
+  /* envelope floors block catastrophic misses (a crash, a landing off the pad complex) without
+     letting one soft near-miss veto a candidate that completes more missions */
+  return candidate.nominal && candidate.worst_speed <= Math.max(5, incumbent.worst_speed) &&
+    candidate.worst_offset <= Math.max(250, incumbent.worst_offset) &&
     (candidate.successes > incumbent.successes ||
     (candidate.successes === incumbent.successes && candidate.mean_offset < incumbent.mean_offset));
 }

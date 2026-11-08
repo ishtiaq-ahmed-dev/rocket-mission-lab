@@ -22,7 +22,7 @@ module.exports = function makeTeacher(FS, settings) {
     aeroTiltMax: 16 * D2R, hAim: 1000, landTiltMax: 32 * D2R, vTd: 1.8,
     landThr: 0.85, landMargin: 15, aLat: 3, kLat: 0.35, fadeH: 200, aGate: 2.5, cnAlpha: 3.2, aoaBase: 0
   }, settings && settings.bp);
-  const ASC = Object.assign({ ignT: -3.6, kick: 2.6 * D2R, tKick0: 8.0, kickDur: 5, gLim: 3.65, propMeco: 60000, sepDelay: 3.0 }, settings && settings.asc);
+  const ASC = Object.assign({ ignT: -3.6, kick: 2.2 * D2R, tKick0: 8.0, kickDur: 5, gLim: 3.65, propMeco: 60000, sepDelay: 3.0, bucketT: 48, bucketW: 10, bucketDepth: 0.35 }, settings && settings.asc);
   const S2 = Object.assign({ ignDelay: 5.0, tFair: 200, deployDelay: 60, hTarget: 300000, hIns: 270000, hMin: 150000, gLim: 3.7, tgoMin: 40 },
     settings && settings.s2);
   const cache = settings && settings.cache ? {} : null;
@@ -226,7 +226,7 @@ module.exports = function makeTeacher(FS, settings) {
     if (S.tMeco > -1e8 || S.cutting) return { dir: unit(vrel), thr: 0, n: 0, sep: S.tMeco > -1e8 && t >= S.tMeco + ASC.sepDelay };
     if (t < ASC.ignT) return { dir: Ub, thr: 0, n: 0, sep: false };
     const h = nrm(S.r) - RE, mNow = boosterMass(S) + upperMass(U);
-    let thr = t < 0 ? clamp((t - ASC.ignT) / 3.0, 0, 1) * 0.95 : 1 - 0.30 * Math.exp(-Math.pow((t - 66) / 14, 2));
+    let thr = t < 0 ? clamp((t - ASC.ignT) / 3.0, 0, 1) * 0.95 : 1 - ASC.bucketDepth * Math.exp(-Math.pow((t - ASC.bucketT) / ASC.bucketW, 2));
     thr = Math.min(thr, ASC.gLim * G0 * mNow / (9 * V.merTvac) + V.merAe * pressAt(h) / V.merTvac);
     if (t >= 0) thr = Math.max(thr, V.merMin);
     let dir = Ub;

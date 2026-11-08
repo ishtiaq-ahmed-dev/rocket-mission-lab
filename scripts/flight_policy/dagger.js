@@ -29,8 +29,13 @@ function moveData(tag) {
 }
 function train(extra) {
   const candidate = path.join(WORK, 'candidate.js'), checkpoint = path.join(WORK, 'candidate.pt');
-  const resume = fs.existsSync(POLICY_FILE) ? ['--init-policy', POLICY_FILE] : [];
-  const r = spawnSync(PY, [path.join(__dirname, 'train.py'), '--output', candidate, '--checkpoint', checkpoint, ...resume, ...extra.filter(x => x !== '--init')], { stdio: 'inherit', cwd: ROOT });
+  /* resume the shipped weights; INIT_POLICY warm-starts a fresh run (no incumbent) from another export */
+  const init = fs.existsSync(POLICY_FILE) ? POLICY_FILE : process.env.INIT_POLICY;
+  const resume = init ? ['--init-policy', init] : [];
+  const argv = [path.join(__dirname, 'train.py'), '--output', candidate, '--checkpoint', checkpoint, ...resume, ...extra.filter(x => x !== '--init')];
+  let r = spawnSync(PY, argv, { stdio: 'inherit', cwd: ROOT });
+  /* a shared GPU can be full (another process holding memory): retry on the CPU */
+  if (r.status !== 0) r = spawnSync(PY, argv, { stdio: 'inherit', cwd: ROOT, env: Object.assign({}, process.env, { CUDA_VISIBLE_DEVICES: '' }) });
   if (r.status !== 0) throw new Error('training failed');
   return candidate;
 }
