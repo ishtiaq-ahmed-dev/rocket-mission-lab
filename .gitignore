@@ -50,3 +50,4 @@ videos/
 screenshots/
 # Raw imagery tile cache for scripts/fetch_imagery.py
 data/geo-cache/
+media/
