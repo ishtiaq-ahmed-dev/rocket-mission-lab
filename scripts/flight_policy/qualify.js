@@ -16,6 +16,8 @@ function score(rows) {
     nominal: !!(complete(nominal) && nominal.vV > -2.1 && nominal.vV < 0 && nominal.vH < 0.5 && nominal.err <= 5 && nominal.tilt < 5),
     successes: dispersed.filter(complete).length,
     orbits: dispersed.filter(r => r.orbit).length,
+    /* catastrophic outcomes: a crash or a landing off the pad complex */
+    catastrophes: dispersed.filter(r => !Number.isFinite(r.vV) || Math.abs(r.vV) > 5 || !Number.isFinite(r.err) || r.err > 250).length,
     mean_offset: dispersed.reduce((sum, r) => sum + (Number.isFinite(r.err) ? r.err : 1e6), 0) / dispersed.length,
     worst_offset: Math.max(...dispersed.map(r => Number.isFinite(r.err) ? r.err : 1e6)),
     worst_speed: Math.max(...dispersed.map(r => Number.isFinite(r.vV) ? Math.abs(r.vV) : 1e6))
@@ -29,10 +31,9 @@ function improves(candidate, incumbent) {
       (candidate.successes === incumbent.successes && (candidate.orbits > incumbent.orbits ||
       (candidate.orbits === incumbent.orbits && candidate.mean_offset < incumbent.mean_offset)));
   }
-  /* envelope floors block catastrophic misses (a crash, a landing off the pad complex) without
-     letting one soft near-miss veto a candidate that completes more missions */
-  return candidate.nominal && candidate.worst_speed <= Math.max(5, incumbent.worst_speed) &&
-    candidate.worst_offset <= Math.max(250, incumbent.worst_offset) &&
+  /* no more catastrophic outcomes (crashes above 5 m/s, landings beyond 250 m) than the incumbent,
+     counted together, so one soft near-miss cannot veto a candidate that completes more missions */
+  return candidate.nominal && candidate.catastrophes <= incumbent.catastrophes &&
     (candidate.successes > incumbent.successes ||
     (candidate.successes === incumbent.successes && candidate.mean_offset < incumbent.mean_offset));
 }

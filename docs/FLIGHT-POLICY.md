@@ -43,10 +43,12 @@ launch-and-landing sequence, public webcast telemetry):
    opposite impulse (1.8 m/s relative; the lighter booster recoils more). The
    upper stage lights its MVac about five seconds later, clear of the booster.
 3. **Flip and boostback.** Cold-gas thrusters turn the booster; three engines
-   burn with **horizontal thrust** toward the landing zone. The burn reverses
-   the downrange velocity. It never points the thrust toward the ground: after
-   separation the booster is still climbing, and gravity alone bends that
-   climb into a fall.
+   burn toward the landing zone and reverse the downrange velocity. The thrust
+   is horizontal on a normal flight; when dispersions leave the booster on a low
+   arc (little time aloft), it is pitched up to 25° to loft the return instead
+   of building a very fast, propellant-hungry return. It never points toward
+   the ground: after separation the booster is still climbing, and gravity
+   alone bends that climb into a fall.
 4. **Ballistic coast.** Engines off, nose kept above the horizon with the
    engines leading, so the booster is already in its entry attitude.
 5. **Entry burn.** Three engines at about 66 km, against the airflow, for about
@@ -54,11 +56,20 @@ launch-and-landing sequence, public webcast telemetry):
    (13 t) is left, as on Falcon 9 where the entry burn lasts 10-20 s. The booster
    then falls fast through the glide instead of drifting down slowly.
 6. **Aerodynamic glide.** Engines off; grid fins trim the descent. The steering
-   is chosen so the predicted touchdown lands on the pad.
+   is chosen so that a landing burn with **no sideways correction** would
+   touch down on the pad, as Falcon 9's grid fins line the booster up; the
+   landing burn then only trims what is left.
 7. **Landing burn.** One engine, lit at the last moment a burn at 85 % throttle
-   can still stop at the pad. The ignition test integrates the stopping
-   distance with drag rising as the air thickens on the way down; the burn
-   itself holds the constant thrust that ends the descent at touchdown speed.
+   can still reach the terminal gate (the ignition test integrates the stopping
+   distance with drag rising as the air thickens). Vertically it is a hoverslam
+   to 20 m above the pad, then a gentle deceleration just above what minimum
+   throttle forces, to 1.4 m/s at touchdown. Sideways, above 150 m a
+   zero-effort-miss law (with the aerodynamic side force of the near-vertical
+   body in its prediction, and a braking cap against a runaway approach) zeroes
+   position and velocity; below 150 m the booster comes down nearly vertical,
+   nulling sideways speed first. Near the crossover where thrust side force and
+   aerodynamic normal force cancel, the commanded tilt fades to zero instead of
+   flipping sides.
    Side steering accounts for the aerodynamic normal force of an engine-first
    body, which at high dynamic pressure is larger than the engine's own side
    force and reverses the steering sense.
@@ -92,40 +103,49 @@ launch-and-landing sequence, public webcast telemetry):
 node scripts/flight_policy/dagger.js --fresh --demos 240 --iters 10 --per-iter 200
 node scripts/flight_policy/parallel.js policy 900000 200   # evaluate on unseen seeds
 node scripts/flight_policy/parallel.js teacher 900000 200  # same seeds, teacher
+node scripts/flight_policy/mine.js hardD 430000 6000 --fails-only   # hard-example mining
+.venv/Scripts/python scripts/flight_policy/train.py --init-policy frontend/public/flight-policy.js --epochs 20 --lr 1e-4 --output candidate.js
 ```
 
 ## Results
 
-Shipped policy: `dagger9` of the final training run. The teacher flies the
-Falcon 9 RTLS timeline (throttle bucket before max-Q, flatter ascent with MECO
-keeping the return propellant, short entry burn, drag-aware landing-burn
-ignition, smooth terminal insertion guidance). The network was warm-started
-from the previous real-timeline network, then trained by behaviour cloning on
-300 noisy teacher demonstrations and DAgger rounds of 300 policy-flown dispersed
-flights. Each candidate is compared with the incumbent on the same 256
-development seeds; the gate blocks crashes (touchdown above 5 m/s) and landings
-off the pad complex (beyond 250 m) unless the incumbent already has them, and
-while no network flies the nominal mission it ships whichever is further along.
-When the development gate saturated, saved candidates were compared on a
-separate 500-flight validation set (seeds 600000-600499) and the best shipped;
-the held-out seeds were run once, for the shipped network. Evidence:
-`data/flight-policy-validation.json` (`node scripts/flight_policy/evaluate.js`).
+**Teacher.** Stress-tested on 2,300 dispersed flights (seeds 500000-500299 and
+700000-701999): 2,300 / 2,300 full missions, worst touchdown 1.57 m/s, worst
+sideways speed 0.85 m/s, worst tilt 3.4°, median pad offset 2.2 m.
+
+**Shipped policy: `polishB4`.** Warm-started from the previous real-timeline
+network and retrained on the redesigned teacher: behaviour cloning on 300 noisy
+teacher demonstrations, 15 DAgger rounds of 300 policy-flown dispersed flights,
+then *hard-example mining*: the network flew thousands of fresh seeds, and on
+every seed where it failed or nearly failed the teacher labelled the states the
+network actually reached (and flew the seed itself), oversampled 3-5x; each
+mining round was followed by a low-learning-rate fine-tune. Noisy teacher
+demonstrations of the hard seeds were dropped after they were found to hurt.
+Candidates are compared with the incumbent on 256 development seeds (no more
+catastrophic outcomes, a crash above 5 m/s or a landing beyond 250 m, than the
+incumbent; then more full missions); when that saturated, candidates were chosen
+on a separate 2,000-flight selection set, and the held-out seeds were run only
+for chosen networks. Evidence: `data/flight-policy-validation.json`
+(`node scripts/flight_policy/evaluate.js`).
 
 | Dispersed flights | Neural policy | Classical teacher |
 | --- | --- | --- |
-| Validation, seeds 600000-600499 | 495 / 500 | 494 / 500 |
-| **Held-out, seeds 900000-900299** | **297 / 300** | 298 / 300 |
+| **Held-out, seeds 900000-900299** | **299 / 300** | 299 / 300 |
+| Validation, seeds 600000-600499 | 500 / 500 | |
+| Development gate, seeds 800000-800255 | 256 / 256 | |
+| Selection, seeds 300000-301999 | 1,995 / 2,000 | 1,999 / 2,000 |
+| Fresh, seeds 440000-445999 (before mining them) | 5,971 / 6,000 | |
 | Held-out reached orbit | 300 / 300 | 300 / 300 |
-| Held-out worst touchdown | 3.31 m/s | 2.02 m/s |
-| Held-out worst pad offset | 59 m | 83 m |
 
 A full mission means orbit (perigee above 150 km, eccentricity below 0.05),
 fairing released, payload deployed, and a touchdown on deployed legs slower than
 3 m/s vertically and 1.5 m/s sideways, tilted under 5° and inside the 43 m pad
-radius. The network's three held-out misses all touched down upright on or
-next to the pad: two at 3.3 m/s (limit 3 m/s) on the centre, one 59 m out. The
-teacher's misses are of the same kind, so the network has reached the teacher's
-level; going further needs a better teacher, not more imitation.
+radius. On the held-out seeds the network and the teacher each miss one
+mission. The network's remaining misses, about 0.3-0.5 % of dispersed flights,
+are rare large diverts at the landing burn (arriving with 15-40 m/s of sideways
+speed) and, rarer, a boostback cutoff held a few seconds too long, which the
+teacher never does; the teacher's own misses are landings just past the 43 m
+radius.
 
 **Nominal replay compared with Falcon 9 RTLS** (Ax-4, 25 June 2025, and Dragon
 cargo webcast timelines; booster apogee from CRS-10 webcast reconstructions):
@@ -133,23 +153,25 @@ cargo webcast timelines; booster apogee from CRS-10 webcast reconstructions):
 | Event | This replay | Falcon 9 RTLS |
 | --- | --- | --- |
 | Max-Q | T+1:11, 25.5 kPa | T+1:12 |
-| MECO | T+2:15, 59.1 km, 1.81 km/s | T+2:17-2:33, ~60-65 km, ~1.7 km/s |
+| MECO | T+2:15, 59.3 km, 1.81 km/s | T+2:17-2:33, ~60-65 km, ~1.7 km/s |
 | Boostback | T+2:35-3:29 | T+2:42-3:28 |
-| Booster apogee | 128 km | ~130 km |
-| Entry burn | T+6:11-6:23 (66 → 56 km) | T+6:18-6:30 |
-| Landing burn | T+7:28 from 3.9 km | T+7:22-7:33 |
-| Touchdown | T+7:53 | T+7:39 |
+| Booster apogee | 129 km | ~130 km |
+| Entry burn | T+6:12-6:24 (66 → 56 km) | T+6:18-6:30 |
+| Landing burn | T+7:31 from 3.7 km | T+7:22-7:33 |
+| Touchdown | T+7:56 | T+7:39 |
 | SECO | T+8:23 | T+8:48 |
 
-Touchdown at 2.03 m/s vertical, 0.05 m/s horizontal, 0.16° tilt, 0.6 m from
-the pad centre; insertion 269 × 342 km at 42.5°; payload deploy T+9:23.
+Touchdown at 1.46 m/s vertical, 0.06 m/s horizontal, 0.18° tilt, 4.9 m from
+the pad centre; insertion 269 × 331 km at 42.2°; payload deploy T+9:23.
 
-Training history: a from-scratch run on the RTLS-timeline teacher reached
-297/300 held-out; it found that the teacher's terminal insertion steering whipped
-the pitch to its limit as time-to-go collapsed, which the network could not
-imitate (fixed with a time-to-go floor). The ascent was then given a throttle
-bucket before max-Q, and the final network was warm-started from that run:
-round 1 flew 11/300, round 3 253/300, round 7 298/300, round 9 298/300.
+Training history: a from-scratch run on the first RTLS-timeline teacher reached
+297/300 held-out; a warm-started retrain after the max-Q throttle bucket reached
+297/300 against the teacher's 298/300, with the misses traced to the teacher's
+terminal landing control. That control was redesigned (terminal gate, braking-
+limited zero-effort-miss divert, crossover fade, lofted boostback on low arcs),
+taking the teacher from 299/300 to 2,300/2,300, and the network was retrained
+on it: DAgger round 1 flew 3/300, round 4 283/300, round 10 257/257 on the
+development gate; hard-example mining then took it to 299/300 held-out.
 
 ## Limits
 

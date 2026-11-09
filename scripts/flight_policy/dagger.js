@@ -42,6 +42,10 @@ function train(extra) {
 
 async function trainAndGate(extra) {
   const candidate = train(extra);
+  /* keep every candidate: the development gate can saturate, and later selection uses validation seeds */
+  const keep = path.join(ROOT, 'data', 'flight-policy', 'candidates');
+  fs.mkdirSync(keep, { recursive: true });
+  fs.copyFileSync(candidate, path.join(keep, (extra[extra.indexOf('--tag') + 1] || 'candidate') + '.js'));
   if (fs.existsSync(POLICY_FILE)) {
     const gate = await qualify(candidate);
     if (!gate.accepted) { console.log('Candidate did not improve the incumbent; shipped policy preserved.'); return; }
