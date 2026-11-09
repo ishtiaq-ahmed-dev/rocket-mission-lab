@@ -85,7 +85,7 @@ test('invalid neural weights fail before a flight can generate NaN telemetry', (
     p => { p.booster.layers[0].W = ''; },
     p => { p.upper.layers.at(-1).out++; },
     p => { p.upper.activation = 'relu'; },
-    p => { p.booster.std = Buffer.alloc(48 * 4).toString('base64'); }
+    p => { p.booster.std = Buffer.alloc(52 * 4).toString('base64'); }
   ]) {
     const bad = JSON.parse(JSON.stringify(P)); mutate(bad);
     assert.throws(() => F.neuralController(bad), /flight policy/);

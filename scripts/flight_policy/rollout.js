@@ -9,7 +9,7 @@ const fs = require('fs');
 const { loadSim } = require('./sim');
 const makeTeacher = require('./teacher');
 
-const NB = 48, NU = 26, ROW = 1 + NB + 7 + 1 + NU + 7;
+const NB = 52, NU = 26, ROW = 1 + NB + 7 + 1 + NU + 7;
 const MODES = ['ASC', 'COAST1', 'BB', 'COAST2', 'ENTRY', 'AERO', 'LAND'];
 
 function rng(seed) {

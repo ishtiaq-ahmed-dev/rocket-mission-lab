@@ -519,8 +519,18 @@ function boosterFeatures(B, t) {
     /* direction of motion relative to the air, as unit vectors in the local frame */
     ...dirFeat(gv, Lb, 30),
     /* fine height and sink rate for the last metres of the landing burn */
-    cl3(pU, 10), cl3(vU, 5)
+    cl3(pU, 10), cl3(vU, 5),
+    /* predictive inputs: where the booster would come down unpowered in vacuum (the cue for
+       boostback cutoff) and where a landing burn with no sideways correction would touch down
+       (the cue for the landing divert) */
+    ...impactFeat(pE, pN, pU, vE, vN, vU, h)
   ];
+}
+function impactFeat(pE, pN, pU, vE, vN, vU, h) {
+  const g = MU / Math.pow(RE + Math.max(h, 0), 2), up = Math.max(pU, 0);
+  const tf = (vU + Math.sqrt(vU * vU + 2 * g * up)) / g;             /* vacuum fall time to pad height */
+  const tb = vU < -1 ? 2 * up / -vU : 0;                              /* constant-deceleration stop time */
+  return [clamp((pE + vE * tf) / 2e4, -5, 5), clamp((pN + vN * tf) / 2e4, -5, 5), cl3(pE + vE * tb, 500), cl3(pN + vN * tb, 500)];
 }
 /* Upper stage features: altitude, inertial velocity in the local frame, attitude,
    orbit energy against the 300 km target, and the stage's own event clocks. */
@@ -573,7 +583,7 @@ function makeNet(spec, inputs, outputs) {
 }
 function neuralController(P) {
   if (!P || !P.booster || !P.upper) throw new Error('flight policy weights (FLIGHT_POLICY) are not loaded');
-  const nb = makeNet(P.booster, 48, 9), nu = makeNet(P.upper, 26, 7);
+  const nb = makeNet(P.booster, 52, 9), nu = makeNet(P.upper, 26, 7);
   return function (ctx) {
     const B = ctx.B, U = ctx.U, t = ctx.t;
     const yb = nb(boosterFeatures(B, t));
@@ -3046,7 +3056,9 @@ function frame(now){
 }
 // Hidden tabs pause their mission clock; visible slow frames keep wall time.
 document.addEventListener('visibilitychange',()=>{lastNow=performance.now();});
-window.__sim={PT:PT,PS:PS,draw:function(dt){realT+=dt;drawFrame(dt);},seek:seek,setCam:setCam,setFocus:setFocus,setPlaying:setPlaying,SIM:SIM,scene:scene,renderer:renderer,camera:camera,sB:sB,sS:sS,F:F,orb:orb,get t(){return simT;},THREE:THREE,ORG:ORG,GEO:GEO};
+window.__sim={PT:PT,PS:PS,draw:function(dt){realT+=dt;drawFrame(dt);},
+  /* frame-stepped recording: advance the mission clock by dt*rate with normal camera smoothing */
+  step:function(dt,rate){realT+=dt;simT=clamp(simT+dt*rate,SIMT0,T_END);drawFrame(dt);},seek:seek,setCam:setCam,setFocus:setFocus,setPlaying:setPlaying,SIM:SIM,scene:scene,renderer:renderer,camera:camera,sB:sB,sS:sS,F:F,orb:orb,get t(){return simT;},THREE:THREE,ORG:ORG,GEO:GEO};
 /* model notes dialog */
 (function(){
   const btn=document.getElementById('notesbtn'),panel=document.getElementById('notes'),close=document.getElementById('notesclose');

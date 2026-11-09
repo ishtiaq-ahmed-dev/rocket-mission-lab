@@ -10,7 +10,8 @@ function runSeeds(dir, tag, seeds, job, workers) {
   if (!job || !['teacher', 'policy', 'mix'].includes(job.fly)) return Promise.reject(new Error('fly must be teacher, policy or mix'));
   if (workers != null && (!Number.isInteger(workers) || workers < 1)) return Promise.reject(new Error('workers must be a positive integer'));
   fs.mkdirSync(dir, { recursive: true });
-  const n = Math.min(workers || Math.max(1, Math.min(8, os.cpus().length - 2)), seeds.length);
+  /* FLIGHT_WORKERS caps parallel rollouts when the machine is shared with other work */
+  const n = Math.min(workers || +process.env.FLIGHT_WORKERS || Math.max(1, Math.min(8, os.cpus().length - 2)), seeds.length);
   const parts = Array.from({ length: n }, () => []);
   seeds.forEach((s, i) => parts[i % n].push(s));
   return Promise.all(parts.map((part, i) => new Promise((resolve, reject) => {

@@ -24,7 +24,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DATA = os.path.join(ROOT, 'data', 'flight-policy', 'datasets')
 OUT = os.path.join(ROOT, 'data', 'flight-policy', 'candidate.js')
 CKPT = os.path.join(ROOT, 'data', 'flight-policy', 'policy.pt')
-NB, NU = 48, 26
+NB, NU = 52, 26
 ROW = 1 + NB + 7 + 1 + NU + 7
 # booster block offsets
 B_VALID, B_X = 0, 1
@@ -242,7 +242,7 @@ def main():
         mb, sb, mu, su = (ckpt[k].numpy() for k in ('mb', 'sb', 'mu', 'su'))
     else:
         (mb, sb), (mu, su) = mapped_normalizer(data, ib, B_X, NB), mapped_normalizer(data, iu, U_X, NU)
-    nb, nu = mlp(NB, 256, 3, 9).to(dev), mlp(NU, 128, 3, 7).to(dev)
+    nb, nu = mlp(NB, 384, 4, 9).to(dev), mlp(NU, 128, 3, 7).to(dev)
     if ckpt:
         nb.load_state_dict(ckpt['nb']); nu.load_state_dict(ckpt['nu'])
 

@@ -64,11 +64,11 @@ These are simulated outputs, not measured SpaceX data:
 
 | Quantity | Result |
 | --- | --- |
-| MECO | 59.3 km at 1.806 km/s |
-| Booster apogee | 128.9 km |
-| Second-stage insertion | 268.9 x 331.3 km at 42.23 deg |
-| Touchdown | 1.46 m/s vertical, 0.06 m/s horizontal, 0.18 deg tilt |
-| Pad offset | 4.9 m from LZ-1 centre on an 86 m pad |
+| MECO | 58.7 km at 1.808 km/s |
+| Booster apogee | 127.2 km |
+| Second-stage insertion | 268.9 x 336.2 km at 42.06 deg |
+| Touchdown | 1.43 m/s vertical, 0.05 m/s horizontal, 0.16 deg tilt |
+| Pad offset | 2.8 m from LZ-1 centre on an 86 m pad |
 
 The flight is flown by the neural policy ([FLIGHT-POLICY.md](FLIGHT-POLICY.md)).
 The booster apogee is higher than in the earlier scripted replay (138.6 km)
