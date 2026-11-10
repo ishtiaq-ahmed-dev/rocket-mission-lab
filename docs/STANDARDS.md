@@ -64,11 +64,11 @@ These are simulated outputs, not measured SpaceX data:
 
 | Quantity | Result |
 | --- | --- |
-| MECO | 58.7 km at 1.808 km/s |
-| Booster apogee | 127.2 km |
-| Second-stage insertion | 268.9 x 336.2 km at 42.06 deg |
-| Touchdown | 1.43 m/s vertical, 0.05 m/s horizontal, 0.16 deg tilt |
-| Pad offset | 2.8 m from LZ-1 centre on an 86 m pad |
+| MECO | 58.4 km at 1.815 km/s |
+| Booster apogee | 125.1 km |
+| Second-stage insertion | 268.9 x 339.4 km at 42.21 deg |
+| Touchdown | 1.31 m/s vertical, 0.06 m/s horizontal, 0.16 deg tilt |
+| Pad offset | 1.2 m from LZ-1 centre on an 86 m pad |
 
 The flight is flown by the neural policy ([FLIGHT-POLICY.md](FLIGHT-POLICY.md)).
 The booster apogee is higher than in the earlier scripted replay (138.6 km)
@@ -111,7 +111,7 @@ flight, or establish landing reliability.
 - FAA/range-safety analysis, airspace coordination, flight-termination systems
   and operational launch constraints.
 - SpaceX guidance, navigation and control. The neural policy imitates an
-  educational teacher; its 299/300 held-out rate is a simulation result.
+  educational teacher; its 298/300 held-out rate is a simulation result.
 - The Python laboratory's subscale RL policies, which did not qualify and are
   not the browser Falcon 9 mission.
 

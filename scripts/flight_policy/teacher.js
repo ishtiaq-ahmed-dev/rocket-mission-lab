@@ -17,9 +17,9 @@ module.exports = function makeTeacher(FS, settings) {
   const { dot, nrm, add, sub, sc, unit, clamp, sstep, rotAbout, localBasis, lzBase, relVel, accel, boosterStep, boosterMass, upperMass, engineThrust, D2R } = FS._;
   const { V, RE, MU, G0, lzFrame, pressAt, orbitElems } = FS;
   const BP = Object.assign({
-    tFlipAfterSep: 4.0, bbAfterMeco: 20.0, bbThr: 0.80, bbN: 3, bbPitch: 0, bbApoRef: 120000, bbApoScale: 65000, bbPitchMax: 25 * D2R, bbTol: 120,
+    tFlipAfterSep: 6.0, bbAfterMeco: 20.0, bbThr: 0.80, bbN: 3, bbPitch: 0, bbApoRef: 120000, bbApoScale: 65000, bbPitchMax: 25 * D2R, bbTol: 120,
     hEntry: 66000, entryThr: 0.80, entryN: 3, entryVend: 1000, entryMax: 40, entryKeep: 13000, entryReserve: 5200, entryTiltMax: 14 * D2R,
-    aeroTiltMax: 16 * D2R, landTiltMax: 32 * D2R, vTd: 1.4, hGate: 20, aEnd: 2.5, hLat: 150, kFade: 8, aLatMax: 7, tauHold: 1.5, kpHold: 0.3, latDrag: 3, aBrake: 3,
+    aeroTiltMax: 16 * D2R, landTiltMax: 20 * D2R, vTd: 1.4, hGate: 20, aEnd: 2.5, hLat: 150, kFade: 8, aLatMax: 5, tauHold: 2.0, kpHold: 0.2, landSteerMax: 20 * D2R,
     landThr: 0.85, landMargin: 15, cnAlpha: 3.2, aoaBase: 0
   }, settings && settings.bp);
   const ASC = Object.assign({ ignT: -3.6, kick: 2.2 * D2R, tKick0: 8.0, kickDur: 5, gLim: 3.65, propMeco: 60000, sepDelay: 3.0, bucketT: 48, bucketW: 10, bucketDepth: 0.35 }, settings && settings.asc);
@@ -91,49 +91,36 @@ module.exports = function makeTeacher(FS, settings) {
       aT = gl + BP.aEnd + (sink - vRef) / 0.6;
     }
     aT = Math.max(0.5, aT);
-    /* lateral, above hLat: zero-effort-miss guidance to zero position and velocity at hLat, where the
-       tilt allowance is still wide. The zero-effort state comes from a short forward integration of
-       the unsteered descent with a linear model of the aerodynamic side force of the near-vertical
-       body, which bleeds sideways speed quickly at high dynamic pressure (latDrag also absorbs the
-       air's resistance to the steering itself). A braking cap stops a runaway approach: closing on
-       the pad faster than aBrake can stop is braked whatever the miss estimate says. Below hLat the
-       booster comes down nearly vertical: sideways speed is nulled first and the pull toward the pad
-       centre fades with height, because the last metres allow only a few degrees of tilt. */
-    const dz = pU - BP.hLat;
-    let aE, aN;
-    if (dz > 0 && !(P && P.noDivert)) {
-      let zE = pE, zN = pN, wE = vE, wN = vN, z = pU, tgo = 0;
-      const s2 = Math.max(sink * sink, vGate * vGate), dh = Math.max(pU - BP.hGate, 1);
-      for (let i = 0; i < 240 && z > BP.hLat; i++) {
-        const dt = 0.25, sk = Math.sqrt(vGate * vGate + (s2 - vGate * vGate) * clamp((z - BP.hGate) / dh, 0, 1));
-        const Vz = Math.hypot(sk, wE, wN), c = 0.5 * FS.rhoAt(h - (pU - z)) * Vz * V.S * BP.cnAlpha * BP.latDrag / m;
-        const f = Math.exp(-c * dt), g1 = c > 1e-6 ? (1 - f) / c : dt;
-        zE += wE * g1; zN += wN * g1; wE *= f; wN *= f; z -= sk * dt; tgo += dt;
-      }
-      tgo = Math.max(tgo, 2 * BP.tauHold);
-      aE = -6 * zE / (tgo * tgo) + 2 * wE / tgo; aN = -6 * zN / (tgo * tgo) + 2 * wN / tgo;   /* a = 6 ZEM/t^2 - 2 ZEV/t */
-      const pr = Math.hypot(pE, pN), close = pr > 1 ? -(vE * pE + vN * pN) / pr : 0, vOk = Math.sqrt(2 * BP.aBrake * pr);
-      if (close > vOk) { aE += (close - vOk) / BP.tauHold * pE / pr; aN += (close - vOk) / BP.tauHold * pN / pr; }
-    } else {
-      const kp = BP.kpHold * clamp((pU - BP.hGate) / (BP.hLat - BP.hGate), 0, 1);
-      aE = -(vE + kp * pE) / BP.tauHold; aN = -(vN + kp * pN) / BP.tauHold;
-    }
-    /* noDivert (prediction only): thrust straight up, to find where the booster would land unsteered */
-    if (P && P.noDivert) { aE = 0; aN = 0; }
-    const aL = Math.min(BP.aLatMax, Math.hypot(aE, aN));
-    /* Net side acceleration per radian of body tilt: the thrust component minus the aerodynamic
-       normal force of an engine-first body. At high dynamic pressure the aero term wins and steering
-       reverses; near the crossover there is no authority, so inside +-kFade the tilt scales with k and
-       fades to zero instead of flipping from one side to the other. */
-    const k = (m * aT - q * V.S * BP.cnAlpha) / m;
     const tl = (pU < 30 ? 4.0 : pU < 120 ? 4.0 + (pU - 30) / 90 * 12 : 16 + clamp((pU - 120) / 200, 0, 1) * (BP.landTiltMax / D2R - 16)) * D2R;
-    const thS = aL * k / Math.max(k * k, BP.kFade * BP.kFade);
-    const th = clamp(Math.abs(thS), 0, tl), sgn = thS >= 0 ? 1 : -1;
-    const aH = Math.hypot(aE, aN);
-    const lat = aH > 1e-6 ? [(L.E[0] * aE + L.N[0] * aN) / aH, (L.E[1] * aE + L.N[1] * aN) / aH, (L.E[2] * aE + L.N[2] * aN) / aH] : [0, 0, 0];
-    const dir = unit(add(sc(L.U, Math.cos(th)), sc(lat, sgn * Math.sin(th))));
+    let dir;
+    if (pU > BP.hLat) {
+      /* Above hLat: two leans, each constant in the pad's frame (upper and lower half of the burn), solved
+         so the booster reaches hLat over the pad with no sideways speed (re-solved twice a second). While
+         the air dominates a lean makes body lift that carries the booster sideways; once the engine
+         dominates the same lean puts thrust into braking, so the booster accelerates toward the pad and
+         then brakes without rocking from one side to the other. noDivert (glide and boostback
+         predictions) flies the burn with no lean at all. */
+      const SL = P && P.steerL && !P.noDivert ? P.steerL : null;
+      const sv = SL ? (pU > SL.hMid ? SL.a : SL.b) : [0, 0], sm = Math.min(1, Math.hypot(sv[0], sv[1]));
+      const th = Math.min(sm * BP.landSteerMax, tl);
+      dir = sm > 1e-6 ? unit(add(sc(L.U, Math.cos(th)), sc(unit(add(sc(L.E, sv[0]), sc(L.N, sv[1]))), Math.sin(th)))) : L.U;
+    } else {
+      /* Below hLat the booster comes down nearly vertical: sideways speed is nulled first and the pull
+         toward the pad centre fades with height, because the last metres allow only a few degrees. */
+      const kp = BP.kpHold * clamp((pU - BP.hGate) / (BP.hLat - BP.hGate), 0, 1);
+      const aE = -(vE + kp * pE) / BP.tauHold, aN = -(vN + kp * pN) / BP.tauHold;
+      const aL = Math.min(BP.aLatMax, Math.hypot(aE, aN));
+      /* side acceleration per radian of tilt: thrust minus the aerodynamic normal force; near the
+         crossover the tilt fades to zero instead of flipping sides */
+      const k = (m * aT - q * V.S * BP.cnAlpha) / m;
+      const thS = aL * k / Math.max(k * k, BP.kFade * BP.kFade);
+      const th = clamp(Math.abs(thS), 0, tl), sgn = thS >= 0 ? 1 : -1;
+      const lat = aL > 1e-6 ? unit(add(sc(L.E, aE), sc(L.N, aN))) : [0, 0, 0];
+      dir = unit(add(sc(L.U, Math.cos(th)), sc(lat, sgn * Math.sin(th))));
+    }
+    const cosT = Math.max(dot(dir, L.U), 0.5);
     const cut = S.nEng === 0 || (pU < 6.0 && vU > -0.8);
-    return { dir: dir, thr: clamp((m * aT / Math.cos(th) + V.merAe * pressAt(h)) / V.merTvac, V.merMin, 1), n: cut ? 0 : 1 };
+    return { dir: dir, thr: clamp((m * aT / cosT + V.merAe * pressAt(h)) / V.merTvac, V.merMin, 1), n: cut ? 0 : 1 };
   }
   /* Net upward deceleration (beyond gravity) a constant thrust must give so the descent ends at
      speed vf at distance pU. Drag decel is taken as D0*(v/v0)^2, which gives the exact
@@ -180,20 +167,24 @@ module.exports = function makeTeacher(FS, settings) {
   function predictMiss(S0, t0, P, dtp) {
     const S = cloneB(S0);
     if (P.bbStart) { S.ign = 1; S.nEng = BP.bbN; S.thr = BP.bbThr; S.cutting = false; S.tIgn = t0; S.axis = P.bb.dir.slice(); }
-    let t = t0, rp = S.r.slice(), pUp = Infinity, nextCheck = t0;
+    let t = t0, rp = S.r.slice(), tp = t0, pUp = Infinity, nextCheck = t0, gate = null;
     const Pl = Object.assign({}, P, { predict: true });
     for (let guard = 0; guard < 6000; guard++) {
       const md = mode(S), h = nrm(S.r) - RE, L = lzFrame(t), pU = dot(sub(S.r, lzBase(t)), L.U);
       if (pU <= 0) {
+        /* touchdown point interpolated within the last step, compared with the pad AT THAT MOMENT: the
+           pad moves ~400 m/s with the Earth's rotation, so using the pad at the end of the step put a
+           step-size-dependent east-west error of up to ~100 m into every prediction */
         const f = pUp < Infinity ? clamp(pUp / Math.max(pUp - pU, 1e-9), 0, 1) : 1, rf = add(rp, sc(sub(S.r, rp), f));
-        const d = sub(rf, lzBase(t)), gv = relVel(S.r, S.v);
-        return { mE: dot(d, L.E), mN: dot(d, L.N), eE: dot(d, L.E), eN: dot(d, L.N), t: t, vU: dot(gv, L.U), landed: true };
+        const tf = tp + f * (t - tp), Lf = lzFrame(tf), d = sub(rf, lzBase(tf)), gv = relVel(S.r, S.v);
+        return { mE: dot(d, Lf.E), mN: dot(d, Lf.N), eE: dot(d, Lf.E), eN: dot(d, Lf.N), t: tf, vU: dot(gv, Lf.U), landed: true, gate };
       }
+      if (!gate && md === 'LAND' && pU <= BP.hLat) { const gv = relVel(S.r, S.v), dd = sub(S.r, lzBase(t)); gate = { pE: dot(dd, L.E), pN: dot(dd, L.N), vE: dot(gv, L.E), vN: dot(gv, L.N) }; }
       if (md === 'LAND' && S.nEng === 0 && !S.cutting) break;
       Pl.ignite = false;
       if (md === 'AERO' && h < 12000 && t >= nextCheck) { Pl.ignite = landingIgnition(S, t); nextCheck = t + 0.5; }
       const dts = md === 'BB' || md === 'ENTRY' || md === 'LAND' || (md === 'AERO' && h < 12000) ? Math.min(dtp, 0.25) : h > 90000 ? dtp * 2 : dtp;
-      rp = S.r.slice(); pUp = pU;
+      rp = S.r.slice(); tp = t; pUp = pU;
       boosterStep(S, law(S, t, Pl), t, dts, 0); t += dts;
     }
     const L = lzFrame(t), d = sub(S.r, lzBase(t));
@@ -217,20 +208,59 @@ module.exports = function makeTeacher(FS, settings) {
     }
     return { dir: bbDirFrom(S, t, az), dur: dur, tEnd: t + dur, az: az, miss: last };
   }
-  /* constant steering (entry: thrust tilt; aero: fin-trim) that zeroes the predicted landing error of
-     an undiverted landing burn: the glide puts the booster on a path to the pad, as Falcon 9's grid
-     fins do, and the landing burn only trims what is left */
+  /* constant steering that zeroes the predicted landing error: entry (thrust tilt) and glide (fin trim)
+     aim for a landing burn flown with no lean, as Falcon 9's grid fins line the booster up; the landing
+     burn then solves its own constant lean ('L') for what is left */
+  /* landing burn: two leans (4 unknowns) that put the booster over the pad with no sideways speed at hLat */
+  function solveLand(S, t) {
+    const pU0 = dot(sub(S.r, lzBase(t)), lzFrame(t).U), hMid = BP.hLat + 0.5 * Math.max(pU0 - BP.hLat, 0);
+    const P = x => ({ steerL: { a: [x[0], x[1]], b: [x[2], x[3]], hMid } });
+    const resid = m => { const g = m.gate || { pE: m.eE, pN: m.eN, vE: 0, vN: 0 }; return [g.pE, g.pN, 4 * g.vE, 4 * g.vN]; };
+    let x = [0, 0, 0, 0];
+    for (let it = 0; it < 6; it++) {
+      const r0 = resid(predictMiss(S, t, P(x), 0.5));
+      if (Math.hypot(r0[0], r0[1]) < 1.5 && Math.hypot(r0[2], r0[3]) < 2) break;
+      const e = 0.2, J = [[], [], [], []];
+      for (let j = 0; j < 4; j++) {
+        const xp = x.slice(); xp[j] += e;
+        const rj = resid(predictMiss(S, t, P(xp), 0.5));
+        for (let i = 0; i < 4; i++) J[i][j] = (rj[i] - r0[i]) / e;
+      }
+      /* damped least squares (stays well behaved when a lean has little lever left) */
+      const A = [[], [], [], []], b = [0, 0, 0, 0], lam = 25;
+      for (let i = 0; i < 4; i++) { for (let j = 0; j < 4; j++) { let sum = i === j ? lam : 0; for (let k = 0; k < 4; k++) sum += J[k][i] * J[k][j]; A[i][j] = sum; } for (let k = 0; k < 4; k++) b[i] += J[k][i] * r0[k]; }
+      const dx = solve4(A, b);
+      x = x.map((v, j) => v - clamp(dx[j], -0.5, 0.5));
+      for (const o of [0, 2]) { const mag = Math.hypot(x[o], x[o + 1]); if (mag > 1) { x[o] /= mag; x[o + 1] /= mag; } }
+    }
+    return { a: [x[0], x[1]], b: [x[2], x[3]], hMid };
+  }
+  function solve4(A, b) {
+    const M = A.map((row, i) => row.concat([b[i]]));
+    for (let c = 0; c < 4; c++) {
+      let piv = c; for (let r = c + 1; r < 4; r++) if (Math.abs(M[r][c]) > Math.abs(M[piv][c])) piv = r;
+      [M[c], M[piv]] = [M[piv], M[c]];
+      if (Math.abs(M[c][c]) < 1e-12) return [0, 0, 0, 0];
+      for (let r = c + 1; r < 4; r++) { const f = M[r][c] / M[c][c]; for (let k = c; k < 5; k++) M[r][k] -= f * M[c][k]; }
+    }
+    const x = [0, 0, 0, 0];
+    for (let r = 3; r >= 0; r--) { let sum = M[r][4]; for (let k = r + 1; k < 4; k++) sum -= M[r][k] * x[k]; x[r] = sum / M[r][r]; }
+    return x;
+  }
   function solveSteer(S, t, key) {
     let s = [0, 0];
-    const P = v => key === 'E' ? { steerE: v, steerA: [0, 0], noDivert: true } : { steerA: v, noDivert: true };
-    for (let it = 0; it < 3; it++) {
+    const P = v => key === 'E' ? { steerE: v, steerA: [0, 0], noDivert: true } : key === 'A' ? { steerA: v, noDivert: true } : { steerL: v };
+    /* the landing lean keeps solving as its lever shrinks near hLat (small but real sensitivity), with
+       bounded Newton steps; glide and entry keep their original settings */
+    const land = key === 'L', iters = land ? 6 : 3, detMin = land ? 1 : 50, stepMax = land ? 0.5 : 1e9;
+    for (let it = 0; it < iters; it++) {
       const m0 = predictMiss(S, t, P(s), 0.5);
-      if (Math.hypot(m0.eE, m0.eN) < 3) break;
+      if (Math.hypot(m0.eE, m0.eN) < (land ? 1.5 : 3)) break;
       const e = 0.25, m1 = predictMiss(S, t, P([s[0] + e, s[1]]), 0.5), m2 = predictMiss(S, t, P([s[0], s[1] + e]), 0.5);
       const J = [[(m1.eE - m0.eE) / e, (m2.eE - m0.eE) / e], [(m1.eN - m0.eN) / e, (m2.eN - m0.eN) / e]];
       const det = J[0][0] * J[1][1] - J[0][1] * J[1][0];
-      if (Math.abs(det) < 50) break;
-      const dE = (J[1][1] * m0.eE - J[0][1] * m0.eN) / det, dN = (-J[1][0] * m0.eE + J[0][0] * m0.eN) / det;
+      if (Math.abs(det) < detMin) break;
+      const dE = clamp((J[1][1] * m0.eE - J[0][1] * m0.eN) / det, -stepMax, stepMax), dN = clamp((-J[1][0] * m0.eE + J[0][0] * m0.eN) / det, -stepMax, stepMax);
       s = [s[0] - 0.9 * dE, s[1] - 0.9 * dN];
       const mag = Math.hypot(s[0], s[1]); if (mag > 1) s = [s[0] / mag, s[1] / mag];
     }
@@ -315,7 +345,9 @@ module.exports = function makeTeacher(FS, settings) {
     if (md === 'COAST1' || md === 'BB') {
       const plan = t - S.tSep < BP.tFlipAfterSep && md === 'COAST1' ? null : cached('bb', t, 0.5, () => planBoostback(S, t));
       cmd = law(S, t, { bb: plan });
-      if (md === 'BB' && plan) cmd.n = plan.dur > 0.05 && S.prop > 9000 ? BP.bbN : 0;
+      /* cut off at the planned end time: the plan is up to 0.5 s old, and at ~7 km of landing error per
+         second of boostback its remaining duration must not be read as if it were fresh */
+      if (md === 'BB' && plan) cmd.n = t < plan.tEnd && plan.dur > 0.05 && S.prop > 9000 ? BP.bbN : 0;
     } else if (md === 'COAST2') {
       const h = nrm(S.r) - RE, go = h < BP.hEntry && dot(S.v, unit(S.r)) < 0;
       cmd = law(S, t, go ? { steerE: cached('sE', t, 0.5, () => solveSteer(S, t, 'E')) } : {});
@@ -323,7 +355,10 @@ module.exports = function makeTeacher(FS, settings) {
       cmd = law(S, t, { steerE: cached('sE', t, 0.5, () => solveSteer(S, t, 'E')) });
     } else if (md === 'AERO') {
       const steerA = cached('sA', t, nrm(S.r) - RE < 15000 ? 0.3 : 0.5, () => solveSteer(S, t, 'A'));
-      cmd = law(S, t, { steerA: steerA, ignite: landingIgnition(S, t) });
+      const ignite = landingIgnition(S, t);
+      cmd = law(S, t, { steerA: steerA, ignite, steerL: ignite ? cached('sL', t, 0.5, () => solveLand(S, t)) : null });
+    } else if (md === 'LAND') {
+      cmd = law(S, t, { steerL: cached('sL', t, 0.5, () => solveLand(S, t)) });
     } else cmd = law(S, t, {});
     cmd.sep = false;
     return cmd;
@@ -333,6 +368,8 @@ module.exports = function makeTeacher(FS, settings) {
   teacher.BP = BP;
   teacher.planBoostback = planBoostback;
   teacher.solveSteer = solveSteer;
+  teacher.solveLand = solveLand;
   teacher.predictMiss = predictMiss;
+  teacher.law = law;
   return teacher;
 };

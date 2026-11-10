@@ -14,6 +14,7 @@ function score(rows) {
   if (!nominal || !dispersed.length) throw new Error('Qualification requires nominal and dispersed flights');
   return {
     nominal: !!(complete(nominal) && nominal.vV > -2.1 && nominal.vV < 0 && nominal.vH < 0.5 && nominal.err <= 5 && nominal.tilt < 5),
+    n: dispersed.length,
     successes: dispersed.filter(complete).length,
     orbits: dispersed.filter(r => r.orbit).length,
     /* catastrophic outcomes: a crash or a landing off the pad complex */
@@ -24,9 +25,11 @@ function score(rows) {
   };
 }
 function improves(candidate, incumbent) {
-  /* bootstrap (training from scratch): until the incumbent flies the nominal mission, ship any
-     candidate that is further along: full missions, then orbits, then landing offset */
-  if (!incumbent.nominal) {
+  /* bootstrap (training from scratch or onto a new teacher): until the incumbent flies the nominal mission
+     AND completes 95 % of the development flights, ship any candidate that is further along: full
+     missions, then orbits, then landing offset. The shipped network is checked on the nominal flight
+     separately, before release. */
+  if (!incumbent.nominal || incumbent.successes < 0.95 * (incumbent.n || 1)) {
     return candidate.nominal || candidate.successes > incumbent.successes ||
       (candidate.successes === incumbent.successes && (candidate.orbits > incumbent.orbits ||
       (candidate.orbits === incumbent.orbits && candidate.mean_offset < incumbent.mean_offset)));

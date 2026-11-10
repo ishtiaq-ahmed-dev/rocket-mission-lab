@@ -135,7 +135,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-off
     <h3>REFERENCE ANCHORS</h3>
     <ul><li>Public Falcon 9 Block 5 figures: 549,054 kg published liftoff mass, nine Merlin 1D engines at 845 kN sea level / 914 kN vacuum, 282/311 s, and one MVac at 981 kN / 348 s. The model's no-payload mass closes to 546.6 t, 0.45% below the published figure; dry mass and drag coefficients are modeled.</li><li>WGS-84 GM and rotation, a spherical mean Earth radius, ISO 2533:1975 / U.S. Standard Atmosphere 1976 layers, and Mach-dependent drag. The reference profile is <code>data/reference/international-standard.json</code>.</li></ul>
     <h3>FLIGHT CONTROL &middot; NEURAL POLICY</h3>
-    <ul><li>Every command in this flight comes from a trained neural network evaluated at 10 Hz on the vehicle's own state: engine ignition, cutoff and count, throttle, attitude, stage separation, second-stage burn, fairing jettison and payload deploy. There is no scripted guidance and no fallback controller in this page.</li><li>The network was trained by imitation of a classical teacher with DAgger (<code>scripts/flight_policy/</code>). On 300 unseen dispersed flights (wind, thrust, drag and mass) it completed 299 missions; the teacher also completed 299 of the same flights.</li><li>Return profile after Falcon 9 RTLS practice: cold-gas flip, three-engine boostback with horizontal thrust (never toward the ground), unpowered ballistic coast with engines leading, three-engine entry burn of about ten seconds near 66 km, unpowered grid-fin glide, single-engine landing burn lit at the last feasible moment.</li><li>After separation the booster still climbs on its own momentum while gravity slows it, and falls after apogee. Stage separation conserves momentum; an engine finishes its shutdown before it can relight.</li></ul>
+    <ul><li>Every command in this flight comes from a trained neural network evaluated at 10 Hz on the vehicle's own state: engine ignition, cutoff and count, throttle, attitude, stage separation, second-stage burn, fairing jettison and payload deploy. There is no scripted guidance and no fallback controller in this page.</li><li>The network was trained by imitation of a classical teacher with DAgger (<code>scripts/flight_policy/</code>). On 300 unseen dispersed flights (wind, thrust, drag and mass) it completed 298 missions; the teacher completed all 300 of the same flights.</li><li>Return profile after Falcon 9 RTLS practice: nitrogen cold-gas flip once the upper stage is clear, three-engine boostback with horizontal thrust (never toward the ground), unpowered ballistic coast with engines leading, three-engine entry burn of about ten seconds near 66 km, unpowered grid-fin glide, single-engine landing burn lit at the last feasible moment.</li><li>After separation the booster still climbs on its own momentum while gravity slows it, and falls after apogee. Stage separation conserves momentum; an engine finishes its shutdown before it can relight.</li></ul>
     <h3>NOT MODELLED / NOT CERTIFIED</h3>
     <ul><li>6-DOF rigid-body dynamics (attitude is a rate-limited first-order response), propellant slosh, aeroelasticity, sensor noise, abort modes, weather, FAA/range safety and structural or thermal limits.</li><li>Plume length and width follow the ambient pressure ratio; soot, grid-fin and leg motion are illustrative. This is not a validated real-world flight model.</li></ul>
     <h3>THIS RUN</h3>
@@ -409,7 +409,7 @@ function boosterRate(S) {
   if (S.attached) return [4 * D2R, 0.5];
   if (S.nEng >= 3) return [9 * D2R, 0.55];
   if (S.nEng === 1) return [14 * D2R, 0.35];
-  return S.q > 1500 ? [8 * D2R, 0.8] : [18 * D2R, 1.2];
+  return S.q > 1500 ? [8 * D2R, 0.8] : [12 * D2R, 1.2];   /* grid fins / nitrogen cold-gas thrusters */
 }
 /* One integration step of the first stage (alone, or carrying `upper` kg as the stack). */
 function boosterStep(S, cmd, t, dt, upper) {
@@ -1650,7 +1650,7 @@ const towerGroup=new THREE.Group();towerGroup.position.copy(TOWER_POS);WG.add(to
 
 /* ================= transporter-erector strongback and lightning protection ================= */
 /* Falcon 9 stands against a black truss strongback that pivots at its base and is pulled back a
-   few degrees before launch; four tall masts carry overhead lightning catenary wires. */
+   few degrees before launch; four tall lightning masts stand around the pad. */
 (function(){
   const awayTower=new V3(TOWER_POS.x,0,TOWER_POS.z).normalize().negate();
   const teH=70,teW=3.2,teD=2.6,lean=3.2*Math.PI/180;
@@ -1680,26 +1680,13 @@ const towerGroup=new THREE.Group();towerGroup.position.copy(TOWER_POS);WG.add(to
     }
   });
   WG.add(te);
-  /* lightning masts and catenary */
+  /* lightning masts */
   const mastM=new THREE.MeshStandardMaterial({color:0xb7bcc1,roughness:0.5,metalness:0.6});
-  const H=92,tops=[];
+  const H=92;
   [[-62,-58],[66,-60],[64,62],[-60,64]].forEach(p=>{
     const m=new THREE.Mesh(new THREE.CylinderGeometry(0.45,1.25,H,10),mastM);m.position.set(p[0],H/2,p[1]);m.castShadow=true;WG.add(m);
     const tip=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.18,6,6),mastM);tip.position.set(p[0],H+3,p[1]);WG.add(tip);
-    tops.push(new V3(p[0],H-0.5,p[1]));
   });
-  const wire=[],sag=7;
-  for(let k=0;k<4;k++)for(const [a,b] of [[k,(k+1)%4],[k,(k+2)%4]]){
-    if(b<a&&(b+2)%4===a)continue;
-    const A=tops[a],Bt=tops[b];
-    for(let i=0;i<24;i++){
-      const f0=i/24,f1=(i+1)/24;
-      const pt=f=>new V3(lerp(A.x,Bt.x,f),lerp(A.y,Bt.y,f)-sag*4*f*(1-f),lerp(A.z,Bt.z,f));
-      const p0=pt(f0),p1=pt(f1);wire.push(p0.x,p0.y,p0.z,p1.x,p1.y,p1.z);
-    }
-  }
-  const wg=new THREE.BufferGeometry();wg.setAttribute('position',new THREE.Float32BufferAttribute(wire,3));
-  WG.add(new THREE.LineSegments(wg,new THREE.LineBasicMaterial({color:0x2a2c2f,transparent:true,opacity:0.7})));
 })();
 
 /* ================= boundary floodlight masts (lamps off: the launch is in daylight, sun ~25 deg up) ================= */
@@ -2221,10 +2208,12 @@ function updateBooster(B,t,tr){
     E.rotation.x=(0.9*Math.sin(tr*2.3+i*0.9))*DEG*k;
     E.rotation.z=(0.9*Math.cos(tr*2.0+i*1.3))*DEG*k;
   }
-  MAT.body.emissiveIntensity=heat*2.6;
+  /* only near peak heating does the base visibly glow (none right after separation at ~70 km) */
+  const glow=sstep(0.7,1.4,heat);
+  MAT.body.emissiveIntensity=glow*1.8;
   sootU.value=sstep(T_ENT,T_ENT+14,t);
-  MAT.titan.emissiveIntensity=heat*1.6;
-  MAT.bell.emissiveIntensity=Math.min(1,thr*0.4+heat*0.5)*0.35;
+  MAT.titan.emissiveIntensity=glow*1.2;
+  MAT.bell.emissiveIntensity=Math.min(1,thr*0.4+glow*0.5)*0.35;
 }
 function updateS2(Sx,t,tr){
   const vis=poseFrom(s2,Sx,0,3,20,0);
@@ -2272,10 +2261,11 @@ uniform float uThr,uAmb,uTime,uSeed,uXp,uLen,uR0;
 varying vec3 vN; varying vec3 vV; varying vec2 vS;
 void main(){
   float s=1.0-uv.y;
-  float grow=1.0+(uXp-1.0)*pow(s,0.62);
+  float grow=1.0+(uXp-1.0)*3.0*pow(s,0.5);   /* thin air: the under-expanded jet fans out right after the nozzle lip */
+  grow*=1.0+1.4*min(uAmb,1.0)*pow(s,0.7);   /* in dense air the afterburning sheath spreads well past the nozzle */
   float cell=6.4*uR0*uXp;
   float barrel=1.0+(0.10/uXp)*cos(s*uLen/cell*6.2832)*(1.0-s*0.6);
-  float taper=1.0-0.88*pow(s,2.4);
+  float taper=1.0-0.88*pow(s,2.4)*mix(0.3,1.0,min(uAmb*3.0,1.0));
   float rad=uR0*(0.82+0.18*uThr)*grow*barrel*taper;
   vec3 p=vec3(position.x*rad,-s*uLen,position.z*rad);
   vN=normalize(normalMatrix*vec3(normal.x,0.12*(uXp-0.8),normal.z));
@@ -2306,10 +2296,10 @@ void main(){
      and thins as ambient pressure falls and the soot cools faster than it can glow. */
   vec3 fringe=mix(vec3(1.0,0.42,0.10),vec3(0.70,0.26,0.08),sqrt(uAmb)*0.55);
   vec3 amber=vec3(1.0,0.56,0.16),yel=vec3(1.0,0.80,0.44),white=vec3(1.0,0.95,0.82);
-  float edge=rho+s*0.45+(fl-0.5)*0.30;
+  float edge=rho+s*(0.45+0.55*min(uAmb,1.0))+(fl-0.5)*0.30;
   vec3 col=mix(fringe,amber,smoothstep(1.0,0.60,edge));
   col=mix(col,yel,smoothstep(0.66,0.30,edge)*0.85);
-  col=mix(col,white,smoothstep(0.34,0.03,rho+s*0.36));
+  col=mix(col,white,smoothstep(0.34,0.03,rho+s*(0.36+0.5*min(uAmb,1.0))));
   float lam=6.4*uR0*uXp;
   float ph=fract(s*uLen/lam+0.12);
   float tri=1.0-abs(2.0*ph-1.0);
@@ -2320,6 +2310,7 @@ void main(){
   col+=vec3(1.0,0.92,0.74)*dm;                 /* Mach disks glow yellow-white in a kerosene plume */
   /* the afterburning plume stays bright well into the stratosphere, then fades as it balloons */
   float I=dens*1.3*(0.55+0.65*uThr)*mix(0.55,1.0,sqrt(uAmb));
+  I/=1.0+0.9*(uXp-1.0)*s;                     /* the same light spread over a much wider, thinner plume */
   I+=dm*0.9;
   gl_FragColor=vec4(col*I*uGain,1.0);
   #include <tonemapping_fragment>
@@ -2394,6 +2385,14 @@ function mkGlow(col,parent,y,order){const m=new THREE.SpriteMaterial({map:glowTe
 const bloom=mkGlow(0xffa24a,rocket,0.2),bloomCore=mkGlow(0xcfe3ff,rocket,0.1),reGlow=mkGlow(0xff6a1c,rocket,0.4);
 const bloom2=mkGlow(0xbcd6ff,s2,-2.9);
 const padGlow=new THREE.PointLight(0xff8a3a,0,160,1.4);scene.add(padGlow);
+/* launch fire seen through the deluge steam: in the flame hole and at the flame-trench mouth */
+const fireHole=mkGlow(0xff7a26,scene,0,9),fireMouth=mkGlow(0xff6a1e,scene,0,9);
+/* normal blending keeps the flame orange against sunlit white steam (additive would wash it to white) */
+fireHole.material.blending=fireMouth.material.blending=THREE.NormalBlending;
+const fireHoleC=mkGlow(0xffd27a,scene,0,9),fireMouthC=mkGlow(0xffc060,scene,0,9);   /* luminous yellow-white heart */
+/* booster engine starts (pad, boostback, entry, landing): each Merlin start shows the green TEA-TEB igniter flash */
+const ignFlash=mkGlow(0x2dff5a,rocket,-2.6,12);ignFlash.material.blending=THREE.NormalBlending;   /* drawn over the plume, so it stays green */
+const IGN_T=[];{const K=SIM.B.K,d=SIM.B.d;for(let i=1;i<SIMN;i++)if(d[i*K+8]>0.5&&d[(i-1)*K+8]<0.5)IGN_T.push(SIMT0+i*SIMDT);}
 
 /* RCS cold-gas jets: tiny, short, crisp cones at the ports; only while the booster is rotating */
 const jetGeo=new THREE.ConeGeometry(0.11,1.0,8,1,true);jetGeo.translate(0,0.5,0);
@@ -2430,7 +2429,7 @@ function updatePlume(B,Sx,t,tr,camPos){
   const Xp=1/(0.14+0.86*Math.sqrt(pr));
   PUB.uTime.value=tr;PUB.uThr.value=thr;PUB.uAmb.value=pr;PUB.uXp.value=Xp;
   /* luminous length: about half a vehicle length at liftoff for nine engines, longer as it rises */
-  PUB.uLen.value=lerp(9,30,thr)*(0.78+0.22*Xp)*(1+0.32*(Xp-1))*(nE===1?0.7:1);
+  PUB.uLen.value=lerp(9,30,thr)*(0.78+0.22*Xp)*(1+0.08*(Xp-1))*(nE===1?0.7:1);
   PUB.uDiam.value=clamp(pr*1.5,0,1)*(thr>0.99?1.0:0.85);
   for(let i=0;i<9;i++)PLUMES[i].visible=nE>0&&thr>0.01&&engineActive(i,nE)&&rocket.visible;
   const k=nE>0?thr:0,share=Math.min(1,nE/3);
@@ -2439,7 +2438,11 @@ function updatePlume(B,Sx,t,tr,camPos){
   PUB.uGain.value=nE>1?0.96/nE:0.6;
   bloom.material.opacity=clamp(k*0.6,0,1);bloom.scale.setScalar((5+5*k)*(0.7+0.3*share)*(1+0.3*(Xp-1)));
   bloomCore.material.opacity=clamp(k*0.55,0,1);bloomCore.scale.setScalar(2.4+1.8*k);
-  reGlow.material.opacity=clamp(B[20]*0.9,0,0.9);reGlow.scale.setScalar(8+22*B[20]);
+  let gI=0;for(const ti of IGN_T){const d=t-ti;if(d>=0&&d<0.45)gI=Math.max(gI,1-d/0.45);}
+  /* the igniter flash comes first; the main flame builds over the next few tenths of a second */
+  ignFlash.material.opacity=Math.min(1,1.4*gI);ignFlash.scale.setScalar(5+7*gI);
+  if(gI>0){bloom.material.opacity*=1-gI;PUB.uGain.value*=1-0.6*gI;}
+  const glowH=sstep(0.7,1.4,B[20]);reGlow.material.opacity=glowH*0.45;reGlow.scale.setScalar(8+22*glowH);
   /* stage 2 */
   const hS=Sx[15];
   const prS=clamp(FlightSim.pressAt(Math.max(hS,0))/pr0,0,1.2),XpS=1/(0.14+0.86*Math.sqrt(prS)),thS=Sx[7],onS=Sx[8]>0.5&&thS>0.01;
@@ -2473,6 +2476,13 @@ function updatePlume(B,Sx,t,tr,camPos){
   const dPad=Math.min(Math.hypot(B[0],B[2]),Math.hypot(B[0]-LZW[0],B[2]-LZW[2]));
   padGlow.position.set(B[0]-ORG.x,(dPad<70?(B[0]-LZW[0])**2+(B[2]-LZW[2])**2<4900?LZW[1]:0:0)+PAD_Y+2.5-ORG.y,B[2]-ORG.z);
   padGlow.intensity=k*near*(nE>=9?30:17)*(dPad<70?1:0);
+  const hL=B[1]-PAD_Y,onL=nE>0&&thr>0.005&&Math.hypot(B[0],B[2])<70?Math.min(1,0.45+0.75*thr):0;
+  const iH=onL*Math.pow(clamp(1-hL/35,0,1),0.7),iM=onL*Math.pow(clamp(1-hL/70,0,1),1.2);
+  const fl=0.86+0.14*Math.sin(tr*31)*Math.sin(tr*19+1.3);
+  fireHole.position.set(B[0]-ORG.x,PAD_Y+2-ORG.y,B[2]-ORG.z);fireHole.material.opacity=clamp(iH*0.95*fl,0,1);fireHole.scale.setScalar(12+10*iH);
+  fireHoleC.position.copy(fireHole.position);fireHoleC.material.opacity=clamp(iH*0.9*fl,0,1);fireHoleC.scale.setScalar(6+5*iH);
+  fireMouth.position.set(-DIRH.x*32-ORG.x,PAD_Y+3-ORG.y,-DIRH.z*32-ORG.z);fireMouth.material.opacity=clamp(iM*0.8*(1.86-fl),0,1);fireMouth.scale.set((14+16*iM)*1.5,(14+16*iM)*0.75,1);   /* a low, flat jet of flame along the ground */
+  fireMouthC.position.copy(fireMouth.position);fireMouthC.material.opacity=clamp(iM*0.5*(1.86-fl),0,1);fireMouthC.scale.set((8+8*iM)*1.7,(8+8*iM)*0.6,1);
 }
 
 /* ================= GPU particles (analytic motion in the vertex shader) ================= */
@@ -2525,7 +2535,7 @@ function makePS(N,order){
       mv.xy+=q;
       gl_Position=projectionMatrix*mv;
       float dist=-mv.z;
-      float a=aS.z*smoothstep(0.0,0.3,age)*(1.0-smoothstep(0.40,1.0,u))*smoothstep(1.5,16.0,dist);
+      float a=aS.z*smoothstep(0.0,mix(0.3,0.04,min(aC.w,1.0)),age)*(1.0-smoothstep(0.40,1.0,u))*smoothstep(1.5,16.0,dist);
       vCol=vec4(aC.rgb,a);vUv=uv;vHot=aC.w;vAge=age;
     }`,
     fragmentShader:`uniform sampler2D uTex; uniform vec3 uSunV;
@@ -2615,8 +2625,42 @@ function spawnStep(k){
       }
     }
   }
-  /* ---- ground blast: launch pad (steam / exhaust) and LZ-1 (dust) ---- */
-  for(let pi=0;pi<2;pi++){
+  /* ---- launch pad: engine fire in the flame hole, fire and steam jetting out of the flame-trench
+     mouth, and white water-deluge steam rolling off the mount (a real Falcon 9 pad shows flame and
+     steam, not sand) ---- */
+  {
+    const P=PADLIST[0],dh=Math.hypot(B[0]-P.x,B[2]-P.z),hA=B[1]-P.y;
+    if(dh<70&&hA<P.altMax&&nE>0&&thr>0.005){
+      /* a lit engine flames at once: the visual intensity does not wait for the throttle ramp */
+      const I=Math.min(1,0.45+0.75*thr)*Math.pow(clamp(1-hA/P.altMax,0,1),0.8)*(nE>=9?1:0.85);
+      const mx=P.x-DIRH.x*30,mz=P.z-DIRH.z*30,tx=-DIRH.x,tz=-DIRH.z,nx=-tz,nz=tx;
+      /* trench mouth: hot exhaust that glows for its first half second, then cools into billows */
+      let n=Math.floor(I*9+R());
+      while(n-->0){
+        const sp=24+R()*40,lat=(R()-0.5)*16,hot=R()<0.65?1:0;
+        PS.emit(mx+nx*(R()-0.5)*6,P.y+1+R()*3,mz+nz*(R()-0.5)*6,tx*sp+nx*lat,2+R()*7,tz*sp+nz*lat,
+          t+R()*STEP,4.5+R()*4,3.5+R()*2.5,17+R()*17,0.16+0.14*R(),0.55,0.97,0.96,0.95,hot,0.55+R()*0.35,R());
+      }
+      /* water deluge steam around the launch mount */
+      n=Math.floor(I*4+R());
+      while(n-->0){
+        const th=R()*6.2832,r0=4+R()*8,vr=5+R()*14;
+        PS.emit(B[0]+Math.cos(th)*r0,P.y+0.6+R()*1.2,B[2]+Math.sin(th)*r0,Math.cos(th)*vr,1+R()*4,Math.sin(th)*vr,
+          t+R()*STEP,5+R()*5,4+R()*2,14+R()*12,0.12+0.10*R(),0.42,0.98,0.98,0.99,0.0,0.6+R()*0.4,R());
+      }
+      /* engine fire in the flame hole while the vehicle is still on or just above the mount */
+      if(hA<35){
+        n=Math.floor(I*14+R());
+        while(n-->0){
+          const th=R()*6.2832,vr=8+R()*18;
+          PS.emit(B[0]+Math.cos(th)*1.8,P.y+1.0+R()*2.5,B[2]+Math.sin(th)*1.8,Math.cos(th)*vr+tx*14,-1+R()*4,Math.sin(th)*vr+tz*14,
+            t+R()*STEP,0.35+R()*0.3,2.5+R()*1.5,6+R()*3,0.6+0.3*R(),0.25,1.0,0.74,0.40,1.0,0.9,R());
+        }
+      }
+    }
+  }
+  /* ---- ground blast at LZ-1: the landing engine raises a grey dust and vapour cloud ---- */
+  for(let pi=1;pi<2;pi++){
     const P=PADLIST[pi];
     const dh=Math.hypot(B[0]-P.x,B[2]-P.z),hA=B[1]-P.y;
     if(dh<70&&hA<P.altMax&&nE>0&&thr>0.05){
@@ -2631,7 +2675,7 @@ function spawnStep(k){
       if(I>0.45&&R()<0.5){
         const nn=3+((R()*4)|0);
         for(let q=0;q<nn;q++){const th=R()*6.2832,vr=30+R()*20;
-          PS.emit(B[0]+Math.cos(th)*6,P.y+0.8,B[2]+Math.sin(th)*6,Math.cos(th)*vr,1.5+R()*3,Math.sin(th)*vr,t+R()*STEP,4.5+R()*3,4,18+R()*10,0.10,0.18,0.82,0.78,0.72,0.0,0.85,R());}
+          PS.emit(B[0]+Math.cos(th)*6,P.y+0.8,B[2]+Math.sin(th)*6,Math.cos(th)*vr,1.5+R()*3,Math.sin(th)*vr,t+R()*STEP,4.5+R()*3,4,18+R()*10,0.10,0.18,0.86,0.85,0.83,0.0,0.85,R());}
       }
     }
   }
