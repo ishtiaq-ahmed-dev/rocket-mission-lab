@@ -34,12 +34,17 @@ function episode(FS, opts) {
   const r = rng((opts.seed || 0) * 104729 + 7), rows = opts.record ? [] : null;
   const noise = opts.noise || 0, D2R = Math.PI / 180;
   let nE = 0, nN = 0, thrN = 0;
+  /* engine faults during the landing burn, so the data shows the recovery: a cutoff (0.5-1.5 s, 1-3.5 km up;
+     the booster glides and relights) or three engines instead of one (0.5-1 s, 100-300 m up; it stops above
+     the pad, cuts, falls and relights). Two noisy demonstrations in five have one; every flight with `faults`. */
+  const fault = opts.faults || (noise > 0 && r() < 0.4) ? (r() < 0.5 ? { h: 1000 + 2500 * r(), n: 0, d: 0.5 + r() } : { h: 100 + 200 * r(), n: 3, d: 0.5 + 0.5 * r() }) : null;
   const _ = FS._;
   const EXPENSIVE = { COAST1: 1, BB: 1, COAST2: 1, ENTRY: 1, AERO: 1 };
   let step = 0;
   const controller = ctx => {
-    /* look-ahead labels are costly: on policy-flown episodes label them every `labelEvery` steps */
-    const md = teacher.mode(ctx.B), want = !!rows && (!policy || !EXPENSIVE[md] || ctx.B.landed || step % (opts.labelEvery || 1) === 0);
+    /* look-ahead labels are costly: on policy-flown episodes label them every `labelEvery` steps, except
+       once the landing burn has started (after an engine fault the glide decides when to relight) */
+    const md = teacher.mode(ctx.B), want = !!rows && (!policy || !EXPENSIVE[md] || ctx.B.ign >= 3 || ctx.B.landed || step % (opts.labelEvery || 1) === 0);
     step++;
     const labels = want || !policy ? teacher(ctx) : null;
     if (want) {
@@ -57,7 +62,7 @@ function episode(FS, opts) {
       row[o++] = du[0]; row[o++] = du[1]; row[o++] = du[2]; row[o++] = lu.thr; row[o++] = lu.on ? 1 : 0; row[o++] = lu.fair ? 1 : 0; row[o++] = lu.deploy ? 1 : 0;
       rows.push(row);
     }
-    if (policy) return policy(ctx);
+    if (policy) { const c = policy(ctx); applyFault(c.booster, ctx); return c; }
     if (noise > 0) {
       /* slowly varying pointing and throttle errors the teacher must correct (gentler on the stack) */
       const k = ctx.B.attached ? 0.3 * noise : noise;
@@ -67,12 +72,19 @@ function episode(FS, opts) {
       /* discrete commands (ignition, cutoff, staging, jettison) execute after a random delay, so the
          demonstrations also show the teacher's command in states just past each switching point */
       const t = ctx.t, xb = Object.assign({}, b, { dir: _.unit(_.add(b.dir, off)), thr: _.clamp(b.thr + thrN, 0, 1) }), xu = Object.assign({}, u);
-      xb.n = lag('n', b.n, t, ctx.B.ign === 2 ? 0.5 : 1.5); xb.sep = lag('sep', b.sep, t, 1.5);
+      xb.n = lag('n', b.n, t, ctx.B.ign >= 2 ? 0.5 : 1.5); xb.sep = lag('sep', b.sep, t, 1.5);
+      applyFault(xb, ctx);
       xu.on = lag('on', u.on, t, 1.0); xu.fair = lag('fair', u.fair, t, 3); xu.deploy = lag('deploy', u.deploy, t, 3);
       return { booster: xb, upper: xu };
     }
+    if (fault) { const xb = Object.assign({}, labels.booster); applyFault(xb, ctx); return { booster: xb, upper: labels.upper }; }
     return labels;
   };
+  function applyFault(b, ctx) {
+    if (!fault) return;
+    if (!fault.end && ctx.B.nEng > 0 && teacher.mode(ctx.B) === 'LAND' && _.nrm(ctx.B.r) - FS.RE - FS.V.baseAboveFoot < fault.h) fault.end = ctx.t + fault.d;
+    if (ctx.t < fault.end) b.n = fault.n;
+  }
   const held = {};
   function lag(key, want, t, maxDelay) {
     const h = held[key] || (held[key] = { v: want, due: null, to: want });
@@ -105,7 +117,7 @@ if (require.main === module) {
   const out = job.out ? fs.openSync(job.out, 'w') : null, results = [];
   for (const seed of job.seeds) {
     const fly = job.fly === 'mix' ? (rng(seed * 31 + 3)() < (job.beta || 0) ? 'teacher' : 'policy') : job.fly;
-    const res = episode(FS, { seed, fly, policy, record: !!out, noise: fly === 'teacher' ? (job.noise || 0) : 0, dispScale: job.dispScale, bp: job.bp, nominal: job.nominal, labelEvery: job.labelEvery });
+    const res = episode(FS, { seed, fly, policy, record: !!out, noise: fly === 'teacher' ? (job.noise || 0) : 0, dispScale: job.dispScale, bp: job.bp, nominal: job.nominal, labelEvery: job.labelEvery, faults: job.faults });
     if (out) for (const row of res.rows) fs.writeSync(out, Buffer.from(row.buffer));
     results.push(Object.assign({ seed, fly }, res.summary));
   }

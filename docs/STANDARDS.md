@@ -111,7 +111,7 @@ flight, or establish landing reliability.
 - FAA/range-safety analysis, airspace coordination, flight-termination systems
   and operational launch constraints.
 - SpaceX guidance, navigation and control. The neural policy imitates an
-  educational teacher; its 298/300 held-out rate is a simulation result.
+  educational teacher; its 300/300 held-out rate is a simulation result.
 - The Python laboratory's subscale RL policies, which did not qualify and are
   not the browser Falcon 9 mission.
 

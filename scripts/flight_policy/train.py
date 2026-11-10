@@ -184,6 +184,23 @@ def atomic_save(filename, writer):
             os.remove(temporary)
 
 
+def resident(data, indices, prepare, dev, headroom=4 * 2**30):
+    """Prepared training tensors loaded onto the GPU once, so every minibatch is gathered there instead of
+    from memory-mapped files on the CPU (which left the GPU idle). Skipped when they would not fit with
+    `headroom` bytes still free for other work sharing the GPU."""
+    if dev != 'cuda':
+        return None
+    sample = prepare(data.take(indices[:1]))
+    need = len(indices) * sum(a[0].size * a.itemsize for a in sample)
+    if need > torch.cuda.mem_get_info()[0] - headroom:
+        return None
+    out = [torch.empty((len(indices),) + a.shape[1:], dtype=torch.from_numpy(a).dtype, device=dev) for a in sample]
+    for offset in range(0, len(indices), 1 << 20):
+        for tensor, part in zip(out, prepare(data.take(indices[offset:offset + (1 << 20)]))):
+            tensor[offset:offset + len(part)] = torch.from_numpy(part).to(dev)
+    return out
+
+
 def fit(net, loss_fn, data, indices, prepare, epochs, lr, batch, dev, label):
     opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=1e-5)
     n = len(indices)
@@ -192,23 +209,29 @@ def fit(net, loss_fn, data, indices, prepare, epochs, lr, batch, dev, label):
     steps = max(1, epochs * ((n + batch - 1) // batch))
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=lr, total_steps=steps, pct_start=0.1)
     t0 = time.time()
+    gpu = resident(data, indices, prepare, dev)
+    print(f'  {label}: {n} rows ' + ('resident on the GPU' if gpu else 'streamed from disk') + f' ({time.time() - t0:.0f}s)', flush=True)
     for ep in range(epochs):
-        perm = torch.randperm(n).numpy()
-        total = 0.0
+        perm = torch.randperm(n, device=dev) if gpu else torch.randperm(n).numpy()
+        total = torch.zeros((), device=dev)
         for i in range(0, n, batch):
-            rows = data.take(indices[perm[i:i + batch]])
-            tensors = [torch.from_numpy(a).to(dev) for a in prepare(rows)]
+            if gpu:
+                tensors = [t[perm[i:i + batch]] for t in gpu]
+            else:
+                rows = data.take(indices[perm[i:i + batch]])
+                tensors = [torch.from_numpy(a).to(dev) for a in prepare(rows)]
             loss = loss_fn(net, *tensors)
-            if not torch.isfinite(loss):
-                raise ValueError(f'Nonfinite {label} training loss; candidate was not exported')
             opt.zero_grad(set_to_none=True)
             loss.backward()
             nn.utils.clip_grad_norm_(net.parameters(), 1.0)
             opt.step()
             sched.step()
-            total += loss.item() * len(rows)
+            total += loss.detach() * len(tensors[0])
+        # checked once per epoch (a per-step check stalls the GPU); a nonfinite loss poisons the total
+        if not torch.isfinite(total):
+            raise ValueError(f'Nonfinite {label} training loss; candidate was not exported')
         if ep == 0 or (ep + 1) % max(1, epochs // 8) == 0 or ep == epochs - 1:
-            print(f'  {label} epoch {ep + 1}/{epochs} loss {total / n:.5f} ({time.time() - t0:.0f}s)', flush=True)
+            print(f'  {label} epoch {ep + 1}/{epochs} loss {total.item() / n:.5f} ({time.time() - t0:.0f}s)', flush=True)
 
 
 def main():

@@ -193,3 +193,20 @@ test('camera controls retain names and selection when compact labels are hidden'
   assert.equal(buttons[0].attributes['aria-pressed'], 'true');
   assert.equal(buttons[3].attributes['aria-pressed'], 'false');
 });
+
+test('the teacher recovers from an engine cutoff or a wrong engine count in the landing burn', () => {
+  /* the teacher once labelled an engine-off landing burn "stay off" and kept thrusting while rising, which
+     taught the network to fall, or to climb away after a brief three-engine pulse near the ground */
+  for (const [hAt, n, dur] of [[1500, 0, 1], [140, 3, 0.8]]) {
+    const T = require('./flight_policy/teacher')(F, { cache: true });
+    let until = -Infinity, relit = false;
+    const sim = F.run({ quick: true, stopWhen: B => B.landed, controller: ctx => {
+      const c = T(ctx), B = ctx.B, h = _.nrm(B.r) - F.RE - F.V.baseAboveFoot;
+      if (until < 0 && B.ign === 3 && B.nEng > 0 && h < hAt) until = ctx.t + dur;
+      if (ctx.t < until) c.booster.n = n;
+      relit = relit || B.ign === 4;
+      return c;
+    } });
+    assert.ok(relit && sim.stats.landing.success, `${n} engines at ${hAt} m: ${JSON.stringify(sim.stats.landing)}`);
+  }
+});

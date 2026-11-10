@@ -73,9 +73,15 @@ launch-and-landing sequence, public webcast telemetry):
    pad with no sideways speed. While the air dominates, a lean makes body lift
    that carries the booster toward the pad; once the engine dominates, the same
    lean puts thrust into braking, so the booster accelerates and then brakes
-   without rocking from one side to the other, as a Falcon 9 does. Below 150 m it
-   comes down nearly vertical, nulling the last sideways drift. Typical leans are
-   3-10°, never more than 20°.
+   without rocking from one side to the other, as a Falcon 9 does. The lean fades
+   out over the last 50 m above 150 m, and below 150 m the booster comes down
+   nearly vertical, nulling the last sideways drift. Typical leans are 3-10°,
+   never more than 20°.
+   *Faults.* If the engine goes out during the burn, the booster glides on its
+   grid fins and relights at the ignition point. If the burn overshoots and the
+   booster stops above the pad, it shuts the engine down (one Merlin at minimum
+   throttle still lifts a nearly empty booster, so it cannot hover), falls, and
+   relights once it is falling fast enough for a gentle stop.
 8. **Orbit insertion.** Closed-loop MVac guidance raises the stage to about
    270 km with zero climb rate and cuts off when the orbit's semi-major axis
    reaches 300 km; the payload deploys 60 s after SECO.
@@ -93,8 +99,12 @@ launch-and-landing sequence, public webcast telemetry):
   0-100 % in any direction, Merlin and MVac thrust ±1 %, drag ±5 %, booster dry
   mass ±300 kg, payload ±1,000 kg). Demonstrations add small pointing/throttle
   errors and randomly delayed discrete commands so the teacher also shows how to
-  recover.
-- `train.py` — behaviour cloning, exported as base64 float32 weights.
+  recover, and some training flights carry an engine fault in the landing burn
+  (a cutoff of 0.5-1.5 s at 1-3.5 km, or three engines instead of one for
+  0.5-1 s at 100-300 m) so the data shows the glide, hop and relight that follow.
+- `train.py` — behaviour cloning, exported as base64 float32 weights. The
+  training set is held on the GPU when it fits (with room left for other work),
+  so minibatches are drawn there instead of from files on disk.
 - `dagger.js` — DAgger: the network flies, the teacher labels the states it
   actually reaches, data is aggregated and the network retrained. Training uses
   file-backed minibatches and resumes the actual incumbent export rather than
@@ -110,7 +120,7 @@ node scripts/flight_policy/mine.js hardD 430000 6000 --fails-only   # hard-examp
 .venv/Scripts/python scripts/flight_policy/train.py --init-policy frontend/public/flight-policy.js --epochs 20 --lr 1e-4 --output candidate.js
 ```
 
-### Prediction fixes
+### Teacher fixes
 
 Two errors in the teacher's look-ahead were found and fixed while redesigning the
 landing: the predicted touchdown point was compared with the pad's position at
@@ -118,79 +128,102 @@ the end of the integration step instead of at the touchdown moment (the pad move
 about 400 m/s with the Earth's rotation, which put an east-west error of up to
 ~100 m into every boostback, glide and landing prediction), and the boostback was
 cut off from a plan up to 0.5 s old (at about 7 km of landing error per second
-of boostback). With both fixed, the teacher lands within 1.4 m of the pad centre
-on 300 of 300 dispersed flights and 2,298 of 2,300 in a stress test.
+of boostback). The boostback planner also returns the best plan it actually
+predicted: near cutoff the heading has almost no lever, the Newton solve can run
+out of iterations, and it used to return its last, untested step, which on one
+dispersed flight meant four more seconds of burn 50° off course and a 12 km miss.
+
+**Landing-burn labels.** The previous network's rare crashes (about 1 in 1,000
+flights, at 160-250 m/s) were not late ignitions. Its engine history showed
+that the teacher's labels had taught them:
+
+- When the engine was off during the landing burn, the landing law said "stay
+  off". Whenever the network cut its engine early, the data told it to keep
+  falling: 147,014 such labels were in the training set, 14,440 of them from the
+  network's own crashes on fresh seeds.
+- When the booster was rising above the pad, the law kept thrusting upward
+  (98,072 labels). After a brief, wrong three-engine command about 140 m up, the
+  network stopped, climbed back to about 4 km, ran out of propellant and fell.
+- The lean switched from the two-lean law to the hold law with a step of 2-4° at
+  150 m. The network had to learn a sharp edge there, and its engine-count output
+  jumped at the same height: that is where the wrong three-engine commands came
+  from.
+
+The teacher now relights after a cutoff, cuts and falls instead of climbing, and
+fades the lean; the mislabelled rows (278,423 in all) were removed and the
+training flights carry engine faults. With these fixes the teacher completes
+2,000 / 2,000 selection flights (previously 1,999), with a worst pad offset of
+3.5 m (previously 32 m).
 
 ## Results
 
-**Teacher.** 2,298 / 2,300 stress flights (seeds 500000-500299 and
-700000-701999; the two misses touched down gently 15 and 26 m from the centre
-but moving sideways too fast),
-1,999 / 2,000 selection, 500 / 500 validation and 300 / 300 held-out flights;
-median pad offset 0.4 m, worst touchdown 1.57 m/s.
+**Teacher.** 2,300 / 2,300 stress flights (seeds 500000-500299 and
+700000-701999), 2,000 / 2,000 selection, 500 / 500 validation, 300 / 300 held-out
+and 1,000 / 1,000 new held-out flights; median pad offset 0.4 m, worst
+touchdown 1.57 m/s.
 
-**Shipped policy: `v5mineA`.** Same networks as before (booster 4 × 384 with
-the two predictive inputs: the vacuum impact point, the cue for boostback
-cutoff, and the undiverted touchdown point, the cue for the divert; upper stage
-3 × 128), retrained on the redesigned landing teacher. Warm-started from the
-previous weights, then 12 DAgger rounds of 250 policy-flown dispersed flights
-(from round 5 at a lower learning rate); each round's candidate is compared
-with the incumbent on 256 development seeds (no more catastrophic outcomes, a
-crash above 5 m/s or a landing beyond 250 m; then more full missions; then a
-smaller mean pad offset). The best round was then refined by *hard-example
-mining* (`scripts/flight_policy/mine.js`): the network flies 6,000 fresh seeds,
-the teacher labels the states the network reached on every seed where it failed
-(and flies the seed itself), the labels are oversampled 5x, and a
-low-learning-rate fine-tune follows. Candidates are scored on a separate
-2,000-flight selection set and rejected if they land hard (above 5 m/s) more
-often than the incumbent; a second mining loop scored 1,980 with nine hard
-landings and was discarded. The held-out seeds were run once, for the shipped
-network. Evidence: `data/flight-policy-validation.json`
-(`node scripts/flight_policy/evaluate.js`).
+**Shipped policy: `v6r4`.** Same networks as before (booster 4 × 384 with the
+two predictive inputs: the vacuum impact point, the cue for boostback cutoff,
+and the undiverted touchdown point, the cue for the divert; upper stage 3 × 128),
+retrained from `v5mineA` on the fixed teacher. Four DAgger rounds: in each, the
+network flew 400 flights with a forced engine fault and 400 normal flights, the
+teacher labelled the states it reached, and a fine-tune followed (rounds 3 and 4
+on the booster network only). Every round was scored on the 2,000-flight
+selection set and on two fault-recovery tests. Round 4 completed all 2,000
+selection flights; it was then checked on validation, development and 6,000
+fresh seeds, and the held-out seeds were run once. Evidence:
+`data/flight-policy-validation.json` (`node scripts/flight_policy/evaluate.js`).
 
 | Dispersed flights | Neural policy | Classical teacher |
 | --- | --- | --- |
-| **Held-out, seeds 900000-900299** | **298 / 300** | 300 / 300 |
-| Validation, seeds 600000-600499 | 497 / 500 | 500 / 500 |
+| **Held-out, seeds 900000-900299** | **300 / 300** | 300 / 300 |
+| **New held-out, seeds 910000-910999** | **1,000 / 1,000** | 1,000 / 1,000 |
+| Validation, seeds 600000-600499 | 500 / 500 | 500 / 500 |
 | Development gate, seeds 800000-800255 | 256 / 256 | |
-| Selection, seeds 300000-301999 | 1,997 / 2,000 | 1,999 / 2,000 |
-| Fresh, seeds 466000-471999 | 5,976 / 6,000 | |
-| Held-out reached orbit | 300 / 300 | 300 / 300 |
-| Held-out median pad offset | 0.8 m | 0.4 m |
+| Selection, seeds 300000-301999 | 2,000 / 2,000 | 2,000 / 2,000 |
+| Fresh, seeds 472000-477999 | 6,000 / 6,000 | |
+| Held-out median pad offset | 0.6 m | 0.4 m |
 
 A full mission means orbit (perigee above 150 km, eccentricity below 0.05),
 fairing released, payload deployed, and a touchdown on deployed legs slower than
 3 m/s vertically and 1.5 m/s sideways, tilted under 5° and inside the 43 m pad
-radius. Of the network's two held-out misses, one is a soft landing 60 m from
-the pad; the other lit its landing burn too late and struck at 163 m/s. Late
-landing-burn ignition is the network's one remaining catastrophic mode: it did
-not occur on the 2,000 selection flights but did once in 300 held-out flights,
-and one validation flight ended 6.6 km away after a misjudged boostback cutoff.
-Across all evaluation sets the network completes 99.4-100 % of dispersed
-missions (8,726 of 8,756 outside the held-out seeds).
+radius. Across all 10,056 dispersed evaluation flights the network completed
+every mission; its worst touchdown was 2.0 m/s and its worst pad offset 35 m.
+On the same 6,000 fresh seeds the previous network (`v5mineA`) completed 5,987:
+four crashes at 190-250 m/s, one boostback 12.7 km off, eight soft landings off
+the pad.
 
-**Landing smoothness.** The redesigned teacher holds two steady leans instead
-of steering back and forth, and the network follows it. Over the nominal flight
-and seven dispersed ones, the booster's lean during the landing burn travels
-49° in total on average (teacher 23°; the previous network, trained on the old
-zero-effort-miss teacher, 119°) and never exceeds 20° (previously 33°).
+**Engine faults.** 100 dispersed flights per fault (seeds 620000-620099), the
+fault forced during the landing burn:
+
+| Fault | `v6r4` | `v5mineA` | Teacher |
+| --- | --- | --- | --- |
+| Engine out for 1 s at 2,500 m | 100 | 0 | 100 |
+| Engine out for 1 s at 1,500 m | 99 | 0 | 100 |
+| Three engines for 0.8 s at 250 m | 100 | 25 | 100 |
+| Three engines for 0.8 s at 120 m | 100 | 0 | 100 |
+
+**Landing smoothness.** Over the nominal flight and 39 dispersed ones, the
+booster's lean during the landing burn travels 47° in total on average (previous
+network 46°, teacher 27°; the network before that, trained on the old
+zero-effort-miss teacher, 119° on eight flights) and never exceeds 19°.
 
 **Nominal replay compared with Falcon 9 RTLS** (Ax-4, 25 June 2025, and Dragon
 cargo webcast timelines; booster apogee from CRS-10 webcast reconstructions):
 
 | Event | This replay | Falcon 9 RTLS |
 | --- | --- | --- |
-| Max-Q | T+1:11, 25.7 kPa | T+1:12 |
-| MECO | T+2:15, 58.4 km, 1.81 km/s | T+2:17-2:33, ~60-65 km, ~1.7 km/s |
+| Max-Q | T+1:11, 25.5 kPa | T+1:12 |
+| MECO | T+2:15, 58.8 km, 1.81 km/s | T+2:17-2:33, ~60-65 km, ~1.7 km/s |
 | Boostback | T+2:36-3:30 | T+2:42-3:28 |
-| Booster apogee | 125 km | ~130 km |
-| Entry burn | T+6:06-6:17 (66 → 57 km) | T+6:18-6:30 |
-| Landing burn | T+7:23 from 3.8 km | T+7:22-7:33 |
-| Touchdown | T+7:48 | T+7:39 |
+| Booster apogee | 127 km | ~130 km |
+| Entry burn | T+6:10-6:21 (66 → 56 km) | T+6:18-6:30 |
+| Landing burn | T+7:28 from 3.6 km | T+7:22-7:33 |
+| Touchdown | T+7:53 | T+7:39 |
 | SECO | T+8:23 | T+8:48 |
 
-Touchdown at 1.31 m/s vertical, 0.06 m/s horizontal, 0.16° tilt, 1.2 m from
-the pad centre; insertion 269 × 339 km at 42.2°; payload deploy T+9:23.
+Touchdown at 1.44 m/s vertical, 0.06 m/s horizontal, 0.20° tilt, 1.4 m from
+the pad centre; insertion 269 × 342 km at 41.8°; payload deploy T+9:23.
 
 Training history: a from-scratch run on the first RTLS-timeline teacher reached
 297/300 held-out; a warm-started retrain after the max-Q throttle bucket reached
@@ -208,7 +241,12 @@ inherited the old teacher's landing, whose zero-effort-miss divert swung the
 booster's lean back and forth in the last kilometres. The landing was then
 redesigned around two constant leans solved by prediction (above), the flip
 moved to six seconds after separation, two prediction errors were fixed, and the
-network retrained on it (`v5mineA`).
+network retrained on it (`v5mineA`, 298/300 held-out). Its rare crashes were
+then traced to the teacher's landing-burn labels and boostback planner (Teacher
+fixes, above); four DAgger rounds with engine faults in the training flights
+produced `v6r4` (selection 1,994 → 1,995 → 1,999 → 2,000; the early rounds
+briefly learned new mistakes, such as cutting the engine mid-burn, which the
+next round's labels removed).
 
 ## Limits
 

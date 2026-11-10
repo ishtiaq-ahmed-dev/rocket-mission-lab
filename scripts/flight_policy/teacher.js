@@ -34,6 +34,9 @@ module.exports = function makeTeacher(FS, settings) {
     const burning = S.nEng > 0 && !S.cutting;
     if (S.ign === 1) return burning ? 'BB' : 'COAST2';
     if (S.ign === 2) return burning ? 'ENTRY' : 'AERO';
+    /* an engine that is out above the pad during the landing burn glides on its fins and relights at the
+       ignition point; the teacher used to say "stay off" there, so one early cutoff became a crash */
+    if (S.nEng === 0 && !S.cutting && nrm(S.r) - RE - V.baseAboveFoot > 6) return 'AERO';
     return 'LAND';
   }
   /* aerodynamic acceleration on the booster at its present attitude (gravity removed) */
@@ -102,7 +105,9 @@ module.exports = function makeTeacher(FS, settings) {
          predictions) flies the burn with no lean at all. */
       const SL = P && P.steerL && !P.noDivert ? P.steerL : null;
       const sv = SL ? (pU > SL.hMid ? SL.a : SL.b) : [0, 0], sm = Math.min(1, Math.hypot(sv[0], sv[1]));
-      const th = Math.min(sm * BP.landSteerMax, tl);
+      /* the lean fades out over the last 50 m above hLat, so the command meets the near-vertical hold law
+         without a step (a step there taught the network a sharp edge that also upset its engine choice) */
+      const th = Math.min(sm * BP.landSteerMax, tl) * clamp((pU - BP.hLat) / 50, 0, 1);
       dir = sm > 1e-6 ? unit(add(sc(L.U, Math.cos(th)), sc(unit(add(sc(L.E, sv[0]), sc(L.N, sv[1]))), Math.sin(th)))) : L.U;
     } else {
       /* Below hLat the booster comes down nearly vertical: sideways speed is nulled first and the pull
@@ -119,7 +124,10 @@ module.exports = function makeTeacher(FS, settings) {
       dir = unit(add(sc(L.U, Math.cos(th)), sc(lat, sgn * Math.sin(th))));
     }
     const cosT = Math.max(dot(dir, L.U), 0.5);
-    const cut = S.nEng === 0 || (pU < 6.0 && vU > -0.8);
+    /* rising above the gate means the burn overshot: one engine cannot hover (minimum thrust exceeds the
+       weight), so it cuts, falls and relights at the ignition point instead of climbing away; a shutdown
+       above the gate runs to completion, so the relight comes from the ignition test, not a flicker */
+    const cut = S.nEng === 0 || (pU < 6.0 && vU > -0.8) || (pU > BP.hGate && (vU > 0 || S.cutting));
     return { dir: dir, thr: clamp((m * aT / cosT + V.merAe * pressAt(h)) / V.merTvac, V.merMin, 1), n: cut ? 0 : 1 };
   }
   /* Net upward deceleration (beyond gravity) a constant thrust must give so the descent ends at
@@ -194,11 +202,14 @@ module.exports = function makeTeacher(FS, settings) {
   function planBoostback(S, t) {
     const start = mode(S) === 'COAST1', m = boosterMass(S), T = BP.bbN * BP.bbThr * V.merTvac;
     const hv = relVel(S.r, S.v), Ub = unit(S.r), vhor = nrm(sub(hv, sc(Ub, dot(hv, Ub))));
-    let az = 0, dur = clamp(start ? m * vhor * 0.9 / T : 10, 0, 70), last = null;
+    let az = 0, dur = clamp(start ? m * vhor * 0.9 / T : 10, 0, 70), best = null;
     const f = (a, du) => predictMiss(S, t, { bbStart: start, bb: { dir: bbDirFrom(S, t, a), tEnd: t + du }, noDivert: true }, 1.0);
     for (let it = 0; it < 8; it++) {
-      const m0 = f(az, dur); last = m0;
-      if (Math.hypot(m0.mE, m0.mN) < BP.bbTol) break;
+      const m0 = f(az, dur), e = Math.hypot(m0.mE, m0.mN);
+      /* keep the best plan actually predicted: near cutoff the heading has almost no lever, and the last
+         untested Newton step once meant 4 s more burn 50 degrees off course (a 12 km miss) */
+      if (!best || e < best.e) best = { e, az, dur, m: m0 };
+      if (e < BP.bbTol) break;
       const ea = 0.01, ed = 0.6, ma = f(az + ea, dur), md = f(az, dur + ed);
       const J = [[(ma.mE - m0.mE) / ea, (md.mE - m0.mE) / ed], [(ma.mN - m0.mN) / ea, (md.mN - m0.mN) / ed]];
       const det = J[0][0] * J[1][1] - J[0][1] * J[1][0];
@@ -206,7 +217,7 @@ module.exports = function makeTeacher(FS, settings) {
       const da = (J[1][1] * m0.mE - J[0][1] * m0.mN) / det, dd = (-J[1][0] * m0.mE + J[0][0] * m0.mN) / det;
       az -= clamp(da, -0.3, 0.3); dur = clamp(dur - clamp(dd, -8, 8), 0, 70);
     }
-    return { dir: bbDirFrom(S, t, az), dur: dur, tEnd: t + dur, az: az, miss: last };
+    return { dir: bbDirFrom(S, t, best.az), dur: best.dur, tEnd: t + best.dur, az: best.az, miss: best.m };
   }
   /* constant steering that zeroes the predicted landing error: entry (thrust tilt) and glide (fin trim)
      aim for a landing burn flown with no lean, as Falcon 9's grid fins line the booster up; the landing
@@ -272,8 +283,12 @@ module.exports = function makeTeacher(FS, settings) {
   function landingIgnition(S, t) {
     const h = nrm(S.r) - RE, L = lzFrame(t), gv = relVel(S.r, S.v), vU = dot(gv, L.U);
     if (h > 14000 || vU >= 0) return false;
-    const pU = dot(sub(S.r, lzBase(t)), L.U) - BP.landMargin - BP.hGate;
+    const hp = dot(sub(S.r, lzBase(t)), L.U), pU = hp - BP.landMargin - BP.hGate;
     const v0 = -vU, D0 = Math.max(0, dot(dragAcc(S), L.U)), rho0 = Math.max(FS.rhoAt(h), 1e-9), m = boosterMass(S);
+    /* never light slower than the gentlest stopping profile (aEnd to the gate, then to touchdown): after a
+       hop the booster falls until it is that fast, or the burn stalls into a hover that empties the tanks.
+       A normal landing burn lights far faster than this (about 300 m/s against 130 m/s at 3.8 km). */
+    if (v0 < Math.sqrt(hp > BP.hGate ? vGate * vGate + 2 * BP.aEnd * (hp - BP.hGate) : BP.vTd * BP.vTd + 2 * BP.aEnd * Math.max(hp, 0))) return false;
     let v = v0, hh = h, d = 0;
     for (let i = 0; i < 2000 && v > vGate; i++) {
       const dt = 0.05, g = MU / Math.pow(RE + hh, 2);
