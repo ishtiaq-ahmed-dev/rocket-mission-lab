@@ -1,17 +1,13 @@
 # International-standard reference profile
 
-Reviewed 2 November 2026. This profile defines what the browser replay and the
-Python workbench can and cannot claim. It is a public-data reference, not a
-flight-certification record.
+Reviewed 2 November 2026. This profile defines what the browser replay can and
+cannot claim. It is a public-data reference, not a flight-certification record.
 
 ## Scope
 
 - **Browser replay** (`frontend/index.html`): a Falcon 9 Block 5-class RTLS
   mission from SLC-40 to LZ-1 with ascent, MECO, separation, second-stage
   insertion, boostback, entry burn, aerodynamic descent and landing.
-- **Python workbench** (`rocket_lab/`, `config.yaml`): a separate 400 m
-  subscale landing/takeoff/combined laboratory. Its vehicle is intentionally
-  smaller and is not a Falcon 9 model.
 - **Public data only.** No SpaceX proprietary telemetry, flight software,
   structural data or certification data is used.
 
@@ -112,8 +108,6 @@ flight, or establish landing reliability.
   and operational launch constraints.
 - SpaceX guidance, navigation and control. The neural policy imitates an
   educational teacher; its 300/300 held-out rate is a simulation result.
-- The Python laboratory's subscale RL policies, which did not qualify and are
-  not the browser Falcon 9 mission.
 
 ## Sources
 

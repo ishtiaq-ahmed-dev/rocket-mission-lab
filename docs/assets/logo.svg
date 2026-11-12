@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Rocket Mission Lab logo">
+  <title>Rocket Mission Lab</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#07142b"/>
+      <stop offset="1" stop-color="#123463"/>
+    </linearGradient>
+    <linearGradient id="flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff3c4"/>
+      <stop offset="0.45" stop-color="#ffb347"/>
+      <stop offset="1" stop-color="#ff6a1a" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c9d3e3"/>
+      <stop offset="0.45" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#b9c4d6"/>
+    </linearGradient>
+    <clipPath id="tile"><rect width="256" height="256" rx="56"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="256" height="256" fill="url(#sky)"/>
+    <g fill="#cfe3ff" opacity="0.7">
+      <circle cx="40" cy="44" r="1.4"/><circle cx="112" cy="22" r="1.1"/><circle cx="214" cy="40" r="1.5"/>
+      <circle cx="226" cy="98" r="1"/><circle cx="30" cy="120" r="1"/><circle cx="150" cy="70" r="0.9"/>
+    </g>
+    <path d="M-10 262 Q128 186 266 262 Z" fill="#163d73"/>
+    <path d="M-10 262 Q128 186 266 262" fill="none" stroke="#4f9bea" stroke-width="2" opacity="0.6"/>
+  </g>
+  <path d="M58 214 C66 58 168 26 192 94" fill="none" stroke="#6fb8ff" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 9" opacity="0.95"/>
+  <g fill="#07142b" stroke="#8fd0ff" stroke-width="2.5">
+    <circle cx="58.0" cy="214.0" r="6.5"/>
+    <circle cx="75.1" cy="128.8" r="5.5"/>
+    <circle cx="108.5" cy="78.1" r="5.5"/>
+    <circle cx="143.8" cy="60.6" r="5.5"/>
+    <circle cx="172.5" cy="67.1" r="5.5"/>
+  </g>
+  <rect x="44" y="214" width="28" height="4" rx="2" fill="#8fd0ff" opacity="0.8"/>
+  <ellipse cx="192" cy="219" rx="30" ry="5.5" fill="none" stroke="#8fd0ff" stroke-width="2" opacity="0.85"/>
+  <path d="M185 196 L199 196 L203 214 Q192 222 181 214 Z" fill="url(#flame)"/>
+  <g stroke="#1b2230" stroke-width="2.6" stroke-linecap="round">
+    <line x1="186" y1="184" x2="173" y2="213"/>
+    <line x1="198" y1="184" x2="211" y2="213"/>
+  </g>
+  <path d="M187 190 L197 190 L199 197 L185 197 Z" fill="#2a3242"/>
+  <rect x="184" y="100" width="16" height="91" rx="2" fill="url(#body)"/>
+  <rect x="184" y="100" width="16" height="13" rx="2" fill="#1b2230"/>
+  <rect x="178" y="104" width="6" height="5" rx="1" fill="#1b2230"/>
+  <rect x="200" y="104" width="6" height="5" rx="1" fill="#1b2230"/>
+  <rect x="184" y="150" width="16" height="2" fill="#9aa7bb"/>
+</svg>

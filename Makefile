@@ -1,8 +1,6 @@
 PYTHON ?= python
-.PHONY: dev test bootstrap
+.PHONY: dev test
 dev:
-	$(PYTHON) scripts/dev.py
+	cd frontend && npm run dev
 test:
 	$(PYTHON) scripts/check.py
-bootstrap:
-	$(PYTHON) scripts/bootstrap.py

@@ -1,53 +1,25 @@
+# Python
 .venv/
-.isaac-venv/
-.isaac-runtime/
-data/isaac-*.json
-data/isaac/
-data/probes/
-node_modules/
-frontend/node_modules/
-frontend/dist/
 __pycache__/
-.pytest_cache/
-.pytest_work/
-data/**/*.tmp
-frontend/public/**/*.tmp
-frontend/public/model-qualification-progress.json
-.ruff_cache/
 *.pyc
-data/checkpoints/
-data/tensorboard/
-data/jobs/
-logs/
-data/campaigns/
-# Generated telemetry and per-checkpoint evaluations stay local. Selected
-# validation evidence is explicitly published under docs/evidence/.
-data/runs/*-src*.json
-data/results/*-src*.json
-data/results/*-src*.csv
-data/results/*-src*.md
-test-results/
-playwright-report/
-*.tsbuildinfo
+.pytest_cache/
+
+# Node and the frontend build
+node_modules/
+frontend/dist/
 *.log
-videos/analysis_*.png
-videos/*.webm
-/screenshot*.png
-/pad-*.png
 
-
-# Flight-policy training data, checkpoints and logs (regenerable, multi-GB)
+# Flight-policy training data, candidates and logs (regenerable, multi-GB)
 data/flight-policy/
-# Local text-to-speech model for scripts/broadcast.py (over the 100 MB GitHub limit)
-data/models/
-# Rendered films and analysis stills
-videos/
-# Other tools' local state
-.freebuff/
-.cloud-attachments/
-# Local editor/agent settings and scratch captures
-.claude/
-screenshots/
 # Raw imagery tile cache for scripts/fetch_imagery.py
 data/geo-cache/
+# Rendered videos and post drafts
 media/
+# Interrupted atomic writes
+data/**/*.tmp
+frontend/public/**/*.tmp
+
+# Local tool and editor state
+.claude/
+.freebuff/
+.cloud-attachments/

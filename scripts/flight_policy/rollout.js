@@ -103,7 +103,7 @@ function summarize(FS, sim) {
   const orbitOk = !!o && (o.rp - FS.RE) > 150000 && o.ecc < 0.05;
   return {
     landed: !!L, success: !!(L && L.success), orbit: orbitOk,
-    vV: L ? L.vV : null, vH: L ? L.vH : null, err: L ? L.err : null, tilt: L ? L.tilt : null, prop: L ? L.prop : null,
+    vV: L ? L.vV : null, vH: L ? L.vH : null, err: L ? L.err : null, errE: L ? L.errE : null, errN: L ? L.errN : null, tilt: L ? L.tilt : null, prop: L ? L.prop : null,
     perigee: o ? (o.rp - FS.RE) / 1000 : null, apogee: o ? (o.ra - FS.RE) / 1000 : null,
     fairing: !!E.FAIRING_SEP, deploy: !!E.SAT_DEPLOY, events: sim.events.map(e => e.name)
   };

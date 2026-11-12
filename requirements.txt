@@ -1,16 +1,7 @@
+# Flight-policy training (scripts/flight_policy/train.py) and its test
 numpy>=1.26,<3
-scipy>=1.12
-PyYAML>=6
-mujoco>=3.3,<4
-gymnasium>=1.1,<2
-stable-baselines3>=2.7,<3
 torch>=2.7
-tensorboard>=2.19
-fastapi>=0.115
-uvicorn>=0.34
-pydantic>=2.10
-cvxpy>=1.6
 pytest>=8
-httpx>=0.28
+# Ground imagery (scripts/fetch_imagery.py) and README figures (scripts/readme_figures.py)
+Pillow>=10
 matplotlib>=3.9
-psutil>=7,<8

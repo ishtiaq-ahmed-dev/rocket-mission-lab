@@ -2,7 +2,7 @@
 
 A condensed record of earlier revisions. The individual dated notes, validation
 logs and the old README were merged here in November 2026; their full text is
-in git history (commit `2e44adf` and earlier). Numbers quoted below describe
+in git history (commit `6c66788` and earlier). Numbers quoted below describe
 those earlier snapshots, not the current flight.
 
 | Date | Revision | What it established |
@@ -25,6 +25,7 @@ those earlier snapshots, not the current flight.
 | 10 Nov 2026 | **Predictive inputs** | The booster network grew to 4 × 384 and gained two inputs computed from its own state (vacuum impact point, undiverted touchdown point), the cues for boostback cutoff and landing divert. Retrained from scratch with DAgger and four hard-example mining loops on a shared machine (memory-aware, restartable orchestration): 299/300 held-out with no crash, 1,998/2,000 selection, 99.7 % on 6,000 fresh seeds. |
 | 10 Nov 2026 | **Smooth landing, real flip timing** | The teacher's landing divert was replaced by two constant leans solved with the full flight model (no more swinging back and forth), the flip moved to six seconds after separation at up to 12°/s, and two look-ahead errors were fixed (pad position at the touchdown instant; a stale boostback cutoff plan). The network was retrained with DAgger and a crash-aware mining loop: 298/300 held-out (teacher 300/300), 1,997/2,000 selection, landing lean path 49° against 119°. The replay gained engine fire and deluge steam at ignition instead of dust, a wide thin-air plume at altitude, no false heating glow after separation, and no wires over the pad. |
 | 10 Nov 2026 | **Landing faults fixed** | The network's rare crashes (about 1 in 1,000) were traced to the teacher's labels: an engine that went out during the landing burn was told to stay off, a booster rising above the pad was told to keep thrusting, and a 2-4° step in the landing lean at 150 m disturbed the network's engine choice. The teacher now relights, cuts and falls instead of climbing, and fades the lean; its boostback planner returns the best plan it predicted (2,000/2,000 selection, 2,300/2,300 stress). 278,423 mislabelled rows were removed and training flights carry engine faults. Four DAgger rounds, with the training set on the GPU: 300/300 and 1,000/1,000 held-out, 6,000/6,000 fresh flights (previous network 5,987), and recovery from a forced engine fault in 399 of 400 flights (previously 25). |
+| 12 Nov 2026 | **Repository cleanup** | The October Python laboratory (`rocket_lab/`: MuJoCo subscale vehicle, Gymnasium environments, PPO/SAC training, FastAPI service, Isaac film tooling), its configs, tests, notes and evidence files were removed; none of it was used by the replay or the flight policy. The README was rewritten around the neural flight, with figures generated from the simulator. The lab remains in git history before this commit. |
 
 ## Lessons carried forward
 

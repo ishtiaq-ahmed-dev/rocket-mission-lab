@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  python:
+  training:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -17,7 +17,6 @@ jobs:
           cache-dependency-path: requirements.txt
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements.txt
-      - run: python scripts/bootstrap.py   # reference classical runs, generated from source
       - run: python -m pytest tests -q
 
   frontend:
