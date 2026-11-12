@@ -1,0 +1,4 @@
+# Keep GitHub's language statistics about the code that was written here
+frontend/public/flight-policy.js linguist-generated=true
+frontend/public/three.min.js linguist-vendored=true
+docs/assets/*.svg linguist-generated=true

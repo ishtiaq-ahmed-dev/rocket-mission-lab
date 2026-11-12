@@ -109,17 +109,14 @@ Weights ship as base64 float32 in [`frontend/public/flight-policy.js`](frontend/
 The networks imitate a classical **teacher** that is never shipped: a predictive controller that simulates the rest of the return from any state, so it can label whatever state the network reaches. Training uses DAgger, so the network learns from its own mistakes rather than only from perfect demonstrations.
 
 ```mermaid
-flowchart TD
-    T["Classical teacher<br/>predicts the rest of the flight;<br/>labels any state"] --> D["Demonstrations<br/>with pointing noise, delayed commands<br/>and engine faults"]
-    D --> BC["Behaviour cloning<br/>PyTorch, training set held on the GPU"]
-    BC --> FLY["The network flies<br/>hundreds of dispersed flights"]
-    FLY --> LAB["The teacher labels every state<br/>the network reached"]
-    LAB --> FT["Aggregate the data, fine-tune"]
-    FT --> G{"Selection gate<br/>2,000 flights, no new crashes,<br/>fault-recovery tests"}
+flowchart LR
+    T["Classical<br/>teacher"] --> D["Demonstrations<br/>noise, delays,<br/>engine faults"] --> BC["Behaviour<br/>cloning"] --> FLY["Network flies<br/>dispersed flights"]
+    FLY --> LAB["Teacher labels<br/>every state reached"] --> FT["Aggregate data,<br/>fine-tune"] --> G{"Selection<br/>gate"}
     G -- "not better" --> FLY
-    G -- "better" --> HO["Held-out evaluation,<br/>run once"]
-    HO --> SHIP["Shipped weights"]
+    G -- "better" --> HO["Held-out test,<br/>run once"] --> SHIP(["Shipped<br/>weights"])
 ```
+
+The gate flies 2,000 selection flights and the fault-recovery tests; a candidate that crashes more often than the incumbent is rejected even if it completes more missions. Behaviour cloning and every fine-tune run on the GPU with the training set held in GPU memory.
 
 The last round of work came from reading the network's engine logs on its rare crashes (about 1 in 1,000 flights). They were the teacher's fault: after an early engine cutoff it said "stay off", and when the booster rose above the pad it said "keep thrusting". Fixing those labels, removing 278,423 mislabelled training rows and adding engine faults to the training flights removed the crashes. The full story, including the dispersion model and every evaluation set, is in [docs/FLIGHT-POLICY.md](docs/FLIGHT-POLICY.md).
 
